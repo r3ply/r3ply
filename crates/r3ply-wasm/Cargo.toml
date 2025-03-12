@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 ammonia = "4.0.0"
 html-escape = "0.2.13"
+mail-builder = { version = "0.4.2", default-features = false }
 mail-parser = { version = "0.9.1", features = ["serde_support"] }
 pulldown-cmark = "0.13.0"
 serde = { version = "1.0.219", features = ["derive"] }

@@ -36,12 +36,13 @@ export function comments_cmd(cwd: string) {
     .action(
       async (options: { config: string; from: string; to: string; date: string; subject: string; body: string; messageId: string }) => {
         const site_config = unsafeUnwrap(await get_site_config(cwd, options.config)).value!
-        const email = generate_email(site_config.domain, site_config.r3ply, options)
+        const email = generate_email(site_config.domain, site_config.r3ply, options).then(email => {
+          console.log(`Input email:\n\n${chalk.blueBright(wrapText(email, 78))}`)
+          console.log(`\n${chalk.yellow("--------------------------")}\n`);
+        })
         const comment = Result.safe(email.then(email => cli_handle_comment_via_email(site_config, new TextEncoder().encode(email))))
         await comment.then(async comment => {
           if (comment.isOk()) {
-            console.log(`Input email:\n\n${chalk.blueBright(wrapText(await email, 78))}`)
-            console.log(`\n${chalk.yellow("--------------------------")}\n`);
             console.log(`Output comment:\n\n${chalk.cyanBright(comment.unwrap())}`)
           } else {
             throw comment.unwrapErr()

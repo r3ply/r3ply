@@ -1,19 +1,20 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+// TODO: add tests
+// pub fn add(left: u64, right: u64) -> u64 {
+//     left + right
+// }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+//     #[test]
+//     fn it_works() {
+//         let result = add(2, 2);
+//         assert_eq!(result, 4);
+//     }
+// }
+
 use wasm_bindgen::prelude::*;
-use std::collections::{HashMap, HashSet};
 use ammonia::Builder;
 
 #[wasm_bindgen]
@@ -71,3 +72,36 @@ pub fn tera(template: String, data: JsValue) -> Result<String, JsError> {
   let mut tera = Tera::default();
   tera.render_str(&template, &ctx).map_err(|error| JsError::from(error))
 }
+
+use mail_builder::{headers::{address::{Address, EmailAddress}, content_type::ContentType, message_id::MessageId}, mime::BodyPart, MessageBuilder};
+use std::{borrow::Cow, collections::{HashMap, HashSet}};
+
+#[wasm_bindgen]
+pub fn build_email(message_id: String, from_name: Option<String>, from_email: String, to_email: String, subject: String, text_body: String) -> String {
+  // let mut email = MessageBuilder::new()
+  let email = MessageBuilder::new()
+    .message_id(MessageId::new(message_id))
+    .from(Address::Address(EmailAddress {
+      name: from_name.map(Cow::Owned),
+      email: Cow::Owned(from_email),
+    }))
+    .to(to_email)
+    .subject(subject)
+    .text_body(text_body);
+
+    // TODO: if I need to add attachments
+    // if let Some(attachment) = attachment {
+    //   email = email.attachment((*attachment.content_type).clone(), (*attachment.filename).clone(), (*attachment.value).clone());
+    // }
+
+  return email.write_to_string().unwrap()
+}
+
+// TODO: if I need to add attachments
+// #[wasm_bindgen]
+// #[derive(Clone, Debug)]
+// pub struct Attachment {
+//     content_type: Box<String>, // Wrapped in Box
+//     filename: Box<String>,     // Wrapped in Box
+//     value: Box<Vec<u8>>,       // Wrapped in Box
+// }
