@@ -4,3 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+ammonia = "4.0.0"
+html5ever = "0.29.1"
+wasm-bindgen = "0.2.100"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
