@@ -2,12 +2,19 @@
   "type": "module",
   "name": "@r3ply/config",
   "version": "0.0.1",
-  "description": "Config schemas for the r3ply commenting system",
-  "main": "dist/index.js",
+  "description": "Config schemas and parsers/validators for the r3ply commenting system",
+  "main": "dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build:generate": "tsx generate.ts",
-    "build:compile": "tsup src/generated/index.ts --dts",
+    "build:compile": "tsup src/generated/index.ts --dts --clean --format esm,cjs",
     "build": "npm run build:generate && npm run build:compile",
     "test": "npx vitest run",
     "test:watch": "npx vitest"
