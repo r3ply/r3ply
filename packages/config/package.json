@@ -1,0 +1,30 @@
+{
+  "type": "module",
+  "name": "@r3ply/config",
+  "version": "1.0.0",
+  "description": "Config schemas for the r3ply commenting system",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build:generate": "tsx generate.ts",
+    "build:compile": "tsup src/generated/index.ts --dts",
+    "build": "npm run build:generate && npm run build:compile",
+    "test": "npx vitest run",
+    "test:watch": "npx vitest"
+  },
+  "dependencies": {
+    "@exodus/schemasafe": "^1.3.0",
+    "json-schema-to-ts": "^3.1.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.6",
+    "tsx": "^4.19.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.9"
+  },
+  "volta": {
+    "node": "20.10.0"
+  },
+  "author": "Spencer Scorcelletti",
+  "license": "MIT"
+}
