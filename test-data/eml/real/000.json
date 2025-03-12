@@ -1,0 +1,198 @@
+{
+  "html_body": [2],
+  "text_body": [1],
+  "attachments": [],
+  "parts": [
+    {
+      "headers": [
+        {
+          "name": "from",
+          "value": { "Address": { "List": [{ "name": null, "address": "test@example.com" }] } },
+          "offset_field": 0,
+          "offset_start": 5,
+          "offset_end": 24
+        },
+        {
+          "name": "content_type",
+          "value": {
+            "ContentType": {
+              "c_type": "multipart",
+              "c_subtype": "alternative",
+              "attributes": [["boundary", "Apple-Mail=_34F098F6-D5B7-4B8B-8443-7EC0348A5A0E"]]
+            }
+          },
+          "offset_field": 24,
+          "offset_start": 37,
+          "offset_end": 124
+        },
+        {
+          "name": "reply_to",
+          "value": { "Address": { "List": [{ "name": "olivia", "address": "olivia@example.com" }] } },
+          "offset_field": 124,
+          "offset_start": 133,
+          "offset_end": 163
+        },
+        {
+          "name": "mime_version",
+          "value": { "Text": "1.0 (Mac OS X Mail 16.0 \\(3731.500.231\\))" },
+          "offset_field": 163,
+          "offset_start": 176,
+          "offset_end": 220
+        },
+        {
+          "name": "date",
+          "value": {
+            "DateTime": {
+              "year": 2023,
+              "month": 6,
+              "day": 20,
+              "hour": 20,
+              "minute": 28,
+              "second": 11,
+              "tz_before_gmt": false,
+              "tz_hour": 2,
+              "tz_minute": 0
+            }
+          },
+          "offset_field": 220,
+          "offset_start": 225,
+          "offset_end": 259
+        },
+        { "name": "subject", "value": { "Text": "This is a test email" }, "offset_field": 259, "offset_start": 267, "offset_end": 290 },
+        {
+          "name": "bcc",
+          "value": { "Address": { "List": [{ "name": "Eve", "address": "eve@example.com" }] } },
+          "offset_field": 290,
+          "offset_start": 294,
+          "offset_end": 318
+        },
+        {
+          "name": { "other": "X-Universally-Unique-Identifier" },
+          "value": { "Text": "933A3A26-A86B-4D3C-B393-2C260D5BC557" },
+          "offset_field": 318,
+          "offset_start": 350,
+          "offset_end": 389
+        },
+        {
+          "name": "cc",
+          "value": { "Address": { "List": [{ "name": "carol", "address": "carol@example.com" }] } },
+          "offset_field": 389,
+          "offset_start": 392,
+          "offset_end": 420
+        },
+        {
+          "name": "to",
+          "value": {
+            "Address": {
+              "List": [
+                { "name": null, "address": "bob@example.com" },
+                { "name": "Alice", "address": "alice@example.com" }
+              ]
+            }
+          },
+          "offset_field": 420,
+          "offset_start": 423,
+          "offset_end": 470
+        },
+        {
+          "name": "message_id",
+          "value": { "Text": "FE97A840-9401-4B26-902E-61EB5D6CD285@example.com" },
+          "offset_field": 470,
+          "offset_start": 481,
+          "offset_end": 534
+        },
+        {
+          "name": "sender",
+          "value": { "Address": { "List": [{ "name": "Savannah Secretary", "address": "savannah@example.com" }] } },
+          "offset_field": 534,
+          "offset_start": 541,
+          "offset_end": 585
+        },
+        {
+          "name": "comments",
+          "value": { "Text": "This feature is not used a whole lot" },
+          "offset_field": 585,
+          "offset_start": 594,
+          "offset_end": 633
+        },
+        { "name": "keywords", "value": { "TextList": ["tests", "emails"] }, "offset_field": 633, "offset_start": 642, "offset_end": 658 },
+        {
+          "name": "comments",
+          "value": { "Text": "But it's still good to test it" },
+          "offset_field": 658,
+          "offset_start": 667,
+          "offset_end": 700
+        },
+        {
+          "name": "keywords",
+          "value": { "TextList": ["open source", "example"] },
+          "offset_field": 700,
+          "offset_start": 709,
+          "offset_end": 732
+        },
+        {
+          "name": { "other": "DKIM-Signature" },
+          "value": {
+            "Text": "v=1; a=rsa-sha256; c=relaxed/relaxed; d=icloud.com;\r\n\ts=1a1hai; t=1687344318;\r\n\tbh=5wGqZpy6dZ0+lmq9+LJ9zZRkTbQ9XKci2Y5LbCPvIhQ=;\r\n\th=Date:from:to:Subject:MIME-Version:Content-Type:Message-Id;\r\n\tb=zBp8hCrzROGEH70XFjVzSyls/HERnOfjYcBlAD3w3/bzJ5m+ZksUuu/zEq4C1Shxq\r\n\t nCC1ccruN/t6Kb5vPK+Wc+mnlPtBN2TFyI4ij1z7TMSDSwPWFTLb05AUtIp3q8c2z3\r\n\t mRIR0OsuEZTT3eJrHzc54Vw0yH9sw2BxXxLMbc4fHihWRmfhIOvUBJ8svY9q7+v8+i\r\n\t QZnX2meUC/Xs5rlfQxTy9X+lXlBfS7JLD3lSWF4fQz1kgrJ7SRgFb5FwFpkHg+SZfE\r\n\t R1ecxrUpj8un+Z21qDGYn01N91qQbW/GjLpTHrsyG8uoDQPByg5nr3kfzqRnqOkYae\r\n\t OhP85bABfn+7g=="
+          },
+          "offset_field": 732,
+          "offset_start": 747,
+          "offset_end": 1310
+        }
+      ],
+      "is_encoding_problem": false,
+      "body": { "Multipart": [1, 2] },
+      "offset_header": 0,
+      "offset_body": 1312,
+      "offset_end": 2042
+    },
+    {
+      "headers": [
+        {
+          "name": "content_transfer_encoding",
+          "value": { "Text": "7bit" },
+          "offset_field": 1368,
+          "offset_start": 1394,
+          "offset_end": 1401
+        },
+        {
+          "name": "content_type",
+          "value": { "ContentType": { "c_type": "text", "c_subtype": "plain", "attributes": [["charset", "us-ascii"]] } },
+          "offset_field": 1401,
+          "offset_start": 1414,
+          "offset_end": 1447
+        }
+      ],
+      "is_encoding_problem": false,
+      "body": { "Text": "Hello, world\r\n\r\n-Tester\r\n\r\n" },
+      "offset_header": 1368,
+      "offset_body": 1449,
+      "offset_end": 1476
+    },
+    {
+      "headers": [
+        {
+          "name": "content_transfer_encoding",
+          "value": { "Text": "7bit" },
+          "offset_field": 1530,
+          "offset_start": 1556,
+          "offset_end": 1563
+        },
+        {
+          "name": "content_type",
+          "value": { "ContentType": { "c_type": "text", "c_subtype": "html", "attributes": [["charset", "us-ascii"]] } },
+          "offset_field": 1563,
+          "offset_start": 1576,
+          "offset_end": 1608
+        }
+      ],
+      "is_encoding_problem": false,
+      "body": {
+        "Html": "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=us-ascii\"></head><body style=\"overflow-wrap: break-word; -webkit-nbsp-mode: space; line-break: after-white-space;\"><div dir=\"auto\" style=\"overflow-wrap: break-word; -webkit-nbsp-mode: space; line-break: after-white-space;\">Hello, world<br><br><div>\r\n<div>-Spence</div>\r\n\r\n</div>\r\n\r\n<br></div></body></html>"
+      },
+      "offset_header": 1530,
+      "offset_body": 1610,
+      "offset_end": 1988
+    }
+  ]
+}

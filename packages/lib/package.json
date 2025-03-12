@@ -1,0 +1,39 @@
+{
+  "type": "module",
+  "name": "@r3ply/lib",
+  "version": "0.0.1",
+  "description": "The r3ply commenting system.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "devDependencies": {
+    "@types/micromatch": "^4.0.9",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "@r3ply/config": "workspace:*",
+    "@iarna/toml": "^2.2.5",
+    "@mail-parser/ts-bindings": "file:../../tools/mail-parser-ts-bindings-0.9.1.tgz",
+    "@r3ply/wasm": "file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz",
+    "dayjs": "^1.11.13",
+    "micromatch": "^4.0.8",
+    "oxide.ts": "^1.1.0",
+    "tsup": "^8.4.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "npx vitest run",
+    "test:watch": "npx vitest"
+  },
+  "keywords": [
+    "email",
+    "comments",
+    "r3ply",
+    "static sites"
+  ],
+  "volta": {
+    "node": "20.10.0"
+  },
+  "author": "Spencer Scorcelletti",
+  "license": "MIT"
+}
