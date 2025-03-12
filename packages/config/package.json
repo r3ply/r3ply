@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@r3ply/config",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Config schemas for the r3ply commenting system",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
     "json-schema-to-ts": "^3.1.1"
   },
   "devDependencies": {
-    "tsup": "^8.3.6",
+    "tsup": "^8.4.0",
     "tsx": "^4.19.3",
     "typescript": "^5.5.4",
     "vitest": "^2.1.9"
