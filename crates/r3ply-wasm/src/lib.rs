@@ -39,3 +39,22 @@ pub fn md_to_html(text: String) -> String {
   html::push_html(&mut html_output, parser);
   return html_output
 }
+
+use mail_parser::MessageParser;
+use serde::Serialize;
+
+#[wasm_bindgen]
+pub fn parse_email_bytes(email: &[u8]) -> JsValue {
+  let serializer = serde_wasm_bindgen::Serializer::json_compatible()
+      .serialize_missing_as_null(true);
+  MessageParser::default()
+      .parse(email)
+      .map(|message| message.serialize(&serializer).unwrap())
+      .unwrap_or(JsValue::NULL)
+}
+
+#[wasm_bindgen]
+pub fn parse_email_str(email: &str) -> JsValue {
+  // Convert the string into bytes (assumed UTF-8) and call the other function.
+  parse_email_bytes(email.as_bytes())
+}
