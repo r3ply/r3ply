@@ -327,15 +327,15 @@ export async function generate_email(
   r3ply_domains: string[],
   options?: { messageId?: string; date?: string; from?: string; to?: string; subject?: string; body?: string },
 ) {
-  const from = options?.from || Math.random() > 0.5 ? generate_email_addr().addr : generate_email_addr().mailbox
-  const [local, domain] = from.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
+  const from = generate_email_addr()
+  const [local, domain] = from.addr.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
   const message_id = options?.messageId || generate_message_id(domain)
   const date = options?.date || generate_date()
   const to = options?.to || `${site_domain}@${r3ply_domains[random_int(r3ply_domains.length)]}`
   const subject = options?.subject || generate_subject(new URL(`https://${site_domain}/`))
   const body = options?.body || (await generate_comment_body())
   return `Date: ${date}
-From: ${from}
+From: ${Math.random() > 0.5 ? from.addr : from.mailbox}
 To: ${to}
 Message-Id: ${message_id}
 Subject: ${subject}
