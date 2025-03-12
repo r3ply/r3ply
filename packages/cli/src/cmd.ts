@@ -2,6 +2,7 @@ import { Command } from 'commander'
 import { cli_handle_comment_via_email, generate_comment_body, generate_email, get_site_config } from './lib.js'
 import { unsafeUnwrap } from './util.js'
 import { Result } from 'oxide.ts'
+import chalk from 'chalk'
 
 // config ----------------------------------------------------------------------
 export function config_cmd(cwd: string) {
@@ -36,11 +37,12 @@ export function comments_cmd(cwd: string) {
       async (options: { config: string; from: string; to: string; date: string; subject: string; body: string; messageId: string }) => {
         const site_config = unsafeUnwrap(await get_site_config(cwd, options.config)).value!
         const email = generate_email(site_config.domain, site_config.r3ply, options)
-        console.log(await email);
         const comment = Result.safe(email.then(email => cli_handle_comment_via_email(site_config, new TextEncoder().encode(email))))
-        await comment.then(comment => {
+        await comment.then(async comment => {
           if (comment.isOk()) {
-            console.log(comment.unwrap())
+            console.log(`Input email:\n\n${chalk.blueBright(wrapText(await email, 78))}`)
+            console.log(`\n${chalk.yellow("--------------------------")}\n`);
+            console.log(`Output comment:\n\n${chalk.cyanBright(comment.unwrap())}`)
           } else {
             throw comment.unwrapErr()
           }
@@ -48,4 +50,9 @@ export function comments_cmd(cwd: string) {
       },
     )
   return comments_cmd
+}
+
+function wrapText(text: string, width: number): string {
+  const regex = new RegExp(`(.{1,${width}})(\\s+|$)`, "g");
+  return text.match(regex)?.join("\n") || text;
 }
