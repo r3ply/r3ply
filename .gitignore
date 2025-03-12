@@ -1,2 +1,5 @@
 crates/**/target
 target
+.DS_Store
+node_modules/
+packages/**/dist
