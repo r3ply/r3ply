@@ -1,0 +1,10 @@
+{
+  "name": "r3ply",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r --filter './packages/config' run build && pnpm -r --filter './packages/lib' run build && pnpm -r --filter './packages/cli' run build"
+  }
+}

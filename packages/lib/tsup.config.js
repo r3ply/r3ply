@@ -2,15 +2,12 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/r3ply.ts'],
+  entry: ['src/index.ts'],
   dts: true,
   clean: true,
-  define: {
-    'import.meta.vitest': 'false', // Strip test code
-  },
-  loader: {
-    '.eml': 'text', // Handle .eml files as text
-  },
-  target: 'es2022', // Allow top-level await
-  format: 'esm', // Force ESM output (avoid CJS errors)
-});
+  define: { 'import.meta.vitest': 'false' },
+  loader: { '.eml': 'text' },
+  target: 'es2022',
+  format: ['esm', 'cjs'],
+  outDir: 'dist'
+})

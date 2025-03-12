@@ -1,0 +1,7 @@
+version = "0.0.1"
+domain = "foo.com"
+r3ply = ['bar.com']
+
+[comments.email.moderation]
+type = 'webhook'
+url = 'https://example.com/comments'
