@@ -27,3 +27,15 @@ pub fn sanitize_html(text: String, allowed_tags: Vec<String>) -> String {
     // Example sanitized output (replace with actual input later)
     cleaner.clean(&text).to_string()
 }
+
+use pulldown_cmark::{Parser, html};
+
+#[wasm_bindgen]
+pub fn md_to_html(text: String) -> String {
+  let parser = Parser::new(&text);
+
+  // Write to a new String buffer.
+  let mut html_output = String::new();
+  html::push_html(&mut html_output, parser);
+  return html_output
+}
