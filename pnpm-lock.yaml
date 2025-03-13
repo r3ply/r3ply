@@ -72,6 +72,9 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1
     devDependencies:
+      esbuild:
+        specifier: ^0.25.1
+        version: 0.25.1
       tsup:
         specifier: ^8.4.0
         version: 8.4.0(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)
@@ -480,7 +483,7 @@ packages:
     engines: {node: '>=14'}
 
   '@r3ply/wasm@file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz':
-    resolution: {integrity: sha512-pqLJulyLxWYRIV03ucjjhmYqT2b5HaVjvH5ZUhIRXW7i8mRMwKSlqlP/pqQ5BlHHKx7sa7Nx7z07TyCHAP2KSw==, tarball: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz}
+    resolution: {integrity: sha512-ia18srw6MuxpV/4BfLXpOqJR8eKuZ/Bbm4fK6VTmScIc+cw0w0VuMAMz7nhB+beqqfdB8OZab37JY4nwm5D7FQ==, tarball: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz}
     version: 0.0.1
 
   '@rollup/rollup-android-arm-eabi@4.35.0':
