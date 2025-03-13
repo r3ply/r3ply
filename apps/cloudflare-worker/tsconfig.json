@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["@cloudflare/workers-types", "vitest/importMeta"],
+    "target": "ES2020",
+    "outDir": "./dist/worker"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["test/**/*"]
+}

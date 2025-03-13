@@ -1,0 +1,6 @@
+version = "0.0.1"
+domain = "r3ply.com"
+
+[[admin]]
+name = "Guybrush Threepwood"
+email = "guybrush@example.com"
