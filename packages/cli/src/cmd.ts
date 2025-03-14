@@ -38,7 +38,8 @@ export function comments_cmd(cwd: string) {
         const site_config = unsafeUnwrap(await get_site_config(cwd, options.config)).value!
         const email = generate_email(site_config.domain, site_config.r3ply, options).then(email => {
           console.log(`Input email:\n\n${chalk.blueBright(wrapText(email, 78))}`)
-          console.log(`\n${chalk.yellow("--------------------------")}\n`);
+          console.log(`\n${chalk.yellow("--------------------------")}\n`)
+          return email
         })
         const comment = Result.safe(email.then(email => cli_handle_comment_via_email(site_config, new TextEncoder().encode(email))))
         await comment.then(async comment => {
