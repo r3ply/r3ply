@@ -5,7 +5,11 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm -r --filter './packages/config' run build && pnpm -r --filter './packages/lib' run build && pnpm -r --filter './packages/cli' run build"
+    "build:wasm": "pnpm -r --filter 'crates/r3ply-wasm' build && pnpm -r --filter 'crates/r3ply-wasm pack",
+    "build:packages": "pnpm -r --filter './packages/*' run build",
+    "build:apps": "pnpm -r --filter './apps/*' run build",
+    "build:all": "pnpm build:wasm && pnpm build:packages && pnpm build:apps",
+    "test:ts": "pnpm -r --filter './packages/*' --filter './apps/*' test"
   },
   "pnpm": {
     "overrides": {

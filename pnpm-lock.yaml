@@ -4,9 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@r3ply/cli': link:packages/cli
+
 importers:
 
-  .: {}
+  .:
+    dependencies:
+      '@r3ply/cli':
+        specifier: link:packages/cli
+        version: link:packages/cli
 
   apps/cloudflare-worker:
     dependencies:
@@ -65,6 +72,8 @@ importers:
       wrangler:
         specifier: ^3.93.0
         version: 3.114.1(@cloudflare/workers-types@4.20250313.0)
+
+  crates/r3ply-wasm: {}
 
   packages/cli:
     dependencies:
