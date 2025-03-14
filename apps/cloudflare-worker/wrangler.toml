@@ -1,0 +1,88 @@
+name = "r3ply-cloudflare-worker"
+main = "src/index.ts"
+compatibility_flags = [ "nodejs_compat" ]
+compatibility_date = "2024-12-07"
+
+[observability]
+enabled = true
+
+[define]
+"import.meta.vitest" = "false"
+
+# Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
+# Note: Use secrets to store sensitive data.
+# Docs: https://developers.cloudflare.com/workers/platform/environment-variables
+[vars]
+EMAIL_MAX_BYTES_DEFAULT = 26214400 # Cloudflare limits emails to 25MB
+EMAIL_HASH_PEPPER_VERSION = "1.0.0" # The pepper used to hash emails is versioned
+
+# Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
+# Docs: https://developers.cloudflare.com/workers/runtime-apis/kv
+[[kv_namespaces]]
+binding = "R3PLY_USER_CONFIGS"
+id = "77c81547fc5c4c35a78eb9c79d231323"
+
+# The following is needed for CF pages + D1 local development
+# [Cloudflare Docs](https://developers.cloudflare.com/d1/learning/local-development/)
+[[d1_databases]]
+binding = "R3PLY_DB"                                 # Should match preview_database_id
+database_name = "r3ply"
+database_id = "24e83108-b6d9-45b0-9744-4b53a4021511" # wrangler d1 info YOUR_DATABASE_NAME
+preview_database_id = "R3PLY_DB"                     # Required for Pages local development
+
+# Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
+# Docs: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
+# [[r2_buckets]]
+# binding = "MY_BUCKET"
+# bucket_name = "my-bucket"
+
+# Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
+# Docs: https://developers.cloudflare.com/queues/get-started
+# [[queues.producers]]
+# binding = "MY_QUEUE"
+# queue = "my-queue"
+
+# Bind a Queue consumer. Queue Consumers can retrieve tasks scheduled by Producers to act on them.
+# Docs: https://developers.cloudflare.com/queues/get-started
+# [[queues.consumers]]
+# queue = "my-queue"
+
+# Bind another Worker service. Use this binding to call another Worker without network overhead.
+# Docs: https://developers.cloudflare.com/workers/platform/services
+# [[services]]
+# binding = "EMAIL_PARSER"
+# service = "rustwasm-email-parser"
+
+# [[services]]
+# binding = "R3PLY_GITHUB_APP"
+# service = "r3ply-github-app"
+
+# Docs: https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/
+[[send_email]]
+name = "MODERATOR_EMAIL"
+destination_address = "moderator@spenc.es"
+
+# Bind a Durable Object. Durable objects are a scale-to-zero compute primitive based on the actor model.
+# Durable Objects can live for as long as needed. Use these when you need a long-running "server", such as in realtime apps.
+# Docs: https://developers.cloudflare.com/workers/runtime-apis/durable-objects
+# [[durable_objects.bindings]]
+# name = "MY_DURABLE_OBJECT"
+# class_name = "MyDurableObject"
+
+# Durable Object migrations.
+# Docs: https://developers.cloudflare.com/workers/learning/using-durable-objects#configure-durable-object-classes-with-migrations
+# [[migrations]]
+# tag = "v1"
+# new_classes = ["MyDurableObject"]
+
+[[rules]]
+type = "Text"
+# Allow toml files to be read for reading r3ply system config
+globs = ["**/*.toml"]
+fallthrough = true
+
+[[rules]]
+type = "Text"
+# Allow eml files to be read
+globs = ["**/*.eml?raw"]
+fallthrough = true

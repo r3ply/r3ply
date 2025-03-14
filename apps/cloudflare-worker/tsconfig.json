@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["@cloudflare/workers-types", "vitest/importMeta"],
+    "target": "es2021", // changed because that's what the create worker template generates
+    "lib": ["es2021"], // added because that's what the create worker template generates
+    "module": "es2022", // added because that's what the create worker template generates
+    "resolveJsonModule": true, // added because that's what the create worker template generates
+    "allowJs": true, // added because that's what the create worker template generates
+    "checkJs": false, // added because that's what the create worker template generates
+    "noEmit": true, // added because that's what the create worker template generates
+    "isolatedModules": true, // added because that's what the create worker template generates
+    "allowSyntheticDefaultImports": true, // added because that's what the create worker template generates
+    "forceConsistentCasingInFileNames": true, // added because that's what the create worker template generates
+    "strict": true, // added because that's what the create worker template generates
+    "skipLibCheck": true // added because that's what the create worker template generates
+  },
+  "include": ["src/**/*", "worker-configuration.d.ts"],
+  "exclude": ["test"]
+}

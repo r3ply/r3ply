@@ -187,7 +187,37 @@ spf_pass = {{ email.auth.spf  }}
 })
 
 import { Message } from '@mail-parser/ts-bindings'
+import { Result } from 'oxide.ts'
 
-test("foo",  () => {
+test.only("tera components",  () => {
+  const foo = `
+{%- component normal(name) %}Hello, {{ name }}{% endcomponent -%}
+{%- component w_body() %}Hello, {{ body }}{% endcomponent -%}
+{%- component nested() %}{{ :normal(name=body) }}{% endcomponent -%}
+{%- component typed_name(name: string) -%}Hello, {{ name }}{% endcomponent -%}
+{%- component typed_obj2(data: map = { "name": "bob" }) -%}Hello, {{ data.name }}{% endcomponent -%}
+{%- component typed_obj3(data: map = { "name": "bob" }) -%}Hello, {{ data["name"] }}{% endcomponent -%}
+{% component navbar()  {"css": "./array.css"} %}
+{{ css }}
+{% endcomponent %}
+
+{{ :normal(name="world") }}
+{% :w_body() %}Steve{% endcomponent :w_body %}
+{% :nested() %}Woz{% endcomponent :nested %}
+{{ :typed_name(name="Types!") }}
+{{ :typed_obj2() }}
+{{ :typed_obj2(data={ "name": "alice" }) }}
+{{ :typed_obj3(data={ "name": "alice" }) }}
+{% set foo = "bar" %}
+{{ :navbar() }}
+`
+  const bar = Result.safe(() => tera(foo, {}))
+  if (bar.isErr()) {
+    console.log(bar.unwrapErr().message)
+  } else {
+    console.log(bar.unwrap());
+
+  }
+
 
 })

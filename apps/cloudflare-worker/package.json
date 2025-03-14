@@ -1,0 +1,40 @@
+{
+  "name": "@r3ply/cloudflare-worker",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "cf-typegen": "wrangler types",
+    "build": "pnpm run cf-typegen && wrangler deploy --dry-run --outdir=dist",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "test": "npx vitest run unit",
+    "test:watch": "npx vitest unit",
+    "test:it": "npx vitest integration run",
+    "test:it:watch": "npx vitest integration"
+  },
+  "dependencies": {
+    "@iarna/toml": "^3.0.0",
+    "@mail-parser/ts-bindings": "file:../../tools/mail-parser-ts-bindings-0.9.1.tgz",
+    "@octokit/app": "^15.1.4",
+    "@octokit/core": "^6.1.4",
+    "@octokit/rest": "^21.1.1",
+    "@octokit/types": "^12.3.0",
+    "@r3ply/config": "workspace:*",
+    "@r3ply/lib": "workspace:*",
+    "@r3ply/wasm": "file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz",
+    "mime": "^4.0.6",
+    "mimetext": "^3.0.16",
+    "octokit": "^4.1.2",
+    "oxide.ts": "^1.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.8.0",
+    "@cloudflare/workers-types": "^4.20250312.0",
+    "typescript": "^5.5.4",
+    "vitest": "^3.0.8",
+    "wrangler": "^3.93.0"
+  },
+  "volta": {
+    "node": "20.10.0"
+  }
+}
