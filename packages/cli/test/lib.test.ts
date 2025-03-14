@@ -83,4 +83,22 @@ describe('CLI library', () => {
     expect((await project.get_site_config_path('/project/src', "../public/r3ply/config.toml")).unwrap()).toBe('/project/public/r3ply/config.toml')
     expect((await project.get_site_config_path('/project/src', "r3ply.config.toml")).unwrapErr().message).toMatch(/No config found at/)
   })
+  test('init_r3ply_project_at', async () => {
+    mockfs({
+      'root': {
+        "a": {},
+        "b": {
+          ".r3ply": {},
+          "c": {
+            d: {}
+          }
+        },
+        "e": {}
+      },
+    });
+    expect((await project.init_r3ply_project_at('root/a')).unwrap()).toBe('root/a/.r3ply')
+    expect((await project.init_r3ply_project_at('root/a', '../e')).unwrapUnchecked()).toBe('root/e/.r3ply')
+    expect((await project.init_r3ply_project_at('root', 'b')).unwrapErr().message).toMatch(/Project already initialized/)
+    expect((await project.init_r3ply_project_at('root', 'b/c/d')).unwrapErr().message).toMatch(/Nested r3ply project/)
+  })
 })

@@ -75,15 +75,24 @@ export namespace project {
   }
 
   // TODO:
-  // export async function init_r3ply_project_at(cwd: string, dir: string): Promise<Result<void, Error>> {
-  //   const new_r3ply_dir = path.join(cwd, dir, R3PLY_DIR)
-  //   return Result.safe(
-  //     fs.promises.mkdir(new_r3ply_dir).then(() => {
-  //       // TODO: in the CLI print to the console:
-  //       // console.log(`Initialized empty r3ply project in ${new_r3ply_dir}`)
-  //     }),
-  //   )
-  // }
+  export async function init_r3ply_project_at(cwd: string, dir?: string): Promise<Result<string, Error>> {
+    const new_r3ply_dir = path.join(cwd, dir ?? '', R3PLY_DIR)
+    const parent_project_exists = find_r3ply_dir(new_r3ply_dir)
+    const initialize_project = parent_project_exists.then(parent_project_exists => {
+      const file_access = Result.safe(fs.promises.access(new_r3ply_dir))
+      return file_access.then(file_access => {
+        if (file_access.isErr()) {
+          if (parent_project_exists.isOk()) throw new Error(`Nested r3ply project. There is already a parent directory initialized at ${chalk.blue("`" + parent_project_exists.unwrap() + "`")}.${chalk.yellow("(Nested projects can lead to strange effects)")}`)
+          return fs.promises.mkdir(new_r3ply_dir).then(() => {
+            return fs.promises.writeFile(path.join(new_r3ply_dir, 'placeholder.txt'), "This is just an empty file so the .r3ply directory is picked up by source control. In the future there will be more things to store here, so this file will be unnecessary.").then(_ => new_r3ply_dir)
+          })
+        } else {
+          throw new Error(`Project already initialized at \`${chalk.reset(path.dirname(new_r3ply_dir))}\``)
+        }
+      })
+    })
+    return Result.safe(initialize_project)
+  }
 }
 
 // r3ply library ---------------------------------------------------------------

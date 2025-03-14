@@ -4,6 +4,21 @@ import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
 import { R3plySiteConfig } from '@r3ply/config'
+import path from 'path'
+
+// init ------------------------------------------------------------------------
+export function init_cmd(cwd: string) {
+  const config_cmd = new Command('init')
+    .description('initialize a new r3ply project')
+    .argument('[directory]', 'directory to initialize bare r3ply project within')
+    .action(async (directory) => {
+      return project.init_r3ply_project_at(cwd, directory).then(r3ply_dir =>  {
+        console.log(`Initialized empty r3ply project at ${chalk.greenBright(path.dirname(util.unsafeUnwrap(r3ply_dir)))}`)
+      })
+    })
+
+  return config_cmd
+}
 
 // config ----------------------------------------------------------------------
 export function config_cmd(cwd: string) {
