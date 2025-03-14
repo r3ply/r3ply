@@ -37,7 +37,7 @@ export function comments_cmd(cwd: string) {
       async (options: { config: string; from: string; to: string; date: string; subject: string; body: string; messageId: string }) => {
         const site_config = unsafeUnwrap(await get_site_config(cwd, options.config)).value!
         const email = generate_email(site_config.domain, site_config.r3ply, options).then(email => {
-          console.log(`Input email:\n\n${chalk.blueBright(wrapText(email, 78))}`)
+          console.log(`Input email:\n\n${chalk.blueBright(email.replace(/\r/g, ""))}`)
           console.log(`\n${chalk.yellow("--------------------------")}\n`)
           return email
         })
@@ -52,9 +52,4 @@ export function comments_cmd(cwd: string) {
       },
     )
   return comments_cmd
-}
-
-function wrapText(text: string, width: number): string {
-  const regex = new RegExp(`(.{1,${width}})(\\s+|$)`, "g");
-  return text.match(regex)?.join("\n") || text;
 }

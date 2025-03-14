@@ -16,7 +16,7 @@ export async function find_up(filename: string, cwd: string = process.cwd()): Pr
   return undefined
 }
 
-export function unsafeUnwrap<T, E>(result: Result<T, E>): T {
+export function unsafeUnwrap<T, E = Error>(result: Result<T, E>): T {
   return result.unwrapOrElse(() => {
     throw result.unwrapErr()
   })

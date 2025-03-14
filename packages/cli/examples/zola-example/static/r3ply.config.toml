@@ -3,7 +3,6 @@ domain = "spenc.es"
 r3ply = ['r3ply.com']
 
 [comments.email]
-"comment_{}" = "{{ comment.txt }}"
 comment_separator = "﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍"
 
 [comments.email.moderation]

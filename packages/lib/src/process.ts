@@ -62,7 +62,7 @@ export function process(context: CommentTemplateContext, site: R3plySiteConfig) 
       },
     )
   } else {
-    comment = JSON.stringify(context)
+    comment = JSON.stringify(context, null, 2)
   }
   return comment
 }

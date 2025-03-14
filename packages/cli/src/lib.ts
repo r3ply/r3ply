@@ -279,7 +279,7 @@ const markov = RiTa.markov(2, { text: ['example.com', 'foo.com', 'foobar.com', '
 import dayjs  from 'dayjs'
 
 export function generate_date(floor: number = Math.floor(Date.now() / 1000) - 315360000, ceiling: number = Math.floor(Date.now() / 1000)) {
-    return dayjs(new Date(random_int(ceiling, floor) * 1000)).format("ddd, DD MMM YYYY HH:mm:ss Z");
+    return random_int(ceiling, floor) * 1000
 }
 
 export function generate_email_addr() {
@@ -322,6 +322,8 @@ export function generate_comment_body(seed?: string[]) {
   )
 }
 
+import { build_email } from '@r3ply/wasm'
+
 export async function generate_email(
   site_domain: string,
   r3ply_domains: string[],
@@ -330,18 +332,12 @@ export async function generate_email(
   const from = generate_email_addr()
   const [local, domain] = from.addr.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
   const message_id = options?.messageId || generate_message_id(domain)
-  const date = options?.date || generate_date()
+  const date = dayjs(options?.date ?? new Date(generate_date()))
   const to = options?.to || `${site_domain}@${r3ply_domains[random_int(r3ply_domains.length)]}`
   const subject = options?.subject || generate_subject(new URL(`https://${site_domain}/`))
   const body = options?.body || (await generate_comment_body())
-  return `Date: ${date}
-From: ${Math.random() > 0.5 ? from.addr : from.mailbox}
-To: ${to}
-Message-Id: ${message_id}
-Subject: ${subject}
-
-${body}
-`
+  const email = Result.safe(() => build_email(message_id, BigInt(date.unix()), from.first, from.addr, to, subject, body))
+  return email.unwrap()
 }
 
 export async function cli_handle_comment_via_email(site_config: R3plySiteConfig, email_bytes: Uint8Array) {

@@ -7,7 +7,7 @@
     "build:bundler": "wasm-pack build --release --target bundler --out-name r3ply-wasm-bundler --no-pack",
     "build:patch": "cp ./bundler-wasm-patch.js pkg/r3ply-wasm-bundler.js",
     "build:package": "cp ./package.json pkg/",
-    "build": "npm run build:node && npm run build:bundler && npm run build:patch && npm run build:package",
+    "build:wasm": "npm run build:node && npm run build:bundler && npm run build:patch && npm run build:package",
     "pack": "wasm-pack pack"
   },
   "files": [

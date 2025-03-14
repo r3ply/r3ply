@@ -5,7 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build:wasm": "pnpm -r --filter 'crates/r3ply-wasm' build && pnpm -r --filter 'crates/r3ply-wasm pack",
+    "build:wasm": "pnpm --filter @r3ply/wasm run build:wasm && pnpm --filter @r3ply/wasm run pack",
     "build:packages": "pnpm -r --filter './packages/*' run build",
     "build:apps": "pnpm -r --filter './apps/*' run build",
     "build:all": "pnpm build:wasm && pnpm build:packages && pnpm build:apps",
