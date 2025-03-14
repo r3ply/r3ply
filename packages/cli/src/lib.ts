@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import { Err, Ok, Result } from 'oxide.ts'
-import { find_up, random_int, unsafeUnwrap } from './util.js'
+import { util } from './util.js'
 import fg from 'fast-glob'
 
 // file system -----------------------------------------------------------------
@@ -10,7 +10,7 @@ const R3PLY_DIR = '.r3ply'
 const CONFIG_GLOB_PATTERNS = [`**/r3ply/config.{toml,json}`, `**/r3ply.config.{toml,json}`]
 
 export async function find_r3ply_dir(cwd: string): Promise<Result<string, Error>> {
-  const find_result = find_up('.r3ply', cwd).then((path) => {
+  const find_result = util.find_up('.r3ply', cwd).then((path) => {
     if (path) return path
     else throw new Error(`No ${R3PLY_DIR} directory found. ${chalk.yellow(`You can run \`re init\` to initialize one.`)}`)
   })
@@ -41,7 +41,7 @@ type TypedParseResult<T> = Omit<ParseResult, 'value'> & { value?: T }
 export async function get_site_config(cwd: string, config_path?: string): Promise<Result<TypedParseResult<R3plySiteConfig>, Error>> {
   const site_config = find_r3ply_dir(cwd)
     // find project dir
-    .then((r3ply_dir) => path.dirname(unsafeUnwrap(r3ply_dir)))
+    .then((r3ply_dir) => path.dirname(util.unsafeUnwrap(r3ply_dir)))
     // find config file or pass in
     .then((project_dir) => {
       if (config_path) return Result.safe(Promise.resolve([config_path]))
@@ -50,17 +50,17 @@ export async function get_site_config(cwd: string, config_path?: string): Promis
     // parse config file
     .then((site_config_paths) => {
       // can't do anything if there is no file
-      if (unsafeUnwrap(site_config_paths).length == 0) {
+      if (util.unsafeUnwrap(site_config_paths).length == 0) {
         throw new Error('No r3ply config found.')
       }
       // haven't decided what to do if there are multiple files, so forbid it for now
-      else if (unsafeUnwrap(site_config_paths).length > 1) {
-        const files_found = JSON.stringify(unsafeUnwrap(site_config_paths), null, 2)
+      else if (util.unsafeUnwrap(site_config_paths).length > 1) {
+        const files_found = JSON.stringify(util.unsafeUnwrap(site_config_paths), null, 2)
         const help = '(You can specify a r3ply config as an optional argument)'
         throw new Error(`Multiple r3ply configs found:\n\n${chalk.red(files_found)}\n\n${chalk.yellow(help)}`)
       }
       // if there's just one file then proceed
-      const site_config_path = unsafeUnwrap(site_config_paths)[0]
+      const site_config_path = util.unsafeUnwrap(site_config_paths)[0]
       return (
         fs.promises
           .readFile(path.join(cwd, site_config_path))
@@ -78,7 +78,7 @@ export async function get_site_config(cwd: string, config_path?: string): Promis
 // r3ply library ---------------------------------------------------------------
 import { RiMarkov, RiTa } from 'rita'
 import { fileURLToPath } from 'url'
-import { R3ply } from '@r3ply/lib'
+import { R3ply, Util } from '@r3ply/lib'
 
 const domains = [
   'ghostpirate',
@@ -279,27 +279,28 @@ const markov = RiTa.markov(2, { text: ['example.com', 'foo.com', 'foobar.com', '
 import dayjs  from 'dayjs'
 
 export function generate_date(floor: number = Math.floor(Date.now() / 1000) - 315360000, ceiling: number = Math.floor(Date.now() / 1000)) {
-    return random_int(ceiling, floor) * 1000
+    return util.random_int(ceiling, floor) * 1000
 }
 
 export function generate_email_addr() {
-  const first = first_names[random_int(first_names.length)]
-  const last = last_names[random_int(last_names.length)]
-  const birthyear = random_int(1990, 1899)
-  const domain = `${domains[random_int(domains.length)]}.${tlds[random_int(tlds.length)]}`
+  const first = first_names[util.random_int(first_names.length)]
+  const last = last_names[util.random_int(last_names.length)]
+  const name = `${first} ${last}`
+  const birthyear = util.random_int(1990, 1899)
+  const domain = `${domains[util.random_int(domains.length)]}.${tlds[util.random_int(tlds.length)]}`
   const local = `${first}.${Math.random() > 0.5 ? birthyear : last}`
   const addr = `${local}@${domain}`
   const mailbox = `${first} ${last} <${addr}>`
-  return { first, last, birthyear, domain, local, addr, mailbox }
+  return { name, domain, local, addr, mailbox }
 }
 
 export function generate_message_id(domain: string) {
-  return `<${crypto.randomUUID()}@${domain}>`
+  return `${crypto.randomUUID()}@${domain}`
 }
 
 export function generate_subject(url: URL) {
-  const site_path = site_paths[random_int(0, site_paths.length)]
-  const site_slug = site_slugs[random_int(0, site_slugs.length)]
+  const site_path = site_paths[util.random_int(0, site_paths.length)]
+  const site_slug = site_slugs[util.random_int(0, site_slugs.length)]
   return new URL(path.join(site_path, site_slug), url).href
 }
 
@@ -329,15 +330,32 @@ export async function generate_email(
   r3ply_domains: string[],
   options?: { messageId?: string; date?: string; from?: string; to?: string; subject?: string; body?: string },
 ) {
-  const from = generate_email_addr()
+  let from: { name?: string, addr: string }
+  if (options?.from) {
+    from = parse_email(options.from)
+  } else {
+    from = generate_email_addr()
+  }
   const [local, domain] = from.addr.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
   const message_id = options?.messageId || generate_message_id(domain)
   const date = dayjs(options?.date ?? new Date(generate_date()))
-  const to = options?.to || `${site_domain}@${r3ply_domains[random_int(r3ply_domains.length)]}`
+  const to = options?.to || `${site_domain}@${r3ply_domains[util.random_int(r3ply_domains.length)]}`
   const subject = options?.subject || generate_subject(new URL(`https://${site_domain}/`))
   const body = options?.body || (await generate_comment_body())
-  const email = Result.safe(() => build_email(message_id, BigInt(date.unix()), from.first, from.addr, to, subject, body))
+  const email = Result.safe(() => build_email(message_id, BigInt(date.unix()), from.name, from.addr, to, subject, body))
   return email.unwrap()
+}
+
+// TODO: bring in my actual email parsing library to handle this stuff. This is not how an email address should be parsed!
+function parse_email(email: string): { name?: string, addr: string } {
+  const name_matches = email.match(/^(.*?)</)
+  let name: string | undefined;
+  if (name_matches) {
+    name = name_matches[1].trim()
+    const email_matches = email.match(/<(.+?)>/)
+    const email_addr = (email_matches! ?? [""])[1].trim()
+    return { name, addr: email_addr }
+  } else return { name: undefined, addr: email }
 }
 
 export async function cli_handle_comment_via_email(site_config: R3plySiteConfig, email_bytes: Uint8Array) {
@@ -348,11 +366,7 @@ domain = "r3ply.com"
 name = "Guybrush Threepwood"
 email = "guybrush@example.com"`))).value!
   const r3ply = R3ply(cli_system_config)
-  const redact = async (input: string) => {
-    const hashedBuffer = await crypto.subtle.digest({ name: 'SHA-256' }, new TextEncoder().encode(input))
-    const hashBase64 = btoa(String.fromCharCode(...new Uint8Array(hashedBuffer)))
-    return hashBase64
-  }
+  const redact = util.sha256_0x
   const comment_via_email_handler = r3ply.comments.viaEmail(redact)
   return comment_via_email_handler([site_config, email_bytes])
 }

@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import { cli_handle_comment_via_email, generate_comment_body, generate_email, get_site_config } from './lib.js'
-import { unsafeUnwrap } from './util.js'
+import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
 
@@ -12,7 +12,7 @@ export function config_cmd(cwd: string) {
     .command('validate [config_path]')
     .description('validate the configuration')
     .action(async (config_path?: string) => {
-      const site_config = unsafeUnwrap(await get_site_config(cwd, config_path))
+      const site_config = util.unsafeUnwrap(await get_site_config(cwd, config_path))
       if (!site_config.valid) throw new Error(`config failed validation:\n\n${JSON.stringify(site_config.errors, null, 2)}`)
     })
 
@@ -35,7 +35,7 @@ export function comments_cmd(cwd: string) {
     .option('--body <text>', 'override email body')
     .action(
       async (options: { config: string; from: string; to: string; date: string; subject: string; body: string; messageId: string }) => {
-        const site_config = unsafeUnwrap(await get_site_config(cwd, options.config)).value!
+        const site_config = util.unsafeUnwrap(await get_site_config(cwd, options.config)).value!
         const email = generate_email(site_config.domain, site_config.r3ply, options).then(email => {
           console.log(`Input email:\n\n${chalk.blueBright(email.replace(/\r/g, ""))}`)
           console.log(`\n${chalk.yellow("--------------------------")}\n`)
