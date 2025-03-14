@@ -9,7 +9,8 @@
     "build:pkgs": "pnpm -r --filter './packages/*' run build",
     "build:apps": "pnpm -r --filter './apps/*' run build",
     "build:all": "pnpm build:wasm && pnpm build:packages && pnpm build:apps",
-    "test:ts": "pnpm -r --filter './packages/*' --filter './apps/*' test"
+    "test:ts": "vitest",
+    "test": "pnpm -r test"
   },
   "pnpm": {
     "overrides": {
@@ -18,5 +19,11 @@
   },
   "dependencies": {
     "@r3ply/cli": "link:packages/cli"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.8"
+  },
+  "volta": {
+    "node": "20.10.0"
   }
 }
