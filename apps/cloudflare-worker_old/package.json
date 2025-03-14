@@ -2,19 +2,15 @@
   "name": "@r3ply/cloudflare-worker",
   "version": "0.0.1",
   "private": true,
-  "main": "dist/types/index.js",
-  "types": "dist/types/index.d.ts",
   "scripts": {
+    "cf-typegen": "wrangler types",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "test": "npx vitest run",
-    "test:watch": "npx vitest --project unit",
-    "test:it": "npx vitest --project integration run",
-    "test:it:watch": "npx vitest --project integration"
+    "test": "npx vitest run unit",
+    "test:watch": "npx vitest unit",
+    "test:it": "npx vitest integration run",
+    "test:it:watch": "npx vitest integration"
   },
-  "files": [
-    "dist/types/**/*"
-  ],
   "dependencies": {
     "@iarna/toml": "^3.0.0",
     "@mail-parser/ts-bindings": "file:../../tools/mail-parser-ts-bindings-0.9.1.tgz",

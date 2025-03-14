@@ -1,7 +1,10 @@
-name = "comments"
+name = "r3ply-cloudflare-worker"
 main = "src/index.ts"
 compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2024-12-07"
+
+[observability]
+enabled = true
 
 [define]
 "import.meta.vitest" = "false"
@@ -71,10 +74,6 @@ destination_address = "moderator@spenc.es"
 # [[migrations]]
 # tag = "v1"
 # new_classes = ["MyDurableObject"]
-
-[observability]
-enabled = true
-
 
 [[rules]]
 type = "Text"
