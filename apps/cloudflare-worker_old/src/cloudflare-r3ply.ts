@@ -1,15 +1,9 @@
 import { R3ply, process, CommentTemplateContext, receive, accept, AcceptedEmail, deliverable, DeliverableEmail, CommentMetadata, prepare, prescreen, Moderation } from '@r3ply/lib'
 import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
-import { Message as Email } from '@mail-parser/ts-bindings'
-import { CommentState, d1 } from './state/d1'
-import { CommentSource } from './r3ply_old'
+import { CommentState } from './state/d1'
 import { GistClient, GistFiles } from './state/gist'
-import { Env } from './types'
 import { Result } from 'oxide.ts'
-import mime from 'mime' // If using ESM
-// import { prescreen } from '../packages/comments/src/prescreen'
-// import { Moderation } from '../packages/comments/src/moderation/moderation'
-import { log } from 'node:console'
+import mime from 'mime'
 
 interface CloudflareR3ply extends R3ply {}
 export function CloudflareR3ply(system_config: R3plySystemConfig) {

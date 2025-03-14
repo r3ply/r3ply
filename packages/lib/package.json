@@ -8,12 +8,12 @@
   "devDependencies": {
     "@types/micromatch": "^4.0.9",
     "typescript": "^5.5.4",
-    "vitest": "^2.1.9"
+    "vitest": "^3.0.8"
   },
   "dependencies": {
-    "@r3ply/config": "workspace:*",
     "@iarna/toml": "^2.2.5",
     "@mail-parser/ts-bindings": "file:../../tools/mail-parser-ts-bindings-0.9.1.tgz",
+    "@r3ply/config": "workspace:*",
     "@r3ply/wasm": "file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz",
     "dayjs": "^1.11.13",
     "micromatch": "^4.0.8",

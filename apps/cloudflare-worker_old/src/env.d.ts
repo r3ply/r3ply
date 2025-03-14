@@ -16,3 +16,8 @@ export interface Env {
   R3PLY_DB: D1Database
   R3PLY_GITHUB_APP: Fetcher
 }
+
+declare module '*.toml' {
+  const content: string
+  export default content
+}

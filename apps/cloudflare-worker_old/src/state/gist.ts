@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
 import { Result } from 'oxide.ts'
-import { OmitFirstParameter } from '../types/util'
+import { OmitFirstParameter } from '../util'
 
 // An object consisting of the filename as the key, with the content as a string
 export type GistFiles = { [key: string]: { content: string } }

@@ -35,3 +35,14 @@ if (import.meta.vitest) {
     expect(await signHMAC('hello, world!')).toBe('429295d1b743487488fbac6012b5f857d18ee0f7fc4cc2bc016ab462fadbc663')
   })
 }
+
+/**
+ * Use this to curry dependencies.
+ * e.g. with `OmitFirstParameter<typeof update_gist>` then:
+ * `update_gist(gist_token: string, gist_id: string, files: GistFiles)`
+ * becomes...
+ * `update_gist(gist_id: string, files: GistFiles)`
+ */
+export type OmitFirstParameter<T extends (...args: any) => any> = T extends (arg1: any, ...rest: infer P) => infer R
+  ? (...args: P) => R
+  : never

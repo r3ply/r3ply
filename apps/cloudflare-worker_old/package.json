@@ -7,7 +7,7 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "test": "npx vitest --project unit run",
+    "test": "npx vitest run",
     "test:watch": "npx vitest --project unit",
     "test:it": "npx vitest --project integration run",
     "test:it:watch": "npx vitest --project integration"
@@ -31,10 +31,10 @@
     "oxide.ts": "^1.1.0"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.6.16",
+    "@cloudflare/vitest-pool-workers": "^0.8.0",
     "@cloudflare/workers-types": "^4.20250312.0",
     "typescript": "^5.5.4",
-    "vitest": "^2.1.9",
+    "vitest": "^3.0.8",
     "wrangler": "^3.93.0"
   },
   "volta": {

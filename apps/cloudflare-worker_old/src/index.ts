@@ -1,9 +1,9 @@
 import { Result } from 'oxide.ts'
-import { Env } from './types'
+import { Env } from './env'
 import { R3plySiteConfig, siteConfigParser, systemConfigParser } from '@r3ply/config'
 import TOML from '@iarna/toml'
 import { R3plyGithubBot } from '@r3ply/lib'
-import { createHMAC } from './util2'
+import { createHMAC } from './util'
 // @ts-ignore
 import r3ply_system_config_toml from '../r3ply.config.toml'
 import { CloudflareR3ply } from './cloudflare-r3ply'

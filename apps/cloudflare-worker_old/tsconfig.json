@@ -6,5 +6,5 @@
     "outDir": "./dist/worker"
   },
   "include": ["src/**/*"],
-  "exclude": ["test/**/*"]
+  "exclude": []
 }

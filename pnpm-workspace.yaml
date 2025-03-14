@@ -1,3 +1,6 @@
 packages:
-  - 'packages/*'
-  - 'apps/cloudflare-worker'
+  - packages/*
+  - apps/cloudflare-worker_old
+  - apps/r3ply-cloudflare-worker
+onlyBuiltDependencies:
+  - sharp

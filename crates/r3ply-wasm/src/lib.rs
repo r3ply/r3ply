@@ -73,7 +73,7 @@ pub fn tera(template: String, data: JsValue) -> Result<String, JsError> {
   tera.render_str(&template, &ctx).map_err(|error| JsError::from(error))
 }
 
-use mail_builder::{headers::{address::{Address, EmailAddress}, content_type::ContentType, message_id::MessageId}, mime::BodyPart, MessageBuilder};
+use mail_builder::{headers::{address::{Address, EmailAddress}, message_id::MessageId}, MessageBuilder};
 use std::{borrow::Cow, collections::{HashMap, HashSet}};
 
 #[wasm_bindgen]
