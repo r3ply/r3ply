@@ -8,7 +8,9 @@
     "build:patch": "cp ./bundler-wasm-patch.js pkg/r3ply-wasm-bundler.js",
     "build:package": "cp ./package.json pkg/",
     "build:wasm": "npm run build:node && npm run build:bundler && npm run build:patch && npm run build:package",
-    "pack": "wasm-pack pack"
+    "pack": "wasm-pack pack",
+    "test": "cargo test",
+    "test:watch": "cargo watch test"
   },
   "files": [
     "r3ply-wasm-bundler_bg.js",
