@@ -3,7 +3,7 @@ domain = "spenc.es"
 r3ply = ['r3ply.com']
 
 [comments.email]
-"comment_{}" = "viaEmail/comment.template.md"
+block_list = ["bob*"]
 comment_separator = "﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍"
 
 [comments.email.moderation]

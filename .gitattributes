@@ -1,2 +1,3 @@
 pnpm-lock.yaml -diff
 Cargo.lock -diff
+package-lock -diff

@@ -1,9 +1,11 @@
-import { beforeEach, describe, expect, test } from 'vitest'
+import { describe, test } from 'vitest'
 
 import { RiMarkov, RiTa } from 'rita'
 import fs from 'fs'
-import { generate_email, generate_email_addr, generate_subject } from '../src/lib'
-import { generate_date } from '../src/lib'
+import { generate } from '../src/lib'
+import { receive } from '@r3ply/lib'
+
+import { sanitize_html, md_to_html, tera, unescape_html, parse_email_str } from '@r3ply/wasm'
 
 describe('CLI library', () => {
   test('rita in-memory', async () => {
@@ -52,26 +54,26 @@ I can at least say that in the meantime, RISC OS is still alive and now open, av
   })
 
   test('email generation', async () => {
-    console.log(`from: ${generate_email_addr().addr}`)
-    console.log(`from: ${generate_email_addr().addr}`)
-    console.log(`from: ${generate_email_addr().addr}`)
-    console.log(`from: ${generate_email_addr().addr}`)
-    console.log(`from: ${generate_email_addr().addr}`)
-    console.log(`from: ${generate_email_addr().addr}`)
+    console.log(`from: ${generate.email_addr().addr}`)
+    console.log(`from: ${generate.email_addr().addr}`)
+    console.log(`from: ${generate.email_addr().addr}`)
+    console.log(`from: ${generate.email_addr().addr}`)
+    console.log(`from: ${generate.email_addr().addr}`)
+    console.log(`from: ${generate.email_addr().addr}`)
 
-    console.log(generate_subject(new URL('https://spenc.es')))
-    console.log(generate_subject(new URL('https://spenc.es')))
+    console.log(generate.subject(new URL('https://spenc.es')))
+    console.log(generate.subject(new URL('https://spenc.es')))
 
-    console.log(generate_date())
-    console.log(generate_date())
-    console.log(generate_date())
-    console.log(generate_date())
+    console.log(generate.date())
+    console.log(generate.date())
+    console.log(generate.date())
+    console.log(generate.date())
 
-    console.log(await generate_email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
-    console.log(await generate_email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
-    console.log(await generate_email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
-    console.log(await generate_email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
-    console.log(await generate_email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
+    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
+    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
+    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
+    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
+    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
   })
 
   test('preprocessing for training data', async () => {
@@ -108,12 +110,6 @@ What tools or techniques do you use to plan it, how quickly do you jump into imp
 `
 
     const parsed_from_str = parse_email_str(email)
-    console.log(`FROM STRING:`);
-    console.log(JSON.stringify(parsed_from_str, null, 2));
   })
 })
-import { R3ply, receive } from '@r3ply/lib'
-
-import { sanitize_html, md_to_html, tera, unescape_html, parse_email_str, parse_email_bytes } from '@r3ply/wasm'
-import { log } from 'console'
 

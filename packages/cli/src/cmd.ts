@@ -1,18 +1,20 @@
 import { Command } from 'commander'
-import { cli_handle_comment_via_email, generate_comment_body, generate_email, get_site_config } from './lib.js'
+import { cli_handle_comment_via_email, project, generate } from './lib.js'
 import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
+import { R3plySiteConfig } from '@r3ply/config'
 
 // config ----------------------------------------------------------------------
 export function config_cmd(cwd: string) {
   const config_cmd = new Command('config').description('various supporting operations for working with r3ply configs')
 
   config_cmd
-    .command('validate [config_path]')
+    .command('validate')
     .description('validate the configuration')
-    .action(async (config_path?: string) => {
-      const site_config = util.unsafeUnwrap(await get_site_config(cwd, config_path))
+    .option('--config <path>', 'specify path to config')
+    .action(async (options: { config: string }) => {
+      const site_config = util.unsafeUnwrap(await project.parse_site_config(cwd, options.config))
       if (!site_config.valid) throw new Error(`config failed validation:\n\n${JSON.stringify(site_config.errors, null, 2)}`)
     })
 
@@ -34,9 +36,16 @@ export function comments_cmd(cwd: string) {
     .option('--subject <text>', 'override email subject')
     .option('--body <text>', 'override email body')
     .action(
-      async (options: { config: string; from: string; to: string; date: string; subject: string; body: string; messageId: string }) => {
-        const site_config = util.unsafeUnwrap(await get_site_config(cwd, options.config)).value!
-        const email = generate_email(site_config.domain, site_config.r3ply, options).then(email => {
+      async (options: { config?: string; from?: string; to?: string; date?: string; subject?: string; body?: string; messageId?: string }) => {
+        let site_config: R3plySiteConfig;
+        if (options.config) {
+          site_config = util.unsafeUnwrap(await project.get_site_config(cwd, options.config))
+        } else {
+          const project_dir = (await project.find_project_dir(cwd)).unwrap()
+          site_config = util.unsafeUnwrap(await project.get_site_config(project_dir, undefined))
+        }
+        site_config = util.unsafeUnwrap(await project.get_site_config(cwd, options.config))
+        const email = generate.email(site_config.domain, site_config.r3ply, options).then(email => {
           console.log(`Input email:\n\n${chalk.blueBright(email.replace(/\r/g, ""))}`)
           console.log(`\n${chalk.yellow("--------------------------")}\n`)
           return email

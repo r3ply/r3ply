@@ -6,7 +6,8 @@ import chalk from 'chalk'
 program.name('re').version('1.0.0').description('CLI for r3ply, an email-based commenting service')
 program.addCommand(config_cmd(process.cwd()))
 program.addCommand(comments_cmd(process.cwd()))
-program.parseAsync(process.argv).catch((error) => {
+program.parseAsync(process.argv).catch((error: Error) => {
   console.error(chalk.redBright(error.message))
+  console.error(chalk.redBright(JSON.stringify(error.stack)))
   process.exit(1)
 })

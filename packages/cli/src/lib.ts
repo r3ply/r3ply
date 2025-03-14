@@ -3,83 +3,187 @@ import fs from 'fs'
 import { Err, Ok, Result } from 'oxide.ts'
 import { util } from './util.js'
 import fg from 'fast-glob'
-
-// file system -----------------------------------------------------------------
-
-const R3PLY_DIR = '.r3ply'
-const CONFIG_GLOB_PATTERNS = [`**/r3ply/config.{toml,json}`, `**/r3ply.config.{toml,json}`]
-
-export async function find_r3ply_dir(cwd: string): Promise<Result<string, Error>> {
-  const find_result = util.find_up('.r3ply', cwd).then((path) => {
-    if (path) return path
-    else throw new Error(`No ${R3PLY_DIR} directory found. ${chalk.yellow(`You can run \`re init\` to initialize one.`)}`)
-  })
-  return Result.safe(find_result)
-}
-
-export async function find_config_files(cwd: string, file_name?: string): Promise<Result<string[], Error>> {
-  return Result.safe(fg.async(CONFIG_GLOB_PATTERNS, { dot: true, cwd: cwd }))
-}
-
-export async function init_r3ply_project_at(cwd: string, dir: string): Promise<Result<void, Error>> {
-  const new_r3ply_dir = path.join(cwd, dir, R3PLY_DIR)
-  return Result.safe(
-    fs.promises.mkdir(new_r3ply_dir).then(() => {
-      // TODO: in the CLI print to the console:
-      // console.log(`Initialized empty r3ply project in ${new_r3ply_dir}`)
-    }),
-  )
-}
-
 import TOML from '@iarna/toml'
 import { R3plySiteConfig, siteConfigParser, systemConfigParser } from '@r3ply/config'
 import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
+import { RiMarkov, RiTa } from 'rita'
+import { fileURLToPath } from 'url'
+import { R3ply } from '@r3ply/lib'
+import dayjs  from 'dayjs'
+import { build_email } from '@r3ply/wasm'
 
-type TypedParseResult<T> = Omit<ParseResult, 'value'> & { value?: T }
+// project stuff ---------------------------------------------------------------
+export namespace project {
+  type TypedParseResult<T> = Omit<ParseResult, 'value'> & { value?: T }
+  const R3PLY_DIR = '.r3ply'
+  const CONFIG_GLOB_PATTERNS = [`**/r3ply/config.{toml,json}`, `**/r3ply.config.{toml,json}`]
 
-export async function get_site_config(cwd: string, config_path?: string): Promise<Result<TypedParseResult<R3plySiteConfig>, Error>> {
-  const site_config = find_r3ply_dir(cwd)
-    // find project dir
-    .then((r3ply_dir) => path.dirname(util.unsafeUnwrap(r3ply_dir)))
-    // find config file or pass in
-    .then((project_dir) => {
-      if (config_path) return Result.safe(Promise.resolve([config_path]))
-      else return find_config_files(cwd)
+  export async function find_r3ply_dir(cwd: string): Promise<Result<string, Error>> {
+    const find_result = util.find_up('.r3ply', cwd).then((path) => {
+      if (path) return path
+      else throw new Error(`No ${R3PLY_DIR} directory found. ${chalk.yellow(`You can run \`re init\` to initialize one.`)}`)
     })
-    // parse config file
-    .then((site_config_paths) => {
-      // can't do anything if there is no file
-      if (util.unsafeUnwrap(site_config_paths).length == 0) {
-        throw new Error('No r3ply config found.')
-      }
-      // haven't decided what to do if there are multiple files, so forbid it for now
-      else if (util.unsafeUnwrap(site_config_paths).length > 1) {
-        const files_found = JSON.stringify(util.unsafeUnwrap(site_config_paths), null, 2)
-        const help = '(You can specify a r3ply config as an optional argument)'
-        throw new Error(`Multiple r3ply configs found:\n\n${chalk.red(files_found)}\n\n${chalk.yellow(help)}`)
-      }
-      // if there's just one file then proceed
-      const site_config_path = util.unsafeUnwrap(site_config_paths)[0]
-      return (
-        fs.promises
-          .readFile(path.join(cwd, site_config_path))
-          // turn config file bytes into a string
-          .then((site_config_bytes) => site_config_bytes.toString())
-          // parse the file as TOML or as JSON depending on the file extension (note: if neither than an error will occur)
-          .then((site_config_str) => (site_config_path.endsWith('.toml') ? TOML.parse(site_config_str) : JSON.parse(site_config_str)))
-      )
+    return Result.safe(find_result)
+  }
+
+  export async function find_project_dir(cwd: string): Promise<Result<string, Error>> {
+    return find_r3ply_dir(cwd).then(r3ply_dir => {
+      return r3ply_dir.map(r3ply_dir => path.dirname(r3ply_dir))
     })
-    // Finally return a parse result of the site config (which can still have errors related to the config's validity)
-    .then((site_config_json) => siteConfigParser(JSON.stringify(site_config_json)))
-  return Result.safe(site_config)
+  }
+
+  export async function find_config_files(from_dir: string, file_glob?: string): Promise<Result<string[], Error>> {
+    if (file_glob) return Result.safe(fg.async([file_glob], { dot: true, cwd: from_dir }))
+    else return Result.safe(fg.async(CONFIG_GLOB_PATTERNS, { dot: true, cwd: from_dir }))
+  }
+
+  export async function get_site_config_path(cwd: string, config_path?: string) {
+    const full_config_path = (async() => {
+      const project_dir = util.unsafeUnwrap(await find_project_dir(cwd))
+      if (config_path) {
+        const relative_files = util.unsafeUnwrap(await find_config_files(cwd, config_path))
+        if (relative_files.length == 0) throw new Error(`No config found at ${path.join(cwd, config_path)}`)
+        else if (relative_files.length > 1) throw new Error(`Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`)
+        else return path.join(cwd, relative_files[0])
+      } else {
+        const relative_files = util.unsafeUnwrap(await find_config_files(project_dir))
+        if (relative_files.length == 0) throw new Error(`No r3ply config found within ${project_dir}`)
+        else if (relative_files.length > 1) throw new Error(`Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`)
+        else return path.join(project_dir, relative_files[0])
+      }
+    })()
+    return Result.safe(full_config_path)
+  }
+
+  export async function parse_site_config(cwd: string, config_path?: string): Promise<Result<TypedParseResult<R3plySiteConfig>, Error>> {
+    const parsed_site_config = get_site_config_path(cwd, config_path)
+      .then(full_config_path => util.unsafeUnwrap(full_config_path))
+      .then(full_config_path => {
+        return fs.promises
+        .readFile(full_config_path)
+        .then((site_config_bytes) => site_config_bytes.toString())
+        .then((site_config_str) => (full_config_path.endsWith('.toml') ? TOML.parse(site_config_str) : JSON.parse(site_config_str)))
+        .then(site_config_json => siteConfigParser(JSON.stringify(site_config_json)))
+      })
+    return Result.safe(parsed_site_config)
+  }
+
+  export async function get_site_config(cwd: string, config_path?: string): Promise<Result<R3plySiteConfig, Error>> {
+    const site_config = parse_site_config(cwd, config_path).then(parsed_site_config => util.unsafeUnwrap(parsed_site_config)).then(parsed_site_config => parsed_site_config.value!)
+    return Result.safe(site_config)
+  }
+
+  // TODO:
+  // export async function init_r3ply_project_at(cwd: string, dir: string): Promise<Result<void, Error>> {
+  //   const new_r3ply_dir = path.join(cwd, dir, R3PLY_DIR)
+  //   return Result.safe(
+  //     fs.promises.mkdir(new_r3ply_dir).then(() => {
+  //       // TODO: in the CLI print to the console:
+  //       // console.log(`Initialized empty r3ply project in ${new_r3ply_dir}`)
+  //     }),
+  //   )
+  // }
 }
 
 // r3ply library ---------------------------------------------------------------
-import { RiMarkov, RiTa } from 'rita'
-import { fileURLToPath } from 'url'
-import { R3ply, Util } from '@r3ply/lib'
+const markov = RiTa.markov(2, { text: ['example.com', 'foo.com', 'foobar.com', 'monkeyisland.net'] })
 
+export namespace generate {
+  export function date(floor: number = Math.floor(Date.now() / 1000) - 315360000, ceiling: number = Math.floor(Date.now() / 1000)) {
+    return util.random_int(ceiling, floor) * 1000
+  }
+
+  export function email_addr() {
+    const first = first_names[util.random_int(first_names.length)]
+    const last = last_names[util.random_int(last_names.length)]
+    const name = `${first} ${last}`
+    const birthyear = util.random_int(1990, 1899)
+    const domain = `${domains[util.random_int(domains.length)]}.${tlds[util.random_int(tlds.length)]}`
+    const local = `${first}.${Math.random() > 0.5 ? birthyear : last}`
+    const addr = `${local}@${domain}`
+    const mailbox = `${first} ${last} <${addr}>`
+    return { name, domain, local, addr, mailbox }
+  }
+
+  export function message_id(domain: string) {
+    return `${crypto.randomUUID()}@${domain}`
+  }
+
+  export function subject(url: URL) {
+    const site_path = site_paths[util.random_int(0, site_paths.length)]
+    const site_slug = site_slugs[util.random_int(0, site_slugs.length)]
+    return new URL(path.join(site_path, site_slug), url).href
+  }
+
+  export function comment_body(seed?: string[]) {
+    // use meta imports to determine where the model file is stored
+    const __filename = fileURLToPath(import.meta.url)
+    const __dirname = path.dirname(__filename)
+    const modelPath = path.join(__dirname, 'comments-markov-model.json')
+
+    // load the model into markov chain and generate text
+    const model_data = fs.promises.readFile(modelPath, 'utf-8')
+    const markov = model_data.then((model_data) => RiMarkov.fromJSON(model_data))
+    return markov.then((markov) =>
+      markov.generate({
+        maxLength: 128,
+        temperature: 1,
+        allowDuplicates: true,
+        seed,
+      }),
+    )
+  }
+
+  export async function email(
+    site_domain: string,
+    r3ply_domains: string[],
+    options?: { messageId?: string; date?: string; from?: string; to?: string; subject?: string; body?: string },
+  ) {
+    let from: { name?: string, addr: string }
+    if (options?.from) {
+      from = parse_email_addr(options.from)
+    } else {
+      from = generate.email_addr()
+    }
+    const [local, domain] = from.addr.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
+    const message_id = options?.messageId || generate.message_id(domain)
+    const date = dayjs(options?.date ?? new Date(generate.date()))
+    const to = options?.to || `${site_domain}@${r3ply_domains[util.random_int(r3ply_domains.length)]}`
+    const subject = options?.subject || generate.subject(new URL(`https://${site_domain}/`))
+    const body = options?.body || (await generate.comment_body())
+    const email = Result.safe(() => build_email(message_id, BigInt(date.unix()), from.name, from.addr, to, subject, body))
+    return email.unwrap()
+  }
+
+  // TODO: bring in my actual email parsing library to handle this stuff. This is not how an email address should be parsed!
+  function parse_email_addr(email: string): { name?: string, addr: string } {
+    const name_matches = email.match(/^(.*?)</)
+    let name: string | undefined;
+    if (name_matches) {
+      name = name_matches[1].trim()
+      const email_matches = email.match(/<(.+?)>/)
+      const email_addr = (email_matches! ?? [""])[1].trim()
+      return { name, addr: email_addr }
+    } else return { name: undefined, addr: email }
+  }
+}
+
+
+export async function cli_handle_comment_via_email(site_config: R3plySiteConfig, email_bytes: Uint8Array) {
+  const cli_system_config = systemConfigParser(JSON.stringify(TOML.parse(`
+version  = "0.0.1"
+domain = "r3ply.com"
+[[admin]]
+name = "Guybrush Threepwood"
+email = "guybrush@example.com"`))).value!
+  const r3ply = R3ply(cli_system_config)
+  const redact = util.sha256_0x
+  const comment_via_email_handler = r3ply.comments.viaEmail(redact)
+  return comment_via_email_handler([site_config, email_bytes])
+}
+
+// data generation -------------------------------------------------------------
 const domains = [
   'ghostpirate',
   'lemonhead',
@@ -273,100 +377,3 @@ const site_paths = [
   'rankings',
   'opinion',
 ]
-
-const markov = RiTa.markov(2, { text: ['example.com', 'foo.com', 'foobar.com', 'monkeyisland.net'] })
-
-import dayjs  from 'dayjs'
-
-export function generate_date(floor: number = Math.floor(Date.now() / 1000) - 315360000, ceiling: number = Math.floor(Date.now() / 1000)) {
-    return util.random_int(ceiling, floor) * 1000
-}
-
-export function generate_email_addr() {
-  const first = first_names[util.random_int(first_names.length)]
-  const last = last_names[util.random_int(last_names.length)]
-  const name = `${first} ${last}`
-  const birthyear = util.random_int(1990, 1899)
-  const domain = `${domains[util.random_int(domains.length)]}.${tlds[util.random_int(tlds.length)]}`
-  const local = `${first}.${Math.random() > 0.5 ? birthyear : last}`
-  const addr = `${local}@${domain}`
-  const mailbox = `${first} ${last} <${addr}>`
-  return { name, domain, local, addr, mailbox }
-}
-
-export function generate_message_id(domain: string) {
-  return `${crypto.randomUUID()}@${domain}`
-}
-
-export function generate_subject(url: URL) {
-  const site_path = site_paths[util.random_int(0, site_paths.length)]
-  const site_slug = site_slugs[util.random_int(0, site_slugs.length)]
-  return new URL(path.join(site_path, site_slug), url).href
-}
-
-export function generate_comment_body(seed?: string[]) {
-  // use meta imports to determine where the model file is stored
-  const __filename = fileURLToPath(import.meta.url)
-  const __dirname = path.dirname(__filename)
-  const modelPath = path.join(__dirname, 'comments-markov-model.json')
-
-  // load the model into markov chain and generate text
-  const model_data = fs.promises.readFile(modelPath, 'utf-8')
-  const markov = model_data.then((model_data) => RiMarkov.fromJSON(model_data))
-  return markov.then((markov) =>
-    markov.generate({
-      maxLength: 128,
-      temperature: 1,
-      allowDuplicates: true,
-      seed,
-    }),
-  )
-}
-
-import { build_email } from '@r3ply/wasm'
-
-export async function generate_email(
-  site_domain: string,
-  r3ply_domains: string[],
-  options?: { messageId?: string; date?: string; from?: string; to?: string; subject?: string; body?: string },
-) {
-  let from: { name?: string, addr: string }
-  if (options?.from) {
-    from = parse_email(options.from)
-  } else {
-    from = generate_email_addr()
-  }
-  const [local, domain] = from.addr.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
-  const message_id = options?.messageId || generate_message_id(domain)
-  const date = dayjs(options?.date ?? new Date(generate_date()))
-  const to = options?.to || `${site_domain}@${r3ply_domains[util.random_int(r3ply_domains.length)]}`
-  const subject = options?.subject || generate_subject(new URL(`https://${site_domain}/`))
-  const body = options?.body || (await generate_comment_body())
-  const email = Result.safe(() => build_email(message_id, BigInt(date.unix()), from.name, from.addr, to, subject, body))
-  return email.unwrap()
-}
-
-// TODO: bring in my actual email parsing library to handle this stuff. This is not how an email address should be parsed!
-function parse_email(email: string): { name?: string, addr: string } {
-  const name_matches = email.match(/^(.*?)</)
-  let name: string | undefined;
-  if (name_matches) {
-    name = name_matches[1].trim()
-    const email_matches = email.match(/<(.+?)>/)
-    const email_addr = (email_matches! ?? [""])[1].trim()
-    return { name, addr: email_addr }
-  } else return { name: undefined, addr: email }
-}
-
-export async function cli_handle_comment_via_email(site_config: R3plySiteConfig, email_bytes: Uint8Array) {
-  const cli_system_config = systemConfigParser(JSON.stringify(TOML.parse(`
-version  = "0.0.1"
-domain = "r3ply.com"
-[[admin]]
-name = "Guybrush Threepwood"
-email = "guybrush@example.com"`))).value!
-  const r3ply = R3ply(cli_system_config)
-  const redact = util.sha256_0x
-  const comment_via_email_handler = r3ply.comments.viaEmail(redact)
-  return comment_via_email_handler([site_config, email_bytes])
-}

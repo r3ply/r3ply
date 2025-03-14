@@ -60,6 +60,20 @@ The following locations are checked (in priority order):
 
 ## CLI
 
+```
+# print usage
+re
+
+# see cmds for working with r3ply config
+re config
+
+# validate r3ply config (use --config <path> for a specific config)
+re config validate
+
+# simulate receiving an email (--from, --subject, etc... can change the email)
+re comments simulate-email
+``
+
 
 ## Contributing
 
