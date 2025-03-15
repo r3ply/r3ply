@@ -189,7 +189,7 @@ spf_pass = {{ email.auth.spf  }}
 import { Message } from '@mail-parser/ts-bindings'
 import { Result } from 'oxide.ts'
 
-test.only("tera components",  () => {
+test.skip("tera components",  () => {
   const foo = `
 {%- component normal(name) %}Hello, {{ name }}{% endcomponent -%}
 {%- component w_body() %}Hello, {{ body }}{% endcomponent -%}
@@ -197,8 +197,8 @@ test.only("tera components",  () => {
 {%- component typed_name(name: string) -%}Hello, {{ name }}{% endcomponent -%}
 {%- component typed_obj2(data: map = { "name": "bob" }) -%}Hello, {{ data.name }}{% endcomponent -%}
 {%- component typed_obj3(data: map = { "name": "bob" }) -%}Hello, {{ data["name"] }}{% endcomponent -%}
-{% component navbar()  {"css": "./array.css"} %}
-{{ css }}
+{% component navbar() {"css": "./array.css"} %}
+ navbar stuff
 {% endcomponent %}
 
 {{ :normal(name="world") }}
@@ -218,6 +218,4 @@ test.only("tera components",  () => {
     console.log(bar.unwrap());
 
   }
-
-
 })

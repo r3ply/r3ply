@@ -8,9 +8,10 @@
     "build:wasm": "pnpm --filter @r3ply/wasm run build:wasm && pnpm --filter @r3ply/wasm run pack",
     "build:pkgs": "pnpm -r --filter './packages/*' run build",
     "build:apps": "pnpm -r --filter './apps/*' run build",
-    "build:all": "pnpm build:wasm && pnpm build:packages && pnpm build:apps",
-    "test:ts": "vitest",
-    "test": "pnpm -r test"
+    "build:all": "pnpm build:wasm && pnpm build:pkgs && pnpm build:apps",
+    "test:ts": "vitest run",
+    "test:ts:watch": "vitest",
+    "test:all": "pnpm -r test"
   },
   "pnpm": {
     "overrides": {

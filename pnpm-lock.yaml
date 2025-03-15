@@ -19,6 +19,61 @@ importers:
         specifier: ^3.0.8
         version: 3.0.8(@types/node@22.13.10)
 
+  apps/cli:
+    dependencies:
+      '@exodus/schemasafe':
+        specifier: ^1.3.0
+        version: 1.3.0
+      '@iarna/toml':
+        specifier: ^2.2.5
+        version: 2.2.5
+      '@r3ply/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@r3ply/lib':
+        specifier: workspace:*
+        version: link:../../packages/lib
+      '@r3ply/wasm':
+        specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
+        version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
+      chalk:
+        specifier: ^5.4.1
+        version: 5.4.1
+      commander:
+        specifier: ^13.1.0
+        version: 13.1.0
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
+      fast-glob:
+        specifier: ^3.3.3
+        version: 3.3.3
+      oxide.ts:
+        specifier: ^1.1.0
+        version: 1.1.0
+      rita:
+        specifier: ^3.1.3
+        version: 3.1.3
+    devDependencies:
+      '@types/mock-fs':
+        specifier: ^4.13.4
+        version: 4.13.4
+      mock-fs:
+        specifier: ^5.5.0
+        version: 5.5.0
+      tsup:
+        specifier: ^8.4.0
+        version: 8.4.0(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)
+      tsx:
+        specifier: ^4.19.3
+        version: 4.19.3
+      typescript:
+        specifier: ^5.5.4
+        version: 5.8.2
+      vitest:
+        specifier: ^3.0.8
+        version: 3.0.8(@types/node@22.13.10)
+
   apps/cloudflare-worker:
     dependencies:
       '@iarna/toml':
@@ -78,61 +133,6 @@ importers:
         version: 3.114.1(@cloudflare/workers-types@4.20250313.0)
 
   crates/r3ply-wasm: {}
-
-  packages/cli:
-    dependencies:
-      '@exodus/schemasafe':
-        specifier: ^1.3.0
-        version: 1.3.0
-      '@iarna/toml':
-        specifier: ^2.2.5
-        version: 2.2.5
-      '@r3ply/config':
-        specifier: workspace:*
-        version: link:../config
-      '@r3ply/lib':
-        specifier: workspace:*
-        version: link:../lib
-      '@r3ply/wasm':
-        specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
-        version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
-      chalk:
-        specifier: ^5.4.1
-        version: 5.4.1
-      commander:
-        specifier: ^13.1.0
-        version: 13.1.0
-      dayjs:
-        specifier: ^1.11.13
-        version: 1.11.13
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
-      oxide.ts:
-        specifier: ^1.1.0
-        version: 1.1.0
-      rita:
-        specifier: ^3.1.3
-        version: 3.1.3
-    devDependencies:
-      '@types/mock-fs':
-        specifier: ^4.13.4
-        version: 4.13.4
-      mock-fs:
-        specifier: ^5.5.0
-        version: 5.5.0
-      tsup:
-        specifier: ^8.4.0
-        version: 8.4.0(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)
-      tsx:
-        specifier: ^4.19.3
-        version: 4.19.3
-      typescript:
-        specifier: ^5.5.4
-        version: 5.8.2
-      vitest:
-        specifier: ^3.0.8
-        version: 3.0.8(@types/node@22.13.10)
 
   packages/config:
     dependencies:
@@ -409,7 +409,6 @@ packages:
   '@esbuild/darwin-arm64@0.25.1':
     resolution: {integrity: sha512-5hEZKPf+nQjYoSr/elb62U19/l1mZDdqidGfmFutVUjjUZrOazAtwK+Kr+3y0C/oeJfLlxo9fXb1w7L+P7E4FQ==}
     engines: {node: '>=18'}
-    cpu: [arm64]
     os: [darwin]
 
   '@esbuild/darwin-x64@0.17.19':
@@ -1155,7 +1154,7 @@ packages:
     engines: {node: '>=14'}
 
   '@r3ply/wasm@file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz':
-    resolution: {integrity: sha512-xHvjqZWi69rZeMFqjFtevfyUS/eDjy47NJPzTEBr1OofGC8sHgJCuxBmg4HIzulP+Jtcftx+0+hm7Ebo/BtugA==, tarball: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz}
+    resolution: {integrity: sha512-275tHmYyWUQCRJM+MLx7jH5xU+uIy6U0WFSPhat8Gr700n42hweGq0tMii8SU6MEcxnhO+1W7SxHuwh+jI5N0w==, tarball: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz}
     version: 0.0.1
 
   '@rollup/rollup-android-arm-eabi@4.35.0':

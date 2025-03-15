@@ -72,7 +72,7 @@ re config validate
 
 # simulate receiving an email (--from, --subject, etc... can change the email)
 re comments simulate-email
-``
+```
 
 
 ## Contributing
@@ -101,14 +101,14 @@ pnpm install
 # useful after initially cloning (note: `pnpm install` first)
 pnpm build:all
 
-# this will build only the TS code
-# much faster than `pnpm build:all`
-pnpm build:ts
+# this will build the packages
+# (faster than `pnpm build:all`)
+pnpm build:pkgs
 
-# run the tests of all the TS code
+# run the tests of all the TS code (add `:watch` to run tests continuously)
 pnpm test:ts
 
-# run the cloudflare worker
+# run the cloudflare worker (or `pnpm -r --filter @r3ply/cloudflare-worker dev`)
 cd apps/cloudflare-worker && pnpm dev
 
 # to link CLI (from source)

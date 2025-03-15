@@ -1,6 +1,6 @@
 packages:
   - crates/r3ply-wasm
   - packages/*
-  - apps/cloudflare-worker
+  - apps/*
 onlyBuiltDependencies:
   - sharp
