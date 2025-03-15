@@ -24,7 +24,10 @@ export function prescreen(
   // Check if site accepts comments from system
   site_accepts_comments_from_system(site.r3ply, system.domain)
   // Check if incoming email exceeds min of system or site configurations
-  const max_bytes_allowed = Math.min(site.comments.email.max_size_bytes, system.email.max_size_bytes)
+  const max_bytes_allowed = Math.min(
+    site.comments.email.max_size_bytes,
+    system.email.max_size_bytes,
+  )
   email_size_exceeds_max(checks.email_size_bytes, max_bytes_allowed)
   // // Check if from matches either system or site blocklists
   // check_blocklist(checks.from, system.email.block_list, site.comments.email.block_list)
@@ -62,59 +65,115 @@ export function prescreen(
  * that is achieved through the unit testing.
  */
 
-function check_blocklist(from: string[], system_block: string[], site_block: string[]) {
-  if (micromatch(from, system_block).length > 0) throw new Error(`Sender matched system blocklist: ${micromatch(from, system_block)}`)
-  if (micromatch(from, site_block).length > 0) throw new Error(`Sender matched site blocklist: ${micromatch(from, site_block)}`)
+function check_blocklist(
+  from: string[],
+  system_block: string[],
+  site_block: string[],
+) {
+  if (micromatch(from, system_block).length > 0)
+    throw new Error(
+      `Sender matched system blocklist: ${micromatch(from, system_block)}`,
+    )
+  if (micromatch(from, site_block).length > 0)
+    throw new Error(
+      `Sender matched site blocklist: ${micromatch(from, site_block)}`,
+    )
 }
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   test('check_blocklist', () => {
     expect(() => check_blocklist([], [], [])).not.toThrowError()
     expect(() => check_blocklist(['a'], [], [])).not.toThrowError()
-    expect(() => check_blocklist(['a', 'ab'], ['a*'], [])).toThrowError(/system .*? a,ab/)
-    expect(() => check_blocklist(['a', 'ab'], [], ['a*'])).toThrowError(/site .*? a,ab/)
-    expect(() => check_blocklist(['a', 'ab', 'ac', 'ad'], [], ['a{b,c}'])).toThrowError(/site .*? ab,ac/)
-    expect(() => check_blocklist(['abc'], [], ['a*c'])).toThrowError(/site .*? abc/)
+    expect(() => check_blocklist(['a', 'ab'], ['a*'], [])).toThrowError(
+      /system .*? a,ab/,
+    )
+    expect(() => check_blocklist(['a', 'ab'], [], ['a*'])).toThrowError(
+      /site .*? a,ab/,
+    )
+    expect(() =>
+      check_blocklist(['a', 'ab', 'ac', 'ad'], [], ['a{b,c}']),
+    ).toThrowError(/site .*? ab,ac/)
+    expect(() => check_blocklist(['abc'], [], ['a*c'])).toThrowError(
+      /site .*? abc/,
+    )
   })
 }
 
-function r3ply_is_disabled(system_enabled: boolean, system_domain: string, site_enabled: boolean, site_domain: string) {
-  if (!system_enabled) throw new Error(`r3ply has been disabled at the system-level config for domain: ${system_domain}`)
-  if (!site_enabled) throw new Error(`r3ply has been disabled at the site-level config for domain: ${site_domain}`)
+function r3ply_is_disabled(
+  system_enabled: boolean,
+  system_domain: string,
+  site_enabled: boolean,
+  site_domain: string,
+) {
+  if (!system_enabled)
+    throw new Error(
+      `r3ply has been disabled at the system-level config for domain: ${system_domain}`,
+    )
+  if (!site_enabled)
+    throw new Error(
+      `r3ply has been disabled at the site-level config for domain: ${site_domain}`,
+    )
 }
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   test('r3ply_is_disabled', () => {
-    expect(() => r3ply_is_disabled(false, 'system', true, 'site')).toThrowError(/disabled .*? system/)
-    expect(() => r3ply_is_disabled(false, 'system', false, 'site')).toThrowError(/disabled .*? system/)
-    expect(() => r3ply_is_disabled(true, 'system', true, 'site')).not.toThrowError()
-    expect(() => r3ply_is_disabled(true, 'system', false, 'site')).toThrowError(/disabled .*? site/)
+    expect(() => r3ply_is_disabled(false, 'system', true, 'site')).toThrowError(
+      /disabled .*? system/,
+    )
+    expect(() =>
+      r3ply_is_disabled(false, 'system', false, 'site'),
+    ).toThrowError(/disabled .*? system/)
+    expect(() =>
+      r3ply_is_disabled(true, 'system', true, 'site'),
+    ).not.toThrowError()
+    expect(() => r3ply_is_disabled(true, 'system', false, 'site')).toThrowError(
+      /disabled .*? site/,
+    )
   })
 }
 
-function system_accepts_comments_for_site(site_domain: string, accepted_site_list: string[]) {
+function system_accepts_comments_for_site(
+  site_domain: string,
+  accepted_site_list: string[],
+) {
   const matches = micromatch([site_domain], accepted_site_list)
   if (matches.length == 0)
-    throw new Error(`System's site list '${JSON.stringify(accepted_site_list)}' does not accept comments for '${site_domain}'`)
+    throw new Error(
+      `System's site list '${JSON.stringify(accepted_site_list)}' does not accept comments for '${site_domain}'`,
+    )
 }
 
-function site_accepts_comments_from_system(site_r3ply_list: string[], system_domain: string) {
+function site_accepts_comments_from_system(
+  site_r3ply_list: string[],
+  system_domain: string,
+) {
   const matches = micromatch([system_domain], site_r3ply_list)
   if (matches.length == 0)
-    throw new Error(`Site's r3ply list '${JSON.stringify(site_r3ply_list)}' does not accept comments from '${system_domain}`)
+    throw new Error(
+      `Site's r3ply list '${JSON.stringify(site_r3ply_list)}' does not accept comments from '${system_domain}`,
+    )
 }
 
 function email_size_exceeds_max(input_size: number, max_allowed: number) {
-  if (input_size < 0) throw new Error('Email input size (bytes) must be non-negative')
-  if (max_allowed < 0) throw new Error('Max allowed email size (bytes) must be non-negative')
-  if (input_size > max_allowed) throw new Error(`Email exceeded max of: ${max_allowed} bytes`)
+  if (input_size < 0)
+    throw new Error('Email input size (bytes) must be non-negative')
+  if (max_allowed < 0)
+    throw new Error('Max allowed email size (bytes) must be non-negative')
+  if (input_size > max_allowed)
+    throw new Error(`Email exceeded max of: ${max_allowed} bytes`)
 }
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   test('email_size_exceeds_max', () => {
-    expect(() => email_size_exceeds_max(-1, 123)).toThrowError(/Email input .*? must be non-negative/)
-    expect(() => email_size_exceeds_max(456, -1)).toThrowError(/Max allowed .*? must be non-negative/)
-    expect(() => email_size_exceeds_max(456, 123)).toThrowError(/Email exceeded max .*? bytes/)
+    expect(() => email_size_exceeds_max(-1, 123)).toThrowError(
+      /Email input .*? must be non-negative/,
+    )
+    expect(() => email_size_exceeds_max(456, -1)).toThrowError(
+      /Max allowed .*? must be non-negative/,
+    )
+    expect(() => email_size_exceeds_max(456, 123)).toThrowError(
+      /Email exceeded max .*? bytes/,
+    )
     expect(() => email_size_exceeds_max(123, 456)).not.toThrowError()
   })
 }

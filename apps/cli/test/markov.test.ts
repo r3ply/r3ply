@@ -5,7 +5,13 @@ import fs from 'fs'
 import { generate } from '../src/lib'
 import { receive } from '@r3ply/lib'
 
-import { sanitize_html, md_to_html, tera, unescape_html, parse_email_str } from '@r3ply/wasm'
+import {
+  sanitize_html,
+  md_to_html,
+  tera,
+  unescape_html,
+  parse_email_str,
+} from '@r3ply/wasm'
 
 describe('CLI library', () => {
   test('rita in-memory', async () => {
@@ -30,14 +36,20 @@ The types of data that clients should have on hand, but nevertheless have asked 
 I can at least say that in the meantime, RISC OS is still alive and now open, available from https://www.riscosopen.org/, and most people will know the ARM company and its architectures went from strength to strength, even if the RISC PC faded away.`)
 
     // Generate an email body
-    console.log('Generated Email Body (RiTa.js):\n', markov.generate({ minLength: 10 }))
+    console.log(
+      'Generated Email Body (RiTa.js):\n',
+      markov.generate({ minLength: 10 }),
+    )
     console.log('Generated Email Body (RiTa.js):\n', markov.generate())
     console.log('Generated Email Body (RiTa.js):\n', markov.generate())
     console.log('Generated Email Body (RiTa.js):\n', markov.generate())
   })
   test('rita pretrained as json', async () => {
     // Load the pre-trained model
-    const modelData = fs.readFileSync('./src/comments/comments-markov-model.json', 'utf-8')
+    const modelData = fs.readFileSync(
+      './src/comments/comments-markov-model.json',
+      'utf-8',
+    )
 
     // Create a Markov generator and load the pre-trained model
     const markov = RiMarkov.fromJSON(modelData)
@@ -69,15 +81,28 @@ I can at least say that in the meantime, RISC OS is still alive and now open, av
     console.log(generate.date())
     console.log(generate.date())
 
-    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
-    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
-    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
-    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
-    console.log(await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']))
+    console.log(
+      await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']),
+    )
+    console.log(
+      await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']),
+    )
+    console.log(
+      await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']),
+    )
+    console.log(
+      await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']),
+    )
+    console.log(
+      await generate.email('spenc.es', ['r3ply.com', 'r3ply-test.com']),
+    )
   })
 
   test('preprocessing for training data', async () => {
-    const ignore = [/["'\(\)\[\]{}]/i, /(www|\.com|job|hire|salary|use this format)/]
+    const ignore = [
+      /["'\(\)\[\]{}]/i,
+      /(www|\.com|job|hire|salary|use this format)/,
+    ]
     console.log(ignore.some((r) => r.test('hello')))
     console.log(ignore.some((r) => r.test("'hello'")))
     console.log(ignore.some((r) => r.test('hello www.helloworld')))
@@ -89,13 +114,19 @@ I can at least say that in the meantime, RISC OS is still alive and now open, av
     console.log(ignore.some((r) => r.test('use this format')))
   })
 
-	test('import wasm modules', async () => {
-		console.log(sanitize_html("<p>Hello, </p>world!", []))
-		console.log(md_to_html("# Introduction"))
-		console.log(tera("Hello, {{ name }}", { name: "bob" }))
-		console.log(tera("{{ title | truncate(length=5) }}", { title: "123456789" }))
-		console.log(unescape_html(`I don&#x27;t consider myself entirely noob-ish in software". How can I clean that all?`))
-    console.log(receive());
+  test('import wasm modules', async () => {
+    console.log(sanitize_html('<p>Hello, </p>world!', []))
+    console.log(md_to_html('# Introduction'))
+    console.log(tera('Hello, {{ name }}', { name: 'bob' }))
+    console.log(
+      tera('{{ title | truncate(length=5) }}', { title: '123456789' }),
+    )
+    console.log(
+      unescape_html(
+        `I don&#x27;t consider myself entirely noob-ish in software". How can I clean that all?`,
+      ),
+    )
+    console.log(receive())
   })
 
   test.only('debug email', async () => {
@@ -112,4 +143,3 @@ What tools or techniques do you use to plan it, how quickly do you jump into imp
     const parsed_from_str = parse_email_str(email)
   })
 })
-

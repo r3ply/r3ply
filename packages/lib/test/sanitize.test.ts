@@ -72,12 +72,15 @@ List
   // console.log(`CLEANED BEFORE HTML: ${cleaned_before_converted}`)
 })
 
-
 test('tera', () => {
   expect(tera('Hello, {{ name }}', { name: 'bob', age: 42 })).toBe('Hello, bob')
-  expect(() => tera('Hello, {{ occupation }}', { name: 'bob', age: 42 })).toThrowError()
+  expect(() =>
+    tera('Hello, {{ occupation }}', { name: 'bob', age: 42 }),
+  ).toThrowError()
   expect(tera('{{ name | upper}}', { name: 'bob' })).toBe('BOB')
-  expect(tera('{{ [1, 2, 3, 4, 5, 6, 7, 8] | slice(end=5) }}', {})).toBe('[1, 2, 3, 4, 5]')
+  expect(tera('{{ [1, 2, 3, 4, 5, 6, 7, 8] | slice(end=5) }}', {})).toBe(
+    '[1, 2, 3, 4, 5]',
+  )
   // expect(tera("{{ 'hello' | truncate(length=1) }}", {})).toBe('h')
 
   const github_config = {
@@ -96,7 +99,8 @@ Comment:
     'pr_title_{}': 'New comment from `{{ comment.id_8 }}`',
     'pr_body_{}':
       "{#\n<!-- prettier-ignore-start -->\n#}\n{%- set dkim = email.auth.dkim -%}{%- set dmarc = email.auth.dmarc -%}{%- set spf = email.auth.spf -%}\n| Date: | {{ email.date }} |\n|:--------------|:-----------------------------------------------------------------------|\n| Sender: | (hashed to `{{ comment.author_7 }}[…]`) |\n| Auth Checks: | dkim={{ dkim }}, dmarc={{ dmarc }}, spf={{ spf }} |\n| Replying to: | {{ comment.subject.url }} |\n\n> {{ comment.txt | split(pat='\n') | join(sep='\n> ') }}\n\n## Options:\n\n• 🔮 preview comment [here](/TODO)\n• 🤮 To ban `{{ comment.author_7 }}[…]` from commenting in the future: [click here (TODO)](/todo)\n",
-    'target_branch_{}': '{{ comment.ts_rcvd }}_{{ comment.id_8 }}-{{ comment.author_7 }}.md',
+    'target_branch_{}':
+      '{{ comment.ts_rcvd }}_{{ comment.id_8 }}-{{ comment.author_7 }}.md',
     enabled: true,
     allow_list: [],
     source_branch: 'main',
@@ -111,7 +115,8 @@ Comment:
       id: 'd70ff344-d595-4e2a-a6ab-febb4121adfe',
       id_8: 'd70ff344',
       ts_rcvd: '1741540446',
-      author: '88b0321464919f1d15763b8f711c7448f7e64c280854e4f85e60231dcbad0179',
+      author:
+        '88b0321464919f1d15763b8f711c7448f7e64c280854e4f85e60231dcbad0179',
       author_7: '88b0321',
       subject: {
         url: 'https://r3ply-config.spence.pages.dev/blog/lemonhead',
@@ -189,7 +194,7 @@ spf_pass = {{ email.auth.spf  }}
 import { Message } from '@mail-parser/ts-bindings'
 import { Result } from 'oxide.ts'
 
-test.skip("tera components",  () => {
+test.skip('tera components', () => {
   const foo = `
 {%- component normal(name) %}Hello, {{ name }}{% endcomponent -%}
 {%- component w_body() %}Hello, {{ body }}{% endcomponent -%}
@@ -215,7 +220,6 @@ test.skip("tera components",  () => {
   if (bar.isErr()) {
     console.log(bar.unwrapErr().message)
   } else {
-    console.log(bar.unwrap());
-
+    console.log(bar.unwrap())
   }
 })

@@ -42,7 +42,9 @@ const markov = RiTa.markov(5)
 // Read the file and add each comment to the model
 function train_on_file(input_file_path: string) {
   console.log(`processing file: ${input_file_path}`)
-  const comments: string[] = JSON.parse(fs.readFileSync(input_file_path).toString())
+  const comments: string[] = JSON.parse(
+    fs.readFileSync(input_file_path).toString(),
+  )
   // comments.forEach(comment => markov.addText(comment))
   markov.addText(comments)
 }

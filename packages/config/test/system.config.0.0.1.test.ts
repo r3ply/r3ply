@@ -19,7 +19,9 @@ async function transpileAndImport(code: string) {
   const dataUrl = `data:text/javascript;charset=utf-8,${encodeURIComponent(result.code)}`
   return import(dataUrl)
 }
-const dynamically_compiled_r3ply_system_config_parser = (await transpileAndImport(module)).parser
+const dynamically_compiled_r3ply_system_config_parser = (
+  await transpileAndImport(module)
+).parser
 
 // Create a type alias for the schema's parser's interface, a fn that takes string and returns a config
 type R3plyConfigParser = (input: string) => TypedParseResult<R3plySystemConfig>
@@ -27,8 +29,14 @@ type R3plyConfigParser = (input: string) => TypedParseResult<R3plySystemConfig>
 // A list of implementations of the parser that are to be tested under the same conditions
 const implementations: [string, R3plyConfigParser][] = [
   ['IMPLEMENTATION: Imported Parser', imported_r3ply_system_config_parser],
-  ['IMPLEMENTATION: Statically Compiled Parser', compiled_r3ply_system_config_parser],
-  ['IMPLEMENTATION: Dynamically Compiled Parser', dynamically_compiled_r3ply_system_config_parser],
+  [
+    'IMPLEMENTATION: Statically Compiled Parser',
+    compiled_r3ply_system_config_parser,
+  ],
+  [
+    'IMPLEMENTATION: Dynamically Compiled Parser',
+    dynamically_compiled_r3ply_system_config_parser,
+  ],
 ]
 
 // The tests here loop through the implementations and apply all the tests to each one
@@ -43,12 +51,15 @@ describe.each(implementations)('%s', (_, parse) => {
     it('validates the required (top-level) values', () => {
       expect(schema_ts.required).toStrictEqual(['version', 'domain', 'admin'])
       expect(
-        parse(`{ "version": "0.0.1", "domain": "r3ply.com", "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`)
-          .valid,
+        parse(
+          `{ "version": "0.0.1", "domain": "r3ply.com", "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
+        ).valid,
       ).toBe(true)
     })
     it('does not allow unspecified values', () => {
-      expect(parse(`{ "version": "0.0.1", "occupation": "programmer" }`).valid).toBe(false)
+      expect(
+        parse(`{ "version": "0.0.1", "occupation": "programmer" }`).valid,
+      ).toBe(false)
     })
   })
   describe('the r3ply system config parser', () => {
@@ -56,10 +67,13 @@ describe.each(implementations)('%s', (_, parse) => {
       expect(parse('').error).toContain('Unexpected end of JSON input')
       expect(parse('just some text').error).toContain('is not valid JSON')
       expect(parse('{}').error).toContain('required at #/version')
-      expect(parse('{ version: "0.0.1" }').error).toContain('Expected property name')
+      expect(parse('{ version: "0.0.1" }').error).toContain(
+        'Expected property name',
+      )
       expect(
-        parse(`{ "version": "0.0.2", "domain": "r3ply.com", "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`)
-          .error,
+        parse(
+          `{ "version": "0.0.2", "domain": "r3ply.com", "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
+        ).error,
       ).toContain('validation failed for enum')
     })
   })

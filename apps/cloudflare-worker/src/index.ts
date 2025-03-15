@@ -1,6 +1,10 @@
 import { Result } from 'oxide.ts'
 import { Env } from './env'
-import { R3plySiteConfig, siteConfigParser, systemConfigParser } from '@r3ply/config'
+import {
+  R3plySiteConfig,
+  siteConfigParser,
+  systemConfigParser,
+} from '@r3ply/config'
 import TOML from '@iarna/toml'
 import { R3plyGithubBot } from '@r3ply/lib'
 import { createHMAC } from './util'
@@ -11,16 +15,22 @@ import { GistClient } from './state/gist'
 import { CommentState } from './state/d1'
 import { tera } from '@r3ply/wasm'
 
-const r3ply_system_config = systemConfigParser(JSON.stringify(TOML.parse(r3ply_system_config_toml))).value!
+const r3ply_system_config = systemConfigParser(
+  JSON.stringify(TOML.parse(r3ply_system_config_toml)),
+).value!
 const r3ply = CloudflareR3ply(r3ply_system_config)
 
 export default {
   // E.g. curl -X POST --data-binary @003.eml  localhost:8787
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-  	return new Response(tera("Hello, {{ name }}", {name:"world!"}))
+    return new Response(tera('Hello, {{ name }}', { name: 'world!' }))
   },
 
-  async email(msg: ForwardableEmailMessage, env: Env, ctx: ExecutionContext): Promise<void> {
+  async email(
+    msg: ForwardableEmailMessage,
+    env: Env,
+    ctx: ExecutionContext,
+  ): Promise<void> {
     return comment_via_email(msg, {
       db: undefined,
       gist_token: env.R3PLY_GIST_TOKEN,
@@ -59,7 +69,9 @@ async function get_site_config(domain: string) {
     const response = await fetch(url, { method: 'GET' })
     if (response.ok && url.pathname.endsWith('.toml')) {
       return response.text().then((text) => {
-        const site_config = siteConfigParser(JSON.stringify(TOML.parse(text))).value!
+        const site_config = siteConfigParser(
+          JSON.stringify(TOML.parse(text)),
+        ).value!
         const merge_remote = merge_remote_reference(url)
         return merge_config(site_config, merge_remote)
       })
@@ -77,15 +89,26 @@ async function get_site_config(domain: string) {
 
 export async function comment_via_email(
   msg: ForwardableEmailMessage,
-  deps: { db?: D1Database; gist_token: string; hmac_secret: string; gh_pw: string },
+  deps: {
+    db?: D1Database
+    gist_token: string
+    hmac_secret: string
+    gh_pw: string
+  },
 ) {
-  const [site_domain, r3ply_domain] = Result.safe(() => msg.to.match(/^(.+?)@(.+?)$/)!.slice(1, 3)).expect(
-    'Error parsing site domain/r3ply domain from `to` portion of email',
-  )
+  const [site_domain, r3ply_domain] = Result.safe(() =>
+    msg.to.match(/^(.+?)@(.+?)$/)!.slice(1, 3),
+  ).expect('Error parsing site domain/r3ply domain from `to` portion of email')
   let site_config = get_site_config(site_domain)
   const email_bytes = new Response(msg.raw).bytes()
-  const cf_r3ply_w_dependencies = r3ply(GistClient(deps.gist_token), deps.db ? CommentState(deps.db) : undefined)
-  const process_email_into_comment = Promise.all([site_config, email_bytes]).then(([site_config_result, email_bytes]) => {
+  const cf_r3ply_w_dependencies = r3ply(
+    GistClient(deps.gist_token),
+    deps.db ? CommentState(deps.db) : undefined,
+  )
+  const process_email_into_comment = Promise.all([
+    site_config,
+    email_bytes,
+  ]).then(([site_config_result, email_bytes]) => {
     const handle_comment_via_email = cf_r3ply_w_dependencies.comments.viaEmail(
       createHMAC(deps.hmac_secret),
       R3plyGithubBot(deps.gh_pw, fetch),
@@ -94,20 +117,27 @@ export async function comment_via_email(
   })
   let result = await Result.safe(process_email_into_comment)
   if (result.isErr()) {
-    console.error(`Error processing email into comment, underlying reason:\n\n${result.unwrapErr()}`)
+    console.error(
+      `Error processing email into comment, underlying reason:\n\n${result.unwrapErr()}`,
+    )
   } else {
     console.log(`Comment!\n\n\`\`\`\n${result.unwrap()}\n\`\`\``)
   }
   return result
 }
 
-export async function merge_config(site_config: R3plySiteConfig, merge_reference: (config_value: string) => Promise<string>) {
+export async function merge_config(
+  site_config: R3plySiteConfig,
+  merge_reference: (config_value: string) => Promise<string>,
+) {
   const promises: Promise<void>[] = []
   if (site_config.comments.email['comment_{}']) {
     promises.push(
-      merge_reference(site_config.comments.email['comment_{}']).then((merged) => {
-        site_config.comments.email['comment_{}'] = merged
-      }),
+      merge_reference(site_config.comments.email['comment_{}']).then(
+        (merged) => {
+          site_config.comments.email['comment_{}'] = merged
+        },
+      ),
     )
   }
   if (site_config.comments.email.moderation.type == 'github') {
@@ -123,7 +153,9 @@ export async function merge_config(site_config: R3plySiteConfig, merge_reference
     })
     promises.push(a, b, c)
   }
-  const d = merge_reference(site_config.comments.email.notify['comment_received_notif_{}']).then((merged) => {
+  const d = merge_reference(
+    site_config.comments.email.notify['comment_received_notif_{}'],
+  ).then((merged) => {
     site_config.comments.email.notify['comment_received_notif_{}'] = merged
   })
   promises.push(d)

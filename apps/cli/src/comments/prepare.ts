@@ -55,7 +55,12 @@ function prepare_file_for_training(input_path: string, output_path: string) {
         .trim()
     })
     .filter((comment: string) => {
-      const disallow_list = [/["'\(\)\[\]{}:]/i, /(www|\.com|\.net|\.io|\.org)/i, /(job|hire|salary|money|earn|use this format)/i, /\S\.\S/]
+      const disallow_list = [
+        /["'\(\)\[\]{}:]/i,
+        /(www|\.com|\.net|\.io|\.org)/i,
+        /(job|hire|salary|money|earn|use this format)/i,
+        /\S\.\S/,
+      ]
       return !disallow_list.some((regex) => regex.test(comment))
     })
   fs.writeFileSync(output_path, JSON.stringify(data, null, 2))

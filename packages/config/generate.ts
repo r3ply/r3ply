@@ -4,8 +4,14 @@ import { module as system_config_module } from './src/system.config.0.0.1'
 
 // Write generated file
 mkdirSync('./src/generated', { recursive: true })
-writeFileSync('./src/generated/site.config.parser.ts', `// @ts-nocheck\n` + site_config_module)
-writeFileSync('./src/generated/system.config.parser.ts', `// @ts-nocheck\n` + system_config_module)
+writeFileSync(
+  './src/generated/site.config.parser.ts',
+  `// @ts-nocheck\n` + site_config_module,
+)
+writeFileSync(
+  './src/generated/system.config.parser.ts',
+  `// @ts-nocheck\n` + system_config_module,
+)
 
 // Note: you can uncomment this to help get editor support for exports
 // export { parser as siteConfigParser } from './src/generated/site.config.parser'

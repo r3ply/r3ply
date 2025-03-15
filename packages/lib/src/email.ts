@@ -17,8 +17,10 @@ export function get_message_id(email: Email) {
     let h = part.headers.find((h) => h.name == 'message_id')
     if (h && h.value != 'Empty' && 'Text' in h.value) values.add(h.value.Text)
   }
-  if (values.size > 1) throw new Error('Emails must not have more than one Message_Id')
-  if (values.size == 0) throw new Error('`Message_Id` must not be missing from email')
+  if (values.size > 1)
+    throw new Error('Emails must not have more than one Message_Id')
+  if (values.size == 0)
+    throw new Error('`Message_Id` must not be missing from email')
   return [...values][0]
 }
 
@@ -36,17 +38,20 @@ export function get_from(email: Email) {
     if (h && h.value != 'Empty' && 'Address' in h.value) {
       if ('List' in h.value.Address)
         h.value.Address.List.forEach((addr) => {
-          if (addr.address) values.add({ name: addr.name, address: addr.address })
+          if (addr.address)
+            values.add({ name: addr.name, address: addr.address })
         })
       if ('Group' in h.value.Address) {
         for (const group of h.value.Address.Group)
           group.addresses.forEach((addr) => {
-            if (addr.address) values.add({ name: addr.name, address: addr.address })
+            if (addr.address)
+              values.add({ name: addr.name, address: addr.address })
           })
       }
     }
   }
-  if (values.size > 1) throw new Error('Emails must not have more than one `From`')
+  if (values.size > 1)
+    throw new Error('Emails must not have more than one `From`')
   if (values.size == 0) throw new Error('`From` must not be missing from email')
   return [...values][0]
 }
@@ -87,9 +92,11 @@ export function get_date(email: Email) {
   let values: Set<DateTime> = new Set([])
   for (const part of email.parts) {
     let h = part.headers.find((h) => h.name == 'date')
-    if (h && h.value != 'Empty' && 'DateTime' in h.value) values.add(h.value.DateTime)
+    if (h && h.value != 'Empty' && 'DateTime' in h.value)
+      values.add(h.value.DateTime)
   }
-  if (values.size > 1) throw new Error('Emails must not have more than one Date')
+  if (values.size > 1)
+    throw new Error('Emails must not have more than one Date')
   if (values.size == 0) throw new Error('Date must not be missing from email')
   let result = [...values][0]
   let rfc3339 = Util.dt_to_rfc3339(result)
@@ -123,9 +130,16 @@ export function get_date(email: Email) {
  * could potentially implement some standard upstream, upon receipt of the actual email.
  */
 export function get_auth_results(email: Email) {
-  let values: Set<{ dkim_pass: boolean; dmarc_pass: boolean; spf_pass: boolean }> = new Set([])
+  let values: Set<{
+    dkim_pass: boolean
+    dmarc_pass: boolean
+    spf_pass: boolean
+  }> = new Set([])
   for (const part of email.parts) {
-    let h = part.headers.find((h) => typeof h.name === 'object' && h.name.other == 'Authentication-Results')
+    let h = part.headers.find(
+      (h) =>
+        typeof h.name === 'object' && h.name.other == 'Authentication-Results',
+    )
     if (h && h.value != 'Empty' && 'Text' in h.value) {
       values.add({
         dkim_pass: h.value.Text.includes('dkim=pass'),
@@ -134,7 +148,8 @@ export function get_auth_results(email: Email) {
       })
     }
   }
-  if (values.size > 1) throw new Error('Unknown how to handle multiple Authentication-Results')
+  if (values.size > 1)
+    throw new Error('Unknown how to handle multiple Authentication-Results')
   if (values.size == 0)
     return {
       dkim_pass: false,
@@ -204,7 +219,10 @@ export namespace Util {
   export function dt_to_rfc3339(dt: DateTime) {
     return `${dt.year}-${dt.month.toString().padStart(2, '0')}-${dt.day.toString().padStart(2, '0')}T${dt.hour
       .toString()
-      .padStart(2, '0')}:${dt.minute.toString().padStart(2, '0')}:${dt.second.toString().padStart(2, '0')}${
+      .padStart(
+        2,
+        '0',
+      )}:${dt.minute.toString().padStart(2, '0')}:${dt.second.toString().padStart(2, '0')}${
       dt.tz_before_gmt ? '-' : '+'
     }${dt.tz_hour.toString().padStart(2, '0')}:${dt.tz_minute.toString().padStart(2, '0')}`
   }
@@ -221,11 +239,17 @@ if (import.meta.vitest) {
   const real_000 = await import('../../test-data/eml/real/000.eml?raw')
   test('get_message_id', () => {
     let message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
-    expect(() => get_message_id(message)).toThrowError(/`Message_Id` must not be missing/)
+    expect(() => get_message_id(message)).toThrowError(
+      /`Message_Id` must not be missing/,
+    )
     message = parse_email_bytes(new TextEncoder().encode(mal2_000.default))
-    expect(() => get_message_id(message)).toThrowError(/more than one Message_Id/)
+    expect(() => get_message_id(message)).toThrowError(
+      /more than one Message_Id/,
+    )
     message = parse_email_bytes(new TextEncoder().encode(real_000.default))
-    expect(get_message_id(message)).toBe('FE97A840-9401-4B26-902E-61EB5D6CD285@example.com')
+    expect(get_message_id(message)).toBe(
+      'FE97A840-9401-4B26-902E-61EB5D6CD285@example.com',
+    )
   })
   test('get_from', async () => {
     // @ts-ignore
@@ -254,7 +278,10 @@ if (import.meta.vitest) {
     // @ts-ignore
     const mal2_005 = await import('../../test-data/eml/malformed2/005.eml?raw')
     let message = parse_email_bytes(new TextEncoder().encode(real_000.default))
-    expect(get_to(message).map((addr) => addr.address)).toStrictEqual(['bob@example.com', 'alice@example.com'])
+    expect(get_to(message).map((addr) => addr.address)).toStrictEqual([
+      'bob@example.com',
+      'alice@example.com',
+    ])
     message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
     expect(() => get_to(message)).toThrowError(/`To` must not be missing/)
   })
@@ -266,8 +293,12 @@ if (import.meta.vitest) {
       { name: 'italian foo', address: 'bar@a.com.it' },
     ]
     expect(Util.unique_addr(addresses, '*@a.com').address).toBe('bar@a.com')
-    expect(() => Util.unique_addr(addresses, '*.com').address).toThrowError(/pattern was not unique enough/)
-    expect(() => Util.unique_addr(addresses, 'asddasdas').address).toThrowError(/pattern was too unique/)
+    expect(() => Util.unique_addr(addresses, '*.com').address).toThrowError(
+      /pattern was not unique enough/,
+    )
+    expect(() => Util.unique_addr(addresses, 'asddasdas').address).toThrowError(
+      /pattern was too unique/,
+    )
   })
   test('get_date', async () => {
     // @ts-ignore
@@ -297,13 +328,27 @@ if (import.meta.vitest) {
     // @ts-ignore
     const real_002 = await import('../../test-data/eml/real/002.eml?raw')
     let message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
-    expect(get_auth_results(message)).toStrictEqual({ dkim_pass: false, dmarc_pass: false, spf_pass: false })
+    expect(get_auth_results(message)).toStrictEqual({
+      dkim_pass: false,
+      dmarc_pass: false,
+      spf_pass: false,
+    })
     message = parse_email_bytes(new TextEncoder().encode(mal2_004.default))
-    expect(() => get_auth_results(message)).toThrowError(/multiple Authentication-Results/)
+    expect(() => get_auth_results(message)).toThrowError(
+      /multiple Authentication-Results/,
+    )
     message = parse_email_bytes(new TextEncoder().encode(real_001.default))
-    expect(get_auth_results(message)).toStrictEqual({ dkim_pass: true, dmarc_pass: true, spf_pass: true })
+    expect(get_auth_results(message)).toStrictEqual({
+      dkim_pass: true,
+      dmarc_pass: true,
+      spf_pass: true,
+    })
     message = parse_email_bytes(new TextEncoder().encode(real_002.default))
-    expect(get_auth_results(message)).toStrictEqual({ dkim_pass: true, dmarc_pass: true, spf_pass: false })
+    expect(get_auth_results(message)).toStrictEqual({
+      dkim_pass: true,
+      dmarc_pass: true,
+      spf_pass: false,
+    })
   })
   test('get_subject', async () => {
     // @ts-ignore
@@ -313,7 +358,9 @@ if (import.meta.vitest) {
     // @ts-ignore
     const real_000 = await import('../../test-data/eml/real/000.eml?raw')
     let message = parse_email_bytes(new TextEncoder().encode(mal2_001.default))
-    expect(() => get_subject(message)).toThrowError(/must not have multiple subjects/)
+    expect(() => get_subject(message)).toThrowError(
+      /must not have multiple subjects/,
+    )
     message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
     expect(get_subject(message)).toBe(undefined)
     message = parse_email_bytes(new TextEncoder().encode(real_000.default))
@@ -337,12 +384,18 @@ if (import.meta.vitest) {
     // @ts-ignore
     const mal_016_json = await import('../../test-data/eml/malformed/016.json')
     let message = parse_email_bytes(new TextEncoder().encode(rfc_000.default))
-    expect(get_body_txt(message)).toBe([1, 2].map((i) => rfc_000_json.parts[i].body.Text).join(''))
+    expect(get_body_txt(message)).toBe(
+      [1, 2].map((i) => rfc_000_json.parts[i].body.Text).join(''),
+    )
     message = parse_email_bytes(new TextEncoder().encode(mal_014.default))
-    expect(get_body_txt(message)).toBe([1].map((i) => mal_014_json.parts[i].body.Text).join(''))
+    expect(get_body_txt(message)).toBe(
+      [1].map((i) => mal_014_json.parts[i].body.Text).join(''),
+    )
     message = parse_email_bytes(new TextEncoder().encode(mal_000.default))
     expect(get_body_txt(message)).toBe('')
     message = parse_email_bytes(new TextEncoder().encode(mal_016.default))
-    expect(get_body_txt(message)).toBe([3, 4, 5].map((i) => mal_016_json.parts[i].body.Text).join(''))
+    expect(get_body_txt(message)).toBe(
+      [3, 4, 5].map((i) => mal_016_json.parts[i].body.Text).join(''),
+    )
   })
 }

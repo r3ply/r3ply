@@ -33,18 +33,29 @@ export interface CommentState {
 export function CommentState(d1: D1Database) {
   return {
     viaEmail: {
-      accept: (message_id: string, gist?: { id: string; url: string }) => accept_new_comment_via_email(d1, message_id, gist),
-      deliverable: (comment_id: string, deliverability: 'deliverable' | 'undeliverable') =>
-        update_comment_via_email_state(d1, comment_id, deliverability),
-      prepared: (comment_id: string, preparability: 'prepared' | 'unpreparable') =>
-        update_comment_via_email_state(d1, comment_id, preparability),
-      processed: (comment_id: string, processability: 'processed' | 'unprocessable') =>
-        update_comment_via_email_state(d1, comment_id, processability),
+      accept: (message_id: string, gist?: { id: string; url: string }) =>
+        accept_new_comment_via_email(d1, message_id, gist),
+      deliverable: (
+        comment_id: string,
+        deliverability: 'deliverable' | 'undeliverable',
+      ) => update_comment_via_email_state(d1, comment_id, deliverability),
+      prepared: (
+        comment_id: string,
+        preparability: 'prepared' | 'unpreparable',
+      ) => update_comment_via_email_state(d1, comment_id, preparability),
+      processed: (
+        comment_id: string,
+        processability: 'processed' | 'unprocessable',
+      ) => update_comment_via_email_state(d1, comment_id, processability),
     },
   }
 }
 
-async function accept_new_comment_via_email(d1: D1Database, message_id: string, gist?: { id: string; url: string }) {
+async function accept_new_comment_via_email(
+  d1: D1Database,
+  message_id: string,
+  gist?: { id: string; url: string },
+) {
   const comment_state: CommentViaEmailStates = 'accepted'
   return d1
     .prepare(
@@ -53,14 +64,29 @@ async function accept_new_comment_via_email(d1: D1Database, message_id: string, 
 		VALUES (?1, ?2, ?3, ?4, ?5)
 		RETURNING id as comment_id, strftime('%s', created_utc) AS ts_rcvd, files_id as gist_id, files_url as gist_url;`,
     )
-    .bind(crypto.randomUUID(), message_id, comment_state, gist?.id ?? null, gist?.url ?? null)
-    .run<CommentMetadata & { gist_id: string | null; gist_url: string | null }>()
+    .bind(
+      crypto.randomUUID(),
+      message_id,
+      comment_state,
+      gist?.id ?? null,
+      gist?.url ?? null,
+    )
+    .run<
+      CommentMetadata & { gist_id: string | null; gist_url: string | null }
+    >()
 }
 
 async function update_comment_via_email_state(
   d1: D1Database,
   comment_id: string,
-  state: PartialCommentViaEmailStates<'deliverable' | 'undeliverable' | 'prepared' | 'unpreparable' | 'processed' | 'unprocessable'>,
+  state: PartialCommentViaEmailStates<
+    | 'deliverable'
+    | 'undeliverable'
+    | 'prepared'
+    | 'unpreparable'
+    | 'processed'
+    | 'unprocessable'
+  >,
 ) {
   return d1
     .prepare(`UPDATE comments_via_email SET state = ? WHERE id = ?`)

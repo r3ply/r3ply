@@ -5,6 +5,7 @@
     "packages/*"
   ],
   "scripts": {
+    "fmt": "prettier --write \"**/*.{js,cjs,ts,mts,jsx,tsx,json,md,toml}\"",
     "build:wasm": "pnpm --filter @r3ply/wasm run build:wasm && pnpm --filter @r3ply/wasm run pack",
     "build:pkgs": "pnpm -r --filter './packages/*' run build",
     "build:apps": "pnpm -r --filter './apps/*' run build",
@@ -22,6 +23,8 @@
     "@r3ply/cli": "link:packages/cli"
   },
   "devDependencies": {
+    "prettier": "^3.5.3",
+    "prettier-plugin-toml": "^2.0.2",
     "vitest": "^3.0.8"
   },
   "volta": {

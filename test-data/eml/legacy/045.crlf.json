@@ -93,7 +93,9 @@
             "ContentType": {
               "c_type": "multipart",
               "c_subtype": "mixed",
-              "attributes": [["boundary", "-1463757054-891160829-958746372=:8452"]]
+              "attributes": [
+                ["boundary", "-1463757054-891160829-958746372=:8452"]
+              ]
             }
           },
           "offset_field": 334,

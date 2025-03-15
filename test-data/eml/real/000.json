@@ -7,7 +7,11 @@
       "headers": [
         {
           "name": "from",
-          "value": { "Address": { "List": [{ "name": null, "address": "test@example.com" }] } },
+          "value": {
+            "Address": {
+              "List": [{ "name": null, "address": "test@example.com" }]
+            }
+          },
           "offset_field": 0,
           "offset_start": 5,
           "offset_end": 24
@@ -18,7 +22,9 @@
             "ContentType": {
               "c_type": "multipart",
               "c_subtype": "alternative",
-              "attributes": [["boundary", "Apple-Mail=_34F098F6-D5B7-4B8B-8443-7EC0348A5A0E"]]
+              "attributes": [
+                ["boundary", "Apple-Mail=_34F098F6-D5B7-4B8B-8443-7EC0348A5A0E"]
+              ]
             }
           },
           "offset_field": 24,
@@ -27,7 +33,11 @@
         },
         {
           "name": "reply_to",
-          "value": { "Address": { "List": [{ "name": "olivia", "address": "olivia@example.com" }] } },
+          "value": {
+            "Address": {
+              "List": [{ "name": "olivia", "address": "olivia@example.com" }]
+            }
+          },
           "offset_field": 124,
           "offset_start": 133,
           "offset_end": 163
@@ -58,10 +68,20 @@
           "offset_start": 225,
           "offset_end": 259
         },
-        { "name": "subject", "value": { "Text": "This is a test email" }, "offset_field": 259, "offset_start": 267, "offset_end": 290 },
+        {
+          "name": "subject",
+          "value": { "Text": "This is a test email" },
+          "offset_field": 259,
+          "offset_start": 267,
+          "offset_end": 290
+        },
         {
           "name": "bcc",
-          "value": { "Address": { "List": [{ "name": "Eve", "address": "eve@example.com" }] } },
+          "value": {
+            "Address": {
+              "List": [{ "name": "Eve", "address": "eve@example.com" }]
+            }
+          },
           "offset_field": 290,
           "offset_start": 294,
           "offset_end": 318
@@ -75,7 +95,11 @@
         },
         {
           "name": "cc",
-          "value": { "Address": { "List": [{ "name": "carol", "address": "carol@example.com" }] } },
+          "value": {
+            "Address": {
+              "List": [{ "name": "carol", "address": "carol@example.com" }]
+            }
+          },
           "offset_field": 389,
           "offset_start": 392,
           "offset_end": 420
@@ -96,14 +120,25 @@
         },
         {
           "name": "message_id",
-          "value": { "Text": "FE97A840-9401-4B26-902E-61EB5D6CD285@example.com" },
+          "value": {
+            "Text": "FE97A840-9401-4B26-902E-61EB5D6CD285@example.com"
+          },
           "offset_field": 470,
           "offset_start": 481,
           "offset_end": 534
         },
         {
           "name": "sender",
-          "value": { "Address": { "List": [{ "name": "Savannah Secretary", "address": "savannah@example.com" }] } },
+          "value": {
+            "Address": {
+              "List": [
+                {
+                  "name": "Savannah Secretary",
+                  "address": "savannah@example.com"
+                }
+              ]
+            }
+          },
           "offset_field": 534,
           "offset_start": 541,
           "offset_end": 585
@@ -115,7 +150,13 @@
           "offset_start": 594,
           "offset_end": 633
         },
-        { "name": "keywords", "value": { "TextList": ["tests", "emails"] }, "offset_field": 633, "offset_start": 642, "offset_end": 658 },
+        {
+          "name": "keywords",
+          "value": { "TextList": ["tests", "emails"] },
+          "offset_field": 633,
+          "offset_start": 642,
+          "offset_end": 658
+        },
         {
           "name": "comments",
           "value": { "Text": "But it's still good to test it" },
@@ -157,7 +198,13 @@
         },
         {
           "name": "content_type",
-          "value": { "ContentType": { "c_type": "text", "c_subtype": "plain", "attributes": [["charset", "us-ascii"]] } },
+          "value": {
+            "ContentType": {
+              "c_type": "text",
+              "c_subtype": "plain",
+              "attributes": [["charset", "us-ascii"]]
+            }
+          },
           "offset_field": 1401,
           "offset_start": 1414,
           "offset_end": 1447
@@ -180,7 +227,13 @@
         },
         {
           "name": "content_type",
-          "value": { "ContentType": { "c_type": "text", "c_subtype": "html", "attributes": [["charset", "us-ascii"]] } },
+          "value": {
+            "ContentType": {
+              "c_type": "text",
+              "c_subtype": "html",
+              "attributes": [["charset", "us-ascii"]]
+            }
+          },
           "offset_field": 1563,
           "offset_start": 1576,
           "offset_end": 1608

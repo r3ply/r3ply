@@ -1,7 +1,12 @@
 import { env } from 'cloudflare:test'
 
 import { describe, expect, beforeAll, test } from 'vitest'
-import { cf_accept, cf_deliverable, cf_prepare, cf_process } from '../src/cloudflare-r3ply'
+import {
+  cf_accept,
+  cf_deliverable,
+  cf_prepare,
+  cf_process,
+} from '../src/cloudflare-r3ply'
 import { createHMAC } from '../src/util'
 import { Ok, Result } from 'oxide.ts'
 import { GistClient, GistFiles } from '../src/state/gist'
@@ -28,25 +33,37 @@ describe('Cloudflare r3ply Tests', () => {
   })
 
   const ok_gist_client: GistClient = {
-    create_gist: async function (files: GistFiles, description?: string | undefined): Promise<Result<{ id: string; url: string }, Error>> {
+    create_gist: async function (
+      files: GistFiles,
+      description?: string | undefined,
+    ): Promise<Result<{ id: string; url: string }, Error>> {
       return Ok({
         id: 'ABC-GIST-ID',
         url: 'https://example.com/ABC-GIST-ID',
       })
     },
-    update_gist: async function (gist_id: string, files: GistFiles): Promise<Result<void, Error>> {
+    update_gist: async function (
+      gist_id: string,
+      files: GistFiles,
+    ): Promise<Result<void, Error>> {
       return Result.safe(() => {
         throw new Error('Function not implemented.')
       })
     },
   }
   const broken_gist_client: GistClient = {
-    create_gist: async function (files: GistFiles, description?: string | undefined): Promise<Result<{ id: string; url: string }, Error>> {
+    create_gist: async function (
+      files: GistFiles,
+      description?: string | undefined,
+    ): Promise<Result<{ id: string; url: string }, Error>> {
       return Result.safe(() => {
         throw new Error('BROKEN!')
       })
     },
-    update_gist: async function (gist_id: string, files: GistFiles): Promise<Result<void, Error>> {
+    update_gist: async function (
+      gist_id: string,
+      files: GistFiles,
+    ): Promise<Result<void, Error>> {
       return Result.safe(() => {
         throw new Error('BROKEN!')
       })
@@ -89,35 +106,87 @@ email = "theghostlpirate@monkeyisland.com"`),
     ),
   ).value!
   test('comment is accepted and its state is updated', async () => {
-    const { metadata } = await cf_accept(new TextEncoder().encode(email), ok_gist_client, comment_state)
-    const select_cmd = await env.TEST_DB.prepare('select files_id, files_url from comments_via_email where id = ?')
+    const { metadata } = await cf_accept(
+      new TextEncoder().encode(email),
+      ok_gist_client,
+      comment_state,
+    )
+    const select_cmd = await env.TEST_DB.prepare(
+      'select files_id, files_url from comments_via_email where id = ?',
+    )
       .bind(metadata.comment_id)
       .run()
-    expect(select_cmd.results[0]).toStrictEqual({ files_id: 'ABC-GIST-ID', files_url: 'https://example.com/ABC-GIST-ID' })
+    expect(select_cmd.results[0]).toStrictEqual({
+      files_id: 'ABC-GIST-ID',
+      files_url: 'https://example.com/ABC-GIST-ID',
+    })
   })
   test('failed gist creation and comment is still accepted (resulting in no gist id + url in state)', async () => {
-    const { metadata } = await cf_accept(new TextEncoder().encode(email), broken_gist_client, comment_state)
-    const select_cmd = await env.TEST_DB.prepare('select files_id, files_url from comments_via_email where id = ?')
+    const { metadata } = await cf_accept(
+      new TextEncoder().encode(email),
+      broken_gist_client,
+      comment_state,
+    )
+    const select_cmd = await env.TEST_DB.prepare(
+      'select files_id, files_url from comments_via_email where id = ?',
+    )
       .bind(metadata.comment_id)
       .run()
-    expect(select_cmd.results[0]).toStrictEqual({ files_id: null, files_url: null })
+    expect(select_cmd.results[0]).toStrictEqual({
+      files_id: null,
+      files_url: null,
+    })
   })
   test('can not accept comments via malformed emails', async () => {
-    const no_to_field = cf_accept(new TextEncoder().encode(email.replace(/^To:.*$\n/m, '')), broken_gist_client, comment_state)
+    const no_to_field = cf_accept(
+      new TextEncoder().encode(email.replace(/^To:.*$\n/m, '')),
+      broken_gist_client,
+      comment_state,
+    )
     await expect(no_to_field).rejects.toThrowError(/`To` must not be missing/)
-    const no_mid_field = cf_accept(new TextEncoder().encode(email.replace(/^Message-Id:.*$\n/m, '')), broken_gist_client, comment_state)
-    await expect(no_mid_field).rejects.toThrowError(/`Message_Id` must not be missing/)
-    const no_from_field = cf_accept(new TextEncoder().encode(email.replace(/^From:.*$\n/m, '')), broken_gist_client, comment_state)
-    await expect(no_from_field).rejects.toThrowError(/`From` must not be missing/)
-    const select_cmd = await env.TEST_DB.prepare('select * from comments_via_email').run()
+    const no_mid_field = cf_accept(
+      new TextEncoder().encode(email.replace(/^Message-Id:.*$\n/m, '')),
+      broken_gist_client,
+      comment_state,
+    )
+    await expect(no_mid_field).rejects.toThrowError(
+      /`Message_Id` must not be missing/,
+    )
+    const no_from_field = cf_accept(
+      new TextEncoder().encode(email.replace(/^From:.*$\n/m, '')),
+      broken_gist_client,
+      comment_state,
+    )
+    await expect(no_from_field).rejects.toThrowError(
+      /`From` must not be missing/,
+    )
+    const select_cmd = await env.TEST_DB.prepare(
+      'select * from comments_via_email',
+    ).run()
     expect(select_cmd.results.length).toBe(0)
   })
   test('deliverable comment', async () => {
-    const { metadata, accepted_email } = await cf_accept(new TextEncoder().encode(email), ok_gist_client, comment_state)
-    const deliverable_email = await cf_deliverable(accepted_email, metadata, redacter, site_config, system_config, comment_state)
-    const select = await env.TEST_DB.prepare(`select id, state from comments_via_email`).run()
+    const { metadata, accepted_email } = await cf_accept(
+      new TextEncoder().encode(email),
+      ok_gist_client,
+      comment_state,
+    )
+    const deliverable_email = await cf_deliverable(
+      accepted_email,
+      metadata,
+      redacter,
+      site_config,
+      system_config,
+      comment_state,
+    )
+    const select = await env.TEST_DB.prepare(
+      `select id, state from comments_via_email`,
+    ).run()
     expect(select.results.length).toBe(1)
-    expect(select.results[0]).toStrictEqual({ id: metadata.comment_id, state: 'deliverable' })
+    expect(select.results[0]).toStrictEqual({
+      id: metadata.comment_id,
+      state: 'deliverable',
+    })
   })
   test('undeliverable comments: no config for that site', async () => {
     const undeliverable_no_config_for_site = `From: Guybrush Threepwood <test@example.com>
@@ -130,11 +199,25 @@ Subject: https://lucasarts.com/blog/monkey-island-the-movie
       ok_gist_client,
       comment_state,
     )
-    const deliverable_email = await cf_deliverable(accepted_email, metadata, redacter, site_config, system_config, comment_state)
-    expect(deliverable_email.unwrapErr().message).toMatch(/Comment is underliverable, `To`: `.*\"lucasarts.com@r3ply.com\".*`/)
-    const select = await env.TEST_DB.prepare(`select id, state from comments_via_email`).run()
+    const deliverable_email = await cf_deliverable(
+      accepted_email,
+      metadata,
+      redacter,
+      site_config,
+      system_config,
+      comment_state,
+    )
+    expect(deliverable_email.unwrapErr().message).toMatch(
+      /Comment is underliverable, `To`: `.*\"lucasarts.com@r3ply.com\".*`/,
+    )
+    const select = await env.TEST_DB.prepare(
+      `select id, state from comments_via_email`,
+    ).run()
     expect(select.results.length).toBe(1)
-    expect(select.results[0]).toStrictEqual({ id: metadata.comment_id, state: 'undeliverable' })
+    expect(select.results[0]).toStrictEqual({
+      id: metadata.comment_id,
+      state: 'undeliverable',
+    })
   })
   test('undeliverable comments: no url in subject', async () => {
     const undeliverable_no_url_in_subject = `From: Guybrush Threepwood <test@example.com>
@@ -147,11 +230,25 @@ Subject: /blog/lemonhead
       ok_gist_client,
       comment_state,
     )
-    const deliverable_email = await cf_deliverable(accepted_email, metadata, redacter, site_config, system_config, comment_state)
-    expect(deliverable_email.unwrapErr().message).toMatch(/config.comments.email.subject == \"url\" requires subject parses as a URL/)
-    const select = await env.TEST_DB.prepare(`select id, state from comments_via_email`).run()
+    const deliverable_email = await cf_deliverable(
+      accepted_email,
+      metadata,
+      redacter,
+      site_config,
+      system_config,
+      comment_state,
+    )
+    expect(deliverable_email.unwrapErr().message).toMatch(
+      /config.comments.email.subject == \"url\" requires subject parses as a URL/,
+    )
+    const select = await env.TEST_DB.prepare(
+      `select id, state from comments_via_email`,
+    ).run()
     expect(select.results.length).toBe(1)
-    expect(select.results[0]).toStrictEqual({ id: metadata.comment_id, state: 'undeliverable' })
+    expect(select.results[0]).toStrictEqual({
+      id: metadata.comment_id,
+      state: 'undeliverable',
+    })
   })
   test('undeliverable comments: sender blocked', async () => {
     const undeliverable_author_on_block_list = `From: Guybrush Threepwood <lemonhead@example.com>
@@ -164,29 +261,81 @@ Subject: https://banana-picker.com/blog/lemonhead
       ok_gist_client,
       comment_state,
     )
-    const deliverable_email = await cf_deliverable(accepted_email, metadata, redacter, site_config, system_config, comment_state)
-    expect(deliverable_email.unwrapErr().message).toMatch(/Comment author was on block_list, matches: lemonhead@example.com/)
-    const select = await env.TEST_DB.prepare(`select id, state from comments_via_email`).run()
+    const deliverable_email = await cf_deliverable(
+      accepted_email,
+      metadata,
+      redacter,
+      site_config,
+      system_config,
+      comment_state,
+    )
+    expect(deliverable_email.unwrapErr().message).toMatch(
+      /Comment author was on block_list, matches: lemonhead@example.com/,
+    )
+    const select = await env.TEST_DB.prepare(
+      `select id, state from comments_via_email`,
+    ).run()
     expect(select.results.length).toBe(1)
-    expect(select.results[0]).toStrictEqual({ id: metadata.comment_id, state: 'undeliverable' })
+    expect(select.results[0]).toStrictEqual({
+      id: metadata.comment_id,
+      state: 'undeliverable',
+    })
   })
   test('undeliverable comments: redaction of comment author failed', async () => {
-    const { metadata, accepted_email } = await cf_accept(new TextEncoder().encode(email), ok_gist_client, comment_state)
+    const { metadata, accepted_email } = await cf_accept(
+      new TextEncoder().encode(email),
+      ok_gist_client,
+      comment_state,
+    )
     const broken_redacter = async (input: string) => {
       throw new Error('Broken!')
     }
-    const deliverable_email = await cf_deliverable(accepted_email, metadata, broken_redacter, site_config, system_config, comment_state)
-    expect(deliverable_email.unwrapErr().message).toMatch(/Error redacting comment author. Underlying reason:.\n\n```\nBroken!/)
-    const select = await env.TEST_DB.prepare(`select id, state from comments_via_email`).run()
+    const deliverable_email = await cf_deliverable(
+      accepted_email,
+      metadata,
+      broken_redacter,
+      site_config,
+      system_config,
+      comment_state,
+    )
+    expect(deliverable_email.unwrapErr().message).toMatch(
+      /Error redacting comment author. Underlying reason:.\n\n```\nBroken!/,
+    )
+    const select = await env.TEST_DB.prepare(
+      `select id, state from comments_via_email`,
+    ).run()
     expect(select.results.length).toBe(1)
-    expect(select.results[0]).toStrictEqual({ id: metadata.comment_id, state: 'undeliverable' })
+    expect(select.results[0]).toStrictEqual({
+      id: metadata.comment_id,
+      state: 'undeliverable',
+    })
   })
   test('prepare comments', async () => {
-    const { metadata, accepted_email } = await cf_accept(new TextEncoder().encode(email), ok_gist_client, comment_state)
-    const deliverable_email = await cf_deliverable(accepted_email, metadata, redacter, site_config, system_config, comment_state)
-    const template_context = (await cf_prepare(deliverable_email.unwrap(), metadata, site_config, system_config, comment_state)).unwrap()
+    const { metadata, accepted_email } = await cf_accept(
+      new TextEncoder().encode(email),
+      ok_gist_client,
+      comment_state,
+    )
+    const deliverable_email = await cf_deliverable(
+      accepted_email,
+      metadata,
+      redacter,
+      site_config,
+      system_config,
+      comment_state,
+    )
+    const template_context = (
+      await cf_prepare(
+        deliverable_email.unwrap(),
+        metadata,
+        site_config,
+        system_config,
+        comment_state,
+      )
+    ).unwrap()
     expect(template_context.comment).toStrictEqual({
-      author: '890983fe440e1d05ae062664348d6d36500030e1b46c80ea1f306328114eec70',
+      author:
+        '890983fe440e1d05ae062664348d6d36500030e1b46c80ea1f306328114eec70',
       author_7: '890983f',
       html: '<p>I found your banana picker.</p>\n',
       id: metadata.comment_id,
@@ -204,26 +353,61 @@ Subject: https://banana-picker.com/blog/lemonhead
       ts_rcvd: metadata.ts_rcvd,
       txt: 'I found your banana picker.',
     })
-    const select = await env.TEST_DB.prepare(`select id, state from comments_via_email`).run()
+    const select = await env.TEST_DB.prepare(
+      `select id, state from comments_via_email`,
+    ).run()
     expect(select.results.length).toBe(1)
-    expect(select.results[0]).toStrictEqual({ id: metadata.comment_id, state: 'prepared' })
+    expect(select.results[0]).toStrictEqual({
+      id: metadata.comment_id,
+      state: 'prepared',
+    })
   })
   test('process comments', async () => {
-    const { metadata, accepted_email } = await cf_accept(new TextEncoder().encode(email), ok_gist_client, comment_state)
-    const deliverable_email = await cf_deliverable(accepted_email, metadata, redacter, site_config, system_config, comment_state)
-    const template_context = (await cf_prepare(deliverable_email.unwrap(), metadata, site_config, system_config, comment_state)).unwrap()
+    const { metadata, accepted_email } = await cf_accept(
+      new TextEncoder().encode(email),
+      ok_gist_client,
+      comment_state,
+    )
+    const deliverable_email = await cf_deliverable(
+      accepted_email,
+      metadata,
+      redacter,
+      site_config,
+      system_config,
+      comment_state,
+    )
+    const template_context = (
+      await cf_prepare(
+        deliverable_email.unwrap(),
+        metadata,
+        site_config,
+        system_config,
+        comment_state,
+      )
+    ).unwrap()
     let site_config_2 = structuredClone(site_config)
     site_config_2.comments.email['comment_{}'] = `
 Comment ID: {{ comment.id }}
 From: {{ comment.author }}
 Content: {{ comment.html }}`
-    const comment = await cf_process(template_context, metadata, broken_gist_client, site_config_2, comment_state)
+    const comment = await cf_process(
+      template_context,
+      metadata,
+      broken_gist_client,
+      site_config_2,
+      comment_state,
+    )
     expect(comment.unwrap()).toBe(`\nComment ID: ${metadata.comment_id}
 From: 890983fe440e1d05ae062664348d6d36500030e1b46c80ea1f306328114eec70
 Content: <p>I found your banana picker.</p>\n`)
-    const select = await env.TEST_DB.prepare(`select id, state FROM comments_via_email`).run()
+    const select = await env.TEST_DB.prepare(
+      `select id, state FROM comments_via_email`,
+    ).run()
     expect(select.results.length).toBe(1)
-    expect(select.results[0]).toStrictEqual({ id: metadata.comment_id, state: 'processed' })
+    expect(select.results[0]).toStrictEqual({
+      id: metadata.comment_id,
+      state: 'processed',
+    })
   })
 
   test.skip('encryption scratch pad', async () => {
@@ -236,15 +420,25 @@ Content: <p>I found your banana picker.</p>\n`)
       ['encrypt', 'decrypt'],
     )) as CryptoKey
     const iv = crypto.getRandomValues(new Uint8Array(16))
-    const encrypted = await crypto.subtle.encrypt({ name: 'aes-gcm', iv }, cryptoKey, new TextEncoder().encode('hello, world'))
-    const decrypted = await crypto.subtle.decrypt({ name: 'aes-gcm', iv }, cryptoKey, encrypted)
+    const encrypted = await crypto.subtle.encrypt(
+      { name: 'aes-gcm', iv },
+      cryptoKey,
+      new TextEncoder().encode('hello, world'),
+    )
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'aes-gcm', iv },
+      cryptoKey,
+      encrypted,
+    )
     console.log(new TextDecoder('utf-8').decode(decrypted))
   })
 
   test.skip('weird promises thing', async () => {
     const config_copy = structuredClone(site_config)
     console.log(config_copy.comments.email.notify['comment_received_notif_{}'])
-    await merge_config(config_copy, (value: string) => Promise.resolve(value + '123'))
+    await merge_config(config_copy, (value: string) =>
+      Promise.resolve(value + '123'),
+    )
     console.log(config_copy.comments.email.notify['comment_received_notif_{}'])
   })
 

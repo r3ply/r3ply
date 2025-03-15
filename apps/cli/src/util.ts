@@ -3,7 +3,10 @@ import fs from 'fs'
 import { Result } from 'oxide.ts'
 
 export namespace util {
-  export async function find_up(filename: string, cwd: string = process.cwd()): Promise<string | undefined> {
+  export async function find_up(
+    filename: string,
+    cwd: string = process.cwd(),
+  ): Promise<string | undefined> {
     let currentDir = cwd
 
     do {
@@ -29,14 +32,16 @@ export namespace util {
 
   export async function sha256_0x(str: string) {
     const encoded = new TextEncoder().encode(str)
-    return crypto.subtle.digest({ name: 'SHA-256' }, encoded).then((hashed_buffer) => {
-      const hashArray = new Uint8Array(hashed_buffer)
-      const hashHex = Array.prototype.map
-        .call(hashArray, (byte: number) => {
-          return ('00' + byte.toString(16)).slice(-2)
-        })
-        .join('')
-      return hashHex
-    })
+    return crypto.subtle
+      .digest({ name: 'SHA-256' }, encoded)
+      .then((hashed_buffer) => {
+        const hashArray = new Uint8Array(hashed_buffer)
+        const hashHex = Array.prototype.map
+          .call(hashArray, (byte: number) => {
+            return ('00' + byte.toString(16)).slice(-2)
+          })
+          .join('')
+        return hashHex
+      })
   }
 }

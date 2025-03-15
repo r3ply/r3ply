@@ -122,7 +122,9 @@
             "ContentType": {
               "c_type": "multipart",
               "c_subtype": "alternative",
-              "attributes": [["boundary", "=====================_714967308==_.ALT"]]
+              "attributes": [
+                ["boundary", "=====================_714967308==_.ALT"]
+              ]
             }
           },
           "offset_field": 406,

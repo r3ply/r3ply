@@ -41,12 +41,11 @@ There are a few things to be aware of when receiving comments.
 
 !["mailto link example"](./docs/mailto-comment-intake.png)
 
-*(the [CLI](#cli) tool can help you with generating mailto links)*
+_(the [CLI](#cli) tool can help you with generating mailto links)_
 
 That way, sending a comment is as easy for your site's visitors as clicking a button.
 
-**Finally *where* the comments will actually go depends on the `moderation` part of your config.** For static sites on github the easiest is approach is to just use `github` moderation. This means comments will be arrive as a pull request in the repo you've specified in the config.
-
+**Finally _where_ the comments will actually go depends on the `moderation` part of your config.** For static sites on github the easiest is approach is to just use `github` moderation. This means comments will be arrive as a pull request in the repo you've specified in the config.
 
 ## Configuration
 
@@ -74,7 +73,6 @@ re config validate
 re comments simulate-email
 ```
 
-
 ## Contributing
 
 This is a new project and a lot of help is needed. To get involved just file an issue. Start with taking a look at the [project structure](#project-structure) and then [how to build](#installbuildtestrun).
@@ -83,15 +81,15 @@ This is a new project and a lot of help is needed. To get involved just file an 
 
 This repository is a monorepo written in a mixture of Typescript and Rust. It contains all the pieces needed to make this work:
 
-* [@r3ply/lib](./packages/lib/) - the core functionality
-* [@r3ply/config](./packages/config) - handles the schema definitions and their parsers
-* [@r3ply/wasm](./crates/r3ply-wasm/) - consolidates the rust libraries used and exports them as functions in wasm
-* [@r3ply/cli](./packages/cli) - a small CLI app to help site owners develop locally, instead of having to send actual emails
-* [@r3ply/cloudflare-worker](./apps/cloudflare-worker/) - the Cloudflare email worker that receives email
+- [@r3ply/lib](./packages/lib/) - the core functionality
+- [@r3ply/config](./packages/config) - handles the schema definitions and their parsers
+- [@r3ply/wasm](./crates/r3ply-wasm/) - consolidates the rust libraries used and exports them as functions in wasm
+- [@r3ply/cli](./packages/cli) - a small CLI app to help site owners develop locally, instead of having to send actual emails
+- [@r3ply/cloudflare-worker](./apps/cloudflare-worker/) - the Cloudflare email worker that receives email
 
 ### Install/Build/Test/Run
 
-The correct order is important: *crates -> packages -> apps*. Here some commands to do this:
+The correct order is important: _crates -> packages -> apps_. Here some commands to do this:
 
 ```sh
 # do this download required dependencies

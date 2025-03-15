@@ -8,7 +8,7 @@
 
 ---
 
-*Legacy Changelog (before monorepo)*
+_Legacy Changelog (before monorepo)_
 
 Programming note: During the development of [`Next` (Legacy)](#next-legacy), the need became clear to repurpose that work into separating the primary functionality from the Cloudflare worker ecosystem altogether. A monorepo structure was chosen, and the changelog version was reset.
 

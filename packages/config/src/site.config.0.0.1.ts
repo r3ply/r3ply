@@ -13,7 +13,8 @@ export const schema_ts = {
     notify_config: {
       $id: 'notify_config',
       title: 'r3ply schema for notifications of comments via email',
-      description: "JSON Schema to configure what should happen to comments received via email, after they've been processed.",
+      description:
+        "JSON Schema to configure what should happen to comments received via email, after they've been processed.",
       type: 'object',
       required: [],
       additionalProperties: false,
@@ -33,17 +34,20 @@ A new comment has been received
       properties: {
         commenter: {
           type: 'boolean',
-          description: 'Set to false to disable all notifications to the commenter',
+          description:
+            'Set to false to disable all notifications to the commenter',
           default: true,
         },
         notify_commenter_upon_submission: {
           type: 'boolean',
-          description: 'Set to false to disable notifying the commenter upon submission of their email comment',
+          description:
+            'Set to false to disable notifying the commenter upon submission of their email comment',
           default: true,
         },
         'comment_submitted_notif_{}': {
           type: 'string',
-          description: 'Comment submission notification template (accepts TODO data)',
+          description:
+            'Comment submission notification template (accepts TODO data)',
           pattern: '^[\\s\\S]*$',
           default: 'TODO',
         },
@@ -71,7 +75,8 @@ A new comment has been received
     moderation_config: {
       $id: 'moderation_config',
       title: 'r3ply schema for moderation of comments via email',
-      description: "JSON Schema to configure what should happen to comments received via email, after they've been processed.",
+      description:
+        "JSON Schema to configure what should happen to comments received via email, after they've been processed.",
       type: 'object',
       required: ['type'],
       // @ts-ignore - note: this is not part of json schema, but is in schemasafe because of ambiguity in json schema spec
@@ -85,7 +90,8 @@ A new comment has been received
           properties: {
             allow_list: {
               type: 'array',
-              description: 'Matches from this list will skip moderation. Uses glob patterns.',
+              description:
+                'Matches from this list will skip moderation. Uses glob patterns.',
               items: { type: 'string', pattern: '^[\\s\\S]*$', maxLength: 256 },
               default: [],
               examples: ['*@alice.com', 'bob@example.com'],
@@ -111,29 +117,36 @@ A new comment has been received
             },
             'file_path_{}': {
               type: 'string',
-              description: 'File path template for new comment (template data is `prepared_comment`).',
+              description:
+                'File path template for new comment (template data is `prepared_comment`).',
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
-              examples: ['/content/comments/{{ comment.id | slice(end=8) }}.md'],
-              $comment: 'compiled template must be 400 characters or less and be a valid file path',
+              examples: [
+                '/content/comments/{{ comment.id | slice(end=8) }}.md',
+              ],
+              $comment:
+                'compiled template must be 400 characters or less and be a valid file path',
             },
             'commit_msg_{}': {
               type: 'string',
-              description: 'Commit message template (template data is `prepare_comment`)',
+              description:
+                'Commit message template (template data is `prepare_comment`)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
               default: 'TODO',
             },
             'pr_title_{}': {
               type: 'string',
-              description: 'Pull request title template (template data is `prepare_comment`)',
+              description:
+                'Pull request title template (template data is `prepare_comment`)',
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
               default: 'TODO',
             },
             'pr_body_{}': {
               type: 'string',
-              description: 'Pull request body template (template data is `prepare_comment`)',
+              description:
+                'Pull request body template (template data is `prepare_comment`)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
               default: 'TODO',
@@ -153,7 +166,8 @@ A new comment has been received
             },
             allow_list: {
               type: 'array',
-              description: 'Matches from this list will skip moderation. Uses glob patterns.',
+              description:
+                'Matches from this list will skip moderation. Uses glob patterns.',
               items: { type: 'string', pattern: '^[\\s\\S]*$', maxLength: 256 },
               default: [],
               examples: ['*@alice.com', 'bob@example.com'],
@@ -175,36 +189,44 @@ A new comment has been received
             },
             'target_branch_{}': {
               type: 'string',
-              description: 'The new branch that will be created when submitting a comment for moderation. Uses templates.',
+              description:
+                'The new branch that will be created when submitting a comment for moderation. Uses templates.',
               pattern: '^[\\s\\S]*$',
               maxLength: 256,
               default: 'comment-{{ comment.ts_rcvd }}-{{ comment.id_8 }}.md',
             },
             'file_path_{}': {
               type: 'string',
-              description: 'File path template for new comment (template data is `prepared_comment`).',
+              description:
+                'File path template for new comment (template data is `prepared_comment`).',
               pattern: '^(?!\\s*/)[\\s\\S]*$',
               maxLength: 1024,
-              examples: ['/content/comments/{{ comment.id | slice(end=8) }}.md'],
-              $comment: 'compiled template must be 400 characters or less and be a valid file path',
+              examples: [
+                '/content/comments/{{ comment.id | slice(end=8) }}.md',
+              ],
+              $comment:
+                'compiled template must be 400 characters or less and be a valid file path',
             },
             'commit_msg_{}': {
               type: 'string',
-              description: 'Commit message template (template data is `prepare_comment`)',
+              description:
+                'Commit message template (template data is `prepare_comment`)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
               default: 'TODO',
             },
             'pr_title_{}': {
               type: 'string',
-              description: 'Pull request title template (template data is `prepare_comment`)',
+              description:
+                'Pull request title template (template data is `prepare_comment`)',
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
               default: 'TODO',
             },
             'pr_body_{}': {
               type: 'string',
-              description: 'Pull request body template (template data is `prepare_comment`)',
+              description:
+                'Pull request body template (template data is `prepare_comment`)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
               default: 'TODO',
@@ -223,7 +245,8 @@ A new comment has been received
             type: { enum: ['webhook'] },
             allow_list: {
               type: 'array',
-              description: 'Matches from this list will skip moderation. Uses glob patterns.',
+              description:
+                'Matches from this list will skip moderation. Uses glob patterns.',
               items: { type: 'string', pattern: '^[\\s\\S]*$', maxLength: 256 },
               default: [],
               examples: ['*@alice.com', 'bob@example.com'],
@@ -421,7 +444,8 @@ A new comment has been received
     },
     enabled: {
       type: 'boolean',
-      description: 'Comments will not be processed if set to false. Default is true.',
+      description:
+        'Comments will not be processed if set to false. Default is true.',
       default: true,
     },
     domain: {
@@ -439,7 +463,8 @@ A new comment has been received
         format: 'hostname',
       },
       examples: ['r3ply.com', 'my-test-r3ply-server.net'],
-      $comment: "It is not recommended to accept r3plies from servers you don't know",
+      $comment:
+        "It is not recommended to accept r3plies from servers you don't know",
     },
     comments: { $ref: '#/definitions/comments_config' },
   },

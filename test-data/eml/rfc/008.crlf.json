@@ -11,7 +11,9 @@
             "ContentType": {
               "c_type": "multipart",
               "c_subtype": "mixed",
-              "attributes": [["boundary", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]]
+              "attributes": [
+                ["boundary", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+              ]
             }
           },
           "offset_field": 0,
@@ -191,7 +193,9 @@
                     "ContentType": {
                       "c_type": "multipart",
                       "c_subtype": "alternative",
-                      "attributes": [["boundary", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]]
+                      "attributes": [
+                        ["boundary", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+                      ]
                     }
                   },
                   "offset_field": 200,

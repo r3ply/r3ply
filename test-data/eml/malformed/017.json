@@ -111,7 +111,9 @@
       ],
       "is_encoding_problem": false,
       "body": {
-        "InlineBinary": [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 10]
+        "InlineBinary": [
+          104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 10
+        ]
       },
       "offset_header": 156,
       "offset_body": 303,

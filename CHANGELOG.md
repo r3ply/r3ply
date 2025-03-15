@@ -21,8 +21,8 @@
   │   └── eml
   └── tools
   ```
+
   - apps: code that is used by itself, not as a library
   - crates: rust related stuff (for now this is just wasm stuff)
   - docs: placeholder for documentation/website
   - packages: TS libraries that are upstream of apps (but downstream wasm stuff)
-

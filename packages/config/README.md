@@ -30,14 +30,50 @@ paths = ['/*', '!/private']
 cache = true
 md_to_html = true
 sanitize_html = true
-allow_tags = ["a", "br", "p", "span", "strong", "s", "strike", "del", "em", "u", "ul", "ol", "li", "blockquote", "hr", "code", "pre", "table", "tr", "td", "th", "caption", "thead", "tbody", "tfoot", "kbd", "mark", "sub", "small"]
+allow_tags = [
+  "a",
+  "br",
+  "p",
+  "span",
+  "strong",
+  "s",
+  "strike",
+  "del",
+  "em",
+  "u",
+  "ul",
+  "ol",
+  "li",
+  "blockquote",
+  "hr",
+  "code",
+  "pre",
+  "table",
+  "tr",
+  "td",
+  "th",
+  "caption",
+  "thead",
+  "tbody",
+  "tfoot",
+  "kbd",
+  "mark",
+  "sub",
+  "small",
+]
 
 [comments.email]
 enabled = true
 subject = "path"
 attachments = false
 max_size_bytes = 10000
-block_list = ['e8a20d6*', 'e8a20d690bd22ff73603a70444197562e08a257f86ab49a52f45bf6d4076804a', 'mallory@evil.com', '*@mallory.com', '*@spam.{com,net}']
+block_list = [
+  'e8a20d6*',
+  'e8a20d690bd22ff73603a70444197562e08a257f86ab49a52f45bf6d4076804a',
+  'mallory@evil.com',
+  '*@mallory.com',
+  '*@spam.{com,net}',
+]
 template = """
 +++
 render = false
@@ -152,7 +188,37 @@ md_to_html = true
 # [Optional, default is true] If false, any html will be allowed
 sanitize_html = true
 # [Optional] Specify html to allow. Has no effect if `sanitize_html = false`.
-allow_tags = ["a", "br", "p", "span", "strong", "s", "strike", "del", "em", "u", "ul", "ol", "li", "blockquote", "hr", "code", "pre", "table", "tr", "td", "th", "caption", "thead", "tbody", "tfoot", "kbd", "mark", "sub", "small"]
+allow_tags = [
+  "a",
+  "br",
+  "p",
+  "span",
+  "strong",
+  "s",
+  "strike",
+  "del",
+  "em",
+  "u",
+  "ul",
+  "ol",
+  "li",
+  "blockquote",
+  "hr",
+  "code",
+  "pre",
+  "table",
+  "tr",
+  "td",
+  "th",
+  "caption",
+  "thead",
+  "tbody",
+  "tfoot",
+  "kbd",
+  "mark",
+  "sub",
+  "small",
+]
 
 # [Optional] Configure comments received via email
 [comments.email]
@@ -170,7 +236,13 @@ max_size_bytes = 10000
 # incoming mail that matches elements in here will be ignored
 # Use email ID (hmac made by r3ply of email address) or string of email address
 # You can use globbing patterns, otherwise matches must be exact
-block_list = ['e8a20d6*', 'e8a20d690bd22ff73603a70444197562e08a257f86ab49a52f45bf6d4076804a', 'mallory@evil.com', '*@mallory.com', '*@spam.{com,net}']
+block_list = [
+  'e8a20d6*',
+  'e8a20d690bd22ff73603a70444197562e08a257f86ab49a52f45bf6d4076804a',
+  'mallory@evil.com',
+  '*@mallory.com',
+  '*@spam.{com,net}',
+]
 # [Optional, default is a json literal] A template to transform comment data into a comment
 # [Note 1: you can also provide a URL to a file, instead of having the template in the config]
 # [Note 2: the file must be served from the same domain as `domain` in this config]
@@ -282,7 +354,7 @@ If you run your own r3ply system, you will almost certainly want to configure th
 
 ```toml
 # [Required] this is used to determine what version of the schema to use (and the version of r3ply)
-version  = "0.0.1"
+version = "0.0.1"
 # [Required] this is the domain that is hosting the r3ply system, e.g. where emails are sent to
 domain = "r3ply.com"
 # [Optional, default is true] If false, system will skip any requests it receives
@@ -303,12 +375,12 @@ enabled = true
 # [⚠️: this affects sites using this r3ply instance, e.g. they can't reply "APPROVE" to comments.]
 # [Note: site moderation emails MUST have dkim, dmarc, and spf enabled for moderation to work]
 moderation = true
+max_size_bytes = 5,242,880
 # [Optional, default is true] If false attachments are ignored
 # [⚠️: this affects sites using this r3ply instance, e.g. will have their attachment settings ignored.]
 attachments = true
 # [Optional, default is 5 MB] Ignored if higher than system allows.
 # [Note: the min(system.max_size_bytes, site.max_size_bytes) will be the final max_size_bytes]
-max_size_bytes = 5,242,880
 # [Optional, default is `[]`] system-wide block list.
 # Incoming mail that matches elements in here will be ignored
 # Use email ID (hmac made by r3ply of email address) or string of email address

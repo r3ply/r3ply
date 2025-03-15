@@ -4,20 +4,24 @@ import { parser as schemasafe_parser, ParseResult } from '@exodus/schemasafe'
 export const schema_ts = {
   $schema: 'http://json-schema.org/draft-04/schema#',
   title: 'r3ply system config schema v0.0.1',
-  description: 'JSON Schema to describe the configuration of a r3ply system. See https://r3ply.com for more info.',
+  description:
+    'JSON Schema to describe the configuration of a r3ply system. See https://r3ply.com for more info.',
   type: 'object',
   required: ['version', 'domain', 'admin'],
   additionalProperties: false,
   properties: {
     version: {
-      description: 'used to determine what version of the schema to use (and the version of r3ply)',
+      description:
+        'used to determine what version of the schema to use (and the version of r3ply)',
       type: 'string',
       enum: ['0.0.1'],
     },
     domain: {
-      description: 'this is the domain that is hosting the r3ply system, e.g. where emails are sent to',
+      description:
+        'this is the domain that is hosting the r3ply system, e.g. where emails are sent to',
       type: 'string',
-      pattern: '^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.(?!-)(?:[A-Za-z0-9-]{1,63}\\.)*[A-Za-z]{2,63}$',
+      pattern:
+        '^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.(?!-)(?:[A-Za-z0-9-]{1,63}\\.)*[A-Za-z]{2,63}$',
       maxLength: 253,
       examples: ['r3ply.com'],
     },
@@ -58,13 +62,15 @@ export const schema_ts = {
             type: 'string',
             format: 'email',
             examples: ['guybrush@example.com'],
-            $comment: 'Do not use mailbox format, e.g. "Le Chuck GP <ghostlechuck@lucasart.com>"',
+            $comment:
+              'Do not use mailbox format, e.g. "Le Chuck GP <ghostlechuck@lucasart.com>"',
           },
         },
       },
     },
     email: {
-      description: 'Configure parameters related to processing comments via email for sites',
+      description:
+        'Configure parameters related to processing comments via email for sites',
       type: 'object',
       required: [],
       additionalProperties: false,
@@ -80,16 +86,20 @@ export const schema_ts = {
           description: 'If false, all emails are ignored',
           type: 'boolean',
           default: true,
-          $comment: '⚠️: if disabled, site configs for `enabed` will be ignored',
+          $comment:
+            '⚠️: if disabled, site configs for `enabed` will be ignored',
         },
         moderation: {
-          description: 'If false, replies to comments from site moderators are ignored',
+          description:
+            'If false, replies to comments from site moderators are ignored',
           type: 'boolean',
           default: true,
-          $comment: 'Note: emails concerning moderation MUST have dkim, dmarc, and spf enabled',
+          $comment:
+            'Note: emails concerning moderation MUST have dkim, dmarc, and spf enabled',
         },
         max_size_bytes: {
-          description: 'Emails are ignored if their size (in bytes) exceed the min(system, site) configs',
+          description:
+            'Emails are ignored if their size (in bytes) exceed the min(system, site) configs',
           type: 'number',
           default: 5242880,
           $comment: 'Note: default is 5 MB',
@@ -99,17 +109,20 @@ export const schema_ts = {
           description: 'If false attachments are ignored',
           type: 'boolean',
           default: false,
-          $comment: 'Warning: if disabled, site configs for attachments will be ignored',
+          $comment:
+            'Warning: if disabled, site configs for attachments will be ignored',
         },
         block_list: {
-          description: 'system-wide block list, works upstream of site blocklists',
+          description:
+            'system-wide block list, works upstream of site blocklists',
           type: 'array',
           default: [],
           items: {
             type: 'string',
             pattern: '^[\\s\\S]*$',
           },
-          $comment: 'globbing patterns can be used, otherwise matches must be exact',
+          $comment:
+            'globbing patterns can be used, otherwise matches must be exact',
         },
       },
     },
@@ -117,7 +130,11 @@ export const schema_ts = {
 } as const satisfies JSONSchema
 export const schema_str = JSON.stringify(schema_ts)
 export const schema = JSON.parse(schema_str)
-const raw_parser_str = schemasafe_parser(schema, { useDefaults: true, includeErrors: true, allErrors: true }).toModule()
+const raw_parser_str = schemasafe_parser(schema, {
+  useDefaults: true,
+  includeErrors: true,
+  allErrors: true,
+}).toModule()
 const raw_parser = eval(raw_parser_str)
 export type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
   value?: T

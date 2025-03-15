@@ -111,7 +111,9 @@
             "ContentType": {
               "c_type": "multipart",
               "c_subtype": "alternative",
-              "attributes": [["boundary", "------------9D454F23DA86BCD63FA3805F"]]
+              "attributes": [
+                ["boundary", "------------9D454F23DA86BCD63FA3805F"]
+              ]
             }
           },
           "offset_field": 348,

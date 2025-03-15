@@ -14,14 +14,24 @@ export interface R3ply {
     viaEmail: (
       redact: (input: string) => Promise<string>,
       moderator?: Moderation,
-    ) => (email_event: [recipient: R3plySiteConfig, bytes: Uint8Array]) => Promise<string>
+    ) => (
+      email_event: [recipient: R3plySiteConfig, bytes: Uint8Array],
+    ) => Promise<string>
   }
 }
 export function R3ply(system: R3plySystemConfig): R3ply {
-  function email_handler(redact: (input: string) => Promise<string>, moderator?: Moderation) {
-    return async function (email_event: [recipient: R3plySiteConfig, bytes: Uint8Array]): Promise<string> {
+  function email_handler(
+    redact: (input: string) => Promise<string>,
+    moderator?: Moderation,
+  ) {
+    return async function (
+      email_event: [recipient: R3plySiteConfig, bytes: Uint8Array],
+    ): Promise<string> {
       const [site, bytes] = email_event
-      return handle_email_event({ site, bytes }, { system_config: system, redact, moderator })
+      return handle_email_event(
+        { site, bytes },
+        { system_config: system, redact, moderator },
+      )
     }
   }
   return {
@@ -33,19 +43,42 @@ export function R3ply(system: R3plySystemConfig): R3ply {
 
 async function handle_email_event(
   email_event: { site: R3plySiteConfig; bytes: Uint8Array },
-  dependencies: { system_config: R3plySystemConfig; redact: (input: string) => Promise<string>; moderator?: Moderation },
+  dependencies: {
+    system_config: R3plySystemConfig
+    redact: (input: string) => Promise<string>
+    moderator?: Moderation
+  },
 ): Promise<string> {
-  prescreen({ email_size_bytes: email_event.bytes.byteLength }, email_event.site, dependencies.system_config)
+  prescreen(
+    { email_size_bytes: email_event.bytes.byteLength },
+    email_event.site,
+    dependencies.system_config,
+  )
   let metadata: CommentMetadata = receive()
   let accepted_email = accept(email_event.bytes)
-  let deliverable_email = deliverable(accepted_email, dependencies.redact, email_event.site, dependencies.system_config)
-  let template_context = deliverable_email.then((deliverable_email) =>
-    prepare(deliverable_email, metadata, email_event.site, dependencies.system_config),
+  let deliverable_email = deliverable(
+    accepted_email,
+    dependencies.redact,
+    email_event.site,
+    dependencies.system_config,
   )
-  let comment = template_context.then((template_context) => process(template_context, email_event.site))
+  let template_context = deliverable_email.then((deliverable_email) =>
+    prepare(
+      deliverable_email,
+      metadata,
+      email_event.site,
+      dependencies.system_config,
+    ),
+  )
+  let comment = template_context.then((template_context) =>
+    process(template_context, email_event.site),
+  )
   return Promise.all([comment, template_context])
     .then(([comment, template_context]) => {
-      if (dependencies.moderator && email_event.site.comments.email.moderation.enabled) {
+      if (
+        dependencies.moderator &&
+        email_event.site.comments.email.moderation.enabled
+      ) {
         dependencies.moderator.send(comment, template_context, email_event.site)
       }
     })
@@ -56,8 +89,9 @@ async function handle_email_event(
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   describe('r3ply in-source tests', async () => {
-
-    const { siteConfigParser, systemConfigParser } = await import('@r3ply/config')
+    const { siteConfigParser, systemConfigParser } = await import(
+      '@r3ply/config'
+    )
     const TOML = await import('@iarna/toml')
     const { accept } = await import('./accept')
     const { deliverable } = await import('./deliverable')
@@ -112,11 +146,11 @@ spf_pass = {{ email.auth.spf  }}
 type = 'webhook'
 url = "https://example.com/comments"
 `),
-      ),
-    )
-    let system_config = systemConfigParser(
-      JSON.stringify(
-        TOML.parse(`
+        ),
+      )
+      let system_config = systemConfigParser(
+        JSON.stringify(
+          TOML.parse(`
 version = "0.0.1"
 domain = "r3ply.com"
 
@@ -124,12 +158,12 @@ domain = "r3ply.com"
 name = "Guybrush Threepwood"
 email = "guybrush@example.com"
 `),
-      ),
-    )
-    let r3ply = R3ply(system_config.value!)
-    let email_handler = r3ply.comments.viaEmail(createHMAC('password123'))
-    let comment = await email_handler([site_config.value!, email_bytes])
-    // console.log(comment)
-  })
+        ),
+      )
+      let r3ply = R3ply(system_config.value!)
+      let email_handler = r3ply.comments.viaEmail(createHMAC('password123'))
+      let comment = await email_handler([site_config.value!, email_bytes])
+      // console.log(comment)
+    })
   })
 }

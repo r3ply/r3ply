@@ -34,7 +34,12 @@ export interface EmailTemplateContext {
  * @param config the site config the email is addressed to
  * @returns comment data
  */
-export function prepare(deliverable: DeliverableEmail, metadata: CommentMetadata, config: R3plySiteConfig, system: R3plySystemConfig) {
+export function prepare(
+  deliverable: DeliverableEmail,
+  metadata: CommentMetadata,
+  config: R3plySiteConfig,
+  system: R3plySystemConfig,
+) {
   // get values from receive
   let { comment_id, ts_rcvd } = metadata
 
@@ -44,7 +49,9 @@ export function prepare(deliverable: DeliverableEmail, metadata: CommentMetadata
     {
       Ok: (data) => data,
       Err: (error) => {
-        console.error(`Error during \`get_email_data()\`, name: ${error.name}, message: ${error.message}`)
+        console.error(
+          `Error during \`get_email_data()\`, name: ${error.name}, message: ${error.message}`,
+        )
         throw error
       },
     },
@@ -52,7 +59,10 @@ export function prepare(deliverable: DeliverableEmail, metadata: CommentMetadata
 
   // Separate body from email signature
   data.email_body_txt = match(
-    Result.safe(() => data.email_body_txt.split(config.comments.email.comment_separator)[0]),
+    Result.safe(
+      () =>
+        data.email_body_txt.split(config.comments.email.comment_separator)[0],
+    ),
     {
       Ok: (email_body_txt) => email_body_txt,
       Err: (error) => {
@@ -65,7 +75,9 @@ export function prepare(deliverable: DeliverableEmail, metadata: CommentMetadata
   )
 
   // Extract md -> html if enabled
-  let body_md = config.comments.md_to_html ? md_to_html(data.email_body_txt) : undefined
+  let body_md = config.comments.md_to_html
+    ? md_to_html(data.email_body_txt)
+    : undefined
 
   // Extract html -> sanitized_html if enabled
   let body_html: string | undefined
@@ -95,8 +107,12 @@ export function prepare(deliverable: DeliverableEmail, metadata: CommentMetadata
         protocol: deliverable.subject.protocol,
         hostname: deliverable.subject.hostname,
         path: deliverable.subject.pathname,
-        queryParams: deliverable.subject.search == '' ? undefined : deliverable.subject.search,
-        fragment: deliverable.subject.hash == '' ? undefined : deliverable.subject.hash,
+        queryParams:
+          deliverable.subject.search == ''
+            ? undefined
+            : deliverable.subject.search,
+        fragment:
+          deliverable.subject.hash == '' ? undefined : deliverable.subject.hash,
       },
       txt: data.email_body_txt,
       md: body_md,
@@ -111,7 +127,10 @@ export function prepare(deliverable: DeliverableEmail, metadata: CommentMetadata
         dkim: data.auth_results.dkim_pass,
         spf: data.auth_results.spf_pass,
         dmarc: data.auth_results.dmarc_pass,
-        pass: data.auth_results.dkim_pass && data.auth_results.spf_pass && data.auth_results.dmarc_pass,
+        pass:
+          data.auth_results.dkim_pass &&
+          data.auth_results.spf_pass &&
+          data.auth_results.dmarc_pass,
       },
     },
   }

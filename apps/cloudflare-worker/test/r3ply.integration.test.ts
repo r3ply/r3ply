@@ -37,8 +37,13 @@ name = "Ghost 'Le Chuck' Pirate"
 email = "theghostlpirate@monkeyisland.com"`),
       ),
     ).value!
-    const r3ply = CloudflareR3ply(system_config)(GistClient(env.R3PLY_GIST_TOKEN), CommentState(env.TEST_DB))
-    const handle_email = r3ply.comments.viaEmail(createHMAC('integration test hmac key'))
+    const r3ply = CloudflareR3ply(system_config)(
+      GistClient(env.R3PLY_GIST_TOKEN),
+      CommentState(env.TEST_DB),
+    )
+    const handle_email = r3ply.comments.viaEmail(
+      createHMAC('integration test hmac key'),
+    )
     const site_config = siteConfigParser(
       JSON.stringify(
         TOML.parse(`
@@ -96,9 +101,13 @@ Subject: https://banana-picker.com/blog/lemonhead
 
 I found your banana picker.
 `
-    const comment = await Result.safe(handle_email([site_config, new TextEncoder().encode(email)]))
+    const comment = await Result.safe(
+      handle_email([site_config, new TextEncoder().encode(email)]),
+    )
     expect(comment.isOk()).toBe(true)
-    const select = (await env.TEST_DB.prepare('SELECT state from comments_via_email').run()).results
+    const select = (
+      await env.TEST_DB.prepare('SELECT state from comments_via_email').run()
+    ).results
     expect(select.length).toBe(1)
     expect(select[0].state).toBe('processed')
   })
@@ -147,7 +156,11 @@ A subset of markdown can be used
       to: 'r3ply-config.spence.pages.dev@r3ply.com',
     }
     const result = await Result.safe(
-      comment_via_email(msg, { gist_token: env.R3PLY_GIST_TOKEN, hmac_secret: env.HMAC_SECRET, gh_pw: env.GITHUB_APP_PW }),
+      comment_via_email(msg, {
+        gist_token: env.R3PLY_GIST_TOKEN,
+        hmac_secret: env.HMAC_SECRET,
+        gh_pw: env.GITHUB_APP_PW,
+      }),
     )
     console.log(result.unwrapUnchecked())
   })

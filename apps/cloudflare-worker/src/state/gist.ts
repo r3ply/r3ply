@@ -12,19 +12,25 @@ export type GistFiles = { [key: string]: { content: string } }
  * @param [description] an optional description of the gist
  * @returns a `Result` of a URL and an ID that can be used in additional API calls (or an `Err<Error>`)
  */
-async function create_gist(gist_token: string, files: GistFiles, description?: string) {
+async function create_gist(
+  gist_token: string,
+  files: GistFiles,
+  description?: string,
+) {
   const octokit = new Octokit({ auth: gist_token })
-  let gist_rep = octokit.gists.create({ files, description, public: false }).then((rep) => {
-    if (rep.status != 201) {
-      let err_msg = `Error storing email in gist: ${JSON.stringify(rep)}`
-      console.error(err_msg)
-      throw new Error(err_msg)
-    } else
-      return {
-        id: rep.data.id!,
-        url: rep.data.html_url!,
-      }
-  })
+  let gist_rep = octokit.gists
+    .create({ files, description, public: false })
+    .then((rep) => {
+      if (rep.status != 201) {
+        let err_msg = `Error storing email in gist: ${JSON.stringify(rep)}`
+        console.error(err_msg)
+        throw new Error(err_msg)
+      } else
+        return {
+          id: rep.data.id!,
+          url: rep.data.html_url!,
+        }
+    })
   return Result.safe(gist_rep)
 }
 
@@ -35,7 +41,11 @@ async function create_gist(gist_token: string, files: GistFiles, description?: s
  * @param files an object consisting of the filename as the key, with the content as a string
  * @returns a `Result` of void (or an `Err<Error>`)
  */
-async function update_gist(gist_token: string, gist_id: string, files: GistFiles) {
+async function update_gist(
+  gist_token: string,
+  gist_id: string,
+  files: GistFiles,
+) {
   const octokit = new Octokit({ auth: gist_token })
   let gist_rep = octokit.gists.update({ gist_id, files }).then((rep) => {
     if (rep.status != 200) {
@@ -53,7 +63,9 @@ export interface GistClient {
 }
 export function GistClient(gist_token: string): GistClient {
   return {
-    create_gist: (files: GistFiles, description?: string) => create_gist(gist_token, files, description),
-    update_gist: (gist_id: string, files: GistFiles) => update_gist(gist_token, gist_id, files),
+    create_gist: (files: GistFiles, description?: string) =>
+      create_gist(gist_token, files, description),
+    update_gist: (gist_id: string, files: GistFiles) =>
+      update_gist(gist_token, gist_id, files),
   }
 }

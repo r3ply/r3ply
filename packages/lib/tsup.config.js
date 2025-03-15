@@ -1,5 +1,5 @@
 // packages/lib/tsup.config.js
-import { defineConfig } from 'tsup';
+import { defineConfig } from 'tsup'
 
 export default defineConfig({
   entry: ['src/index.ts'],
@@ -9,5 +9,5 @@ export default defineConfig({
   loader: { '.eml': 'text' },
   target: 'es2022',
   format: ['esm', 'cjs'],
-  outDir: 'dist'
+  outDir: 'dist',
 })
