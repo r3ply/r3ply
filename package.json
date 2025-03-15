@@ -15,12 +15,7 @@
     "test:all": "pnpm -r test"
   },
   "pnpm": {
-    "overrides": {
-      "@r3ply/cli": "link:packages/cli"
-    }
-  },
-  "dependencies": {
-    "@r3ply/cli": "link:packages/cli"
+    "overrides": {}
   },
   "devDependencies": {
     "prettier": "^3.5.3",

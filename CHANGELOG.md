@@ -9,20 +9,23 @@
   ```
   .
   ├── apps
-  │   ├── cli
-  │   └── cloudflare-worker
+  │   ├── cli
+  │   └── cloudflare-worker
   ├── crates
-  │   └── r3ply-wasm
+  │   └── r3ply-wasm
   ├── docs
+  ├── examples
+  │   └── zola-example
   ├── packages
-  │   ├── config
-  │   └── lib
+  │   ├── config
+  │   └── lib
   ├── test-data
-  │   └── eml
+  │   └── eml
   └── tools
   ```
 
   - apps: code that is used by itself, not as a library
   - crates: rust related stuff (for now this is just wasm stuff)
   - docs: placeholder for documentation/website
+  - examples: different websites demoing r3ply + playground for experimentation
   - packages: TS libraries that are upstream of apps (but downstream wasm stuff)

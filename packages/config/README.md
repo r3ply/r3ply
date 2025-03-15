@@ -14,7 +14,7 @@ r3ply = ["r3ply.com", "my-test-r3ply-server.net"]
 [comments.email.moderation]
 type = "github"
 repo = "https://github.com/you/yoursite"
-file_path = "/content/comments/{{ comment.id }}.md"
+"file_path_{}" = "content/comments/{{ comment.id }}.md"
 ```
 
 Here's an example config, without comments
@@ -352,6 +352,7 @@ A new comment has been received
 
 If you run your own r3ply system, you will almost certainly want to configure the system.
 
+<!-- prettier-ignore -->
 ```toml
 # [Required] this is used to determine what version of the schema to use (and the version of r3ply)
 version = "0.0.1"
@@ -371,16 +372,16 @@ email = "guybrush@example.com"
 # [Optional, default is true] If false, all emails are ignored.
 # [⚠️: this affects sites using this r3ply instance, e.g. will also not receive comments if disabled.]
 enabled = true
+# [Optional, default is 5 MB] Ignored if higher than system allows.
+# [Note: the min(system.max_size_bytes, site.max_size_bytes) will be the final max_size_bytes]
+max_size_bytes = 5,242,880
 # [Optional, default is false] If false, replies to comments from site moderators are ignored
 # [⚠️: this affects sites using this r3ply instance, e.g. they can't reply "APPROVE" to comments.]
 # [Note: site moderation emails MUST have dkim, dmarc, and spf enabled for moderation to work]
 moderation = true
-max_size_bytes = 5,242,880
 # [Optional, default is true] If false attachments are ignored
 # [⚠️: this affects sites using this r3ply instance, e.g. will have their attachment settings ignored.]
 attachments = true
-# [Optional, default is 5 MB] Ignored if higher than system allows.
-# [Note: the min(system.max_size_bytes, site.max_size_bytes) will be the final max_size_bytes]
 # [Optional, default is `[]`] system-wide block list.
 # Incoming mail that matches elements in here will be ignored
 # Use email ID (hmac made by r3ply of email address) or string of email address

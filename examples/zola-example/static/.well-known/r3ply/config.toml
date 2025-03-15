@@ -1,0 +1,8 @@
+version = "0.0.1"
+domain = "your-site.com"
+r3ply = ["r3ply.com"]
+
+[comments.email.moderation]
+type = "github"
+repo = "https://github.com/you/yoursite"
+"file_path_{}" = "content/comments/{{ comment.id }}.md"
