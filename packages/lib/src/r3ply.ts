@@ -7,7 +7,6 @@ import { process } from './process'
 import { createHMAC } from './util'
 import { prescreen } from './prescreen'
 import { Moderation } from './moderation/moderation'
-import { describe } from 'vitest'
 
 export interface R3ply {
   comments: {
@@ -88,21 +87,17 @@ async function handle_email_event(
 // TODO: for some reason this is breaking my cloudflare builds...
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
-  describe('r3ply in-source tests', async () => {
+  test('make', async () => {
     const { siteConfigParser, systemConfigParser } = await import(
       '@r3ply/config'
     )
     const TOML = await import('@iarna/toml')
-    const { accept } = await import('./accept')
-    const { deliverable } = await import('./deliverable')
-    const { computeHMAC } = await import('./util')
     // @ts-ignore todo: figure out how to get vscode to recognize these vitest raw imports
     const real_001 = await import('../../test-data/eml/real/001.eml?raw')
-    test('make', async () => {
-      let email_bytes = new TextEncoder().encode(real_001.default)
-      let site_config = siteConfigParser(
-        JSON.stringify(
-          TOML.parse(`
+    let email_bytes = new TextEncoder().encode(real_001.default)
+    let site_config = siteConfigParser(
+      JSON.stringify(
+        TOML.parse(`
 version = "0.0.1"
 domains = ["spenc.es"]
 r3ply = ['r3ply.com']
@@ -146,11 +141,11 @@ spf_pass = {{ email.auth.spf  }}
 type = 'webhook'
 url = "https://example.com/comments"
 `),
-        ),
-      )
-      let system_config = systemConfigParser(
-        JSON.stringify(
-          TOML.parse(`
+      ),
+    )
+    let system_config = systemConfigParser(
+      JSON.stringify(
+        TOML.parse(`
 version = "0.0.1"
 domain = "r3ply.com"
 
@@ -158,14 +153,13 @@ domain = "r3ply.com"
 name = "Guybrush Threepwood"
 email = "guybrush@example.com"
 `),
-        ),
-      )
-      console.log(system_config)
+      ),
+    )
+    let r3ply = R3ply(system_config.value!)
 
-      let r3ply = R3ply(system_config.value!)
-      let email_handler = r3ply.comments.viaEmail(createHMAC('password123'))
-      let comment = await email_handler([site_config.value!, email_bytes])
-      // console.log(comment)
-    })
+    let email_handler = r3ply.comments.viaEmail(createHMAC('password123'))
+    await expect(
+      email_handler([site_config.value!, email_bytes]),
+    ).resolves.not.toThrowError()
   })
 }
