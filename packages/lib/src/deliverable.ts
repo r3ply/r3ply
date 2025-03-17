@@ -22,7 +22,10 @@ export async function deliverable(
   // check `To` has address, and is addressed properly (to this site + r3ply pair, i.e. <YOUR_SITE>@<R3PLY>)
   let to = match(
     Result.safe(() =>
-      Util.unique_addr(accepted.to, `${site.domain}@${system.domain}`),
+      Util.unique_addr(
+        accepted.to,
+        site.domains.map((site_domain) => `${site_domain}@${system.domain}`),
+      ),
     ),
     {
       Ok: (to) => to.address,
@@ -45,8 +48,8 @@ export async function deliverable(
       `config.comments.email.subject == "url" requires subject parses as a URL`,
     )
 
-    // check subject has same hostname as `site.domain`, as well as pathname as `site.comments.paths`
-    if (subject.hostname != site.domain)
+    // check subject has same hostname is inclued in `site.domains`, as well as pathname as `site.comments.paths`
+    if (!site.domains.includes(subject.hostname))
       throw new Error(
         `Site can not accept subjects concerning other domains: ${subject.hostname}`,
       )

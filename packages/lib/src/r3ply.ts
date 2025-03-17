@@ -104,7 +104,7 @@ if (import.meta.vitest) {
         JSON.stringify(
           TOML.parse(`
 version = "0.0.1"
-domain = "spenc.es"
+domains = ["spenc.es"]
 r3ply = ['r3ply.com']
 
 [comments.email]
@@ -160,6 +160,8 @@ email = "guybrush@example.com"
 `),
         ),
       )
+      console.log(system_config)
+
       let r3ply = R3ply(system_config.value!)
       let email_handler = r3ply.comments.viaEmail(createHMAC('password123'))
       let comment = await email_handler([site_config.value!, email_bytes])
