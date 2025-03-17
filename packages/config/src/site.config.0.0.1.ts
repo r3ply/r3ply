@@ -7,7 +7,7 @@ export const schema_ts = {
   description:
     "JSON Schema to describe a site's configuration for use with the r3ply commenting system. See https://r3ply.com for more info.",
   type: 'object',
-  required: ['version', 'domain', 'r3ply', 'comments'],
+  required: ['version', 'domains', 'r3ply', 'comments'],
   additionalProperties: false,
   definitions: {
     notify_config: {
@@ -448,10 +448,14 @@ A new comment has been received
         'Comments will not be processed if set to false. Default is true.',
       default: true,
     },
-    domain: {
-      description: 'The domain that this site is configuring',
-      type: 'string',
-      format: 'hostname',
+    domains: {
+      description: 'The domains that this site is configuring',
+      type: 'array',
+      items: {
+        type: 'string',
+        format: 'hostname',
+      },
+      minItems: 1,
       examples: ['lucasarts.com', 'ghosts.lucasarts.com'],
       $comment: 'must match the domain that serves the config',
     },

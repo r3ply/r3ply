@@ -48,7 +48,7 @@ describe.each(implementations)('%s', (_, parse) => {
   }
   const minimum_config = {
     version: '0.0.1',
-    domain: 'example.com',
+    domains: ['example.com'],
     r3ply: ['r3ply.com', 'my-test-r3ply-server.com'],
     comments: { email: { moderation: webhook_test } },
   }
@@ -66,7 +66,7 @@ describe.each(implementations)('%s', (_, parse) => {
     ).toBe(false))
   describe('the root object', () => {
     describe('required fields', () => {
-      let expected_fields = ['version', 'domain', 'r3ply', 'comments']
+      let expected_fields = ['version', 'domains', 'r3ply', 'comments']
       test(`expected fields: ${JSON.stringify(expected_fields)}`, () =>
         expect(new Set(schema_ts.required)).toStrictEqual(
           new Set(expected_fields),
@@ -79,70 +79,91 @@ describe.each(implementations)('%s', (_, parse) => {
           parse(JSON.stringify({ ...minimum_config, version: '0.0.2' })).valid,
         ).toBe(false)
       })
-      test('`domain` must be a valid hostname', () => {
+      test('`domains` expects one or more valid hostnames', () => {
         expect(
-          parse(JSON.stringify({ ...minimum_config, domain: 'example.com' }))
+          parse(JSON.stringify({ ...minimum_config, domains: [] })).valid,
+        ).toBe(false)
+        expect(
+          parse(
+            JSON.stringify({ ...minimum_config, domains: ['a.com', 'b.net'] }),
+          ).valid,
+        ).toBe(true)
+        expect(
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              domains: ['subdomain.example.com'],
+            }),
+          ).valid,
+        ).toBe(true)
+        expect(
+          parse(JSON.stringify({ ...minimum_config, domains: ['domain'] }))
+            .valid,
+        ).toBe(true)
+        expect(
+          parse(JSON.stringify({ ...minimum_config, domains: ['localhost'] }))
+            .valid,
+        ).toBe(true)
+        expect(
+          parse(JSON.stringify({ ...minimum_config, domains: ['127.0.0.1'] }))
             .valid,
         ).toBe(true)
         expect(
           parse(
             JSON.stringify({
               ...minimum_config,
-              domain: 'subdomain.example.com',
+              domains: [
+                `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(61)}`,
+              ],
             }),
           ).valid,
         ).toBe(true)
         expect(
-          parse(JSON.stringify({ ...minimum_config, domain: 'domain' })).valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, domain: 'localhost' }))
-            .valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, domain: '127.0.0.1' }))
+          parse(JSON.stringify({ ...minimum_config, domains: ['xn--v4h.com'] }))
             .valid,
         ).toBe(true)
         expect(
           parse(
             JSON.stringify({
               ...minimum_config,
-              domain: `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(61)}`,
+              domains: ['hello  sfdjfsn world'],
             }),
           ).valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, domain: 'xn--v4h.com' }))
-            .valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, domain: 'hello world' }))
-            .valid,
-        ).toBe(false)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, domain: 'localhost:1234' }))
-            .valid,
         ).toBe(false)
         expect(
           parse(
-            JSON.stringify({ ...minimum_config, domain: 'https://google.com' }),
-          ).valid,
-        ).toBe(false)
-        expect(
-          parse(
-            JSON.stringify({ ...minimum_config, domain: 'example.com/path/' }),
+            JSON.stringify({ ...minimum_config, domains: ['localhost:1234'] }),
           ).valid,
         ).toBe(false)
         expect(
           parse(
             JSON.stringify({
               ...minimum_config,
-              domain: `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(62)}`,
+              domains: ['https://google.com'],
             }),
           ).valid,
         ).toBe(false)
         expect(
-          parse(JSON.stringify({ ...minimum_config, domain: '☮️.com' })).valid,
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              domains: ['example.com/path/'],
+            }),
+          ).valid,
+        ).toBe(false)
+        expect(
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              domains: [
+                `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(62)}`,
+              ],
+            }),
+          ).valid,
+        ).toBe(false)
+        expect(
+          parse(JSON.stringify({ ...minimum_config, domains: ['☮️.com'] }))
+            .valid,
         ).toBe(false)
       })
       test('`r3ply` must only have valid hostnames', () => {
