@@ -6,3 +6,4 @@ apps/cli/src/comments/training_data/*.json
 crates/r3ply-wasm/pkg/**
 **/Cargo.lock
 **/pnpm-lock.yaml
+**/worker-configuration.d.ts

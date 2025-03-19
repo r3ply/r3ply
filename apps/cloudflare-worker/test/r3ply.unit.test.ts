@@ -83,7 +83,7 @@ I found your banana picker.
     JSON.stringify(
       TOML.parse(`
 version = "0.0.1"
-domain = "banana-picker.com"
+domains = ["banana-picker.com"]
 r3ply = ["r3ply.com"]
 
 [comments.email]
