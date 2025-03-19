@@ -1,5 +1,5 @@
 import { match, Option, Result } from 'oxide.ts'
-import { Redacted } from './types'
+import { Redacted, Secret } from './types'
 import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
 import micromatch from 'micromatch'
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
@@ -39,23 +39,11 @@ export async function deliverable(
   }
 
   // check `From` is not on site's `block_list`
-  const from = Redacted(
-    (await Result.safe(redact(accepted.from.value)))
-      .mapErr((err) => {
-        throw new Error(
-          `Error redacting comment author. Underlying reason: \n\n\`\`\`\n${err.message}\n\`\`\`\n`,
-        )
-      })
-      .expect('Error redacting `From` header.'),
-  )
-  const author_on_site_block_list = micromatch(
-    [accepted.from.value, from.value],
+  const from = await from_field_is_deliverable(
+    accepted.from,
+    redact,
     site.comments.email.block_list,
   )
-  if (author_on_site_block_list.length > 0)
-    throw new Error(
-      `Comment author was on block_list, matches: ${author_on_site_block_list}`,
-    )
 
   return { from, to, subject, email: accepted.email }
 }
@@ -123,6 +111,38 @@ function subject_field_is_deliverable(
   return subject
 }
 
+/**
+ * @description for the `From` field to be deliverable it must not match with the site's configured block_list
+ * @param from_secret the from field, wrapped in a `Secret` type
+ * @param redact a function that's used to obscure the secret, e.g. a hash function or an hmac
+ * @param block_list a list of strings that can be patterns
+ * @returns the `From` field but redacted
+ */
+async function from_field_is_deliverable(
+  from_secret: Secret<string>,
+  redact: (input: string) => Promise<string>,
+  block_list: string[],
+) {
+  const from = Redacted(
+    (await Result.safe(redact(from_secret.value)))
+      .mapErr((err) => {
+        throw new Error(
+          `Error redacting comment author. Underlying reason: \n\n\`\`\`\n${err.message}\n\`\`\`\n`,
+        )
+      })
+      .expect('Error redacting `From` header.'),
+  )
+  const author_on_site_block_list = micromatch(
+    [from_secret.value, from.value],
+    block_list,
+  )
+  if (author_on_site_block_list.length > 0)
+    throw new Error(
+      `Comment author was on block_list, matches: ${author_on_site_block_list}`,
+    )
+  return from
+}
+
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   test('to_field_is_deliverable', () => {
@@ -161,5 +181,29 @@ if (import.meta.vitest) {
     expect(() =>
       subject_field_is_deliverable('https://a.com', ['a.com'], ['/blog']),
     ).toThrowError(/not configured to accept comments at path/)
+  })
+  test('from_field_is_deliverable', async () => {
+    const from: Secret<string> = Secret('bob@example.com')
+    await expect(
+      from_field_is_deliverable(
+        from,
+        (input: string) => Promise.resolve(input),
+        [],
+      ),
+    ).resolves.not.toThrowError()
+    await expect(
+      from_field_is_deliverable(
+        from,
+        (input: string) => Promise.resolve(input),
+        ['alice@example.com'],
+      ),
+    ).resolves.not.toThrowError()
+    await expect(
+      from_field_is_deliverable(
+        from,
+        (input: string) => Promise.resolve(input),
+        ['bob@example.com'],
+      ),
+    ).rejects.toThrowError(/Comment author was on block_list/)
   })
 }
