@@ -193,18 +193,18 @@ export namespace Util {
   /**
    * @description filter an array of address using a glob pattern
    * @param addrs an array of Addr objects
-   * @param address_glob a glob pattern that will be used again the .address field of members of addrs
+   * @param address_globs a glob pattern that will be used again the .address field of members of addrs
    * @returns a unique Addr
    * @throws Exactly one Addr MUST be returned.
    */
-  export function unique_addr(addrs: Addr[], address_glob: string) {
+  export function unique_addr(addrs: Addr[], address_globs: string[]) {
     type AddrWithAddress = { name: string | null; address: string }
     if (addrs.length == 0) throw new Error('Parameter "addrs" can not be empty')
     let values: Set<AddrWithAddress> = new Set([])
     addrs
       .filter((addr) => {
         if (addr.address) {
-          let matches = micromatch([addr.address], address_glob)
+          let matches = micromatch([addr.address], address_globs)
           return matches.length > 0
         }
       })
@@ -286,19 +286,19 @@ if (import.meta.vitest) {
     expect(() => get_to(message)).toThrowError(/`To` must not be missing/)
   })
   test('unique_addr', () => {
-    expect(() => Util.unique_addr([], '*')).toThrowError(/can not be empty/)
+    expect(() => Util.unique_addr([], ['*'])).toThrowError(/can not be empty/)
     let addresses: Addr[] = [
       { name: 'foo', address: 'bar@a.com' },
       { name: 'baz', address: 'biz@b.com' },
       { name: 'italian foo', address: 'bar@a.com.it' },
     ]
-    expect(Util.unique_addr(addresses, '*@a.com').address).toBe('bar@a.com')
-    expect(() => Util.unique_addr(addresses, '*.com').address).toThrowError(
+    expect(Util.unique_addr(addresses, ['*@a.com']).address).toBe('bar@a.com')
+    expect(() => Util.unique_addr(addresses, ['*.com']).address).toThrowError(
       /pattern was not unique enough/,
     )
-    expect(() => Util.unique_addr(addresses, 'asddasdas').address).toThrowError(
-      /pattern was too unique/,
-    )
+    expect(
+      () => Util.unique_addr(addresses, ['asddasdas']).address,
+    ).toThrowError(/pattern was too unique/)
   })
   test('get_date', async () => {
     // @ts-ignore

@@ -18,9 +18,9 @@ export function prescreen(
   system: R3plySystemConfig,
 ): void {
   // Check if system and site are enabled
-  r3ply_is_disabled(system.enabled, system.domain, site.enabled, site.domain)
+  r3ply_is_disabled(system.enabled, system.domain, site.enabled, site.domains)
   // Check if system accepts comments on behalf of site
-  system_accepts_comments_for_site(site.domain, system.sites)
+  system_accepts_comments_for_site(site.domains, system.sites)
   // Check if site accepts comments from system
   site_accepts_comments_from_system(site.r3ply, system.domain)
   // Check if incoming email exceeds min of system or site configurations
@@ -103,7 +103,7 @@ function r3ply_is_disabled(
   system_enabled: boolean,
   system_domain: string,
   site_enabled: boolean,
-  site_domain: string,
+  site_domains: string[],
 ) {
   if (!system_enabled)
     throw new Error(
@@ -111,36 +111,40 @@ function r3ply_is_disabled(
     )
   if (!site_enabled)
     throw new Error(
-      `r3ply has been disabled at the site-level config for domain: ${site_domain}`,
+      `r3ply has been disabled at the site-level config for domain: ${site_domains}`,
     )
 }
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   test('r3ply_is_disabled', () => {
-    expect(() => r3ply_is_disabled(false, 'system', true, 'site')).toThrowError(
-      /disabled .*? system/,
-    )
     expect(() =>
-      r3ply_is_disabled(false, 'system', false, 'site'),
+      r3ply_is_disabled(false, 'system', true, ['a', 'b']),
     ).toThrowError(/disabled .*? system/)
     expect(() =>
-      r3ply_is_disabled(true, 'system', true, 'site'),
+      r3ply_is_disabled(false, 'system', false, ['a', 'b']),
+    ).toThrowError(/disabled .*? system/)
+    expect(() =>
+      r3ply_is_disabled(true, 'system', true, ['a', 'b']),
     ).not.toThrowError()
-    expect(() => r3ply_is_disabled(true, 'system', false, 'site')).toThrowError(
-      /disabled .*? site/,
-    )
+    expect(() =>
+      r3ply_is_disabled(true, 'system', false, ['a', 'b']),
+    ).toThrowError(/disabled .*? site/)
   })
 }
 
 function system_accepts_comments_for_site(
-  site_domain: string,
+  site_domains: string[],
   accepted_site_list: string[],
 ) {
-  const matches = micromatch([site_domain], accepted_site_list)
+  const matches = micromatch(site_domains, accepted_site_list)
   if (matches.length == 0)
     throw new Error(
-      `System's site list '${JSON.stringify(accepted_site_list)}' does not accept comments for '${site_domain}'`,
+      `System's site list '${JSON.stringify(accepted_site_list)}' does not accept comments for '${JSON.stringify(site_domains, null, 2)}'`,
     )
+}
+if (import.meta.vitest) {
+  const { test, expect } = import.meta.vitest
+  // TODO
 }
 
 function site_accepts_comments_from_system(
@@ -152,6 +156,10 @@ function site_accepts_comments_from_system(
     throw new Error(
       `Site's r3ply list '${JSON.stringify(site_r3ply_list)}' does not accept comments from '${system_domain}`,
     )
+}
+if (import.meta.vitest) {
+  const { test, expect } = import.meta.vitest
+  // TODO
 }
 
 function email_size_exceeds_max(input_size: number, max_allowed: number) {

@@ -91,7 +91,11 @@ export function comments_cmd(cwd: string) {
           await project.get_site_config(cwd, options.config),
         )
         const email = generate
-          .email(site_config.domain, site_config.r3ply, options)
+          .email(
+            site_config.domains[util.random_int(site_config.domains.length)],
+            site_config.r3ply,
+            options,
+          )
           .then((email) => {
             console.log(
               `Input email:\n\n${chalk.blueBright(email.replace(/\r/g, ''))}`,

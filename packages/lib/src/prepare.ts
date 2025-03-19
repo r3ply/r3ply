@@ -93,7 +93,7 @@ export function prepare(
     r3ply: {
       config_version: config.version,
       server: system.domain,
-      site: config.domain,
+      site: config.domains.find((domain) => deliverable.to.includes(domain))!,
     },
     comment: {
       id: comment_id,

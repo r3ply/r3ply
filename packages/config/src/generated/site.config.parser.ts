@@ -9,7 +9,7 @@ const schema = {
   description:
     "JSON Schema to describe a site's configuration for use with the r3ply commenting system. See https://r3ply.com for more info.",
   type: 'object',
-  required: ['version', 'domain', 'r3ply', 'comments'],
+  required: ['version', 'domains', 'r3ply', 'comments'],
   additionalProperties: false,
   definitions: {
     notify_config: {
@@ -429,10 +429,11 @@ const schema = {
         'Comments will not be processed if set to false. Default is true.',
       default: true,
     },
-    domain: {
-      description: 'The domain that this site is configuring',
-      type: 'string',
-      format: 'hostname',
+    domains: {
+      description: 'The domains that this site is configuring',
+      type: 'array',
+      items: { type: 'string', format: 'hostname' },
+      minItems: 1,
       examples: ['lucasarts.com', 'ghosts.lucasarts.com'],
       $comment: 'must match the domain that serves the config',
     },
@@ -543,29 +544,29 @@ const raw_parser = (function () {
                   })
                   errorCount++
                 } else {
-                  for (let m = 0; m < data.allow_list.length; m++) {
+                  for (let n = 0; n < data.allow_list.length; n++) {
                     if (
-                      data.allow_list[m] !== undefined &&
-                      hasOwn(data.allow_list, m)
+                      data.allow_list[n] !== undefined &&
+                      hasOwn(data.allow_list, n)
                     ) {
-                      if (!(typeof data.allow_list[m] === 'string')) {
+                      if (!(typeof data.allow_list[n] === 'string')) {
                         if (validate.errors === null) validate.errors = []
                         validate.errors.push({
                           keywordLocation:
                             '#/oneOf/0/properties/allow_list/items/type',
-                          instanceLocation: '#/allow_list/' + m,
+                          instanceLocation: '#/allow_list/' + n,
                         })
                         errorCount++
                       } else {
                         if (
-                          data.allow_list[m].length > 256 &&
-                          stringLength(data.allow_list[m]) > 256
+                          data.allow_list[n].length > 256 &&
+                          stringLength(data.allow_list[n]) > 256
                         ) {
                           if (validate.errors === null) validate.errors = []
                           validate.errors.push({
                             keywordLocation:
                               '#/oneOf/0/properties/allow_list/items/maxLength',
-                            instanceLocation: '#/allow_list/' + m,
+                            instanceLocation: '#/allow_list/' + n,
                           })
                           errorCount++
                         }
@@ -848,29 +849,29 @@ const raw_parser = (function () {
                   })
                   errorCount++
                 } else {
-                  for (let n = 0; n < data.allow_list.length; n++) {
+                  for (let o = 0; o < data.allow_list.length; o++) {
                     if (
-                      data.allow_list[n] !== undefined &&
-                      hasOwn(data.allow_list, n)
+                      data.allow_list[o] !== undefined &&
+                      hasOwn(data.allow_list, o)
                     ) {
-                      if (!(typeof data.allow_list[n] === 'string')) {
+                      if (!(typeof data.allow_list[o] === 'string')) {
                         if (validate.errors === null) validate.errors = []
                         validate.errors.push({
                           keywordLocation:
                             '#/oneOf/1/properties/allow_list/items/type',
-                          instanceLocation: '#/allow_list/' + n,
+                          instanceLocation: '#/allow_list/' + o,
                         })
                         errorCount++
                       } else {
                         if (
-                          data.allow_list[n].length > 256 &&
-                          stringLength(data.allow_list[n]) > 256
+                          data.allow_list[o].length > 256 &&
+                          stringLength(data.allow_list[o]) > 256
                         ) {
                           if (validate.errors === null) validate.errors = []
                           validate.errors.push({
                             keywordLocation:
                               '#/oneOf/1/properties/allow_list/items/maxLength',
-                            instanceLocation: '#/allow_list/' + n,
+                            instanceLocation: '#/allow_list/' + o,
                           })
                           errorCount++
                         }
@@ -1104,13 +1105,13 @@ const raw_parser = (function () {
           })
           errorCount++
         } else {
-          for (let j = 0; j < data.paths.length; j++) {
-            if (data.paths[j] !== undefined && hasOwn(data.paths, j)) {
-              if (!(typeof data.paths[j] === 'string')) {
+          for (let k = 0; k < data.paths.length; k++) {
+            if (data.paths[k] !== undefined && hasOwn(data.paths, k)) {
+              if (!(typeof data.paths[k] === 'string')) {
                 if (validate.errors === null) validate.errors = []
                 validate.errors.push({
                   keywordLocation: '#/properties/paths/items/type',
-                  instanceLocation: '#/paths/' + j,
+                  instanceLocation: '#/paths/' + k,
                 })
                 errorCount++
               }
@@ -1157,16 +1158,16 @@ const raw_parser = (function () {
           })
           errorCount++
         } else {
-          for (let k = 0; k < data.allow_tags.length; k++) {
+          for (let l = 0; l < data.allow_tags.length; l++) {
             if (
-              data.allow_tags[k] !== undefined &&
-              hasOwn(data.allow_tags, k)
+              data.allow_tags[l] !== undefined &&
+              hasOwn(data.allow_tags, l)
             ) {
-              if (!(typeof data.allow_tags[k] === 'string')) {
+              if (!(typeof data.allow_tags[l] === 'string')) {
                 if (validate.errors === null) validate.errors = []
                 validate.errors.push({
                   keywordLocation: '#/properties/allow_tags/items/type',
-                  instanceLocation: '#/allow_tags/' + k,
+                  instanceLocation: '#/allow_tags/' + l,
                 })
                 errorCount++
               }
@@ -1332,17 +1333,17 @@ const raw_parser = (function () {
               })
               errorCount++
             } else {
-              for (let l = 0; l < data.email.block_list.length; l++) {
+              for (let m = 0; m < data.email.block_list.length; m++) {
                 if (
-                  data.email.block_list[l] !== undefined &&
-                  hasOwn(data.email.block_list, l)
+                  data.email.block_list[m] !== undefined &&
+                  hasOwn(data.email.block_list, m)
                 ) {
-                  if (!(typeof data.email.block_list[l] === 'string')) {
+                  if (!(typeof data.email.block_list[m] === 'string')) {
                     if (validate.errors === null) validate.errors = []
                     validate.errors.push({
                       keywordLocation:
                         '#/properties/email/properties/block_list/items/type',
-                      instanceLocation: '#/email/block_list/' + l,
+                      instanceLocation: '#/email/block_list/' + m,
                     })
                     errorCount++
                   }
@@ -1512,11 +1513,11 @@ const raw_parser = (function () {
         })
         errorCount++
       }
-      if (!(data.domain !== undefined && hasOwn(data, 'domain'))) {
+      if (!(data.domains !== undefined && hasOwn(data, 'domains'))) {
         if (validate.errors === null) validate.errors = []
         validate.errors.push({
           keywordLocation: '#/required',
-          instanceLocation: '#/domain',
+          instanceLocation: '#/domains',
         })
         errorCount++
       }
@@ -1565,24 +1566,45 @@ const raw_parser = (function () {
           errorCount++
         }
       } else data.enabled = true
-      if (data.domain !== undefined && hasOwn(data, 'domain')) {
-        if (!(typeof data.domain === 'string')) {
+      if (data.domains !== undefined && hasOwn(data, 'domains')) {
+        if (!Array.isArray(data.domains)) {
           if (validate.errors === null) validate.errors = []
           validate.errors.push({
-            keywordLocation: '#/properties/domain/type',
-            instanceLocation: '#/domain',
+            keywordLocation: '#/properties/domains/type',
+            instanceLocation: '#/domains',
           })
           errorCount++
         } else {
-          const prev0 = errorCount
-          if (errorCount === prev0) {
-            if (!format0(data.domain)) {
-              if (validate.errors === null) validate.errors = []
-              validate.errors.push({
-                keywordLocation: '#/properties/domain/format',
-                instanceLocation: '#/domain',
-              })
-              errorCount++
+          if (data.domains.length < 1) {
+            if (validate.errors === null) validate.errors = []
+            validate.errors.push({
+              keywordLocation: '#/properties/domains/minItems',
+              instanceLocation: '#/domains',
+            })
+            errorCount++
+          }
+          for (let i = 0; i < data.domains.length; i++) {
+            if (data.domains[i] !== undefined && hasOwn(data.domains, i)) {
+              if (!(typeof data.domains[i] === 'string')) {
+                if (validate.errors === null) validate.errors = []
+                validate.errors.push({
+                  keywordLocation: '#/properties/domains/items/type',
+                  instanceLocation: '#/domains/' + i,
+                })
+                errorCount++
+              } else {
+                const prev0 = errorCount
+                if (errorCount === prev0) {
+                  if (!format0(data.domains[i])) {
+                    if (validate.errors === null) validate.errors = []
+                    validate.errors.push({
+                      keywordLocation: '#/properties/domains/items/format',
+                      instanceLocation: '#/domains/' + i,
+                    })
+                    errorCount++
+                  }
+                }
+              }
             }
           }
         }
@@ -1596,23 +1618,23 @@ const raw_parser = (function () {
           })
           errorCount++
         } else {
-          for (let i = 0; i < data.r3ply.length; i++) {
-            if (data.r3ply[i] !== undefined && hasOwn(data.r3ply, i)) {
-              if (!(typeof data.r3ply[i] === 'string')) {
+          for (let j = 0; j < data.r3ply.length; j++) {
+            if (data.r3ply[j] !== undefined && hasOwn(data.r3ply, j)) {
+              if (!(typeof data.r3ply[j] === 'string')) {
                 if (validate.errors === null) validate.errors = []
                 validate.errors.push({
                   keywordLocation: '#/properties/r3ply/items/type',
-                  instanceLocation: '#/r3ply/' + i,
+                  instanceLocation: '#/r3ply/' + j,
                 })
                 errorCount++
               } else {
                 const prev1 = errorCount
                 if (errorCount === prev1) {
-                  if (!format0(data.r3ply[i])) {
+                  if (!format0(data.r3ply[j])) {
                     if (validate.errors === null) validate.errors = []
                     validate.errors.push({
                       keywordLocation: '#/properties/r3ply/items/format',
-                      instanceLocation: '#/r3ply/' + i,
+                      instanceLocation: '#/r3ply/' + j,
                     })
                     errorCount++
                   }
@@ -1641,7 +1663,7 @@ const raw_parser = (function () {
         if (
           key5 !== 'version' &&
           key5 !== 'enabled' &&
-          key5 !== 'domain' &&
+          key5 !== 'domains' &&
           key5 !== 'r3ply' &&
           key5 !== 'comments'
         ) {

@@ -54,7 +54,10 @@ var util;
 // src/lib.ts
 import fg from "fast-glob";
 import TOML from "@iarna/toml";
-import { siteConfigParser, systemConfigParser } from "@r3ply/config";
+import {
+  siteConfigParser,
+  systemConfigParser
+} from "@r3ply/config";
 import chalk from "chalk";
 import { RiMarkov, RiTa } from "rita";
 import { fileURLToPath } from "url";
@@ -64,11 +67,17 @@ import { build_email } from "@r3ply/wasm";
 var project;
 ((project2) => {
   const R3PLY_DIR = ".r3ply";
-  const CONFIG_GLOB_PATTERNS = [`**/r3ply/config.{toml,json}`, `**/r3ply.config.{toml,json}`];
+  const CONFIG_GLOB_PATTERNS = [
+    `**/r3ply/config.{toml,json}`,
+    `**/r3ply.config.{toml,json}`
+  ];
   async function find_r3ply_dir(cwd) {
     const find_result = util.find_up(".r3ply", cwd).then((path4) => {
       if (path4) return path4;
-      else throw new Error(`No ${R3PLY_DIR} directory found. ${chalk.yellow(`You can run \`re init\` to initialize one.`)}`);
+      else
+        throw new Error(
+          `No ${R3PLY_DIR} directory found. ${chalk.yellow(`You can run \`re init\` to initialize one.`)}`
+        );
     });
     return Result2.safe(find_result);
   }
@@ -80,22 +89,38 @@ var project;
   }
   project2.find_project_dir = find_project_dir;
   async function find_config_files(from_dir, file_glob) {
-    if (file_glob) return Result2.safe(fg.async([file_glob], { dot: true, cwd: from_dir }));
-    else return Result2.safe(fg.async(CONFIG_GLOB_PATTERNS, { dot: true, cwd: from_dir }));
+    if (file_glob)
+      return Result2.safe(fg.async([file_glob], { dot: true, cwd: from_dir }));
+    else
+      return Result2.safe(
+        fg.async(CONFIG_GLOB_PATTERNS, { dot: true, cwd: from_dir })
+      );
   }
   project2.find_config_files = find_config_files;
   async function get_site_config_path(cwd, config_path) {
     const full_config_path = (async () => {
       const project_dir = util.unsafeUnwrap(await find_project_dir(cwd));
       if (config_path) {
-        const relative_files = util.unsafeUnwrap(await find_config_files(cwd, config_path));
-        if (relative_files.length == 0) throw new Error(`No config found at ${path2.join(cwd, config_path)}`);
-        else if (relative_files.length > 1) throw new Error(`Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`);
+        const relative_files = util.unsafeUnwrap(
+          await find_config_files(cwd, config_path)
+        );
+        if (relative_files.length == 0)
+          throw new Error(`No config found at ${path2.join(cwd, config_path)}`);
+        else if (relative_files.length > 1)
+          throw new Error(
+            `Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`
+          );
         else return path2.join(cwd, relative_files[0]);
       } else {
-        const relative_files = util.unsafeUnwrap(await find_config_files(project_dir));
-        if (relative_files.length == 0) throw new Error(`No r3ply config found within ${project_dir}`);
-        else if (relative_files.length > 1) throw new Error(`Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`);
+        const relative_files = util.unsafeUnwrap(
+          await find_config_files(project_dir)
+        );
+        if (relative_files.length == 0)
+          throw new Error(`No r3ply config found within ${project_dir}`);
+        else if (relative_files.length > 1)
+          throw new Error(
+            `Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`
+          );
         else return path2.join(project_dir, relative_files[0]);
       }
     })();
@@ -104,7 +129,11 @@ var project;
   project2.get_site_config_path = get_site_config_path;
   async function parse_site_config(cwd, config_path) {
     const parsed_site_config = get_site_config_path(cwd, config_path).then((full_config_path) => util.unsafeUnwrap(full_config_path)).then((full_config_path) => {
-      return fs2.promises.readFile(full_config_path).then((site_config_bytes) => site_config_bytes.toString()).then((site_config_str) => full_config_path.endsWith(".toml") ? TOML.parse(site_config_str) : JSON.parse(site_config_str)).then((site_config_json) => siteConfigParser(JSON.stringify(site_config_json)));
+      return fs2.promises.readFile(full_config_path).then((site_config_bytes) => site_config_bytes.toString()).then(
+        (site_config_str) => full_config_path.endsWith(".toml") ? TOML.parse(site_config_str) : JSON.parse(site_config_str)
+      ).then(
+        (site_config_json) => siteConfigParser(JSON.stringify(site_config_json))
+      );
     });
     return Result2.safe(parsed_site_config);
   }
@@ -117,24 +146,36 @@ var project;
   async function init_r3ply_project_at(cwd, dir) {
     const new_r3ply_dir = path2.join(cwd, dir ?? "", R3PLY_DIR);
     const parent_project_exists = find_r3ply_dir(new_r3ply_dir);
-    const initialize_project = parent_project_exists.then((parent_project_exists2) => {
-      const file_access = Result2.safe(fs2.promises.access(new_r3ply_dir));
-      return file_access.then((file_access2) => {
-        if (file_access2.isErr()) {
-          if (parent_project_exists2.isOk()) throw new Error(`Nested r3ply project. There is already a parent directory initialized at ${chalk.blue("`" + parent_project_exists2.unwrap() + "`")}.${chalk.yellow("(Nested projects can lead to strange effects)")}`);
-          return fs2.promises.mkdir(new_r3ply_dir).then(() => {
-            return fs2.promises.writeFile(path2.join(new_r3ply_dir, "placeholder.txt"), "This is just an empty file so the .r3ply directory is picked up by source control. In the future there will be more things to store here, so this file will be unnecessary.").then((_) => new_r3ply_dir);
-          });
-        } else {
-          throw new Error(`Project already initialized at \`${chalk.reset(path2.dirname(new_r3ply_dir))}\``);
-        }
-      });
-    });
+    const initialize_project = parent_project_exists.then(
+      (parent_project_exists2) => {
+        const file_access = Result2.safe(fs2.promises.access(new_r3ply_dir));
+        return file_access.then((file_access2) => {
+          if (file_access2.isErr()) {
+            if (parent_project_exists2.isOk())
+              throw new Error(
+                `Nested r3ply project. There is already a parent directory initialized at ${chalk.blue("`" + parent_project_exists2.unwrap() + "`")}.${chalk.yellow("(Nested projects can lead to strange effects)")}`
+              );
+            return fs2.promises.mkdir(new_r3ply_dir).then(() => {
+              return fs2.promises.writeFile(
+                path2.join(new_r3ply_dir, "placeholder.txt"),
+                "This is just an empty file so the .r3ply directory is picked up by source control. In the future there will be more things to store here, so this file will be unnecessary."
+              ).then((_) => new_r3ply_dir);
+            });
+          } else {
+            throw new Error(
+              `Project already initialized at \`${chalk.reset(path2.dirname(new_r3ply_dir))}\``
+            );
+          }
+        });
+      }
+    );
     return Result2.safe(initialize_project);
   }
   project2.init_r3ply_project_at = init_r3ply_project_at;
 })(project || (project = {}));
-var markov = RiTa.markov(2, { text: ["example.com", "foo.com", "foobar.com", "monkeyisland.net"] });
+var markov = RiTa.markov(2, {
+  text: ["example.com", "foo.com", "foobar.com", "monkeyisland.net"]
+});
 var generate;
 ((generate2) => {
   function date(floor = Math.floor(Date.now() / 1e3) - 31536e4, ceiling = Math.floor(Date.now() / 1e3)) {
@@ -168,7 +209,9 @@ var generate;
     const __dirname = path2.dirname(__filename);
     const modelPath = path2.join(__dirname, "comments-markov-model.json");
     const model_data = fs2.promises.readFile(modelPath, "utf-8");
-    const markov2 = model_data.then((model_data2) => RiMarkov.fromJSON(model_data2));
+    const markov2 = model_data.then(
+      (model_data2) => RiMarkov.fromJSON(model_data2)
+    );
     return markov2.then(
       (markov3) => markov3.generate({
         maxLength: 128,
@@ -192,7 +235,17 @@ var generate;
     const to = options?.to || `${site_domain}@${r3ply_domains[util.random_int(r3ply_domains.length)]}`;
     const subject2 = options?.subject || generate2.subject(new URL(`https://${site_domain}/`));
     const body = options?.body || await generate2.comment_body();
-    const email2 = Result2.safe(() => build_email(message_id2, BigInt(date2.unix()), from.name, from.addr, to, subject2, body));
+    const email2 = Result2.safe(
+      () => build_email(
+        message_id2,
+        BigInt(date2.unix()),
+        from.name,
+        from.addr,
+        to,
+        subject2,
+        body
+      )
+    );
     return email2.unwrap();
   }
   generate2.email = email;
@@ -208,12 +261,16 @@ var generate;
   }
 })(generate || (generate = {}));
 async function cli_handle_comment_via_email(site_config, email_bytes) {
-  const cli_system_config = systemConfigParser(JSON.stringify(TOML.parse(`
+  const cli_system_config = systemConfigParser(
+    JSON.stringify(
+      TOML.parse(`
 version  = "0.0.1"
 domain = "r3ply.com"
 [[admin]]
 name = "Guybrush Threepwood"
-email = "guybrush@example.com"`))).value;
+email = "guybrush@example.com"`)
+    )
+  ).value;
   const r3ply = R3ply(cli_system_config);
   const redact = util.sha256_0x;
   const comment_via_email_handler = r3ply.comments.viaEmail(redact);
@@ -414,50 +471,83 @@ import { Result as Result3 } from "oxide.ts";
 import chalk2 from "chalk";
 import path3 from "path";
 function init_cmd(cwd) {
-  const config_cmd2 = new Command("init").description("initialize a new r3ply project").argument("[directory]", "directory to initialize bare r3ply project within").action(async (directory) => {
+  const config_cmd2 = new Command("init").description("initialize a new r3ply project").argument(
+    "[directory]",
+    "directory to initialize bare r3ply project within"
+  ).action(async (directory) => {
     return project.init_r3ply_project_at(cwd, directory).then((r3ply_dir) => {
-      console.log(`Initialized empty r3ply project at ${chalk2.greenBright(path3.dirname(util.unsafeUnwrap(r3ply_dir)))}`);
+      console.log(
+        `Initialized empty r3ply project at ${chalk2.greenBright(path3.dirname(util.unsafeUnwrap(r3ply_dir)))}`
+      );
     });
   });
   return config_cmd2;
 }
 function config_cmd(cwd) {
-  const config_cmd2 = new Command("config").description("various supporting operations for working with r3ply configs");
+  const config_cmd2 = new Command("config").description(
+    "various supporting operations for working with r3ply configs"
+  );
   config_cmd2.command("validate").description("validate the configuration").option("--config <path>", "specify path to config").action(async (options) => {
-    const site_config = util.unsafeUnwrap(await project.parse_site_config(cwd, options.config));
-    if (!site_config.valid) throw new Error(`config failed validation:
+    const site_config = util.unsafeUnwrap(
+      await project.parse_site_config(cwd, options.config)
+    );
+    if (!site_config.valid)
+      throw new Error(
+        `config failed validation:
 
-${JSON.stringify(site_config.errors, null, 2)}`);
+${JSON.stringify(site_config.errors, null, 2)}`
+      );
   });
   return config_cmd2;
 }
 function comments_cmd(cwd) {
-  const comments_cmd2 = new Command("comments").description("various supporting operations for working with r3ply comments");
-  comments_cmd2.command("simulate-email").description("simulate receiving a comment via email with your current r3ply config").option("--config <config-path>", "specify path to config").option("--message-id <id>", "override Message-ID header").option("--date <date>", "override Date header").option("--from <address>", "override From header").option("--to <address>", "override To header").option("--subject <text>", "override email subject").option("--body <text>", "override email body").action(
+  const comments_cmd2 = new Command("comments").description(
+    "various supporting operations for working with r3ply comments"
+  );
+  comments_cmd2.command("simulate-email").description(
+    "simulate receiving a comment via email with your current r3ply config"
+  ).option("--config <config-path>", "specify path to config").option("--message-id <id>", "override Message-ID header").option("--date <date>", "override Date header").option("--from <address>", "override From header").option("--to <address>", "override To header").option("--subject <text>", "override email subject").option("--body <text>", "override email body").action(
     async (options) => {
       let site_config;
       if (options.config) {
-        site_config = util.unsafeUnwrap(await project.get_site_config(cwd, options.config));
+        site_config = util.unsafeUnwrap(
+          await project.get_site_config(cwd, options.config)
+        );
       } else {
         const project_dir = (await project.find_project_dir(cwd)).unwrap();
-        site_config = util.unsafeUnwrap(await project.get_site_config(project_dir, void 0));
+        site_config = util.unsafeUnwrap(
+          await project.get_site_config(project_dir, void 0)
+        );
       }
-      site_config = util.unsafeUnwrap(await project.get_site_config(cwd, options.config));
-      const email = generate.email(site_config.domain, site_config.r3ply, options).then((email2) => {
-        console.log(`Input email:
+      site_config = util.unsafeUnwrap(
+        await project.get_site_config(cwd, options.config)
+      );
+      const email = generate.email(site_config.domains[util.random_int(site_config.domains.length)], site_config.r3ply, options).then((email2) => {
+        console.log(
+          `Input email:
 
-${chalk2.blueBright(email2.replace(/\r/g, ""))}`);
+${chalk2.blueBright(email2.replace(/\r/g, ""))}`
+        );
         console.log(`
 ${chalk2.yellow("--------------------------")}
 `);
         return email2;
       });
-      const comment = Result3.safe(email.then((email2) => cli_handle_comment_via_email(site_config, new TextEncoder().encode(email2))));
+      const comment = Result3.safe(
+        email.then(
+          (email2) => cli_handle_comment_via_email(
+            site_config,
+            new TextEncoder().encode(email2)
+          )
+        )
+      );
       await comment.then(async (comment2) => {
         if (comment2.isOk()) {
-          console.log(`Output comment:
+          console.log(
+            `Output comment:
 
-${chalk2.cyanBright(comment2.unwrap())}`);
+${chalk2.cyanBright(comment2.unwrap())}`
+          );
         } else {
           throw comment2.unwrapErr();
         }
