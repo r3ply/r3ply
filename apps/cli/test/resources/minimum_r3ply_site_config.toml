@@ -1,5 +1,5 @@
 version = "0.0.1"
-domain = "foo.com"
+domains = ["foo.com"]
 r3ply = ['bar.com']
 
 [comments.email.moderation]
