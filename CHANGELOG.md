@@ -2,6 +2,8 @@
 
 ## Next
 
+- Refactor `domain` (string) to `domains` (string[]) for site config
+
 ## 0.0.1 (2025-03-15)
 
 - make a monorepo with the following directory structure:
