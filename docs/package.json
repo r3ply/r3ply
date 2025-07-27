@@ -1,0 +1,20 @@
+{
+  "name": "@r3ply/docs",
+  "version": "0.0.1",
+  "description": "r3ply site and documentation",
+  "public": false,
+  "scripts": {
+    "build": "zola build $BUILD_OPTS && npx @tailwindcss/cli -i ./public/input.css -o ./public/style.css -m",
+    "serve": "zola serve $SERVE_OPTS --interface 0.0.0.0 & npx @tailwindcss/cli  -i ./public/input.css -o ./public/style.css --watch && wait",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@tailwindcss/typography": "^0.5.16",
+    "tailwindcss": "^4.1.11"
+  },
+  "volta": {
+    "node": "20.10.0"
+  },
+  "author": "Spencer Scorcelletti",
+  "license": "MIT"
+}
