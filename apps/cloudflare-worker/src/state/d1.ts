@@ -1,6 +1,9 @@
 import { CommentMetadata } from '@r3ply/lib'
 import { OmitFirstParameter } from '../util'
 
+////////////////////////////////////
+///// BEGIN COMMENTS VIA EMAIL /////
+////////////////////////////////////
 type CommentViaEmailStates =
   | 'accepted'
   | 'deliverable'
@@ -30,7 +33,7 @@ export interface CommentState {
   }
 }
 
-export function CommentState(d1: D1Database) {
+export function CommentState(d1: D1Database): CommentState {
   return {
     viaEmail: {
       accept: (message_id: string, gist?: { id: string; url: string }) =>
@@ -93,4 +96,64 @@ async function update_comment_via_email_state(
     .bind(state, comment_id)
     .run()
     .then((_) => Promise.resolve())
+}
+////////////////////////////////////
+////// END COMMENTS VIA EMAIL //////
+////////////////////////////////////
+
+////////////////////////////////////
+/////// BEGIN CACHE COMMENTS ///////
+////////////////////////////////////
+export interface CachedComment {
+  domain: string,
+  path: string,
+  comment_id: string,
+  created_utc: string,
+  comment_json: any
+}
+/**
+ *  get(key): Value | null
+    set(key, value, ttl = None): void
+    delete(key): void
+    has(key): bool
+    clear(): void  # Optional
+ */
+export interface CommentCache {
+  get(domain: string, path: string, comment_id?: string): Promise<CachedComment[]>
+  set(domain: string, path:  string, comment_id: string, comment: any): Promise<void>
+  // delete(domain: string, path:  string, comment_id?: string): Promise<void>
+  // has(domain: string, path:  string, comment_id?: string): Promise<boolean>
+  // clear(domain?: string, path?:  string): Promise<void>
+}
+
+export function CommentCache(d1: D1Database): CommentCache {
+  return {
+  set: async function (domain: string, path: string, comment_id: string, comment: any): Promise<void> {
+      return d1
+        .prepare(`
+          INSERT INTO pending_comments (domain, path, comment_id, comment_json)
+          VALUES (?1, ?2, ?3, ?4);
+        `)
+        .bind(domain, path, comment_id, JSON.stringify(comment))
+        .run()
+        .then((_) => Promise.resolve())
+      throw new Error('Function not implemented.')
+    },
+    get: function (domain: string, path: string, comment_id?: string): Promise<CachedComment[]> {
+      if (comment_id) {
+        return d1
+          .prepare("SELECT * from pending_comments WHERE comment_id = ? AND domain = ? AND path = ?;")
+          .bind(comment_id, domain, path)
+          .run<CachedComment>()
+          .then(db_rep => db_rep.results)
+      }
+      else {
+        return d1
+          .prepare("SELECT * from pending_comments WHERE domain = ? AND path = ?;")
+          .bind(domain, path)
+          .run<CachedComment>()
+          .then(db_rep => db_rep.results)
+      }
+    }
+  }
 }

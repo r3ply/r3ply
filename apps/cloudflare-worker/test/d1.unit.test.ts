@@ -1,10 +1,9 @@
 import { beforeAll, describe, expect, test } from 'vitest'
 import { env } from 'cloudflare:test'
-import { CommentState } from '../src/state/d1'
+import { CommentCache, CommentState } from '../src/state/d1'
 
-describe('schema', () => {
+describe('comments_via_email', () => {
   beforeAll(async () => {
-    console.log('Setting up DB')
     let create_table = await env.TEST_DB.prepare(
       `DROP TABLE IF EXISTS comments_via_email;
 			CREATE TABLE IF NOT EXISTS comments_via_email (
@@ -16,7 +15,7 @@ describe('schema', () => {
 					files_url TEXT UNIQUE -- comment files URL, E.g. gist, S3, R2
 			);`,
     ).run()
-    console.log(`Done setting up DB, success: ${create_table.success}`)
+    console.log(`Attempted to create \`comments_vial_email\` table, success: ${create_table.success}`)
   })
   const state = CommentState(env.TEST_DB)
   test('accept comment', async () => {
@@ -100,5 +99,44 @@ describe('schema', () => {
       id: accept_result.comment_id,
       state: 'unprocessable',
     })
+  })
+})
+
+describe('pending_comments', () => {
+  beforeAll(async () => {
+    let create_table = await env.TEST_DB.prepare(
+      `DROP TABLE IF EXISTS pending_comments;
+			CREATE TABLE IF NOT EXISTS pending_comments (
+          domain TEXT, -- e.g. example-blog.com
+          path TEXT, -- e.g. /posts/my-great-vacation
+					comment_id TEXT PRIMARY KEY NOT NULL, -- UUID stored as TEXT
+					created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- ts auto-generated upon insertion
+					comment_json JSON
+			);`,
+    ).run()
+    console.log(`Attempted to create \`pending_comments\` table, success: ${create_table.success}`)
+  })
+  const cache = CommentCache(env.TEST_DB)
+  test("set", async () => {
+    await cache.set("example.com", "/", "123", {})
+    const actual = await env.TEST_DB.prepare("SELECT * from pending_comments").run()
+    const actual2 = await cache.get("example.com", "/")
+    expect(actual.results[0]["comment_id"]).toBe("123")
+  })
+  test("get", async() => {
+    await env.TEST_DB.prepare(`
+      INSERT INTO pending_comments (domain, path, comment_id, comment_json)
+      VALUES (?1, ?2, ?3, ?4), (?5, ?6, ?7, ?8);
+    `)
+    .bind("A", "/B", "123", JSON.stringify({}), "C", "/D", "456", JSON.stringify({}))
+    .run()
+    const a = await cache.get("A", "/B")
+    expect(a[0].comment_id).toBe("123")
+    const one_two_three = await cache.get("A", "/B", "123")
+    expect(one_two_three[0].comment_id).toBe("123")
+    const c = await cache.get("C", "/D")
+    expect(c[0].comment_id).toBe("456")
+    const dne = await cache.get("D", "/")
+    expect(dne).toStrictEqual([])
   })
 })
