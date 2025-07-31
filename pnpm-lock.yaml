@@ -102,6 +102,9 @@ importers:
       '@r3ply/wasm':
         specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
         version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
+      hono:
+        specifier: ^4.8.10
+        version: 4.8.10
       mime:
         specifier: ^4.0.6
         version: 4.0.6
@@ -1567,6 +1570,10 @@ packages:
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
+
+  hono@4.8.10:
+    resolution: {integrity: sha512-DRMYbR3aFk6YET1FCSAFbgF2cWYTz5j0YAFYPECx9fmrbKBDAYnWU+YCgRTpOaatxMYN6e68U/2IG39zRP4W/A==}
+    engines: {node: '>=16.9.0'}
 
   is-arrayish@0.3.2:
     resolution: {integrity: sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==}
@@ -3262,6 +3269,8 @@ snapshots:
       path-scurry: 1.11.1
 
   he@1.2.0: {}
+
+  hono@4.8.10: {}
 
   is-arrayish@0.3.2:
     optional: true

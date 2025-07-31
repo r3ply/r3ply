@@ -1,3 +1,5 @@
+import { Hono } from 'hono'
+import api from './api'
 import { Result } from 'oxide.ts'
 import {
   R3plySiteConfig,
@@ -12,8 +14,12 @@ import r3ply_system_config_toml from '../r3ply.config.toml'
 import { CloudflareR3ply } from './cloudflare-r3ply'
 import { GistClient } from './state/gist'
 import { CommentState } from './state/d1'
-import { tera } from '@r3ply/wasm'
 
+// initialization for fetch handler
+const app = new Hono()
+app.route('/', api)
+
+// initialization for email handler
 const r3ply_system_config = systemConfigParser(
   JSON.stringify(TOML.parse(r3ply_system_config_toml)),
 ).value!
@@ -22,7 +28,7 @@ const r3ply = CloudflareR3ply(r3ply_system_config)
 export default {
   // E.g. curl -X POST --data-binary @003.eml  localhost:8787
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    return new Response(tera('Hello, {{ name }}', { name: 'world!' }))
+    return app.fetch(request, env, ctx)
   },
 
   async email(

@@ -22,6 +22,7 @@
     "@r3ply/config": "workspace:*",
     "@r3ply/lib": "workspace:*",
     "@r3ply/wasm": "file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz",
+    "hono": "^4.8.10",
     "mime": "^4.0.6",
     "mimetext": "^3.0.16",
     "octokit": "^4.1.2",
