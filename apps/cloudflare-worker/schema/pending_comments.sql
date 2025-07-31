@@ -1,0 +1,2 @@
+-- the schema for this lives in the `src/state/d1.ts` file, because the pending comments are cleared from the cache just by dropping/recreating the table. This file isn't loaded in that source code because this runs in v8 and loading files and making that work in tests is often annoying and a source of problems for unclear benefits.
+-- I have left this file here just to point someone in the future to where to go

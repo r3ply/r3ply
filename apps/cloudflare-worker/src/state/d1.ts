@@ -105,55 +105,88 @@ async function update_comment_via_email_state(
 /////// BEGIN CACHE COMMENTS ///////
 ////////////////////////////////////
 export interface CachedComment {
-  domain: string,
-  path: string,
-  comment_id: string,
-  created_utc: string,
+  domain: string
+  path: string
+  comment_id: string
+  created_utc: string
   comment_json: any
 }
-/**
- *  get(key): Value | null
-    set(key, value, ttl = None): void
-    delete(key): void
-    has(key): bool
-    clear(): void  # Optional
- */
+
 export interface CommentCache {
-  get(domain: string, path: string, comment_id?: string): Promise<CachedComment[]>
-  set(domain: string, path:  string, comment_id: string, comment: any): Promise<void>
-  // delete(domain: string, path:  string, comment_id?: string): Promise<void>
-  // has(domain: string, path:  string, comment_id?: string): Promise<boolean>
-  // clear(domain?: string, path?:  string): Promise<void>
+  get(
+    domain: string,
+    path: string,
+    comment_id?: string,
+  ): Promise<CachedComment[]>
+  set(
+    domain: string,
+    path: string,
+    comment_id: string,
+    comment: any,
+  ): Promise<void>
+  clear(): Promise<void>
 }
 
 export function CommentCache(d1: D1Database): CommentCache {
   return {
-  set: async function (domain: string, path: string, comment_id: string, comment: any): Promise<void> {
+    set: async function (
+      domain: string,
+      path: string,
+      comment_id: string,
+      comment: any,
+    ): Promise<void> {
       return d1
-        .prepare(`
+        .prepare(
+          `
           INSERT INTO pending_comments (domain, path, comment_id, comment_json)
           VALUES (?1, ?2, ?3, ?4);
-        `)
+        `,
+        )
         .bind(domain, path, comment_id, JSON.stringify(comment))
         .run()
         .then((_) => Promise.resolve())
       throw new Error('Function not implemented.')
     },
-    get: function (domain: string, path: string, comment_id?: string): Promise<CachedComment[]> {
+    get: async function (
+      domain: string,
+      path: string,
+      comment_id?: string,
+    ): Promise<CachedComment[]> {
       if (comment_id) {
         return d1
-          .prepare("SELECT * from pending_comments WHERE comment_id = ? AND domain = ? AND path = ?;")
+          .prepare(
+            'SELECT * from pending_comments WHERE comment_id = ? AND domain = ? AND path = ?;',
+          )
           .bind(comment_id, domain, path)
           .run<CachedComment>()
-          .then(db_rep => db_rep.results)
-      }
-      else {
+          .then((db_rep) => db_rep.results)
+      } else {
         return d1
-          .prepare("SELECT * from pending_comments WHERE domain = ? AND path = ?;")
+          .prepare(
+            'SELECT * from pending_comments WHERE domain = ? AND path = ?;',
+          )
           .bind(domain, path)
           .run<CachedComment>()
-          .then(db_rep => db_rep.results)
+          .then((db_rep) => db_rep.results)
       }
-    }
+    },
+    clear: async function (): Promise<void> {
+      return d1
+        .prepare(
+          `DROP TABLE IF EXISTS pending_comments;
+          CREATE TABLE IF NOT EXISTS pending_comments (
+            domain TEXT, -- e.g. example-blog.com
+            path TEXT, -- e.g. /posts/my-great-vacation
+            comment_id TEXT PRIMARY KEY NOT NULL, -- UUID stored as TEXT
+            created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- ts auto-generated upon insertion
+            comment_json JSON
+          );`,
+        )
+        .run()
+        .then((_) => Promise.resolve())
+    },
   }
 }
+////////////////////////////////////
+//////// END CACHE COMMENTS ////////
+////////////////////////////////////
