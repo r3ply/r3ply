@@ -128,6 +128,14 @@ export interface CommentCache {
 }
 
 export function CommentCache(d1: D1Database): CommentCache {
+  const drop_table = `drop table IF EXISTS pending_comments;`
+  const create_table = `CREATE TABLE IF NOT EXISTS pending_comments (
+    domain TEXT, -- e.g. example-blog.com
+    path TEXT, -- e.g. /posts/my-great-vacation
+    comment_id TEXT PRIMARY KEY NOT NULL, -- UUID stored as TEXT
+    created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- ts auto-generated upon insertion
+    comment_json JSON);`
+
   return {
     set: async function (
       domain: string,
@@ -137,7 +145,7 @@ export function CommentCache(d1: D1Database): CommentCache {
     ): Promise<void> {
       return d1
         .prepare(
-          `
+          `${create_table}
           INSERT INTO pending_comments (domain, path, comment_id, comment_json)
           VALUES (?1, ?2, ?3, ?4);
         `,
@@ -155,7 +163,7 @@ export function CommentCache(d1: D1Database): CommentCache {
       if (comment_id) {
         return d1
           .prepare(
-            'SELECT * from pending_comments WHERE comment_id = ? AND domain = ? AND path = ?;',
+            `${create_table}\nSELECT * from pending_comments WHERE comment_id = ? AND domain = ? AND path = ?;`,
           )
           .bind(comment_id, domain, path)
           .run<CachedComment>()
@@ -163,7 +171,7 @@ export function CommentCache(d1: D1Database): CommentCache {
       } else {
         return d1
           .prepare(
-            'SELECT * from pending_comments WHERE domain = ? AND path = ?;',
+            `${create_table}\nSELECT * from pending_comments WHERE domain = ? AND path = ?;`,
           )
           .bind(domain, path)
           .run<CachedComment>()
@@ -172,16 +180,7 @@ export function CommentCache(d1: D1Database): CommentCache {
     },
     clear: async function (): Promise<void> {
       return d1
-        .prepare(
-          `DROP TABLE IF EXISTS pending_comments;
-          CREATE TABLE IF NOT EXISTS pending_comments (
-            domain TEXT, -- e.g. example-blog.com
-            path TEXT, -- e.g. /posts/my-great-vacation
-            comment_id TEXT PRIMARY KEY NOT NULL, -- UUID stored as TEXT
-            created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- ts auto-generated upon insertion
-            comment_json JSON
-          );`,
-        )
+        .prepare(`${drop_table}\n${create_table}`)
         .run()
         .then((_) => Promise.resolve())
     },
