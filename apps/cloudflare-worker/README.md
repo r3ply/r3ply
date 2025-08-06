@@ -44,8 +44,7 @@ There are a few pieces of infrastructure to be aware of
   - Email Workers ([docs](https://developers.cloudflare.com/email-routing/email-workers/)) - provides inbound email and some limited reply/fwd/send capabilities
     - Email Routing ([panel](https://dash.cloudflare.com/55945010d6d11381c59ab3263481b978/r3ply.com/email/routing/routes)) - Manage how routes trigger workers for this project
     - Moderator email binding - you can register certain email with Cloudflare in advance and then bind them to your service, which is how moderator emails are currently handled (In the future this should be removed as Cloudflare limits how many email bindings you can have)
-    - Mail Channels ([link](https://support.mailchannels.com/hc/en-us/articles/4565898358413-Sending-Email-from-Cloudflare-Workers-using-MailChannels-Send-API)) - provides free email sending with Cloudflare Workers, but this functionality hasn't been implemented yet
-  - [KV Store] ([docs](https://developers.cloudflare.com/kv/)) - is used to store user configs under the binding `R3PLY_USER_CONFIGS`
+    <!-- - Mail Channels ([link](https://support.mailchannels.com/hc/en-us/articles/4565898358413-Sending-Email-from-Cloudflare-Workers-using-MailChannels-Send-API)) - provides free email sending with Cloudflare Workers, but this functionality hasn't been implemented yet -->
 - GitHub
   - r3ply is currently storing emails in private gists, just in case there's an issue when processing a comment, which should allow the message to be reprocessed in the future if needed
 

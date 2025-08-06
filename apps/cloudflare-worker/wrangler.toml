@@ -16,12 +16,6 @@ enabled = true
 EMAIL_MAX_BYTES_DEFAULT = 26214400  # Cloudflare limits emails to 25MB
 EMAIL_HASH_PEPPER_VERSION = "1.0.0" # The pepper used to hash emails is versioned
 
-# Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
-# Docs: https://developers.cloudflare.com/workers/runtime-apis/kv
-[[kv_namespaces]]
-binding = "R3PLY_USER_CONFIGS"
-id = "77c81547fc5c4c35a78eb9c79d231323"
-
 # The following is needed for CF pages + D1 local development
 # [Cloudflare Docs](https://developers.cloudflare.com/d1/learning/local-development/)
 [[d1_databases]]
