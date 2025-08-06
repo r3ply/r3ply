@@ -238,6 +238,18 @@ export async function cf_process(
         metadata.comment_id,
         comment.isOk() ? 'processed' : 'unprocessable',
       )
+      .then((_) => {
+        // cache the comment if it's enabled in their configuration
+        if (site_config.comments.cache) {
+          const [domain, path, comment_id, comment] = [
+            template_context.r3ply.site,
+            template_context.comment.subject.path,
+            template_context.comment.id,
+            JSON.stringify(template_context),
+          ]
+          comment_state.cache.set(domain, path, comment_id, comment)
+        }
+      })
       .then((_) => comment)
   } else return comment
 }

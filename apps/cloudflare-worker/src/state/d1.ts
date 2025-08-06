@@ -1,9 +1,6 @@
 import { CommentMetadata } from '@r3ply/lib'
 import { OmitFirstParameter } from '../util'
 
-////////////////////////////////////
-///// BEGIN COMMENTS VIA EMAIL /////
-////////////////////////////////////
 type CommentViaEmailStates =
   | 'accepted'
   | 'deliverable'
@@ -31,6 +28,7 @@ export interface CommentState {
       state: PartialCommentViaEmailStates<'processed' | 'unprocessable'>,
     ) => ReturnType<typeof update_comment_via_email_state>
   }
+  cache: CommentCache
 }
 
 export function CommentState(d1: D1Database): CommentState {
@@ -51,9 +49,13 @@ export function CommentState(d1: D1Database): CommentState {
         processability: 'processed' | 'unprocessable',
       ) => update_comment_via_email_state(d1, comment_id, processability),
     },
+    cache: CommentCache(d1),
   }
 }
 
+////////////////////////////////////
+///// BEGIN COMMENTS VIA EMAIL /////
+////////////////////////////////////
 async function accept_new_comment_via_email(
   d1: D1Database,
   message_id: string,

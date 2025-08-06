@@ -10,7 +10,7 @@ import {
 import { createHMAC } from '../src/util'
 import { Ok, Result } from 'oxide.ts'
 import { GistClient, GistFiles } from '../src/state/gist'
-import { CommentState } from '../src/state/d1'
+import { CommentCache, CommentState } from '../src/state/d1'
 import TOML from '@iarna/toml'
 import { siteConfigParser, systemConfigParser } from '@r3ply/config'
 import { merge_config, merge_remote_reference } from '../src'
@@ -408,6 +408,13 @@ Content: <p>I found your banana picker.</p>\n`)
       id: metadata.comment_id,
       state: 'processed',
     })
+    const cache = CommentCache(env.TEST_DB)
+    const pending_comment = await cache.get(
+      'banana-picker.com',
+      '/blog/lemonhead',
+      metadata.comment_id,
+    )
+    expect(pending_comment[0].comment_id).toBe(metadata.comment_id)
   })
 
   test.skip('encryption scratch pad', async () => {
