@@ -337,13 +337,13 @@ commenter = true
 # [Optional, default is true] Set to false to disable notifying the commenter upon submission of their email comment"
 notify_commenter_upon_submission = true
 # [Optional, see (TODO: link) for example]
-"comment_submitted_notif_{{}}" = """
+"comment_submitted_notif_{}" = """
 Your comment was submitted
 """
 # [Optional, default is true] If false, no email notification sent to moderator
 moderator = true
 # [Optional, see (TODO: link) for example]
-"comment_received_notif_{{}}" = """
+"comment_received_notif_{}" = """
 A new comment has been received
 """
 

@@ -15,12 +15,12 @@ commenter -> r3ply server -> site
 
 And here's a basic overview of what these terms mean:
 
-* **commenter**: this is the person who actually wrote the comment. They send the comment to the r3ply server, either via email or some other method (e.g. POST, etc...).
-* **r3ply server**: the program that receives the message from the commenter in its original form. It acts as an intermediary of the site and processes the comment from the raw form the commenter sent it into something the site admin expects.
-* **r3ply server config**: this is the r3ply config of the r3ply server.
-* *site*: this is the site domain the original comment is addressed to.
-* **site admin**: the person who is administering the site.
-* **site config**: this is the r3ply config of the site the original comment is addressed to
+- **commenter**: this is the person who actually wrote the comment. They send the comment to the r3ply server, either via email or some other method (e.g. POST, etc...).
+- **r3ply server**: the program that receives the message from the commenter in its original form. It acts as an intermediary of the site and processes the comment from the raw form the commenter sent it into something the site admin expects.
+- **r3ply server config**: this is the r3ply config of the r3ply server.
+- _site_: this is the site domain the original comment is addressed to.
+- **site admin**: the person who is administering the site.
+- **site config**: this is the r3ply config of the site the original comment is addressed to
 
 View the [config](../config/) for more information about config.
 
@@ -34,4 +34,3 @@ Comments that are received via email transition through states as they are proce
 4. `deliverable`: additional checks are performed to see if the email comment is even deliverable based on a range of factors. This is difference from prescreen because the actual headers of the email are looked at. `deliverable` is for example when a commenter who has been previously blocked would be stopped.
 5. `prepare`: next the email is prepared to for processing. This is when all the inputs that are needed for turning an email into a comment are gathered and made ready.
 6. `process`: finally the prepared inputs of the email are processed into an actual comment, based on the site admin's configuration. Usually this means an object is passed as the context to a template the site admin has configured.
-

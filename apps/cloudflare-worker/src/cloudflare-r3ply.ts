@@ -82,12 +82,12 @@ export function CloudflareR3ply(system_config: R3plySystemConfig) {
           })
           .unwrap()
         if (moderator) {
-          const moderation_reuslt = moderator?.send(
+          const moderation_result = moderator?.send(
             comment,
             template_context,
             site_config,
           ) as any as Promise<Response>
-          return moderation_reuslt.then((moderation_result) => {
+          return moderation_result.then((moderation_result) => {
             if (!moderation_result.ok) {
               return moderation_result.text().then((error_text) => {
                 console.error(

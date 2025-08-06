@@ -22,7 +22,9 @@ const api = new Hono<{ Bindings: Env }>()
 
 api.get('/comments/pending/get/:domain/:path{.+}', async (c) => {
   const { domain, path } = c.req.param()
-  return CommentCache(c.env.R3PLY_DB).get(domain, path).then(comments => c.json(comments))
+  return CommentCache(c.env.R3PLY_DB)
+    .get(domain, path)
+    .then((comments) => c.json(comments))
 })
 
 export default api

@@ -113,12 +113,12 @@ export async function comment_via_email(
   const process_email_into_comment = Promise.all([
     site_config,
     email_bytes,
-  ]).then(([site_config_result, email_bytes]) => {
+  ]).then(([site_config, email_bytes]) => {
     const handle_comment_via_email = cf_r3ply_w_dependencies.comments.viaEmail(
       createHMAC(deps.hmac_secret),
       R3plyGithubBot(deps.gh_pw, fetch),
     )
-    return handle_comment_via_email([site_config_result, email_bytes])
+    return handle_comment_via_email([site_config, email_bytes])
   })
   let result = await Result.safe(process_email_into_comment)
   if (result.isErr()) {

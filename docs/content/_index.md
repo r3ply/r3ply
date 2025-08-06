@@ -20,17 +20,19 @@ repo = "https://github.com/you/<YOUR_REPO>"
 
 ## Features
 
-* Designed especially for static sites but works with any backend
-* Comments via email out of the box with support for other channels
-* Moderation is included, e.g. GitHub PR or through other means
-* Self-hosting is also possible but r3ply.com is available right away
-* Privacy first: email addresses are redacted
-* There's a CLI to help with development
+- Designed especially for static sites but works with any backend
+- Comments via email out of the box with support for other channels
+- Moderation is included, e.g. GitHub PR or through other means
+- Self-hosting is also possible but r3ply.com is available right away
+- Privacy first: email addresses are redacted
+- There's a CLI to help with development
 
 Read the [getting started](#getting-started) to jump right in, or view individual topics for more detailed info.
 
 ## Table of Contents
+
 <!-- TOC -->
+
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Receiving Comments](#receiving-comments)
@@ -92,7 +94,3 @@ re config validate
 # simulate receiving an email (--from, --subject, etc... can change the email)
 re comments simulate-email
 ```
-
-
-
-
