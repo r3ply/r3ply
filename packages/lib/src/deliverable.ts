@@ -71,7 +71,7 @@ function to_field_is_deliverable(
       Ok: (to) => to.address,
       Err: (error) => {
         throw new Error(
-          `Comment is underliverable, \`To\`: \`${JSON.stringify(site_domains)}\``,
+          `Comment is undeliverable, \`To\`: \`${JSON.stringify(site_domains)}\``,
         )
       },
     },
@@ -163,13 +163,13 @@ if (import.meta.vitest) {
     )
     expect(() =>
       to_field_is_deliverable([a, hello], site_domains, system_domain),
-    ).toThrowError(/Comment is underliverable/)
+    ).toThrowError(/Comment is undeliverable/)
     expect(() =>
       to_field_is_deliverable([c], site_domains, system_domain),
-    ).toThrowError(/Comment is underliverable/)
+    ).toThrowError(/Comment is undeliverable/)
     expect(() =>
       to_field_is_deliverable([a], site_domains, 'notr3ply.com'),
-    ).toThrowError(/Comment is underliverable/)
+    ).toThrowError(/Comment is undeliverable/)
   })
   test('subject_is_a_url', () => {
     expect(
