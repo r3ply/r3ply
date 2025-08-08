@@ -15,6 +15,7 @@ import { Result as Result2 } from "oxide.ts";
 import path from "path";
 import fs from "fs";
 import { Result } from "oxide.ts";
+import crypto from "crypto";
 var util;
 ((util2) => {
   async function find_up(filename, cwd = process.cwd()) {
@@ -64,6 +65,7 @@ import { fileURLToPath } from "url";
 import { R3ply } from "@r3ply/lib";
 import dayjs from "dayjs";
 import { build_email } from "@r3ply/wasm";
+import crypto2 from "crypto";
 var project;
 ((project2) => {
   const R3PLY_DIR = ".r3ply";
@@ -195,7 +197,7 @@ var generate;
   }
   generate2.email_addr = email_addr;
   function message_id(domain) {
-    return `${crypto.randomUUID()}@${domain}`;
+    return `${crypto2.randomUUID()}@${domain}`;
   }
   generate2.message_id = message_id;
   function subject(url) {
@@ -522,7 +524,11 @@ function comments_cmd(cwd) {
       site_config = util.unsafeUnwrap(
         await project.get_site_config(cwd, options.config)
       );
-      const email = generate.email(site_config.domains[util.random_int(site_config.domains.length)], site_config.r3ply, options).then((email2) => {
+      const email = generate.email(
+        site_config.domains[util.random_int(site_config.domains.length)],
+        site_config.r3ply,
+        options
+      ).then((email2) => {
         console.log(
           `Input email:
 

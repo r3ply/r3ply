@@ -1,4 +1,5 @@
 import { Redacted, Secret } from './types'
+import crypto from 'crypto'
 
 export function createHMAC(key: string) {
   return function (message: string) {

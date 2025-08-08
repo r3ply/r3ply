@@ -16,6 +16,7 @@ import { fileURLToPath } from 'url'
 import { R3ply } from '@r3ply/lib'
 import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
+import crypto from 'crypto'
 
 // project stuff ---------------------------------------------------------------
 export namespace project {
