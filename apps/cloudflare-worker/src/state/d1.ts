@@ -145,6 +145,9 @@ export function CommentCache(d1: D1Database): CommentCache {
       comment_id: string,
       comment: any,
     ): Promise<void> {
+      const url = new URL('https://example.com')
+      url.host = domain
+      url.pathname = path
       return d1
         .prepare(
           `${create_table}
@@ -152,7 +155,7 @@ export function CommentCache(d1: D1Database): CommentCache {
           VALUES (?1, ?2, ?3, ?4);
         `,
         )
-        .bind(domain, path, comment_id, JSON.stringify(comment))
+        .bind(url.host, url.pathname, comment_id, JSON.stringify(comment))
         .run()
         .then((_) => Promise.resolve())
       throw new Error('Function not implemented.')
@@ -162,12 +165,15 @@ export function CommentCache(d1: D1Database): CommentCache {
       path: string,
       comment_id?: string,
     ): Promise<CachedComment[]> {
+      const url = new URL('https://example.com')
+      url.host = domain
+      url.pathname = path
       if (comment_id) {
         return d1
           .prepare(
             `${create_table}\nSELECT * from pending_comments WHERE comment_id = ? AND domain = ? AND path = ?;`,
           )
-          .bind(comment_id, domain, path)
+          .bind(comment_id, url.host, url.pathname)
           .run<CachedComment>()
           .then((db_rep) => db_rep.results)
       } else {
@@ -175,7 +181,7 @@ export function CommentCache(d1: D1Database): CommentCache {
           .prepare(
             `${create_table}\nSELECT * from pending_comments WHERE domain = ? AND path = ?;`,
           )
-          .bind(domain, path)
+          .bind(url.host, url.pathname)
           .run<CachedComment>()
           .then((db_rep) => db_rep.results)
       }
