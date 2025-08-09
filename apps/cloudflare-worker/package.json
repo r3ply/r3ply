@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "cf-typegen": "wrangler types",
+    "cf-typegen": "npx wrangler types",
     "build": "pnpm run cf-typegen && wrangler deploy --dry-run --outdir=dist",
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
+    "deploy": "npx wrangler deploy",
+    "dev": "npx wrangler dev",
     "test": "npx vitest run unit",
     "test:watch": "npx vitest unit",
     "test:it": "npx vitest integration run",
@@ -22,6 +22,7 @@
     "@r3ply/config": "workspace:*",
     "@r3ply/lib": "workspace:*",
     "@r3ply/wasm": "file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz",
+    "@types/node": "^24.2.1",
     "hono": "^4.8.10",
     "mime": "^4.0.6",
     "mimetext": "^3.0.16",
@@ -30,10 +31,9 @@
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.8.0",
-    "@cloudflare/workers-types": "^4.20250312.0",
     "typescript": "^5.5.4",
     "vitest": "^3.0.8",
-    "wrangler": "^3.93.0"
+    "wrangler": "^4.28.1"
   },
   "volta": {
     "node": "20.10.0"
