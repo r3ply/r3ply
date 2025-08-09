@@ -1,8 +1,2 @@
-CREATE TABLE IF NOT EXISTS comments_via_email (
-  id TEXT PRIMARY KEY NOT NULL, -- UUID stored as TEXT
-  message_id TEXT UNIQUE NOT NULL, -- Email Message-ID must be globally unique
-  created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- Auto-generated timestamp for when the record was created
-  state TEXT NOT NULL CHECK(state IN ('accepted', 'deliverable', 'undeliverable', 'prepared', 'unpreparable', 'processed', 'unprocessable', 'delivered')), -- comment state, note: comments are always in exactly one state
-  files_id TEXT UNIQUE, -- comment files ID, E.g. gist, S3, R2
-  files_url TEXT UNIQUE -- comment files URL, E.g. gist, S3, R2
-);
+-- the schema for this lives in the `src/state/d1.ts` file. This file isn't loaded in that source code because this runs in v8 and loading files and making that work in tests is often annoying and a source of problems for unclear benefits.
+-- I have left this file here just to point someone in the future to where to go

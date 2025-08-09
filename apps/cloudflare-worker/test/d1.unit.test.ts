@@ -4,20 +4,8 @@ import { CommentCache, CommentState } from '../src/state/d1'
 
 describe('comments_via_email', () => {
   beforeAll(async () => {
-    let create_table = await env.TEST_DB.prepare(
-      `DROP TABLE IF EXISTS comments_via_email;
-			CREATE TABLE IF NOT EXISTS comments_via_email (
-					id TEXT PRIMARY KEY NOT NULL, -- UUID stored as TEXT
-					message_id TEXT UNIQUE NOT NULL, -- Email Message-ID must be globally unique
-					created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- Auto-generated timestamp for when the record was created
-					state TEXT NOT NULL CHECK(state IN ('accepted', 'deliverable', 'undeliverable', 'prepared', 'unpreparable', 'processed', 'unprocessable', 'delivered')), -- comment state, note: comments are always in exactly one state
-					files_id TEXT UNIQUE, -- comment files ID, E.g. gist, S3, R2
-					files_url TEXT UNIQUE -- comment files URL, E.g. gist, S3, R2
-			);`,
-    ).run()
-    console.log(
-      `Attempted to create \`comments_vial_email\` table, success: ${create_table.success}`,
-    )
+    // drops the table between each test (it is created automatically upon receiving a new comment)
+    await env.TEST_DB.prepare(`DROP TABLE IF EXISTS comments_via_email;`).run()
   })
   const state = CommentState(env.TEST_DB)
   test('accept comment', async () => {
@@ -106,7 +94,6 @@ describe('comments_via_email', () => {
 
 describe('pending_comments', () => {
   beforeAll(async () => {
-    console.log('Creating `pending_comments` table')
     // `clear` destroys/creates the table, so reusing it for test setup
     await cache.clear()
   })
