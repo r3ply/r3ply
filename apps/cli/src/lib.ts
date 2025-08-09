@@ -162,10 +162,6 @@ export namespace project {
 }
 
 // r3ply library ---------------------------------------------------------------
-const markov = RiTa.markov(2, {
-  text: ['example.com', 'foo.com', 'foobar.com', 'monkeyisland.net'],
-})
-
 export namespace generate {
   export function date(
     floor: number = Math.floor(Date.now() / 1000) - 315360000,
@@ -279,7 +275,7 @@ export async function cli_handle_comment_via_email(
     JSON.stringify(
       TOML.parse(`
 version  = "0.0.1"
-domain = "r3ply.com"
+domain = "${site_config.r3ply[util.random_int(site_config.r3ply.length)]}"
 [[admin]]
 name = "Guybrush Threepwood"
 email = "guybrush@example.com"`),
@@ -306,7 +302,6 @@ const domains = [
   'dontdrinkgrog',
 ]
 const tlds = ['com', 'net', 'us', 'biz', 'org', 'io']
-const local_names = ['guybrush', 'bob', 'alice', 'lechuck', 'elaine', 'mallory']
 const first_names = [
   'LeChuck',
   'Guybrush',

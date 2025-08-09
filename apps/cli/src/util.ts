@@ -27,6 +27,12 @@ export namespace util {
     })
   }
 
+  /**
+   * chooses a number between ceiling and floor, suitable for picking random elements from an array
+   * @param ceiling exclusive
+   * @param floor inclusive
+   * @returns
+   */
   export function random_int(ceiling: number, floor: number = 0) {
     return Math.floor(Math.random() * (ceiling - floor)) + floor
   }
