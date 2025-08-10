@@ -9,7 +9,7 @@ Just add `./well-known/r3ply/config.toml` to your site, and receive comments via
 
 ```toml
 version = "0.0.1"
-domain = "<YOUR_SITE>.com"
+domains = ["<YOUR_SITE>.com"]
 r3ply = ["r3ply.com"]
 
 [comments.email.moderation]

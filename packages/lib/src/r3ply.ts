@@ -147,7 +147,7 @@ url = "https://example.com/comments"
       JSON.stringify(
         TOML.parse(`
 version = "0.0.1"
-domain = "r3ply.com"
+domains = ["r3ply.com"]
 
 [[admin]]
 name = "Guybrush Threepwood"

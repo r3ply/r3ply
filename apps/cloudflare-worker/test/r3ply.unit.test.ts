@@ -17,19 +17,9 @@ import { merge_config, merge_remote_reference } from '../src'
 
 describe('Cloudflare r3ply Tests', () => {
   beforeAll(async () => {
-    console.log('Setting up DB')
     let create_table = await env.TEST_DB.prepare(
-      `DROP TABLE IF EXISTS comments_via_email;
-			CREATE TABLE IF NOT EXISTS comments_via_email (
-					id TEXT PRIMARY KEY NOT NULL, -- UUID stored as TEXT
-					message_id TEXT UNIQUE NOT NULL, -- Email Message-ID must be globally unique
-					created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- Auto-generated timestamp for when the record was created
-					state TEXT NOT NULL CHECK(state IN ('accepted', 'deliverable', 'undeliverable', 'prepared', 'unpreparable', 'processed', 'delivered')), -- comment state, note: comments are always in exactly one state
-					files_id TEXT UNIQUE, -- comment files ID, E.g. gist, S3, R2
-					files_url TEXT UNIQUE -- comment files URL, E.g. gist, S3, R2
-			);`,
+      `DROP TABLE IF EXISTS comments_via_email;`,
     ).run()
-    console.log(`Done setting up DB, success: ${create_table.success}`)
   })
 
   const ok_gist_client: GistClient = {
@@ -98,7 +88,7 @@ url = "https://banana-picker.com/comments"`),
     JSON.stringify(
       TOML.parse(`
 version = "0.0.1"
-domain = "r3ply.com"
+domains = ["r3ply.com"]
 
 [[admin]]
 name = "Ghost 'Le Chuck' Pirate"
@@ -160,10 +150,10 @@ email = "theghostlpirate@monkeyisland.com"`),
     await expect(no_from_field).rejects.toThrowError(
       /`From` must not be missing/,
     )
-    const select_cmd = await env.TEST_DB.prepare(
+    const select_cmd = env.TEST_DB.prepare(
       'select * from comments_via_email',
     ).run()
-    expect(select_cmd.results.length).toBe(0)
+    await expect(select_cmd).rejects.toThrowError(/no such table/)
   })
   test('deliverable comment', async () => {
     const { metadata, accepted_email } = await cf_accept(
@@ -208,7 +198,7 @@ Subject: https://lucasarts.com/blog/monkey-island-the-movie
       comment_state,
     )
     expect(deliverable_email.unwrapErr().message).toMatch(
-      /Comment is underliverable, `To`: `.*\"lucasarts.com@r3ply.com\".*`/,
+      /Comment is undeliverable, `To`: `\["banana-picker.com"\]`/,
     )
     const select = await env.TEST_DB.prepare(
       `select id, state from comments_via_email`,
@@ -453,7 +443,7 @@ Content: <p>I found your banana picker.</p>\n`)
     const foo = siteConfigParser(
       JSON.stringify(
         TOML.parse(`version = "0.0.1"
-domain = "r3ply-config.spence.pages.dev"
+domains = ["r3ply-config.spence.pages.dev"]
 r3ply = ['r3ply.com']
 
 [comments.email]

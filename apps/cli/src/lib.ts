@@ -275,7 +275,7 @@ export async function cli_handle_comment_via_email(
     JSON.stringify(
       TOML.parse(`
 version  = "0.0.1"
-domain = "${site_config.r3ply[util.random_int(site_config.r3ply.length)]}"
+domains = ["${site_config.r3ply[util.random_int(site_config.r3ply.length)]}"]
 [[admin]]
 name = "Guybrush Threepwood"
 email = "guybrush@example.com"`),

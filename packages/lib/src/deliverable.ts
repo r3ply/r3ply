@@ -11,6 +11,8 @@ export interface DeliverableEmail {
   to: string
   subject: URL
   email: Email
+  site_domain: string
+  r3ply_domain: string
 }
 
 export async function deliverable(
@@ -20,7 +22,8 @@ export async function deliverable(
   system: R3plySystemConfig,
 ): Promise<DeliverableEmail> {
   // check `To` has address, and is addressed properly (to this site + r3ply pair, i.e. <YOUR_SITE>@<R3PLY>)
-  const to = to_field_is_deliverable(accepted.to, site.domains, system.domain)
+  const to = to_field_is_deliverable(accepted.to, site.domains, system.domains)
+  const [site_domain, r3ply_domain] = to.split('@', 2)
 
   // check `Subject` header of comment is deliverable (note: if future subject types besides URL are added, here is where to integrate that logic)
   let subject: URL
@@ -45,7 +48,7 @@ export async function deliverable(
     site.comments.email.block_list,
   )
 
-  return { from, to, subject, email: accepted.email }
+  return { from, to, subject, email: accepted.email, site_domain, r3ply_domain }
 }
 
 /**
@@ -58,13 +61,17 @@ export async function deliverable(
 function to_field_is_deliverable(
   to: Addr[],
   site_domains: string[],
-  system_domain: string,
+  system_domains: string[],
 ) {
   return match(
     Result.safe(() =>
       Util.unique_addr(
         to,
-        site_domains.map((site_domain) => `${site_domain}@${system_domain}`),
+        site_domains.flatMap((site_domain) =>
+          system_domains.map(
+            (system_domain) => `${site_domain}@${system_domain}`,
+          ),
+        ),
       ),
     ),
     {
@@ -147,7 +154,7 @@ if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   test('to_field_is_deliverable', () => {
     const site_domains = ['a.com', 'hello.com']
-    const system_domain = 'r3ply.com'
+    const system_domain = ['r3ply.com']
     const a: Addr = { address: `a.com@${system_domain}`, name: null }
     const hello: Addr = { address: `hello.com@${system_domain}`, name: null }
     const c: Addr = { address: `c.com@${system_domain}`, name: null }
@@ -168,7 +175,7 @@ if (import.meta.vitest) {
       to_field_is_deliverable([c], site_domains, system_domain),
     ).toThrowError(/Comment is undeliverable/)
     expect(() =>
-      to_field_is_deliverable([a], site_domains, 'notr3ply.com'),
+      to_field_is_deliverable([a], site_domains, ['notr3ply.com']),
     ).toThrowError(/Comment is undeliverable/)
   })
   test('subject_is_a_url', () => {

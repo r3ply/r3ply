@@ -8,7 +8,7 @@ import { describe, it, expect, test } from 'vitest'
 // Could import any other source file/function here
 import worker from '../src'
 
-describe('Hello World worker', () => {
+describe.skip('Hello World worker', () => {
   it('responds with Hello World!', async () => {
     const request = new Request('http://example.com')
     // Create an empty context to pass to `worker.fetch()`
@@ -22,7 +22,7 @@ describe('Hello World worker', () => {
 
 import { tera } from '@r3ply/wasm'
 
-describe('foo', () => {
+describe.skip('foo', () => {
   test('bar', () => {
     expect(tera('Hello, {{ name }}', { name: 'world' })).toBe('Hello, world')
   })

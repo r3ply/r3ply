@@ -6,7 +6,7 @@ Just make a `r3ply.config.toml` config file available publicly, and start receiv
 
 ```toml
 version = "0.0.1"
-domain = "your-site.com"
+domains = ["your-site.com"]
 r3ply = ["r3ply.com"]
 
 [comments.email.moderation]

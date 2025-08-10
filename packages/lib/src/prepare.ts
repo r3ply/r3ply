@@ -92,8 +92,8 @@ export function prepare(
   let template_context: CommentTemplateContext & EmailTemplateContext = {
     r3ply: {
       config_version: config.version,
-      server: system.domain,
-      site: config.domains.find((domain) => deliverable.to.includes(domain))!,
+      server: deliverable.r3ply_domain,
+      site: deliverable.site_domain,
     },
     comment: {
       id: comment_id,

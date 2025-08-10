@@ -7,7 +7,7 @@ export const schema_ts = {
   description:
     'JSON Schema to describe the configuration of a r3ply system. See https://r3ply.com for more info.',
   type: 'object',
-  required: ['version', 'domain', 'admin'],
+  required: ['version', 'domains', 'admin'],
   additionalProperties: false,
   properties: {
     version: {
@@ -16,14 +16,16 @@ export const schema_ts = {
       type: 'string',
       enum: ['0.0.1'],
     },
-    domain: {
-      description:
-        'this is the domain that is hosting the r3ply system, e.g. where emails are sent to',
-      type: 'string',
-      pattern:
-        '^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.(?!-)(?:[A-Za-z0-9-]{1,63}\\.)*[A-Za-z]{2,63}$',
-      maxLength: 253,
-      examples: ['r3ply.com'],
+    domains: {
+      description: 'The r3ply domains that configuration applies to',
+      type: 'array',
+      items: {
+        type: 'string',
+        format: 'hostname',
+      },
+      minItems: 1,
+      examples: ['r3ply.com', 'test.r3ply.com'],
+      $comment: 'must match the domain that serves the config',
     },
     enabled: {
       description: 'If false, system will skip any requests it receives',
@@ -128,20 +130,17 @@ export const schema_ts = {
     },
   },
 } as const satisfies JSONSchema
-export const schema_str = JSON.stringify(schema_ts)
-export const schema = JSON.parse(schema_str)
-const raw_parser_str = schemasafe_parser(schema, {
+const basic_parser = schemasafe_parser(schema_ts as any, {
   useDefaults: true,
   includeErrors: true,
   allErrors: true,
-}).toModule()
-const raw_parser = eval(raw_parser_str)
+})
 export type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
   value?: T
 }
 export type R3plySystemConfig = FromSchema<typeof schema_ts>
 export const parser = (input: string) => {
-  let parse_result = raw_parser(input) as ParseResult
+  let parse_result = basic_parser(input)
   return parse_result as TypedParseResult<R3plySystemConfig>
 }
 
@@ -149,7 +148,7 @@ export const module = `/** This file is generated. DO NOT EDIT. */
 import { ParseResult } from '@exodus/schemasafe'
 import { FromSchema } from 'json-schema-to-ts'
 
-const schema = ${JSON.stringify(schema)} as const;
+const schema = ${JSON.stringify(basic_parser.toJSON())} as const;
 
 type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
   value?: T
@@ -158,7 +157,7 @@ type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
 export type R3plySystemConfig = FromSchema<typeof schema>
 
 // The generated raw parser function.
-const raw_parser = ${raw_parser_str}
+const raw_parser = ${basic_parser.toModule()}
 
 // A wrapper that adds type safety.
 export const parser = (input: string): TypedParseResult<R3plySystemConfig> => {

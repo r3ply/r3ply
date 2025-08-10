@@ -49,10 +49,10 @@ describe.each(implementations)('%s', (_, parse) => {
       expect(parse('{ version: "0.0.1" }').valid).toBe(false)
     })
     it('validates the required (top-level) values', () => {
-      expect(schema_ts.required).toStrictEqual(['version', 'domain', 'admin'])
+      expect(schema_ts.required).toStrictEqual(['version', 'domains', 'admin'])
       expect(
         parse(
-          `{ "version": "0.0.1", "domain": "r3ply.com", "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
+          `{ "version": "0.0.1", "domains": ["r3ply.com"], "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
         ).valid,
       ).toBe(true)
     })
@@ -72,7 +72,7 @@ describe.each(implementations)('%s', (_, parse) => {
       )
       expect(
         parse(
-          `{ "version": "0.0.2", "domain": "r3ply.com", "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
+          `{ "version": "0.0.2", "domains": ["r3ply.com"], "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
         ).error,
       ).toContain('validation failed for enum')
     })
@@ -80,7 +80,7 @@ describe.each(implementations)('%s', (_, parse) => {
   describe('the root object of the r3ply system config', () => {
     it("has it's default values parsed automatically", () => {
       let result = parse(
-        `{ "version": "0.0.1", "domain": "r3ply.com", "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
+        `{ "version": "0.0.1", "domains":[ "r3ply.com"], "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
       )
       expect(result.value?.enabled).toBe(true)
     })
@@ -88,7 +88,7 @@ describe.each(implementations)('%s', (_, parse) => {
   describe('the email object of the r3ply system config', () => {
     it('parses defaults automatically', () => {
       let result = parse(
-        `{ "version": "0.0.1", "domain": "r3ply.com", "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
+        `{ "version": "0.0.1", "domains":[ "r3ply.com"], "admin": [{ "name": "Guybrush Threepwood", "email": "guybrush@example.com"}]}`,
       )
       expect(result.value?.email.enabled).toBe(true)
       expect(result.value?.email.moderation).toBe(false)
@@ -98,7 +98,7 @@ describe.each(implementations)('%s', (_, parse) => {
     it('can override defaults', () => {
       let config = {
         version: '0.0.1',
-        domain: 'r3ply.com',
+        domains: ['r3ply.com'],
         admin: [{ name: 'Guybrush Threepwood', email: 'guybrush@example.com' }],
         email: {
           enabled: false,

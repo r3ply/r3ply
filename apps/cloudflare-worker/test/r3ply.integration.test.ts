@@ -11,26 +11,16 @@ import { Result } from 'oxide.ts'
 
 describe.skip('Cloudflare r3ply Tests', () => {
   beforeAll(async () => {
-    console.log('Setting up DB')
     let create_table = await env.TEST_DB.prepare(
-      `DROP TABLE IF EXISTS comments_via_email;
-			CREATE TABLE IF NOT EXISTS comments_via_email (
-					id TEXT PRIMARY KEY NOT NULL, -- UUID stored as TEXT
-					message_id TEXT UNIQUE NOT NULL, -- Email Message-ID must be globally unique
-					created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- Auto-generated timestamp for when the record was created
-					state TEXT NOT NULL CHECK(state IN ('accepted', 'deliverable', 'undeliverable', 'prepared', 'unpreparable', 'processed', 'delivered')), -- comment state, note: comments are always in exactly one state
-					files_id TEXT UNIQUE, -- comment files ID, E.g. gist, S3, R2
-					files_url TEXT UNIQUE -- comment files URL, E.g. gist, S3, R2
-			);`,
+      `DROP TABLE IF EXISTS comments_via_email;`,
     ).run()
-    console.log(`Done setting up DB, success: ${create_table.success}`)
   })
   test('end to end with test code setup', async () => {
     const system_config = systemConfigParser(
       JSON.stringify(
         TOML.parse(`
 version = "0.0.1"
-domain = "r3ply.com"
+domains = ["r3ply.com"]
 
 [[admin]]
 name = "Ghost 'Le Chuck' Pirate"
@@ -48,7 +38,7 @@ email = "theghostlpirate@monkeyisland.com"`),
       JSON.stringify(
         TOML.parse(`
 version = "0.0.1"
-domain = "banana-picker.com"
+domains = ["banana-picker.com"]
 r3ply = ["r3ply.com"]
 
 [comments.email]

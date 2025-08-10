@@ -98,38 +98,30 @@ describe('pending_comments', () => {
     await cache.clear()
   })
   const cache = CommentCache(env.TEST_DB)
-  test('set', async () => {
-    await cache.set('example.com', '/', '123', {})
-    const actual = await env.TEST_DB.prepare(
-      'SELECT * from pending_comments',
-    ).run()
-    const actual2 = await cache.get('example.com', '/')
-    expect(actual.results[0]['comment_id']).toBe('123')
-  })
-  test('get', async () => {
-    await env.TEST_DB.prepare(
-      `
-      INSERT INTO pending_comments (domain, path, comment_id, comment_json)
-      VALUES (?1, ?2, ?3, ?4), (?5, ?6, ?7, ?8);
-    `,
-    )
-      .bind(
-        'A',
-        '/B',
-        '123',
-        JSON.stringify({}),
-        'C',
-        '/D',
-        '456',
-        JSON.stringify({}),
-      )
-      .run()
-    const a = await cache.get('A', '/B')
-    expect(a[0].comment_id).toBe('123')
-    const one_two_three = await cache.get('A', '/B', '123')
-    expect(one_two_three[0].comment_id).toBe('123')
-    const c = await cache.get('C', '/D')
-    expect(c[0].comment_id).toBe('456')
+  test('set/get', async () => {
+    // domains and paths are normalized via the URL class, so domains become lowercase and paths remain case sensitive
+    await cache.set('A', '/B', '456', JSON.stringify({}))
+    await cache.set('C', '/d', '789', JSON.stringify({}))
+
+    const ab = await cache.get('a', '/b')
+    const aB = await cache.get('a', '/B')
+    const AB = await cache.get('A', '/B')
+    const Ab = await cache.get('A', '/b')
+
+    expect(ab).toStrictEqual([])
+    expect(aB[0].comment_id).toBe('456')
+    expect(AB[0].comment_id).toBe('456')
+    expect(Ab).toStrictEqual([])
+
+    const cd = await cache.get('c', '/d')
+    const cD = await cache.get('c', '/D')
+    const CD = await cache.get('C', '/D')
+    const Cd = await cache.get('C', '/d')
+    expect(cd[0].comment_id).toBe('789')
+    expect(cD).toStrictEqual([])
+    expect(CD).toStrictEqual([])
+    expect(Cd[0].comment_id).toBe('789')
+
     const dne = await cache.get('D', '/')
     expect(dne).toStrictEqual([])
   })

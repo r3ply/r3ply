@@ -358,7 +358,7 @@ If you run your own r3ply system, you will almost certainly want to configure th
 # [Required] this is used to determine what version of the schema to use (and the version of r3ply)
 version = "0.0.1"
 # [Required] this is the domain that is hosting the r3ply system, e.g. where emails are sent to
-domain = "r3ply.com"
+domains = ["r3ply.com"]
 # [Optional, default is true] If false, system will skip any requests it receives
 enabled = true
 # [Optional, default is `["*"]`] Glob pattern of sites to forward comments to
