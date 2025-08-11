@@ -118,7 +118,7 @@ A new comment has been received
             'file_path_{}': {
               type: 'string',
               description:
-                'File path template for new comment (template data is `prepared_comment`).',
+                'File path template for new comment (template string).',
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
               examples: [
@@ -129,27 +129,36 @@ A new comment has been received
             },
             'commit_msg_{}': {
               type: 'string',
-              description:
-                'Commit message template (template data is `prepare_comment`)',
+              description: 'Commit message template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
               default: 'TODO',
             },
+            '&commit_msg_{}': {
+              type: 'string',
+              description: 'Commit message template (reference to a file)',
+              pattern: '^[\\s\\S]*$',
+              maxLength: 256,
+            },
             'pr_title_{}': {
               type: 'string',
-              description:
-                'Pull request title template (template data is `prepare_comment`)',
+              description: 'Pull request title template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
               default: 'TODO',
             },
             'pr_body_{}': {
               type: 'string',
-              description:
-                'Pull request body template (template data is `prepare_comment`)',
+              description: 'Pull request body template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
               default: 'TODO',
+            },
+            '&pr_body_{}': {
+              type: 'string',
+              description: 'Pull request body template (reference to a file)',
+              pattern: '^[\\s\\S]*$',
+              maxLength: 256,
             },
           },
         },
@@ -198,7 +207,7 @@ A new comment has been received
             'file_path_{}': {
               type: 'string',
               description:
-                'File path template for new comment (template data is `prepared_comment`).',
+                'File path template for new comment (template string).',
               pattern: '^(?!\\s*/)[\\s\\S]*$',
               maxLength: 1024,
               examples: [
@@ -209,27 +218,36 @@ A new comment has been received
             },
             'commit_msg_{}': {
               type: 'string',
-              description:
-                'Commit message template (template data is `prepare_comment`)',
+              description: 'Commit message template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
               default: 'TODO',
             },
+            '&commit_msg_{}': {
+              type: 'string',
+              description: 'Commit message template (reference to a file)',
+              pattern: '^[\\s\\S]*$',
+              maxLength: 256,
+            },
             'pr_title_{}': {
               type: 'string',
-              description:
-                'Pull request title template (template data is `prepare_comment`)',
+              description: 'Pull request title template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
               default: 'TODO',
             },
             'pr_body_{}': {
               type: 'string',
-              description:
-                'Pull request body template (template data is `prepare_comment`)',
+              description: 'Pull request body template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
               default: 'TODO',
+            },
+            '&pr_body_{}': {
+              type: 'string',
+              description: 'Pull request body template (reference to a file)',
+              pattern: '^[\\s\\S]*$',
+              maxLength: 256,
             },
           },
         },
@@ -404,7 +422,12 @@ A new comment has been received
             },
             'comment_{}': {
               type: 'string',
-              description: '[Optional] Comment template (inline or URL)',
+              description: '[Optional] Comment template (template string)',
+              pattern: '^[\\s\\S]*$',
+            },
+            '&comment_{}': {
+              type: 'string',
+              description: '[Optional] Comment template (file)',
               pattern: '^[\\s\\S]*$',
             },
             'comment_{}_mime': {

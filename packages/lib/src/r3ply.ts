@@ -18,7 +18,10 @@ export interface R3ply {
     ) => Promise<string>
   }
 }
-export function R3ply(system: R3plySystemConfig): R3ply {
+export function R3ply(
+  system: R3plySystemConfig,
+  file_resolver?: (file_uri?: string) => Promise<string | undefined>,
+): R3ply {
   function email_handler(
     redact: (input: string) => Promise<string>,
     moderator?: Moderation,
@@ -29,7 +32,7 @@ export function R3ply(system: R3plySystemConfig): R3ply {
       const [site, bytes] = email_event
       return handle_email_event(
         { site, bytes },
-        { system_config: system, redact, moderator },
+        { system_config: system, redact, moderator, file_resolver },
       )
     }
   }
@@ -46,6 +49,7 @@ async function handle_email_event(
     system_config: R3plySystemConfig
     redact: (input: string) => Promise<string>
     moderator?: Moderation
+    file_resolver?: (file_uri?: string) => Promise<string | undefined>
   },
 ): Promise<string> {
   prescreen(
@@ -53,15 +57,15 @@ async function handle_email_event(
     email_event.site,
     dependencies.system_config,
   )
-  let metadata: CommentMetadata = receive()
-  let accepted_email = accept(email_event.bytes)
-  let deliverable_email = deliverable(
+  const metadata: CommentMetadata = receive()
+  const accepted_email = accept(email_event.bytes)
+  const deliverable_email = deliverable(
     accepted_email,
     dependencies.redact,
     email_event.site,
     dependencies.system_config,
   )
-  let template_context = deliverable_email.then((deliverable_email) =>
+  const template_context = deliverable_email.then((deliverable_email) =>
     prepare(
       deliverable_email,
       metadata,
@@ -69,9 +73,25 @@ async function handle_email_event(
       dependencies.system_config,
     ),
   )
-  let comment = template_context.then((template_context) =>
-    process(template_context, email_event.site),
-  )
+  const comment = (() => {
+    if (dependencies.file_resolver) {
+      return dependencies
+        .file_resolver(email_event.site.comments.email['&comment_{}'])
+        .then((comment_template_from_file) => {
+          return template_context.then((template_context) =>
+            process(
+              template_context,
+              email_event.site,
+              comment_template_from_file,
+            ),
+          )
+        })
+    } else {
+      return template_context.then((template_context) =>
+        process(template_context, email_event.site),
+      )
+    }
+  })()
   return Promise.all([comment, template_context])
     .then(([comment, template_context]) => {
       if (

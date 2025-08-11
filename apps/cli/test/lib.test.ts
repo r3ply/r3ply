@@ -52,7 +52,7 @@ describe('CLI library', () => {
       (await project.find_project_dir('/root/project/src/.r3ply')).unwrap(),
     ).toBe('/root/project')
   })
-  test('find_config_files', async () => {
+  test('find_site_config_files', async () => {
     mockfs({
       '/r3ply.config.toml': '',
       '/r3ply/config.toml': '',
@@ -61,28 +61,30 @@ describe('CLI library', () => {
       '/a/b/c/d/foo.txt': '',
       '/src': {},
     })
-    expect((await project.find_config_files('/')).unwrap()).toStrictEqual([
+    expect((await project.find_site_config_files('/')).unwrap()).toStrictEqual([
       'r3ply.config.json',
       'r3ply.config.toml',
       'r3ply/config.json',
       'r3ply/config.toml',
     ])
     expect(
-      (await project.find_config_files('/', 'a/b/c/d/foo.txt')).unwrap(),
+      (await project.find_site_config_files('/', 'a/b/c/d/foo.txt')).unwrap(),
     ).toStrictEqual(['a/b/c/d/foo.txt'])
     expect(
-      (await project.find_config_files('/', 'a/b/c/d/foo.txt')).unwrap(),
+      (await project.find_site_config_files('/', 'a/b/c/d/foo.txt')).unwrap(),
     ).toStrictEqual(['a/b/c/d/foo.txt'])
     expect(
-      (await project.find_config_files('/', 'a/**/foo.txt')).unwrap(),
+      (await project.find_site_config_files('/', 'a/**/foo.txt')).unwrap(),
     ).toStrictEqual(['a/b/c/d/foo.txt'])
     expect(
-      (await project.find_config_files('/', 'a/b/c/d/foo.*')).unwrap(),
+      (await project.find_site_config_files('/', 'a/b/c/d/foo.*')).unwrap(),
     ).toStrictEqual(['a/b/c/d/foo.txt'])
-    expect((await project.find_config_files('/src')).unwrap()).toStrictEqual([])
+    expect(
+      (await project.find_site_config_files('/src')).unwrap(),
+    ).toStrictEqual([])
     expect(
       (
-        await project.find_config_files('/src', '../r3ply.config.json')
+        await project.find_site_config_files('/src', '../r3ply.config.json')
       ).unwrap(),
     ).toStrictEqual(['../r3ply.config.json'])
   })
@@ -152,6 +154,34 @@ describe('CLI library', () => {
         await project.get_site_config_path('/project/src', 'r3ply.config.toml')
       ).unwrapErr().message,
     ).toMatch(/No config found at/)
+  })
+  test.only('resolve_file_relative_to_site_config', async () => {
+    mockfs({
+      '/.r3ply': {},
+      '/public/.well-known/r3ply/config.toml': '',
+      '/public/.well-known/r3ply/viaEmail/template.toml': 'Hello, {{ name }}',
+    })
+    const site_config_path = (await project.get_site_config_path('/')).unwrap()
+    const file_resolver =
+      project.resolve_file_relative_to_site_config(site_config_path)
+    expect(await file_resolver('viaEmail/template.toml')).toBe(
+      'Hello, {{ name }}',
+    )
+    expect(await file_resolver('../r3ply/viaEmail/template.toml')).toBe(
+      'Hello, {{ name }}',
+    )
+    expect(await file_resolver('/viaEmail/template.toml')).toBe(
+      'Hello, {{ name }}',
+    )
+    expect(await file_resolver('./viaEmail/template.toml')).toBe(
+      'Hello, {{ name }}',
+    )
+    await expect(file_resolver('foo')).rejects.toThrow(
+      /no such file or directory/,
+    )
+    await expect(file_resolver('r3ply/viaEmail/template.toml')).rejects.toThrow(
+      /no such file or directory/,
+    )
   })
   test('init_r3ply_project_at', async () => {
     mockfs({

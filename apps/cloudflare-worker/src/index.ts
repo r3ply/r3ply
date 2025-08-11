@@ -7,7 +7,7 @@ import {
   systemConfigParser,
 } from '@r3ply/config'
 import TOML from '@iarna/toml'
-import { R3plyGithubBot } from '@r3ply/lib'
+import { Moderation, R3plyGithubBot } from '@r3ply/lib'
 import { createHMAC } from './util'
 // @ts-ignore
 import r3ply_system_config_toml from '../r3ply.config.toml'
@@ -114,9 +114,20 @@ export async function comment_via_email(
     site_config,
     email_bytes,
   ]).then(([site_config, email_bytes]) => {
+    let moderation: Moderation
+    switch (site_config.comments.email.moderation.type) {
+      case 'github':
+        moderation = R3plyGithubBot(deps.gh_pw, fetch)
+        break
+      case 'webhook':
+        throw new Error('not implemented yet')
+      default:
+        throw new Error('not implemented yet')
+        break
+    }
     const handle_comment_via_email = cf_r3ply_w_dependencies.comments.viaEmail(
       createHMAC(deps.hmac_secret),
-      R3plyGithubBot(deps.gh_pw, fetch),
+      moderation,
     )
     return handle_comment_via_email([site_config, email_bytes])
   })

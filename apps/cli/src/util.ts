@@ -21,6 +21,11 @@ export namespace util {
     return undefined
   }
 
+  /**
+   * Unwraps a result or else it throws the underlying error
+   * @param result
+   * @returns
+   */
   export function unsafeUnwrap<T, E = Error>(result: Result<T, E>): T {
     return result.unwrapOrElse(() => {
       throw result.unwrapErr()

@@ -27,6 +27,11 @@ export namespace project {
     `**/r3ply.config.{toml,json}`,
   ]
 
+  /**
+   * Finds the `.r3ply` dir that should be located at the top-level of the user's repository
+   * @param cwd
+   * @returns
+   */
   export async function find_r3ply_dir(
     cwd: string,
   ): Promise<Result<string, Error>> {
@@ -40,6 +45,11 @@ export namespace project {
     return Result.safe(find_result)
   }
 
+  /**
+   * The top-level directory of the user's repository
+   * @param cwd
+   * @returns
+   */
   export async function find_project_dir(
     cwd: string,
   ): Promise<Result<string, Error>> {
@@ -48,7 +58,13 @@ export namespace project {
     })
   }
 
-  export async function find_config_files(
+  /**
+   * Searches a specific directory for files that match the pattern of a r3ply site config
+   * @param from_dir
+   * @param file_glob
+   * @returns
+   */
+  export async function find_site_config_files(
     from_dir: string,
     file_glob?: string,
   ): Promise<Result<string[], Error>> {
@@ -60,6 +76,12 @@ export namespace project {
       )
   }
 
+  /**
+   * Searches for r3ply site config file, with the `.r3ply` directory (i.e. r3ply_dir) as a starting point
+   * @param cwd
+   * @param config_path
+   * @returns
+   */
   export async function get_site_config_path(
     cwd: string,
     config_path?: string,
@@ -68,7 +90,7 @@ export namespace project {
       const project_dir = util.unsafeUnwrap(await find_project_dir(cwd))
       if (config_path) {
         const relative_files = util.unsafeUnwrap(
-          await find_config_files(cwd, config_path),
+          await find_site_config_files(cwd, config_path),
         )
         if (relative_files.length == 0)
           throw new Error(`No config found at ${path.join(cwd, config_path)}`)
@@ -79,7 +101,7 @@ export namespace project {
         else return path.join(cwd, relative_files[0])
       } else {
         const relative_files = util.unsafeUnwrap(
-          await find_config_files(project_dir),
+          await find_site_config_files(project_dir),
         )
         if (relative_files.length == 0)
           throw new Error(`No r3ply config found within ${project_dir}`)
@@ -93,6 +115,12 @@ export namespace project {
     return Result.safe(full_config_path)
   }
 
+  /**
+   * Parses the r3ply site config into an object that can further be processed for other tasks
+   * @param cwd
+   * @param config_path
+   * @returns
+   */
   export async function parse_site_config(
     cwd: string,
     config_path?: string,
@@ -115,6 +143,12 @@ export namespace project {
     return Result.safe(parsed_site_config)
   }
 
+  /**
+   * Get the r3ply site config, as an object
+   * @param cwd
+   * @param config_path
+   * @returns
+   */
   export async function get_site_config(
     cwd: string,
     config_path?: string,
@@ -123,6 +157,29 @@ export namespace project {
       .then((parsed_site_config) => util.unsafeUnwrap(parsed_site_config))
       .then((parsed_site_config) => parsed_site_config.value!)
     return Result.safe(site_config)
+  }
+
+  /**
+   * Creates a file resolver based on the location of the r3ply site config
+   * @param config_path the path of the file, relative to the r3ply site config
+   * @returns utf8 contents of file at path
+   */
+  export function resolve_file_relative_to_site_config(config_path: string) {
+    const file_resolver: (file_uri?: string) => Promise<string | undefined> = (
+      file_uri,
+    ) => {
+      if (file_uri) {
+        const r3ply_site_config_dir = path.dirname(config_path)
+        const fully_qualified_file_path = path.join(
+          r3ply_site_config_dir,
+          file_uri,
+        )
+        return fs.promises
+          .readFile(fully_qualified_file_path)
+          .then((file_at_path_bytes) => file_at_path_bytes.toString())
+      } else return Promise.resolve(undefined)
+    }
+    return file_resolver
   }
 
   // TODO:
@@ -270,6 +327,7 @@ export namespace generate {
 export async function cli_handle_comment_via_email(
   site_config: R3plySiteConfig,
   email_bytes: Uint8Array,
+  file_resolver: (file_uri?: string) => Promise<string | undefined>,
 ) {
   const cli_system_config = systemConfigParser(
     JSON.stringify(
@@ -281,7 +339,7 @@ name = "Guybrush Threepwood"
 email = "guybrush@example.com"`),
     ),
   ).value!
-  const r3ply = R3ply(cli_system_config)
+  const r3ply = R3ply(cli_system_config, file_resolver)
   const redact = util.sha256_0x
   const comment_via_email_handler = r3ply.comments.viaEmail(redact)
   return comment_via_email_handler([site_config, email_bytes])

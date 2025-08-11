@@ -367,7 +367,9 @@ describe.each(implementations)('%s', (_, parse) => {
                   new Set([
                     'allow_list',
                     'commit_msg_{}',
+                    '&commit_msg_{}',
                     'pr_body_{}',
+                    '&pr_body_{}',
                     'pr_title_{}',
                     'target_branch_{}',
                     'source_branch',
@@ -376,7 +378,9 @@ describe.each(implementations)('%s', (_, parse) => {
                 ).toStrictEqual(optional_fields)
                 expect(github_moderation.allow_list).toStrictEqual([])
                 expect(github_moderation['commit_msg_{}']).toBe('TODO')
+                expect(github_moderation['&commit_msg_{}']).toBeUndefined()
                 expect(github_moderation['pr_body_{}']).toBe('TODO')
+                expect(github_moderation['&pr_body_{}']).toBeUndefined()
                 expect(github_moderation['pr_title_{}']).toBe('TODO')
                 expect(github_moderation['target_branch_{}']).toBe(
                   'comment-{{ comment.ts_rcvd }}-{{ comment.id_8 }}.md',
@@ -432,6 +436,7 @@ describe.each(implementations)('%s', (_, parse) => {
             'max_size_bytes',
             'block_list',
             'comment_{}',
+            '&comment_{}',
             'comment_{}_mime',
             'notify',
             'comment_separator',

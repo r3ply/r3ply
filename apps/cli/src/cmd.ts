@@ -129,19 +129,27 @@ export function comments_cmd(cwd: string) {
         messageId?: string
       }) => {
         let site_config: R3plySiteConfig
+        let file_resolver: (file_uri?: string) => Promise<string | undefined>
         if (options.config) {
           site_config = util.unsafeUnwrap(
             await project.get_site_config(cwd, options.config),
           )
+          const site_config_path = util.unsafeUnwrap(
+            await project.get_site_config_path(cwd, options.config),
+          )
+          file_resolver =
+            project.resolve_file_relative_to_site_config(site_config_path)
         } else {
           const project_dir = (await project.find_project_dir(cwd)).unwrap()
           site_config = util.unsafeUnwrap(
             await project.get_site_config(project_dir, undefined),
           )
+          const site_config_path = util.unsafeUnwrap(
+            await project.get_site_config_path(project_dir, undefined),
+          )
+          file_resolver =
+            project.resolve_file_relative_to_site_config(site_config_path)
         }
-        site_config = util.unsafeUnwrap(
-          await project.get_site_config(cwd, options.config),
-        )
         const email = generate
           .email(
             site_config.domains[util.random_int(site_config.domains.length)],
@@ -160,6 +168,7 @@ export function comments_cmd(cwd: string) {
             cli_handle_comment_via_email(
               site_config,
               new TextEncoder().encode(email),
+              file_resolver,
             ),
           ),
         )

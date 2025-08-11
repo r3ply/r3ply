@@ -39,7 +39,7 @@ export interface CommentTemplateContext {
 }
 
 /**
- * @description if configured this just binds an email template to its context, otherwise it just stringifieds the context itself
+ * @description if configured this just binds an email template to its context, otherwise it just stringifies the context itself
  * @param context at a minimum `CommentTemplateContext` but additional contexts can be added with the `&` type operator
  * @param site the configuration of the intended recipient (a website) of the comment
  * @returns either a comment rendered as a string, from the configured template and context, or just the raw context itself
@@ -47,10 +47,15 @@ export interface CommentTemplateContext {
 export function process(
   context: CommentTemplateContext,
   site: R3plySiteConfig,
+  comment_template_from_file?: string,
 ) {
+  const template = (() => {
+    if (site.comments.email['comment_{}']) {
+      return site.comments.email['comment_{}']
+    } else return comment_template_from_file
+  })()
   let comment: string
-  if (site.comments.email['comment_{}']) {
-    const template = site.comments.email['comment_{}']
+  if (template) {
     comment = match(
       // Note: the stringify -> parse combo is necessary to remove keys that are present but are undefined
       Result.safe(() => tera(template, JSON.parse(JSON.stringify(context)))),

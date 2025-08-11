@@ -406,16 +406,32 @@ Content: <p>I found your banana picker.</p>\n`)
     )
     expect(pending_comment[0].comment_id).toBe(metadata.comment_id)
   })
+  test('other moderation methods specified', async () => {
+    const site_config = siteConfigParser(
+      JSON.stringify(
+        TOML.parse(`
+version = "0.0.1"
+domains = ["banana-picker.com"]
+r3ply = ["r3ply.com"]
 
+[comments.email]
+block_list = ["lemonhead@*"]
+
+[comments.email.moderation]
+type = "webhook"
+url = "https://banana-picker.com/comments"`),
+      ),
+    ).value!
+  })
   test.skip('encryption scratch pad', async () => {
-    const cryptoKey: CryptoKey = (await crypto.subtle.generateKey(
+    const cryptoKey = await crypto.subtle.generateKey(
       {
         name: 'AES-GCM',
         length: 256, // 256-bit key,
       },
       true, // Allow exporting the key
       ['encrypt', 'decrypt'],
-    )) as CryptoKey
+    )
     const iv = crypto.getRandomValues(new Uint8Array(16))
     const encrypted = await crypto.subtle.encrypt(
       { name: 'aes-gcm', iv },
