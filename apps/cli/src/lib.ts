@@ -272,7 +272,7 @@ export namespace generate {
 
   export async function email(
     site_domain: string,
-    r3ply_domains: string[],
+    r3ply_domain: string,
     options?: {
       messageId?: string
       date?: string
@@ -291,11 +291,10 @@ export namespace generate {
     const [local, domain] = from.addr.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
     const message_id = options?.messageId || generate.message_id(domain)
     const date = dayjs(options?.date ?? new Date(generate.date()))
-    const to =
-      options?.to ||
-      `${site_domain}@${r3ply_domains[util.random_int(r3ply_domains.length)]}`
+    const to = options?.to || `${site_domain}@${r3ply_domain}`
+    const [to_local, _] = to.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
     const subject =
-      options?.subject || generate.subject(new URL(`https://${site_domain}/`))
+      options?.subject || generate.subject(new URL(`https://${to_local}/`))
     const body = options?.body || (await generate.comment_body())
     const email = Result.safe(() =>
       build_email(
@@ -333,7 +332,7 @@ export async function cli_handle_comment_via_email(
     JSON.stringify(
       TOML.parse(`
 version  = "0.0.1"
-domains = ["${site_config.r3ply[util.random_int(site_config.r3ply.length)]}"]
+domains = ${JSON.stringify(site_config.r3ply)}
 [[admin]]
 name = "Guybrush Threepwood"
 email = "guybrush@example.com"`),

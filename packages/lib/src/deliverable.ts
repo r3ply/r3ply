@@ -41,6 +41,9 @@ export async function deliverable(
     )
   }
 
+  // check `Subject` header's domain is the same as local portion of to `To` address
+  subject_domain_matches_site_domain(subject, site_domain)
+
   // check `From` is not on site's `block_list`
   const from = await from_field_is_deliverable(
     accepted.from,
@@ -55,7 +58,7 @@ export async function deliverable(
  * @description for the `To` field to be deliverable it must have exactly one deliverable address (additional non-deliverable addresses are ok)
  * @param to a list of addresses the email is addressed to (in address includes name and email address)
  * @param site_domains the domains the site config accepts emails at
- * @param system_domain the systems the site config accepts emails from
+ * @param system_domains the systems the site config accepts emails from
  * @returns the relevant `To` field (only the email address) and it ignores the others
  */
 function to_field_is_deliverable(
@@ -63,22 +66,17 @@ function to_field_is_deliverable(
   site_domains: string[],
   system_domains: string[],
 ) {
+  const valid_possible_to_headers = site_domains.flatMap((site_domain) =>
+    system_domains.map((system_domain) => `${site_domain}@${system_domain}`),
+  )
   return match(
-    Result.safe(() =>
-      Util.unique_addr(
-        to,
-        site_domains.flatMap((site_domain) =>
-          system_domains.map(
-            (system_domain) => `${site_domain}@${system_domain}`,
-          ),
-        ),
-      ),
-    ),
+    Result.safe(() => Util.unique_addr(to, valid_possible_to_headers)),
     {
       Ok: (to) => to.address,
       Err: (error) => {
+        const to_addresses = to.map((to) => to.address)
         throw new Error(
-          `Comment is undeliverable, \`To\`: \`${JSON.stringify(site_domains)}\``,
+          `Comment is undeliverable, \`To\`: \`${JSON.stringify(to_addresses)}\` did not match any valid addresses: ${JSON.stringify(valid_possible_to_headers)}`,
         )
       },
     },
@@ -119,6 +117,20 @@ function subject_field_is_deliverable(
 }
 
 /**
+ * The subject's domain must match the site's domain
+ * @param subject the URL object of the subject
+ * @param site_domain the URL object of the site's domain (i.e. local part of `To` email header)
+ */
+function subject_domain_matches_site_domain(subject: URL, site_domain: string) {
+  const url = new URL('https://example.com')
+  url.host = site_domain
+  if (subject.host != url.host)
+    throw new Error(
+      `Local part of \`To\` header must be same domain as \`Subject\` header (${subject.host} doesn't match ${url.host})`,
+    )
+}
+
+/**
  * @description for the `From` field to be deliverable it must not match with the site's configured block_list
  * @param from_secret the from field, wrapped in a `Secret` type
  * @param redact a function that's used to obscure the secret, e.g. a hash function or an hmac
@@ -153,29 +165,69 @@ async function from_field_is_deliverable(
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   test('to_field_is_deliverable', () => {
-    const site_domains = ['a.com', 'hello.com']
-    const system_domain = ['r3ply.com']
-    const a: Addr = { address: `a.com@${system_domain}`, name: null }
-    const hello: Addr = { address: `hello.com@${system_domain}`, name: null }
-    const c: Addr = { address: `c.com@${system_domain}`, name: null }
+    const site_domains = ['a.com', 'test.a.com']
+    const system_domains = ['r3ply.com', 'test.r3ply.com']
+    const a_at_r3ply: Addr = { address: `a.com@r3ply.com`, name: null }
+    const a_at_test_r3ply: Addr = {
+      address: `a.com@test.r3ply.com`,
+      name: null,
+    }
+    const test_a_at_r3ply: Addr = {
+      address: `test.a.com@r3ply.com`,
+      name: null,
+    }
+    const test_a_at_test_r3ply: Addr = {
+      address: `test.a.com@test.r3ply.com`,
+      name: null,
+    }
+    const c: Addr = { address: `c.com@r3ply.com`, name: null }
     expect(
       to_field_is_deliverable(
-        [a, { address: 'unrelated.com', name: null }],
+        [a_at_r3ply, { address: 'unrelated.com', name: null }],
         site_domains,
-        system_domain,
+        system_domains,
       ),
     ).toBe('a.com@r3ply.com')
-    expect(to_field_is_deliverable([hello], site_domains, system_domain)).toBe(
-      'hello.com@r3ply.com',
-    )
+    expect(
+      to_field_is_deliverable(
+        [a_at_test_r3ply, { address: 'unrelated.com', name: null }],
+        site_domains,
+        system_domains,
+      ),
+    ).toBe('a.com@test.r3ply.com')
+    expect(
+      to_field_is_deliverable(
+        [test_a_at_r3ply, { address: 'unrelated.com', name: null }],
+        site_domains,
+        system_domains,
+      ),
+    ).toBe('test.a.com@r3ply.com')
+    expect(
+      to_field_is_deliverable(
+        [test_a_at_test_r3ply, { address: 'unrelated.com', name: null }],
+        site_domains,
+        system_domains,
+      ),
+    ).toBe('test.a.com@test.r3ply.com')
     expect(() =>
-      to_field_is_deliverable([a, hello], site_domains, system_domain),
+      to_field_is_deliverable(
+        [test_a_at_r3ply, test_a_at_test_r3ply],
+        site_domains,
+        system_domains,
+      ),
     ).toThrowError(/Comment is undeliverable/)
     expect(() =>
-      to_field_is_deliverable([c], site_domains, system_domain),
+      to_field_is_deliverable(
+        [test_a_at_r3ply, test_a_at_r3ply],
+        site_domains,
+        system_domains,
+      ),
     ).toThrowError(/Comment is undeliverable/)
     expect(() =>
-      to_field_is_deliverable([a], site_domains, ['notr3ply.com']),
+      to_field_is_deliverable([c], site_domains, system_domains),
+    ).toThrowError(/Comment is undeliverable/)
+    expect(() =>
+      to_field_is_deliverable([a_at_r3ply], site_domains, ['notr3ply.com']),
     ).toThrowError(/Comment is undeliverable/)
   })
   test('subject_is_a_url', () => {
@@ -188,6 +240,10 @@ if (import.meta.vitest) {
     expect(() =>
       subject_field_is_deliverable('https://a.com', ['a.com'], ['/blog']),
     ).toThrowError(/not configured to accept comments at path/)
+  })
+  test('subject_domain_matches_site_domain', () => {
+    expect(() => subject_domain_matches_site_domain(new URL("https://a.com"), "b.com")).toThrow(/a.com doesn't match b.com/)
+    expect(subject_domain_matches_site_domain(new URL("https://a.com"), "a.com"))
   })
   test('from_field_is_deliverable', async () => {
     const from: Secret<string> = Secret('bob@example.com')

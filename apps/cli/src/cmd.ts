@@ -91,7 +91,7 @@ export function comments_cmd(cwd: string) {
         const email = Result.safe(
           generate.email(
             site_config.domains[util.random_int(site_config.domains.length)],
-            site_config.r3ply,
+            site_config.r3ply[util.random_int(site_config.r3ply.length)],
             options,
           ),
         )
@@ -153,7 +153,7 @@ export function comments_cmd(cwd: string) {
         const email = generate
           .email(
             site_config.domains[util.random_int(site_config.domains.length)],
-            site_config.r3ply,
+            site_config.r3ply[util.random_int(site_config.r3ply.length)],
             options,
           )
           .then((email) => {
