@@ -137,8 +137,7 @@ A new comment has been received
             '&commit_msg_{}': {
               type: 'string',
               description: 'Commit message template (reference to a file)',
-              pattern: '^[\\s\\S]*$',
-              maxLength: 256,
+              format: 'uri',
             },
             'pr_title_{}': {
               type: 'string',
@@ -157,8 +156,7 @@ A new comment has been received
             '&pr_body_{}': {
               type: 'string',
               description: 'Pull request body template (reference to a file)',
-              pattern: '^[\\s\\S]*$',
-              maxLength: 256,
+              format: 'uri',
             },
           },
         },
@@ -428,7 +426,7 @@ A new comment has been received
             '&comment_{}': {
               type: 'string',
               description: '[Optional] Comment template (file)',
-              pattern: '^[\\s\\S]*$',
+              format: 'uri',
             },
             'comment_{}_mime': {
               type: 'string',

@@ -242,8 +242,12 @@ if (import.meta.vitest) {
     ).toThrowError(/not configured to accept comments at path/)
   })
   test('subject_domain_matches_site_domain', () => {
-    expect(() => subject_domain_matches_site_domain(new URL("https://a.com"), "b.com")).toThrow(/a.com doesn't match b.com/)
-    expect(subject_domain_matches_site_domain(new URL("https://a.com"), "a.com"))
+    expect(() =>
+      subject_domain_matches_site_domain(new URL('https://a.com'), 'b.com'),
+    ).toThrow(/a.com doesn't match b.com/)
+    expect(
+      subject_domain_matches_site_domain(new URL('https://a.com'), 'a.com'),
+    )
   })
   test('from_field_is_deliverable', async () => {
     const from: Secret<string> = Secret('bob@example.com')

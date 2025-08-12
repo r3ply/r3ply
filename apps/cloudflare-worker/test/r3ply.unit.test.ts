@@ -198,7 +198,7 @@ Subject: https://lucasarts.com/blog/monkey-island-the-movie
       comment_state,
     )
     expect(deliverable_email.unwrapErr().message).toMatch(
-      /Comment is undeliverable, `To`: `\["banana-picker.com"\]`/,
+      /Comment is undeliverable, `To`: `\["lucasarts.com@r3ply.com"\]` did not match any valid addresses: \["banana-picker.com@r3ply.com"\]/,
     )
     const select = await env.TEST_DB.prepare(
       `select id, state from comments_via_email`,
