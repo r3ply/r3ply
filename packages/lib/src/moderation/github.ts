@@ -67,7 +67,10 @@ export interface GitHubModerationContext {
 }
 
 export interface R3plyGithubBot
-  extends Moderation<CreateCommentInRepoArgs, GitHubModerationContext & CommentTemplateContext> {}
+  extends Moderation<
+    CreateCommentInRepoArgs,
+    GitHubModerationContext & CommentTemplateContext
+  > {}
 
 // F/fetch stuff because often times the default fetch isn't used, e.g. in the context of a 'bound' service in cloudflare
 export function R3plyGithubBot<F extends typeof fetch>(
@@ -87,13 +90,15 @@ export function R3plyGithubBot<F extends typeof fetch>(
       )
     // Prepare the arguments supplied to the GitHub bot by resolving any remote template references
     const gh_args = await (async () => {
+      const base_branch = moderationConfig['base_branch_{}']
       const head_branch = moderationConfig['head_branch_{}']
       const file_path = moderationConfig['file_path_{}']
       let commit_msg = moderationConfig['commit_msg_{}'] ?? ''
       const pr_title = moderationConfig['pr_title_{}']
       let pr_body = moderationConfig['pr_body_{}'] ?? ''
       return create_pr_args(comment, context, moderationConfig, {
-        head_branch: head_branch,
+        base_branch,
+        head_branch,
         file_path,
         commit_msg,
         pr_title,
@@ -242,6 +247,7 @@ function create_pr_args(
   context: CommentTemplateContext,
   github_config: GithubModerationConfig,
   templates: {
+    base_branch: string
     head_branch: string
     file_path: string
     commit_msg: string
@@ -251,7 +257,7 @@ function create_pr_args(
 ) {
   let { repo_owner, repo_name } = parse_repo(github_config.repo)
   const sanitized_context = JSON.parse(JSON.stringify(context))
-  let base_branch = github_config.base_branch
+  let base_branch = tera(templates.base_branch, sanitized_context)
   let head_branch = tera(templates.head_branch, sanitized_context)
   let new_comment_filepath = tera(
     github_config['file_path_{}'],
@@ -260,6 +266,7 @@ function create_pr_args(
   let commit_msg = tera(templates.commit_msg, sanitized_context)
   let pr_msg_title = tera(templates.pr_title, sanitized_context)
   let pr_msg_body = tera(templates.pr_body, sanitized_context)
+
   let gh_args: CreateCommentInRepoArgs = {
     repo_owner,
     repo_name,
@@ -328,7 +335,7 @@ if (import.meta.vitest) {
       repo: 'https://github.com/example.com/blog/',
       'file_path_{}': 'content/comments/{{ comment.id }}.txt',
       allow_list: ['*'],
-      base_branch: 'main',
+      'base_branch_{}': 'main',
       'head_branch_{}': 'comment-{{ comment.author_7 }}-{{ comment.id_8 }}',
       'commit_msg_{}': 'new comment: \n> {{ comment.txt }}\n',
       'pr_title_{}': 'merge comment {{ comment.id_8 }}',
@@ -336,6 +343,7 @@ if (import.meta.vitest) {
         'this is a PR to merge comment from user {{ comment.author_7 }}, with content: \n> {{ comment.txt }}',
     }
     const result = create_pr_args(comment, context, github_moderation, {
+      base_branch: github_moderation['base_branch_{}'],
       head_branch: github_moderation['head_branch_{}'],
       file_path: github_moderation['file_path_{}'],
       commit_msg: github_moderation['commit_msg_{}'] ?? '',
@@ -345,7 +353,7 @@ if (import.meta.vitest) {
     expect(result).toStrictEqual({
       repo_owner: 'example.com',
       repo_name: 'blog',
-      repo_url: "https://github.com/example.com/blog/",
+      repo_url: 'https://github.com/example.com/blog/',
       source_branch: 'main',
       target_branch: 'comment-7654321-12345678',
       comment_data: 'This is a comment',

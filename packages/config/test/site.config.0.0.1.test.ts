@@ -374,7 +374,7 @@ describe.each(implementations)('%s', (_, parse) => {
                     '&pr_body_{}',
                     'pr_title_{}',
                     'head_branch_{}',
-                    'base_branch',
+                    'base_branch_{}',
                     'enabled',
                   ]),
                 ).toStrictEqual(optional_fields)
@@ -391,7 +391,7 @@ describe.each(implementations)('%s', (_, parse) => {
                 expect(github_moderation['head_branch_{}']).toBe(
                   'comment-{{ comment.ts_rcvd }}-{{ comment.id_8 }}.md',
                 )
-                expect(github_moderation['base_branch']).toBe('main')
+                expect(github_moderation['base_branch_{}']).toBe('main')
                 expect(github_moderation['enabled']).toBe(true)
               })
               test('type: webhook moderation', () => {

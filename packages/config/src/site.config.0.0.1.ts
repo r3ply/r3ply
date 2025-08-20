@@ -119,10 +119,11 @@ A new comment has been received
               maxLength: 1024,
               examples: ['https://github.com/you/yoursite'],
             },
-            base_branch: {
+            'base_branch_{}{}': {
               type: 'string',
-              description: 'Base branch',
-              pattern: '^[\\S]*$',
+              description: 'Name of the base branch (template string).',
+              pattern: '^[\\s\\S]*$',
+              maxLength: 128,
               default: 'main',
             },
             'file_path_{}': {
@@ -197,10 +198,10 @@ A new comment has been received
               maxLength: 1024,
               examples: ['https://github.com/you/yoursite'],
             },
-            base_branch: {
+            'base_branch_{}': {
               type: 'string',
-              description: 'Base branch',
-              pattern: '^[\\S]*$',
+              description: 'Name of the base branch (template string).',
+              pattern: '^[\\s\\S]*$',
               maxLength: 128,
               default: 'main',
             },
