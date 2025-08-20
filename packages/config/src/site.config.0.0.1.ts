@@ -119,7 +119,7 @@ A new comment has been received
               maxLength: 1024,
               examples: ['https://github.com/you/yoursite'],
             },
-            source_branch: {
+            base_branch: {
               type: 'string',
               description: 'Base branch',
               pattern: '^[\\S]*$',
@@ -197,14 +197,14 @@ A new comment has been received
               maxLength: 1024,
               examples: ['https://github.com/you/yoursite'],
             },
-            source_branch: {
+            base_branch: {
               type: 'string',
               description: 'Base branch',
               pattern: '^[\\S]*$',
               maxLength: 128,
               default: 'main',
             },
-            'target_branch_{}': {
+            'head_branch_{}': {
               type: 'string',
               description:
                 'The new branch that will be created when submitting a comment for moderation. Uses templates.',

@@ -373,8 +373,8 @@ describe.each(implementations)('%s', (_, parse) => {
                     'pr_body_{}',
                     '&pr_body_{}',
                     'pr_title_{}',
-                    'target_branch_{}',
-                    'source_branch',
+                    'head_branch_{}',
+                    'base_branch',
                     'enabled',
                   ]),
                 ).toStrictEqual(optional_fields)
@@ -388,10 +388,10 @@ describe.each(implementations)('%s', (_, parse) => {
                 expect(github_moderation['pr_title_{}']).toBe(
                   'New comment ({{ comment.id_8 }}) on {{ comment.subject.url }} by author `{{ comment.author_7 }}`',
                 )
-                expect(github_moderation['target_branch_{}']).toBe(
+                expect(github_moderation['head_branch_{}']).toBe(
                   'comment-{{ comment.ts_rcvd }}-{{ comment.id_8 }}.md',
                 )
-                expect(github_moderation['source_branch']).toBe('main')
+                expect(github_moderation['base_branch']).toBe('main')
                 expect(github_moderation['enabled']).toBe(true)
               })
               test('type: webhook moderation', () => {

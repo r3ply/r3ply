@@ -168,24 +168,6 @@ export function comments_cmd(cwd: string) {
         const cli_system_config = systemConfigParser(
           JSON.stringify(cli_system_config_toml),
         ).value!
-        console.log(
-          `${chalk.whiteBright('=== System Config ===\n')}`,
-          '\n' +
-            highlight(
-              `# Generated using site config \n${TOML.stringify(cli_system_config_toml)}`,
-              { language: 'toml', ignoreIllegals: true },
-            ) +
-            '\n',
-        )
-        console.log(
-          `${chalk.whiteBright('=== Site Config ===\n')}`,
-          '\n' +
-            highlight(
-              `# From path ${site_config_path} \n${TOML.stringify(site_config)}`,
-              { language: 'toml', ignoreIllegals: true },
-            ) +
-            '\n',
-        )
 
         const email = generate
           .email(
@@ -230,12 +212,27 @@ export function comments_cmd(cwd: string) {
           if (response.isOk()) {
             const email_event_response = response.unwrap()
             console.log(
-              `${chalk.whiteBright('=== Prescreening Results ===')}\n`,
+              `${chalk.whiteBright('=== System Config ===\n')}`,
               '\n' +
                 highlight(
-                  TOML.stringify(email_event_response.prescreening as any),
+                  `# Generated using site config \n${TOML.stringify(cli_system_config_toml)}`,
                   { language: 'toml', ignoreIllegals: true },
-                ),
+                ) +
+                '\n',
+            )
+            console.log(
+              `${chalk.whiteBright('=== Site Config ===\n')}`,
+              `\n${highlight(
+                `# From path ${site_config_path} \n${TOML.stringify(site_config)}`,
+                { language: 'toml', ignoreIllegals: true },
+              )}`,
+            )
+            console.log(
+              `${chalk.whiteBright('=== Prescreening Results ===')}\n`,
+              `\n${highlight(
+                TOML.stringify(email_event_response.prescreening as any),
+                { language: 'toml', ignoreIllegals: true },
+              )}`,
             )
             console.log(
               `\n${chalk.whiteBright('=== Comment Received ===')}\n`,
@@ -248,11 +245,11 @@ export function comments_cmd(cwd: string) {
               email_event_response.deliverable
             console.log(
               `\n${chalk.whiteBright('=== Deliverability Details ===')}\n`,
-              `\n${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details as any))}`,
+              `\n${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details as any), { language: 'toml', ignoreIllegals: true })}`,
             )
             console.log(
               `\n${chalk.whiteBright('=== Template Context ===')}\n`,
-              `\n${highlight('# Note: these are the values available to your templates\n' + TOML.stringify(email_event_response.prepared as any))}`,
+              `\n${highlight('# These are the values available to your templates\n' + TOML.stringify(email_event_response.prepared as any), { language: 'toml', ignoreIllegals: true })}`,
             )
             console.log(
               `\n${chalk.whiteBright('=== Comment ===')}\n`,
@@ -260,19 +257,19 @@ export function comments_cmd(cwd: string) {
             )
             console.log(
               `\n${chalk.whiteBright('=== Moderation Args ===')}\n`,
-              `\n${highlight(TOML.stringify(email_event_response.moderation?.args as any))}`,
+              `\n${highlight('# These are the arguments used for moderation, alongside the comment\n' + TOML.stringify(email_event_response.moderation?.args as any), { language: 'toml', ignoreIllegals: true })}`,
             )
             console.log(
               `\n${chalk.whiteBright('=== Notification Context ===')}\n`,
-              `\n${highlight(TOML.stringify(email_event_response.moderation?.context as any))}`,
+              `\n${highlight('# These values are available within notification templates\n' + TOML.stringify(email_event_response.moderation?.context as any), { language: 'toml', ignoreIllegals: true })}`,
             )
             console.log(
-              `\n${chalk.whiteBright('=== Commenter Notification ===')}\n`,
-              `\n${highlight(email_event_response.moderation?.commenter_notif ?? 'none')}`,
+              `\n${chalk.whiteBright('=== Comment Submitted Notification ===')}\n`,
+              `\n${highlight(email_event_response.moderation?.commenter_notif ?? 'none', { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
             )
             console.log(
-              `\n${chalk.whiteBright('=== Moderator Notification ===')}\n`,
-              `\n${highlight(email_event_response.moderation?.moderator_notif ?? 'none')}`,
+              `\n${chalk.whiteBright('=== Comment Received Notification ===')}\n`,
+              `\n${highlight(email_event_response.moderation?.moderator_notif ?? 'none', { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
             )
           } else {
             throw response.unwrapErr()
