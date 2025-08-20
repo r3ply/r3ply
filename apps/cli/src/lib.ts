@@ -6,6 +6,7 @@ import fg from 'fast-glob'
 import TOML from '@iarna/toml'
 import {
   R3plySiteConfig,
+  R3plySystemConfig,
   siteConfigParser,
   systemConfigParser,
 } from '@r3ply/config'
@@ -332,20 +333,11 @@ export namespace generate {
 }
 
 export async function cli_handle_comment_via_email(
+  system_config: R3plySystemConfig,
   site_config: R3plySiteConfig,
   email_bytes: Uint8Array,
   file_resolver: (file_uri?: string) => Promise<string | undefined>,
 ) {
-  const cli_system_config = systemConfigParser(
-    JSON.stringify(
-      TOML.parse(`
-version  = "0.0.1"
-domains = ${JSON.stringify(site_config.r3ply)}
-[[admin]]
-name = "Guybrush Threepwood"
-email = "guybrush@example.com"`),
-    ),
-  ).value!
   const redact = util.sha256_0x
   const fetch = async (input: URL | RequestInfo, init?: RequestInit) => {
     return Response.json({
@@ -374,7 +366,7 @@ email = "guybrush@example.com"`),
     if (type == 'github') return github_moderation
     else throw 'Not yet implemented'
   }
-  const r3ply = R3ply(cli_system_config)
+  const r3ply = R3ply(system_config)
   const comment_via_email_handler = r3ply.comments.viaEmail(redact, moderation)
   return comment_via_email_handler([site_config, email_bytes])
 }

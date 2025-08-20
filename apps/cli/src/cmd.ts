@@ -3,11 +3,11 @@ import { cli_handle_comment_via_email, project, generate } from './lib.js'
 import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
-import { R3plySiteConfig } from '@r3ply/config'
+import { R3plySiteConfig, systemConfigParser } from '@r3ply/config'
 import path from 'path'
 import { resolve_config_references } from '@r3ply/lib'
-import { tera } from '@r3ply/wasm'
 import { highlight } from 'cli-highlight'
+import TOML from '@iarna/toml'
 
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
@@ -159,6 +159,34 @@ export function comments_cmd(cwd: string) {
           site_config_path,
           project.dereference_local_file,
         )
+        const cli_system_config_toml = TOML.parse(`
+        version  = "0.0.1"
+        domains = ${JSON.stringify(site_config.r3ply)}
+        [[admin]]
+        name = "Guybrush Threepwood"
+        email = "guybrush@example.com"`)
+        const cli_system_config = systemConfigParser(
+          JSON.stringify(cli_system_config_toml),
+        ).value!
+        console.log(
+          `${chalk.whiteBright('=== System Config ===\n')}`,
+          '\n' +
+            highlight(
+              `# Generated using site config \n${TOML.stringify(cli_system_config_toml)}`,
+              { language: 'toml', ignoreIllegals: true },
+            ) +
+            '\n',
+        )
+        console.log(
+          `${chalk.whiteBright('=== Site Config ===\n')}`,
+          '\n' +
+            highlight(
+              `# From path ${site_config_path} \n${TOML.stringify(site_config)}`,
+              { language: 'toml', ignoreIllegals: true },
+            ) +
+            '\n',
+        )
+
         const email = generate
           .email(
             site_config.domains[util.random_int(site_config.domains.length)],
@@ -166,15 +194,22 @@ export function comments_cmd(cwd: string) {
             options,
           )
           .then((email) => {
+            // TODO: for some reason highlight.js doesn't support `eml`???
             console.log(
-              '=== Input Email ===\n',
-              `\n${chalk.blueBright(email.replace(/\r/g, ''))}\n`,
+              `${chalk.whiteBright('=== Input Email ===\n')}`,
+              '\n' +
+                highlight(email.replace(/\r/g, ''), {
+                  language: 'yaml',
+                  ignoreIllegals: true,
+                }) +
+                '\n\n',
             )
             return email
           })
         const response = Result.safe(
           email.then((email) =>
             cli_handle_comment_via_email(
+              cli_system_config,
               site_config,
               new TextEncoder().encode(email),
               file_resolver,
@@ -195,34 +230,49 @@ export function comments_cmd(cwd: string) {
           if (response.isOk()) {
             const email_event_response = response.unwrap()
             console.log(
-              `=== Prescreening Results ===\n`,
+              `${chalk.whiteBright('=== Prescreening Results ===')}\n`,
               '\n' +
                 highlight(
-                  tera(
-                    `[checks.email_size_bytes]
-results = "{{ checks.email_size_bytes.result }}"
-bytes_received = {{ checks.email_size_bytes.bytes_received }}
-max_bytes_allowed = {{ checks.email_size_bytes.max_bytes_allowed }}
-
-[checks.r3ply_is_disabled]
-results = "{{ checks.r3ply_is_disabled.result }}"
-site = {{ checks.r3ply_is_disabled.site }}
-system = {{ checks.r3ply_is_disabled.system }}
-
-[checks.comments_accepted]
-results = "{{ checks.comments_accepted.result }}"
-site = {{ checks.comments_accepted.system_for_site }}
-system = {{ checks.comments_accepted.site_from_system }}`,
-                    email_event_response.prescreening,
-                  ),
+                  TOML.stringify(email_event_response.prescreening as any),
                   { language: 'toml', ignoreIllegals: true },
                 ),
-              '\n',
-              `Output comment:\n\n${chalk.cyanBright(await email_event_response.comment)}`,
-              `\n${chalk.yellow('--------------------------')}\n`,
-              `\nCommenter notification:\n\n${chalk.cyanBright(email_event_response.notifs.commenter)}`,
-              `\n${chalk.yellow('--------------------------')}\n`,
-              `\nModerator notification:\n\n${chalk.cyanBright(email_event_response.notifs.moderator)}`,
+            )
+            console.log(
+              `\n${chalk.whiteBright('=== Comment Received ===')}\n`,
+              `\n${highlight(
+                TOML.stringify(email_event_response.received as any),
+                { language: 'toml', ignoreIllegals: true },
+              )}`,
+            )
+            const { email, ...deliverable_details } =
+              email_event_response.deliverable
+            console.log(
+              `\n${chalk.whiteBright('=== Deliverability Details ===')}\n`,
+              `\n${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details as any))}`,
+            )
+            console.log(
+              `\n${chalk.whiteBright('=== Template Context ===')}\n`,
+              `\n${highlight('# Note: these are the values available to your templates\n' + TOML.stringify(email_event_response.prepared as any))}`,
+            )
+            console.log(
+              `\n${chalk.whiteBright('=== Comment ===')}\n`,
+              `\n${highlight(email_event_response.comment as any)}`,
+            )
+            console.log(
+              `\n${chalk.whiteBright('=== Moderation Args ===')}\n`,
+              `\n${highlight(TOML.stringify(email_event_response.moderation?.args as any))}`,
+            )
+            console.log(
+              `\n${chalk.whiteBright('=== Notification Context ===')}\n`,
+              `\n${highlight(TOML.stringify(email_event_response.moderation?.context as any))}`,
+            )
+            console.log(
+              `\n${chalk.whiteBright('=== Commenter Notification ===')}\n`,
+              `\n${highlight(email_event_response.moderation?.commenter_notif ?? 'none')}`,
+            )
+            console.log(
+              `\n${chalk.whiteBright('=== Moderator Notification ===')}\n`,
+              `\n${highlight(email_event_response.moderation?.moderator_notif ?? 'none')}`,
             )
           } else {
             throw response.unwrapErr()

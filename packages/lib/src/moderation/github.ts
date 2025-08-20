@@ -9,7 +9,7 @@ import { tera } from '@r3ply/wasm'
 import { Moderation } from './moderation'
 
 // Note: this was copy/pasted from the gh-bot code but it should be considered temporary and the code should be properly packaged and imported from there
-interface CreateCommentInRepoArgs {
+export interface CreateCommentInRepoArgs {
   repo_owner: string
   repo_name: string
   source_branch: string
@@ -25,7 +25,7 @@ interface CreateCommentInRepoArgs {
       }
 }
 
-interface GitHubModerationContext {
+export interface GitHubModerationContext {
   github: {
     comment: {
       path: string
@@ -60,7 +60,8 @@ interface GitHubModerationContext {
   }
 }
 
-export interface R3plyGithubBot extends Moderation {}
+export interface R3plyGithubBot
+  extends Moderation<CreateCommentInRepoArgs, GitHubModerationContext> {}
 
 // F/fetch stuff because often times the default fetch isn't used, e.g. in the context of a 'bound' service in cloudflare
 export function R3plyGithubBot<F extends typeof fetch>(
@@ -198,7 +199,12 @@ export function R3plyGithubBot<F extends typeof fetch>(
       }
     }
 
-    return { commenter_notif, moderator_notif }
+    return {
+      args: gh_args,
+      context: gh_context,
+      commenter_notif,
+      moderator_notif,
+    }
   }
   return {
     send: send,

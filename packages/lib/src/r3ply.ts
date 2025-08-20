@@ -4,20 +4,20 @@ import {
   R3plySiteConfig,
   R3plySystemConfig,
 } from '@r3ply/config'
-import { accept } from './accept'
-import { deliverable } from './deliverable'
-import { CommentMetadata, prepare } from './prepare'
-import { receive } from './receive'
-import { process } from './process'
+import { accept, AcceptedEmail } from './accept'
+import { deliverable, DeliverableEmail } from './deliverable'
+import { prepare } from './prepare'
+import { CommentMetadata, receive } from './receive'
+import { CommentTemplateContext, process } from './process'
 import { createHMAC } from './util'
 import { prescreen, PrescreenResult } from './prescreen'
-import { Moderation } from './moderation/moderation'
+import { Moderation, ModerationResult } from './moderation/moderation'
 
 export interface R3ply {
   comments: {
     viaEmail: (
       redactor: (input: string) => Promise<string>,
-      moderator?: (type: 'github' | 'webhook') => Moderation,
+      moderator?: (type: 'github' | 'webhook') => Moderation<any, any>,
     ) => (
       email_event: [recipient: R3plySiteConfig, bytes: Uint8Array],
     ) => Promise<EmailEventResponse>
@@ -26,7 +26,7 @@ export interface R3ply {
 export function R3ply(system: R3plySystemConfig): R3ply {
   function email_handler(
     redactor: (input: string) => Promise<string>,
-    moderator?: (type: 'github' | 'webhook') => Moderation,
+    moderator?: (type: 'github' | 'webhook') => Moderation<any, any>,
   ) {
     return async function (
       email_event: [recipient: R3plySiteConfig, bytes: Uint8Array],
@@ -47,8 +47,12 @@ export function R3ply(system: R3plySystemConfig): R3ply {
 
 export interface EmailEventResponse {
   prescreening: PrescreenResult
+  received: CommentMetadata
+  accepted: AcceptedEmail
+  deliverable: DeliverableEmail
+  prepared: CommentTemplateContext
   comment: string
-  notifs: { commenter: string | undefined; moderator: string | undefined }
+  moderation?: ModerationResult<any, any>
 }
 
 async function handle_email_event(
@@ -56,7 +60,7 @@ async function handle_email_event(
   dependencies: {
     system_config: R3plySystemConfig
     redactor: (input: string) => Promise<string>
-    moderator?: (type: 'github' | 'webhook') => Moderation
+    moderator?: (type: 'github' | 'webhook') => Moderation<any, any>
   },
 ): Promise<EmailEventResponse> {
   const prescreen_results = prescreen(
@@ -64,7 +68,7 @@ async function handle_email_event(
     email_event.site,
     dependencies.system_config,
   )
-  const metadata: CommentMetadata = receive()
+  const metadata = receive()
   const accepted_email = accept(email_event.bytes)
   const deliverable_email = deliverable(
     accepted_email,
@@ -88,8 +92,8 @@ async function handle_email_event(
     ),
   )
   // Note: if things need to be added that are independent of the basic email -> comment chain, probably a good place to do it is within this promise
-  return Promise.all([comment, template_context]).then(
-    ([comment, template_context]) => {
+  return Promise.all([deliverable_email, comment, template_context]).then(
+    ([deliverable_email, comment, template_context]) => {
       if (
         dependencies.moderator &&
         email_event.site.comments.email.moderation.enabled
@@ -101,25 +105,27 @@ async function handle_email_event(
           email_event.site.comments.email.notify
         return moderator
           .send(comment, template_context, moderation_config, notify_config)
-          .then((notifs) => {
+          .then((moderation_rep) => {
             const result: EmailEventResponse = {
               prescreening: prescreen_results,
+              received: metadata,
+              accepted: accepted_email,
+              deliverable: deliverable_email,
+              prepared: template_context,
               comment: comment,
-              notifs: {
-                commenter: notifs?.commenter_notif,
-                moderator: notifs?.moderator_notif,
-              },
+              moderation: moderation_rep,
             }
             return result
           })
       } else {
         const result: EmailEventResponse = {
           prescreening: prescreen_results,
+          received: metadata,
+          accepted: accepted_email,
+          deliverable: deliverable_email,
+          prepared: template_context,
           comment: comment,
-          notifs: {
-            commenter: undefined,
-            moderator: undefined,
-          },
+          moderation: undefined,
         }
         return result
       }

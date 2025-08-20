@@ -129,7 +129,7 @@ export async function comment_via_email(
     site_config,
     email_bytes,
   ]).then(([site_config, email_bytes]) => {
-    let moderation = (type: 'github' | 'webhook'): Moderation => {
+    let moderation = (type: 'github' | 'webhook'): Moderation<any, any> => {
       switch (site_config.comments.email.moderation.type) {
         case 'github':
           return R3plyGithubBot(deps.gh_pw, fetch)

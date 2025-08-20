@@ -5,8 +5,7 @@ import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
 import { DeliverableEmail } from './deliverable'
 import { CommentTemplateContext } from './process'
 import { md_to_html, sanitize_html } from '@r3ply/wasm'
-
-export type CommentMetadata = { comment_id: string; ts_rcvd: string }
+import { CommentMetadata } from './receive'
 
 /**
  * This adds context for comments received via email

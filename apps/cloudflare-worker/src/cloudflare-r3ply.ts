@@ -28,12 +28,12 @@ export function CloudflareR3ply(system_config: R3plySystemConfig) {
   ): CloudflareR3ply {
     function email_handler(
       redactor: (input: string) => Promise<string>,
-      moderator?: (type: 'github' | 'webhook') => Moderation,
+      moderator?: (type: 'github' | 'webhook') => Moderation<any, any>,
     ) {
       const handle_email_event: (
         email_event: [recipient: R3plySiteConfig, bytes: Uint8Array],
       ) => Promise<EmailEventResponse> = async ([site_config, email_bytes]) => {
-        prescreen(
+        const prescreening = prescreen(
           { email_size_bytes: email_bytes.byteLength },
           site_config,
           system_config,
@@ -92,13 +92,18 @@ export function CloudflareR3ply(system_config: R3plySystemConfig) {
               template_context,
               site_config.comments.email.moderation,
             )
-            .then((notifs) => {
+            .then((moderation_result) => {
               const result: EmailEventResponse = {
                 comment,
-                notifs: {
-                  commenter: notifs.commenter_notif,
-                  moderator: notifs.moderator_notif,
+                prescreening: prescreening,
+                received: {
+                  comment_id: metadata.comment_id,
+                  ts_rcvd: metadata.ts_rcvd,
                 },
+                accepted: accepted_email,
+                deliverable: deliverable_email,
+                prepared: template_context,
+                moderation: moderation_result,
               }
               return result
             })
@@ -106,10 +111,14 @@ export function CloudflareR3ply(system_config: R3plySystemConfig) {
         } else {
           const result: EmailEventResponse = {
             comment,
-            notifs: {
-              commenter: undefined,
-              moderator: undefined,
+            prescreening: prescreening,
+            received: {
+              comment_id: metadata.comment_id,
+              ts_rcvd: metadata.ts_rcvd,
             },
+            accepted: accepted_email,
+            deliverable: deliverable_email,
+            prepared: template_context,
           }
           return result
         }
