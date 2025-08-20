@@ -161,7 +161,7 @@ A new comment has been received
               description: 'Pull request body template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
-              default: `TODO`
+              default: `TODO`,
             },
             '&pr_body_{}': {
               type: 'string',
@@ -253,7 +253,7 @@ Comment: > {{ comment.txt | split(pat="\n") | join(sep="> ") }}`,
               description: 'Pull request body template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
-              default: `TODO`
+              default: `TODO`,
             },
             '&pr_body_{}': {
               type: 'string',

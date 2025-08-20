@@ -1,6 +1,26 @@
 import micromatch from 'micromatch'
 import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
 
+export interface PrescreenResult {
+  checks: {
+    email_size_bytes: {
+      result: 'pass' | 'fail'
+      bytes_received: number
+      max_bytes_allowed: number
+    }
+    r3ply_is_disabled: {
+      result: 'pass' | 'fail'
+      site: boolean
+      system: boolean
+    }
+    comments_accepted: {
+      result: 'pass' | 'fail'
+      system_for_site: boolean
+      site_from_system: boolean
+    }
+  }
+}
+
 /**
  * This function acts as an assertion before processing an email any further.
  * @param checks an object that contains various things to check
@@ -16,7 +36,7 @@ export function prescreen(
   },
   site: R3plySiteConfig,
   system: R3plySystemConfig,
-): void {
+): PrescreenResult {
   // Check if system and site are enabled
   r3ply_is_disabled(system.enabled, system.domains, site.enabled, site.domains)
   // Check if system accepts comments on behalf of site
@@ -31,6 +51,26 @@ export function prescreen(
   email_size_exceeds_max(checks.email_size_bytes, max_bytes_allowed)
   // // Check if from matches either system or site blocklists
   // check_blocklist(checks.from, system.email.block_list, site.comments.email.block_list)
+  const result: PrescreenResult = {
+    checks: {
+      email_size_bytes: {
+        result: 'pass',
+        bytes_received: checks.email_size_bytes,
+        max_bytes_allowed: max_bytes_allowed,
+      },
+      r3ply_is_disabled: {
+        result: 'pass',
+        site: false,
+        system: false,
+      },
+      comments_accepted: {
+        result: 'pass',
+        system_for_site: true,
+        site_from_system: true,
+      },
+    },
+  }
+  return result
 }
 
 /**
@@ -64,7 +104,7 @@ export function prescreen(
  * Larger functions can focus on APIs and usability, and the process for gleaning insight into
  * that is achieved through the unit testing.
  */
-
+// TODO: I think this isn't being used anywhere and is in fact done in deliverable.ts now
 function check_blocklist(
   from: string[],
   system_block: string[],

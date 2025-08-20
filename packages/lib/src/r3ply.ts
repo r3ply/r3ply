@@ -10,7 +10,7 @@ import { CommentMetadata, prepare } from './prepare'
 import { receive } from './receive'
 import { process } from './process'
 import { createHMAC } from './util'
-import { prescreen } from './prescreen'
+import { prescreen, PrescreenResult } from './prescreen'
 import { Moderation } from './moderation/moderation'
 
 export interface R3ply {
@@ -45,7 +45,8 @@ export function R3ply(system: R3plySystemConfig): R3ply {
   }
 }
 
-export type EmailEventResponse = {
+export interface EmailEventResponse {
+  prescreening: PrescreenResult
   comment: string
   notifs: { commenter: string | undefined; moderator: string | undefined }
 }
@@ -58,7 +59,7 @@ async function handle_email_event(
     moderator?: (type: 'github' | 'webhook') => Moderation
   },
 ): Promise<EmailEventResponse> {
-  prescreen(
+  const prescreen_results = prescreen(
     { email_size_bytes: email_event.bytes.byteLength },
     email_event.site,
     dependencies.system_config,
@@ -101,22 +102,26 @@ async function handle_email_event(
         return moderator
           .send(comment, template_context, moderation_config, notify_config)
           .then((notifs) => {
-            return {
-              comment,
+            const result: EmailEventResponse = {
+              prescreening: prescreen_results,
+              comment: comment,
               notifs: {
                 commenter: notifs?.commenter_notif,
                 moderator: notifs?.moderator_notif,
               },
             }
+            return result
           })
       } else {
-        return {
-          comment,
+        const result: EmailEventResponse = {
+          prescreening: prescreen_results,
+          comment: comment,
           notifs: {
             commenter: undefined,
             moderator: undefined,
           },
         }
+        return result
       }
     },
   )

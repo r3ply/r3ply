@@ -6,6 +6,8 @@ import chalk from 'chalk'
 import { R3plySiteConfig } from '@r3ply/config'
 import path from 'path'
 import { resolve_config_references } from '@r3ply/lib'
+import { tera } from '@r3ply/wasm'
+import { highlight } from 'cli-highlight'
 
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
@@ -165,9 +167,9 @@ export function comments_cmd(cwd: string) {
           )
           .then((email) => {
             console.log(
-              `Input email:\n\n${chalk.blueBright(email.replace(/\r/g, ''))}`,
+              '=== Input Email ===\n',
+              `\n${chalk.blueBright(email.replace(/\r/g, ''))}\n`,
             )
-            console.log(`\n${chalk.yellow('--------------------------')}\n`)
             return email
           })
         const response = Result.safe(
@@ -193,6 +195,29 @@ export function comments_cmd(cwd: string) {
           if (response.isOk()) {
             const email_event_response = response.unwrap()
             console.log(
+              `=== Prescreening Results ===\n`,
+              '\n' +
+                highlight(
+                  tera(
+                    `[checks.email_size_bytes]
+results = "{{ checks.email_size_bytes.result }}"
+bytes_received = {{ checks.email_size_bytes.bytes_received }}
+max_bytes_allowed = {{ checks.email_size_bytes.max_bytes_allowed }}
+
+[checks.r3ply_is_disabled]
+results = "{{ checks.r3ply_is_disabled.result }}"
+site = {{ checks.r3ply_is_disabled.site }}
+system = {{ checks.r3ply_is_disabled.system }}
+
+[checks.comments_accepted]
+results = "{{ checks.comments_accepted.result }}"
+site = {{ checks.comments_accepted.system_for_site }}
+system = {{ checks.comments_accepted.site_from_system }}`,
+                    email_event_response.prescreening,
+                  ),
+                  { language: 'toml', ignoreIllegals: true },
+                ),
+              '\n',
               `Output comment:\n\n${chalk.cyanBright(await email_event_response.comment)}`,
               `\n${chalk.yellow('--------------------------')}\n`,
               `\nCommenter notification:\n\n${chalk.cyanBright(email_event_response.notifs.commenter)}`,

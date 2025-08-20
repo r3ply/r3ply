@@ -23,6 +23,7 @@
     "@r3ply/lib": "workspace:*",
     "@r3ply/wasm": "file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz",
     "chalk": "^5.4.1",
+    "cli-highlight": "^2.1.11",
     "commander": "^13.1.0",
     "dayjs": "^1.11.13",
     "fast-glob": "^3.3.3",
