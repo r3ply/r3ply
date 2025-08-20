@@ -8,7 +8,7 @@ Here's an example of the minimum config (uses all defaults)
 
 ```toml
 version = "0.0.1"
-domains = ["your-site.com"]
+domains = ["your-site.com", "test.your-site.com"]
 r3ply = ["r3ply.com", "my-test-r3ply-server.net"]
 
 [comments.email.moderation]
@@ -22,7 +22,7 @@ Here's an example config, without comments
 ```toml
 version = "0.0.1"
 enabled = true
-domains = ["your-site.com"]
+domains = ["your-site.com", "test.your-site.com"]
 r3ply = ["r3ply.com", "my-test-r3ply-server.net"]
 [comments]
 enabled = true
@@ -101,7 +101,7 @@ email_hash = "{{ commentor.id }}"
 email_hash_version = "1.0.0"
 dkim_pass = {{ email.auth.dkim }}
 dmarc_pass = {{ email.auth.dmarc }}
-spf_pass = {{ {{ email.details.spf  }}
+spf_pass = {{ email.details.spf  }}
 +++
 
 {{ comment.body_html }}
@@ -165,7 +165,7 @@ version = "0.0.1"
 enabled = true
 # [Required] The domains that this config belongs to (config must be served from same domain)
 # [Note: an array so you can develop/test changes on one, while serving traffic at the same time on others]
-domains = ["your-site.com"]
+domains = ["your-site.com", "test.your-site.com"]
 # [Optional, default is r3ply.com] The domains this site expects to receive r3plyies from
 # [Note 1: this can be useful for testing or transitioning to a new r3ply server]
 # [Note 2: glob patterns are allowed here, so you can simply add `*` to accept all r3plies]
@@ -274,7 +274,7 @@ email_hash = "{{ commentor.id }}"
 email_hash_version = "1.0.0"
 dkim_pass = {{ email.auth.dkim }}
 dmarc_pass = {{ email.auth.dmarc }}
-spf_pass = {{ {{ email.details.spf  }}
+spf_pass = {{ email.details.spf  }}
 +++
 
 {{ comment.body_html }}

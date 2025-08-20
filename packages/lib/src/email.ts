@@ -119,7 +119,7 @@ export function get_date(email: Email) {
  * is fine, as most people use popular email providers. However, if r3ply were to be used under
  * the same assumptions of one service provider, for example Cloudflare email workers, then it could
  * lead to potentially unsafe results. I think the best path forward will be for authentication to
- * be implemented as closure by the people operation the service.
+ * be implemented as closure by the people operating the r3ply server.
  *
  * What's here is just what works at a bare minimum under a fixed set of assumptions, but it is no
  * way to be considered reliable or safe under all circumstances.
@@ -150,12 +150,13 @@ export function get_auth_results(email: Email) {
   }
   if (values.size > 1)
     throw new Error('Unknown how to handle multiple Authentication-Results')
-  if (values.size == 0)
+  if (values.size == 0) {
     return {
       dkim_pass: false,
       dmarc_pass: false,
       spf_pass: false,
     }
+  }
   return [...values][0]
 }
 

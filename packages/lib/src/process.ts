@@ -47,18 +47,15 @@ export interface CommentTemplateContext {
 export function process(
   context: CommentTemplateContext,
   site: R3plySiteConfig,
-  comment_template_from_file?: string,
+  comment_template?: string,
 ) {
-  const template = (() => {
-    if (site.comments.email['comment_{}']) {
-      return site.comments.email['comment_{}']
-    } else return comment_template_from_file
-  })()
   let comment: string
-  if (template) {
+  if (comment_template) {
     comment = match(
       // Note: the stringify -> parse combo is necessary to remove keys that are present but are undefined
-      Result.safe(() => tera(template, JSON.parse(JSON.stringify(context)))),
+      Result.safe(() =>
+        tera(comment_template, JSON.parse(JSON.stringify(context))),
+      ),
       {
         Ok: (rendered) => rendered,
         Err: (error) => {

@@ -13,7 +13,7 @@ import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
 import { RiMarkov, RiTa } from 'rita'
 import { fileURLToPath } from 'url'
-import { R3ply } from '@r3ply/lib'
+import { DerferenceFile, R3ply, R3plyGithubBot } from '@r3ply/lib'
 import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
 import crypto from 'crypto'
@@ -157,6 +157,14 @@ export namespace project {
       .then((parsed_site_config) => util.unsafeUnwrap(parsed_site_config))
       .then((parsed_site_config) => parsed_site_config.value!)
     return Result.safe(site_config)
+  }
+
+  export const dereference_local_file: DerferenceFile = async (
+    base_uri: string,
+    file_uri_ref?: string,
+  ): Promise<string | undefined> => {
+    const resolver = resolve_file_relative_to_site_config(base_uri)
+    return resolver(file_uri_ref)
   }
 
   /**
@@ -338,9 +346,36 @@ name = "Guybrush Threepwood"
 email = "guybrush@example.com"`),
     ),
   ).value!
-  const r3ply = R3ply(cli_system_config, file_resolver)
   const redact = util.sha256_0x
-  const comment_via_email_handler = r3ply.comments.viaEmail(redact)
+  const fetch = async (input: URL | RequestInfo, init?: RequestInit) => {
+    return Response.json({
+      id: 'A temporary ID',
+      url: 'https://example.com/change-me/todo',
+      html_url: 'https://example.com/change-me/todo/html',
+      diff_url: 'https://example.com/change-me/todo/diff',
+      patch_url: 'https://example.com/change-me/todo/patch',
+      issue_url: 'https://example.com/change-me/todo/issue',
+      commits_url: 'https://example.com/change-me/todo/commits',
+      comments_url: 'https://example.com/change-me/todo/comments',
+      statuses_url: 'https://example.com/change-me/todo/statuses',
+      number: 123,
+      state: 'open',
+      title: 'Temporary PR Title (TODO: change me)',
+      body: 'Temporary PR Body (TODO: change me)',
+      created_at: 'Temporary Date (TODO: change me)',
+      commits: 1,
+      additions: 25,
+      deletions: 0,
+      changed_files: 0,
+    })
+  }
+  const github_moderation = R3plyGithubBot('no password', fetch)
+  const moderation = (type: 'github' | 'webhook') => {
+    if (type == 'github') return github_moderation
+    else throw 'Not yet implemented'
+  }
+  const r3ply = R3ply(cli_system_config)
+  const comment_via_email_handler = r3ply.comments.viaEmail(redact, moderation)
   return comment_via_email_handler([site_config, email_bytes])
 }
 

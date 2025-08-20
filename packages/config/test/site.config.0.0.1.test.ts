@@ -2,6 +2,8 @@ import { describe, expect } from 'vitest'
 import {
   schema_ts,
   R3plySiteConfig,
+  R3plyNotifyConfig,
+  R3plyModerationConfig,
   parser as imported_r3ply_site_config_parser,
   module,
   TypedParseResult,
@@ -377,11 +379,11 @@ describe.each(implementations)('%s', (_, parse) => {
                   ]),
                 ).toStrictEqual(optional_fields)
                 expect(github_moderation.allow_list).toStrictEqual([])
-                expect(github_moderation['commit_msg_{}']).toBe('TODO')
+                expect(github_moderation['commit_msg_{}']).toMatch(/Comment submitted/)
                 expect(github_moderation['&commit_msg_{}']).toBeUndefined()
                 expect(github_moderation['pr_body_{}']).toBe('TODO')
                 expect(github_moderation['&pr_body_{}']).toBeUndefined()
-                expect(github_moderation['pr_title_{}']).toBe('TODO')
+                expect(github_moderation['pr_title_{}']).toBe('New comment ({{ comment.id_8 }}) on {{ comment.subject.url }} by author `{{ comment.author_7 }}`')
                 expect(github_moderation['target_branch_{}']).toBe(
                   'comment-{{ comment.ts_rcvd }}-{{ comment.id_8 }}.md',
                 )
@@ -547,9 +549,11 @@ describe.each(implementations)('%s', (_, parse) => {
                   'commenter',
                   'notify_commenter_upon_submission',
                   'comment_submitted_notif_{}',
+                  "&comment_submitted_notif_{}",
                   'moderator',
                   'notify_moderator_upon_receipt',
                   'comment_received_notif_{}',
+                  "&comment_received_notif_{}",
                 ]
                 test(`expected fields: ${JSON.stringify(expected_optional_fields)}`, () => {
                   expect(new Set(expected_optional_fields)).toStrictEqual(
@@ -567,43 +571,27 @@ describe.each(implementations)('%s', (_, parse) => {
                   { field: string; expected_value: any; test: boolean },
                 ][] = [
                   [
-                    '`commenter` is true',
-                    { test: true, field: 'commenter', expected_value: true },
+                    '`commenter` is false',
+                    { test: true, field: 'commenter', expected_value: false },
                   ],
                   [
-                    '`notify_commenter_upon_submission` is true',
+                    '`notify_commenter_upon_submission` is false',
                     {
                       test: true,
                       field: 'notify_commenter_upon_submission',
-                      expected_value: true,
+                      expected_value: false,
                     },
                   ],
                   [
-                    '`comment_submitted_notif_{}` is "TODO',
-                    {
-                      test: true,
-                      field: 'comment_submitted_notif_{}',
-                      expected_value: 'TODO',
-                    },
+                    '`moderator` is false',
+                    { test: true, field: 'moderator', expected_value: false },
                   ],
                   [
-                    '`moderator` is true',
-                    { test: true, field: 'moderator', expected_value: true },
-                  ],
-                  [
-                    '`notify_moderator_upon_receipt` is "all"',
+                    '`notify_moderator_upon_receipt` is "none"',
                     {
                       test: true,
                       field: 'notify_moderator_upon_receipt',
-                      expected_value: 'all',
-                    },
-                  ],
-                  [
-                    '`comment_received_notif_{}` is "TODO',
-                    {
-                      test: true,
-                      field: 'comment_received_notif_{}',
-                      expected_value: 'TODO',
+                      expected_value: 'none',
                     },
                   ],
                 ]

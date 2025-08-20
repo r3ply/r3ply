@@ -11,6 +11,8 @@ import {
   prepare,
   prescreen,
   Moderation,
+  DerferenceFile,
+  EmailEventResponse,
 } from '@r3ply/lib'
 import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
 import { CommentState } from './state/d1'
@@ -25,12 +27,12 @@ export function CloudflareR3ply(system_config: R3plySystemConfig) {
     comment_state?: CommentState,
   ): CloudflareR3ply {
     function email_handler(
-      redact: (input: string) => Promise<string>,
-      moderator?: Moderation,
+      redactor: (input: string) => Promise<string>,
+      moderator?: (type: 'github' | 'webhook') => Moderation,
     ) {
       const handle_email_event: (
         email_event: [recipient: R3plySiteConfig, bytes: Uint8Array],
-      ) => Promise<string> = async ([site_config, email_bytes]) => {
+      ) => Promise<EmailEventResponse> = async ([site_config, email_bytes]) => {
         prescreen(
           { email_size_bytes: email_bytes.byteLength },
           site_config,
@@ -45,7 +47,7 @@ export function CloudflareR3ply(system_config: R3plySystemConfig) {
           await cf_deliverable(
             accepted_email,
             metadata,
-            redact,
+            redactor,
             site_config,
             system_config,
             comment_state,
@@ -82,24 +84,35 @@ export function CloudflareR3ply(system_config: R3plySystemConfig) {
           })
           .unwrap()
         if (moderator) {
-          const moderation_result = moderator?.send(
+          const moderation_result = moderator(
+            site_config.comments.email.moderation.type,
+          )
+            .send(
+              comment,
+              template_context,
+              site_config.comments.email.moderation,
+            )
+            .then((notifs) => {
+              const result: EmailEventResponse = {
+                comment,
+                notifs: {
+                  commenter: notifs.commenter_notif,
+                  moderator: notifs.moderator_notif,
+                },
+              }
+              return result
+            })
+          return moderation_result
+        } else {
+          const result: EmailEventResponse = {
             comment,
-            template_context,
-            site_config,
-          ) as any as Promise<Response>
-          return moderation_result.then((moderation_result) => {
-            if (!moderation_result.ok) {
-              return moderation_result.text().then((error_text) => {
-                console.error(
-                  `Error sending comment for moderation, details:\n\n> ${error_text.split('\n').join('\n> ')}`,
-                )
-                return comment
-              })
-            } else {
-              return comment
-            }
-          })
-        } else return comment
+            notifs: {
+              commenter: undefined,
+              moderator: undefined,
+            },
+          }
+          return result
+        }
       }
       return handle_email_event
     }
@@ -204,7 +217,13 @@ export async function cf_process(
   site_config: R3plySiteConfig,
   comment_state?: CommentState,
 ) {
-  const comment = Result.safe(() => process(template_context, site_config))
+  const comment = Result.safe(() =>
+    process(
+      template_context,
+      site_config,
+      site_config.comments.email['comment_{}'],
+    ),
+  )
   if (metadata.gist_id !== null) {
     let comment_file: { [key: string]: { content: string } }
     if (comment.isOk()) {
@@ -252,4 +271,50 @@ export async function cf_process(
       })
       .then((_) => comment)
   } else return comment
+}
+
+/**
+ * A function used to created a "file_resolver" for r3ply that takes a base URL (in practice usually the location of the site's r3ply config) and uses that to resolve file references in the config.
+ * @param base the domain + path from which to base the file resolution from (usually starting from the directory of the domain's r3ply config)
+ * @returns an async function that accepts a file_uri and will resolve the file relative to `base`, and return either the file's contents (if 200 OK) or undefined
+ * @example (assuming base URL: https://example.com/.well-known/r3ply/config.toml)
+ *
+ * relative reference: e.g.
+ * file.txt -> https://example.com/.well-known/r3ply/file.txt
+ * absolute reference: e.g. /file.txt -> https://example.com/file.txt
+ * relative dotted reference: e.g. ../file.txt -> https://example.com/.well-known/file.txt
+ * relative reference exceeding site root: e.g. ../../../../file.txt -> https://example.com/file.txt
+ * absolute reference from another domain: e.g. https://mallory.com/file.txt -> https://example.com/file.txt
+ * absolute reference from another domain, with another absolute reference as the path: e.g. https://mallory.com/https://bad.com/file.txt -> https://example.com/https://bad.com/file.txt
+ *
+ */
+function resolve_file_from_domain(base: URL) {
+  return async function (file_uri?: string): Promise<string | undefined> {
+    if (file_uri) {
+      // used to normalize the filepath, in case a fully qualified URI is given (in which case the URL would override the base)
+      const file_uri_as_url = new URL(file_uri, 'https://example.com')
+      const file_response = fetch(
+        new URL('./' + file_uri_as_url.pathname, base),
+      )
+      return file_response.then((file_response) => {
+        if (file_response.ok) {
+          return file_response.text()
+        } else {
+          return undefined
+        }
+      })
+    } else return Promise.resolve(undefined)
+  }
+}
+
+export const resolve_config_references_at_domain: DerferenceFile = async (
+  base_uri: string,
+  file_uri_ref?: string,
+): Promise<string | undefined> => {
+  console.log('Resolving config reference:')
+  console.log(base_uri)
+  console.log(file_uri_ref)
+  console.log()
+
+  return resolve_file_from_domain(new URL(base_uri))(file_uri_ref)
 }

@@ -1,4 +1,9 @@
-import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
+import {
+  R3plyModerationConfig,
+  R3plyNotifyConfig,
+  R3plySiteConfig,
+  R3plySystemConfig,
+} from '@r3ply/config'
 import { accept } from './accept'
 import { deliverable } from './deliverable'
 import { CommentMetadata, prepare } from './prepare'
@@ -11,28 +16,25 @@ import { Moderation } from './moderation/moderation'
 export interface R3ply {
   comments: {
     viaEmail: (
-      redact: (input: string) => Promise<string>,
-      moderator?: Moderation,
+      redactor: (input: string) => Promise<string>,
+      moderator?: (type: 'github' | 'webhook') => Moderation,
     ) => (
       email_event: [recipient: R3plySiteConfig, bytes: Uint8Array],
-    ) => Promise<string>
+    ) => Promise<EmailEventResponse>
   }
 }
-export function R3ply(
-  system: R3plySystemConfig,
-  file_resolver?: (file_uri?: string) => Promise<string | undefined>,
-): R3ply {
+export function R3ply(system: R3plySystemConfig): R3ply {
   function email_handler(
-    redact: (input: string) => Promise<string>,
-    moderator?: Moderation,
+    redactor: (input: string) => Promise<string>,
+    moderator?: (type: 'github' | 'webhook') => Moderation,
   ) {
     return async function (
       email_event: [recipient: R3plySiteConfig, bytes: Uint8Array],
-    ): Promise<string> {
+    ): Promise<EmailEventResponse> {
       const [site, bytes] = email_event
       return handle_email_event(
         { site, bytes },
-        { system_config: system, redact, moderator, file_resolver },
+        { system_config: system, redactor: redactor, moderator },
       )
     }
   }
@@ -43,15 +45,19 @@ export function R3ply(
   }
 }
 
+export type EmailEventResponse = {
+  comment: string
+  notifs: { commenter: string | undefined; moderator: string | undefined }
+}
+
 async function handle_email_event(
   email_event: { site: R3plySiteConfig; bytes: Uint8Array },
   dependencies: {
     system_config: R3plySystemConfig
-    redact: (input: string) => Promise<string>
-    moderator?: Moderation
-    file_resolver?: (file_uri?: string) => Promise<string | undefined>
+    redactor: (input: string) => Promise<string>
+    moderator?: (type: 'github' | 'webhook') => Moderation
   },
-): Promise<string> {
+): Promise<EmailEventResponse> {
   prescreen(
     { email_size_bytes: email_event.bytes.byteLength },
     email_event.site,
@@ -61,7 +67,7 @@ async function handle_email_event(
   const accepted_email = accept(email_event.bytes)
   const deliverable_email = deliverable(
     accepted_email,
-    dependencies.redact,
+    dependencies.redactor,
     email_event.site,
     dependencies.system_config,
   )
@@ -73,35 +79,47 @@ async function handle_email_event(
       dependencies.system_config,
     ),
   )
-  const comment = (() => {
-    if (dependencies.file_resolver) {
-      return dependencies
-        .file_resolver(email_event.site.comments.email['&comment_{}'])
-        .then((comment_template_from_file) => {
-          return template_context.then((template_context) =>
-            process(
-              template_context,
-              email_event.site,
-              comment_template_from_file,
-            ),
-          )
-        })
-    } else {
-      return template_context.then((template_context) =>
-        process(template_context, email_event.site),
-      )
-    }
-  })()
-  return Promise.all([comment, template_context])
-    .then(([comment, template_context]) => {
+  const comment = template_context.then((template_context) =>
+    process(
+      template_context,
+      email_event.site,
+      email_event.site.comments.email['comment_{}'],
+    ),
+  )
+  // Note: if things need to be added that are independent of the basic email -> comment chain, probably a good place to do it is within this promise
+  return Promise.all([comment, template_context]).then(
+    ([comment, template_context]) => {
       if (
         dependencies.moderator &&
         email_event.site.comments.email.moderation.enabled
       ) {
-        dependencies.moderator.send(comment, template_context, email_event.site)
+        const moderation_config: R3plyModerationConfig =
+          email_event.site.comments.email.moderation
+        const moderator = dependencies.moderator(moderation_config.type)
+        const notify_config: R3plyNotifyConfig =
+          email_event.site.comments.email.notify
+        return moderator
+          .send(comment, template_context, moderation_config, notify_config)
+          .then((notifs) => {
+            return {
+              comment,
+              notifs: {
+                commenter: notifs?.commenter_notif,
+                moderator: notifs?.moderator_notif,
+              },
+            }
+          })
+      } else {
+        return {
+          comment,
+          notifs: {
+            commenter: undefined,
+            moderator: undefined,
+          },
+        }
       }
-    })
-    .then((_) => comment)
+    },
+  )
 }
 
 // TODO: for some reason this is breaking my cloudflare builds...

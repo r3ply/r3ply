@@ -1,5 +1,9 @@
-import { Result } from 'oxide.ts'
-import { R3plySiteConfig } from '../../../config/dist/index.cjs'
+import { match, Result } from 'oxide.ts'
+import {
+  R3plyModerationConfig,
+  R3plyNotifyConfig,
+  R3plySiteConfig,
+} from '@r3ply/config'
 import { CommentTemplateContext } from '../process'
 import { tera } from '@r3ply/wasm'
 import { Moderation } from './moderation'
@@ -21,7 +25,42 @@ interface CreateCommentInRepoArgs {
       }
 }
 
-interface R3plyGithubBot extends Moderation {}
+interface GitHubModerationContext {
+  github: {
+    comment: {
+      path: string
+    }
+    commit: {
+      message: string
+    }
+    pr: {
+      branch: {
+        source: string
+        target: string
+      }
+      id: number
+      url: string
+      html_url: string
+      diff_url: string
+      patch_url: string
+      issue_url: string
+      commits_url: string
+      comments_url: string
+      statuses_url: string
+      number: number
+      state: 'open' | 'closed'
+      title: string
+      body: string | null
+      created_at: string
+      commits: number
+      additions: number
+      deletions: number
+      changed_files: number
+    }
+  }
+}
+
+export interface R3plyGithubBot extends Moderation {}
 
 // F/fetch stuff because often times the default fetch isn't used, e.g. in the context of a 'bound' service in cloudflare
 export function R3plyGithubBot<F extends typeof fetch>(
@@ -31,19 +70,32 @@ export function R3plyGithubBot<F extends typeof fetch>(
   async function send(
     comment: string,
     context: CommentTemplateContext,
-    siteConfig: R3plySiteConfig,
+    moderationConfig: R3plyModerationConfig,
+    notifyConfig?: R3plyNotifyConfig,
   ) {
-    if (siteConfig.comments.email.moderation.type != 'github')
+    // throw early to guarantee thereafter it is always a github moderation config
+    if (moderationConfig.type != 'github')
       throw new Error(
         "Moderation type = 'github' is required to use GitHub Moderation",
       )
-    const gh_args = create_pr_args(
-      comment,
-      context,
-      siteConfig.comments.email.moderation,
-    )
+    // Prepare the arguments supplied to the GitHub bot by resolving any remote template references
+    const gh_args = await (async () => {
+      const target_branch = moderationConfig['target_branch_{}']
+      const file_path = moderationConfig['file_path_{}']
+      let commit_msg = moderationConfig['commit_msg_{}'] ?? ''
+      const pr_title = moderationConfig['pr_title_{}']
+      let pr_body = moderationConfig['pr_body_{}'] ?? ''
+      return create_pr_args(comment, context, moderationConfig, {
+        target_branch,
+        file_path,
+        commit_msg,
+        pr_title,
+        pr_body,
+      })
+    })()
+
     // note: the origin of the URL is ignored if the fetch belongs to a bound service. A default `fetch` though will in fact use this. TODO: deploy the github app somewhere ontop of the r3ply.com domain.
-    return fetch(
+    const gh_rep = fetch(
       new Request(
         'https://r3ply-github-app.spence.workers.dev/comments?strategy=GitHub:repo&open_pr=true',
         {
@@ -55,7 +107,98 @@ export function R3plyGithubBot<F extends typeof fetch>(
           body: JSON.stringify(gh_args),
         },
       ),
-    )
+    ).then((gh_rep) => gh_rep.json())
+
+    const gh_context = await gh_rep.then((gh_rep) => {
+      // these properties come from just the GitHub documentation and don't have actual type safety, although they do have a scheme
+      const gh_context: GitHubModerationContext = {
+        github: {
+          comment: {
+            path: gh_args.new_comment_filepath,
+          },
+          commit: {
+            message: gh_args.commit_msg,
+          },
+          pr: {
+            branch: {
+              source: gh_args.source_branch,
+              target: gh_args.target_branch,
+            },
+            id: gh_rep.id,
+            url: gh_rep.url,
+            html_url: gh_rep.html_url,
+            diff_url: gh_rep.diff_url,
+            patch_url: gh_rep.patch_url,
+            issue_url: gh_rep.issue_url,
+            commits_url: gh_rep.commits_url,
+            comments_url: gh_rep.comments_url,
+            statuses_url: gh_rep.statuses_url,
+            number: gh_rep.number,
+            state: gh_rep.state,
+            title: gh_rep.title,
+            body: gh_rep.body,
+            created_at: gh_rep.created_at,
+            commits: gh_rep.commits,
+            additions: gh_rep.additions,
+            deletions: gh_rep.deletions,
+            changed_files: gh_rep.changed_files,
+          },
+        },
+      }
+
+      if (notifyConfig) {
+      }
+      return gh_context
+    })
+
+    let commenter_notif: string | undefined
+    let moderator_notif: string | undefined
+    if (notifyConfig) {
+      if (notifyConfig.commenter) {
+        if (notifyConfig.notify_commenter_upon_submission) {
+          let commenter_template = notifyConfig['comment_submitted_notif_{}']
+          if (commenter_template) {
+            commenter_notif = match(
+              Result.safe(() =>
+                tera(commenter_template, { ...context, ...gh_context }),
+              ),
+              {
+                Ok: (commenter_notif) => commenter_notif,
+                Err: (error) => {
+                  console.error(
+                    `Error binding commenter notification to context, original message:\n\n${error.message}\n\nContext:\n\n\`\`\`TS\n${JSON.stringify(context, null, 2)}\n\`\`\``,
+                  )
+                  throw error
+                },
+              },
+            )
+          }
+        }
+      }
+      if (notifyConfig.moderator) {
+        if (notifyConfig.notify_moderator_upon_receipt) {
+          let moderator_template = notifyConfig['comment_received_notif_{}']
+          if (moderator_template) {
+            moderator_notif = match(
+              Result.safe(() =>
+                tera(moderator_template, { ...context, ...gh_context }),
+              ),
+              {
+                Ok: (moderator_notif) => moderator_notif,
+                Err: (error) => {
+                  console.error(
+                    `Error binding moderator notification to context, original message:\n\n${error.message}\n\nContext:\n\n\`\`\`TS\n${JSON.stringify(context, null, 2)}\n\`\`\``,
+                  )
+                  throw error
+                },
+              },
+            )
+          }
+        }
+      }
+    }
+
+    return { commenter_notif, moderator_notif }
   }
   return {
     send: send,
@@ -84,18 +227,25 @@ function create_pr_args(
   comment: string,
   context: CommentTemplateContext,
   github_config: GithubModerationConfig,
+  templates: {
+    target_branch: string
+    file_path: string
+    commit_msg: string
+    pr_title: string
+    pr_body: string
+  },
 ) {
   let { repo_owner, repo_name } = parse_repo(github_config.repo)
   const sanitized_context = JSON.parse(JSON.stringify(context))
   let source_branch = github_config.source_branch
-  let target_branch = tera(github_config['target_branch_{}'], sanitized_context)
+  let target_branch = tera(templates.target_branch, sanitized_context)
   let new_comment_filepath = tera(
     github_config['file_path_{}'],
     sanitized_context,
   )
-  let commit_msg = tera(github_config['commit_msg_{}'], sanitized_context)
-  let pr_msg_title = tera(github_config['pr_title_{}'], sanitized_context)
-  let pr_msg_body = tera(github_config['pr_body_{}'], sanitized_context)
+  let commit_msg = tera(templates.commit_msg, sanitized_context)
+  let pr_msg_title = tera(templates.pr_title, sanitized_context)
+  let pr_msg_body = tera(templates.pr_body, sanitized_context)
   let gh_args: CreateCommentInRepoArgs = {
     repo_owner,
     repo_name,
@@ -170,7 +320,13 @@ if (import.meta.vitest) {
       'pr_body_{}':
         'this is a PR to merge comment from user {{ comment.author_7 }}, with content: \n> {{ comment.txt }}',
     }
-    const result = create_pr_args(comment, context, github_moderation)
+    const result = create_pr_args(comment, context, github_moderation, {
+      target_branch: github_moderation['target_branch_{}'],
+      file_path: github_moderation['file_path_{}'],
+      commit_msg: github_moderation['commit_msg_{}'] ?? '',
+      pr_title: github_moderation['pr_title_{}'],
+      pr_body: github_moderation['pr_body_{}'] ?? '',
+    })
     expect(result).toStrictEqual({
       repo_owner: 'example.com',
       repo_name: 'blog',

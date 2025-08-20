@@ -36,26 +36,31 @@ A new comment has been received
           type: 'boolean',
           description:
             'Set to false to disable all notifications to the commenter',
-          default: true,
+          default: false,
         },
         notify_commenter_upon_submission: {
           type: 'boolean',
           description:
             'Set to false to disable notifying the commenter upon submission of their email comment',
-          default: true,
+          default: false,
         },
         'comment_submitted_notif_{}': {
           type: 'string',
           description:
-            'Comment submission notification template (accepts TODO data)',
+            'Comment submission notification template (template string)',
           pattern: '^[\\s\\S]*$',
-          default: 'TODO',
+        },
+        '&comment_submitted_notif_{}': {
+          type: 'string',
+          description:
+            'Comment submission notification template (reference to a file)',
+          format: 'uri-reference',
         },
         moderator: {
           type: 'boolean',
           description:
             "Set to false to disable all notifications to the site's moderator (note: this requires a moderation email address to be set up, either in the site config or privately with your r3ply server)",
-          default: true,
+          default: false,
         },
         notify_moderator_upon_receipt: {
           type: 'string',
@@ -66,9 +71,14 @@ A new comment has been received
         },
         'comment_received_notif_{}': {
           type: 'string',
-          description: 'New comment notification template',
+          description: 'New comment notification template (string template)',
           pattern: '^[\\s\\S]*$',
-          default: 'TODO',
+        },
+        '&comment_received_notif_{}': {
+          type: 'string',
+          description:
+            'New comment notification template (reference to a file)',
+          format: 'uri-reference',
         },
       },
     },
@@ -132,31 +142,31 @@ A new comment has been received
               description: 'Commit message template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
-              default: 'TODO',
             },
             '&commit_msg_{}': {
               type: 'string',
               description: 'Commit message template (reference to a file)',
-              format: 'uri',
+              format: 'uri-reference',
             },
             'pr_title_{}': {
               type: 'string',
               description: 'Pull request title template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
-              default: 'TODO',
+              default:
+                'New comment ({{ comment.id_8 }}) on {{ comment.subject.url }} by author `{{ comment.author_7 }}`',
             },
             'pr_body_{}': {
               type: 'string',
               description: 'Pull request body template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
-              default: 'TODO',
+              default: `TODO`
             },
             '&pr_body_{}': {
               type: 'string',
               description: 'Pull request body template (reference to a file)',
-              format: 'uri',
+              format: 'uri-reference',
             },
           },
         },
@@ -219,33 +229,36 @@ A new comment has been received
               description: 'Commit message template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
-              default: 'TODO',
+              default: `Comment submitted:
+Sender: {{ comment.author }}
+Timestamp: {{ comment.ts_rcvd }}
+Subject: {{ comment.subject.url }}
+Comment: > {{ comment.txt | split(pat="\n") | join(sep="> ") }}`,
             },
             '&commit_msg_{}': {
               type: 'string',
               description: 'Commit message template (reference to a file)',
-              pattern: '^[\\s\\S]*$',
-              maxLength: 256,
+              format: 'uri-reference',
             },
             'pr_title_{}': {
               type: 'string',
               description: 'Pull request title template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
-              default: 'TODO',
+              default:
+                'New comment ({{ comment.id_8 }}) on {{ comment.subject.url }} by author `{{ comment.author_7 }}`',
             },
             'pr_body_{}': {
               type: 'string',
               description: 'Pull request body template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
-              default: 'TODO',
+              default: `TODO`
             },
             '&pr_body_{}': {
               type: 'string',
               description: 'Pull request body template (reference to a file)',
-              pattern: '^[\\s\\S]*$',
-              maxLength: 256,
+              format: 'uri-reference',
             },
           },
         },
@@ -426,7 +439,7 @@ A new comment has been received
             '&comment_{}': {
               type: 'string',
               description: '[Optional] Comment template (file)',
-              format: 'uri',
+              format: 'uri-reference',
             },
             'comment_{}_mime': {
               type: 'string',
@@ -439,12 +452,10 @@ A new comment has been received
             notify: {
               $ref: '#/definitions/notify_config',
               default: {
-                commenter: true,
-                notify_commenter_upon_submission: true,
-                'comment_submitted_notif_{}': 'TODO',
-                moderator: true,
-                notify_moderator_upon_receipt: 'all',
-                'comment_received_notif_{}': 'TODO',
+                commenter: false,
+                notify_commenter_upon_submission: false,
+                moderator: false,
+                notify_moderator_upon_receipt: 'none',
               },
             },
             // TODO: figure out why this doesn't work:
@@ -494,17 +505,31 @@ A new comment has been received
     comments: { $ref: '#/definitions/comments_config' },
   },
 } as const satisfies JSONSchema
-const basic_parser = schemasafe_parser(schema_ts as any, {
+
+export type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
+  value?: T
+}
+
+const site_config_parser = schemasafe_parser(schema_ts as any, {
   useDefaults: true,
   includeErrors: true,
   allErrors: true,
 })
-export type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
-  value?: T
-}
+
 export type R3plySiteConfig = FromSchema<typeof schema_ts>
+export type R3plyNotifyConfig = FromSchema<
+  typeof schema_ts.definitions.notify_config
+>
+export type R3plyModerationConfig = FromSchema<
+  typeof schema_ts.definitions.moderation_config
+>
+export type R3plyCommentsConfig = FromSchema<
+  typeof schema_ts.definitions.comments_config
+>
+
+// Only creating a parser for the overarching site config because the individual definitions don't have schema, which is required for a parser
 export const parser = (input: string) => {
-  let parse_result = basic_parser(input)
+  let parse_result = site_config_parser(input)
   return parse_result as TypedParseResult<R3plySiteConfig>
 }
 
@@ -512,16 +537,22 @@ export const module = `/** This file is generated. DO NOT EDIT. */
 import { ParseResult } from '@exodus/schemasafe'
 import { FromSchema } from 'json-schema-to-ts'
 
-const schema = ${JSON.stringify(basic_parser.toJSON())} as const;
+const schema = ${JSON.stringify(site_config_parser.toJSON())} as const;
+const notify_json = ${JSON.stringify(schema_ts.definitions.notify_config)} as const;
+const moderation_json = ${JSON.stringify(schema_ts.definitions.moderation_config)} as const;
+const comments_json = ${JSON.stringify(schema_ts.definitions.comments_config)} as const;
 
 type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
   value?: T
 }
 
 export type R3plySiteConfig = FromSchema<typeof schema>
+export type R3plyNotifyConfig = FromSchema<typeof notify_json>
+export type R3plyModerationConfig = FromSchema<typeof moderation_json>
+export type R3plyCommentsConfig = FromSchema<typeof comments_json>
 
 // The generated raw parser function.
-const raw_parser = ${basic_parser.toModule()}
+const raw_parser = ${site_config_parser.toModule()}
 
 // A wrapper that adds type safety.
 export const parser = (input: string): TypedParseResult<R3plySiteConfig> => {

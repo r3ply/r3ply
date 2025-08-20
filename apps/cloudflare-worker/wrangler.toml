@@ -1,3 +1,5 @@
+#:schema https://unpkg.com/wrangler@4.28.1/config-schema.json
+
 name = "r3ply-cloudflare-worker"
 main = "src/index.ts"
 compatibility_flags = ["nodejs_compat"]
@@ -24,28 +26,11 @@ database_name = "r3ply"
 database_id = "24e83108-b6d9-45b0-9744-4b53a4021511" # wrangler d1 info YOUR_DATABASE_NAME
 preview_database_id = "R3PLY_DB"                     # Required for Pages local development
 
-# Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
-# Docs: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
-
-# Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
-# Docs: https://developers.cloudflare.com/queues/get-started
-# [[queues.producers]]
-# binding = "MY_QUEUE"
-# queue = "my-queue"
-
-# Bind a Queue consumer. Queue Consumers can retrieve tasks scheduled by Producers to act on them.
-# Docs: https://developers.cloudflare.com/queues/get-started
-# [[queues.consumers]]
-# queue = "my-queue"
-
-# Bind another Worker service. Use this binding to call another Worker without network overhead.
-# Docs: https://developers.cloudflare.com/workers/platform/services
-# [[services]]
-# binding = "EMAIL_PARSER"
-# service = "rustwasm-email-parser"
+[[d1_databases]]
+binding = "R3PLY_STAGING_DB"
+database_name = ""
+database_id = "7ee88e89-bd64-41b8-bd03-a537ee600b4b"
+preview_database_id = "R3PLY_STAGING_DB"
 
 # [[services]]
 # binding = "R3PLY_GITHUB_APP"

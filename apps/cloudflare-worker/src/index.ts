@@ -7,11 +7,18 @@ import {
   systemConfigParser,
 } from '@r3ply/config'
 import TOML from '@iarna/toml'
-import { Moderation, R3plyGithubBot } from '@r3ply/lib'
+import {
+  Moderation,
+  R3plyGithubBot,
+  resolve_config_references,
+} from '@r3ply/lib'
 import { createHMAC } from './util'
 // @ts-ignore
 import r3ply_system_config_toml from '../r3ply.config.toml'
-import { CloudflareR3ply } from './cloudflare-r3ply'
+import {
+  CloudflareR3ply,
+  resolve_config_references_at_domain,
+} from './cloudflare-r3ply'
 import { GistClient } from './state/gist'
 import { CommentState } from './state/d1'
 
@@ -77,15 +84,21 @@ async function get_site_config(domain: string) {
         const site_config = siteConfigParser(
           JSON.stringify(TOML.parse(text)),
         ).value!
-        const merge_remote = merge_remote_reference(url)
-        return merge_config(site_config, merge_remote)
+        return resolve_config_references(
+          site_config,
+          url.toString(),
+          resolve_config_references_at_domain,
+        )
       })
     }
     if (response.ok && url.pathname.endsWith('.json')) {
       return response.text().then((text) => {
         const site_config = siteConfigParser(text).value!
-        const merge_remote = merge_remote_reference(url)
-        return merge_config(site_config, merge_remote)
+        return resolve_config_references(
+          site_config,
+          url.toString(),
+          resolve_config_references_at_domain,
+        )
       })
     }
   }
@@ -104,8 +117,10 @@ export async function comment_via_email(
   const [site_domain, r3ply_domain] = Result.safe(() =>
     msg.to.match(/^(.+?)@(.+?)$/)!.slice(1, 3),
   ).expect('Error parsing site domain/r3ply domain from `to` portion of email')
+
   let site_config = get_site_config(site_domain)
   const email_bytes = new Response(msg.raw).bytes()
+
   const cf_r3ply_w_dependencies = r3ply(
     GistClient(deps.gist_token),
     deps.db ? CommentState(deps.db) : undefined,
@@ -114,17 +129,17 @@ export async function comment_via_email(
     site_config,
     email_bytes,
   ]).then(([site_config, email_bytes]) => {
-    let moderation: Moderation
-    switch (site_config.comments.email.moderation.type) {
-      case 'github':
-        moderation = R3plyGithubBot(deps.gh_pw, fetch)
-        break
-      case 'webhook':
-        throw new Error('not implemented yet')
-      default:
-        throw new Error('not implemented yet')
-        break
+    let moderation = (type: 'github' | 'webhook'): Moderation => {
+      switch (site_config.comments.email.moderation.type) {
+        case 'github':
+          return R3plyGithubBot(deps.gh_pw, fetch)
+        case 'webhook':
+          throw new Error('not implemented yet')
+        default:
+          throw new Error('not implemented yet')
+      }
     }
+
     const handle_comment_via_email = cf_r3ply_w_dependencies.comments.viaEmail(
       createHMAC(deps.hmac_secret),
       moderation,
@@ -137,57 +152,9 @@ export async function comment_via_email(
       `Error processing email into comment, underlying reason:\n\n${result.unwrapErr()}`,
     )
   } else {
-    console.log(`Comment!\n\n\`\`\`\n${result.unwrap()}\n\`\`\``)
-  }
-  return result
-}
-
-export async function merge_config(
-  site_config: R3plySiteConfig,
-  merge_reference: (config_value: string) => Promise<string>,
-) {
-  const promises: Promise<void>[] = []
-  if (site_config.comments.email['comment_{}']) {
-    promises.push(
-      merge_reference(site_config.comments.email['comment_{}']).then(
-        (merged) => {
-          site_config.comments.email['comment_{}'] = merged
-        },
-      ),
+    console.log(
+      `Comment!\n\n\`\`\`\n${JSON.stringify(result.unwrap(), null, 2)}\n\`\`\``,
     )
   }
-  if (site_config.comments.email.moderation.type == 'github') {
-    const moderation = site_config.comments.email.moderation
-    const a = merge_reference(moderation['commit_msg_{}']).then((merged) => {
-      moderation['commit_msg_{}'] = merged
-    })
-    const b = merge_reference(moderation['pr_body_{}']).then((merged) => {
-      moderation['pr_body_{}'] = merged
-    })
-    const c = Promise.all([a, b]).then((_) => {
-      site_config.comments.email.moderation = moderation
-    })
-    promises.push(a, b, c)
-  }
-  const d = merge_reference(
-    site_config.comments.email.notify['comment_received_notif_{}'],
-  ).then((merged) => {
-    site_config.comments.email.notify['comment_received_notif_{}'] = merged
-  })
-  promises.push(d)
-  return Promise.all(promises).then((_) => site_config)
-}
-
-export function merge_remote_reference(config_url: URL) {
-  return async function (config_value: string) {
-    const base_url = new URL('./', config_url)
-    const response = fetch(new URL(config_value, base_url))
-    return response.then((response) => {
-      if (response.ok) {
-        return response.text()
-      } else {
-        return config_value
-      }
-    })
-  }
+  return result
 }

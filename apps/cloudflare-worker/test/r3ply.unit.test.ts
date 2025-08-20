@@ -13,7 +13,6 @@ import { GistClient, GistFiles } from '../src/state/gist'
 import { CommentCache, CommentState } from '../src/state/d1'
 import TOML from '@iarna/toml'
 import { siteConfigParser, systemConfigParser } from '@r3ply/config'
-import { merge_config, merge_remote_reference } from '../src'
 
 describe('Cloudflare r3ply Tests', () => {
   beforeAll(async () => {
@@ -444,15 +443,6 @@ url = "https://banana-picker.com/comments"`),
       encrypted,
     )
     console.log(new TextDecoder('utf-8').decode(decrypted))
-  })
-
-  test.skip('weird promises thing', async () => {
-    const config_copy = structuredClone(site_config)
-    console.log(config_copy.comments.email.notify['comment_received_notif_{}'])
-    await merge_config(config_copy, (value: string) =>
-      Promise.resolve(value + '123'),
-    )
-    console.log(config_copy.comments.email.notify['comment_received_notif_{}'])
   })
 
   test.skip('foo', async () => {

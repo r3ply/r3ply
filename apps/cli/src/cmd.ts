@@ -5,6 +5,7 @@ import { Result } from 'oxide.ts'
 import chalk from 'chalk'
 import { R3plySiteConfig } from '@r3ply/config'
 import path from 'path'
+import { resolve_config_references } from '@r3ply/lib'
 
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
@@ -129,12 +130,13 @@ export function comments_cmd(cwd: string) {
         messageId?: string
       }) => {
         let site_config: R3plySiteConfig
+        let site_config_path: string
         let file_resolver: (file_uri?: string) => Promise<string | undefined>
         if (options.config) {
           site_config = util.unsafeUnwrap(
             await project.get_site_config(cwd, options.config),
           )
-          const site_config_path = util.unsafeUnwrap(
+          site_config_path = util.unsafeUnwrap(
             await project.get_site_config_path(cwd, options.config),
           )
           file_resolver =
@@ -144,12 +146,17 @@ export function comments_cmd(cwd: string) {
           site_config = util.unsafeUnwrap(
             await project.get_site_config(project_dir, undefined),
           )
-          const site_config_path = util.unsafeUnwrap(
+          site_config_path = util.unsafeUnwrap(
             await project.get_site_config_path(project_dir, undefined),
           )
           file_resolver =
             project.resolve_file_relative_to_site_config(site_config_path)
         }
+        site_config = await resolve_config_references(
+          site_config,
+          site_config_path,
+          project.dereference_local_file,
+        )
         const email = generate
           .email(
             site_config.domains[util.random_int(site_config.domains.length)],
@@ -163,7 +170,7 @@ export function comments_cmd(cwd: string) {
             console.log(`\n${chalk.yellow('--------------------------')}\n`)
             return email
           })
-        const comment = Result.safe(
+        const response = Result.safe(
           email.then((email) =>
             cli_handle_comment_via_email(
               site_config,
@@ -172,13 +179,28 @@ export function comments_cmd(cwd: string) {
             ),
           ),
         )
-        await comment.then(async (comment) => {
-          if (comment.isOk()) {
+        // TODO:
+        // const msg_reply = createMimeMessage()
+        // msg_reply.setHeader('In-Reply-To', msg.headers.get('Message-ID')!)
+        // msg_reply.setSender(msg.to)
+        // msg_reply.setRecipient(msg.from)
+        // msg_reply.setSubject(msg.headers.get('Subject')!)
+        // msg_reply.addMessage({
+        //   contentType: 'text/plain',
+        //   data: `Hello, world!`,
+        // })
+        await response.then(async (response) => {
+          if (response.isOk()) {
+            const email_event_response = response.unwrap()
             console.log(
-              `Output comment:\n\n${chalk.cyanBright(comment.unwrap())}`,
+              `Output comment:\n\n${chalk.cyanBright(await email_event_response.comment)}`,
+              `\n${chalk.yellow('--------------------------')}\n`,
+              `\nCommenter notification:\n\n${chalk.cyanBright(email_event_response.notifs.commenter)}`,
+              `\n${chalk.yellow('--------------------------')}\n`,
+              `\nModerator notification:\n\n${chalk.cyanBright(email_event_response.notifs.moderator)}`,
             )
           } else {
-            throw comment.unwrapErr()
+            throw response.unwrapErr()
           }
         })
       },
