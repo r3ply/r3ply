@@ -29,18 +29,18 @@ export function init_cmd(cwd: string) {
 }
 
 // config ----------------------------------------------------------------------
-export function config_cmd(cwd: string) {
-  const config_cmd = new Command('config').description(
+export function validate_cmd(cwd: string) {
+  const validate_cmd = new Command('validate').description(
     'various supporting operations for working with r3ply configs',
   )
-
-  config_cmd
-    .command('validate')
+  validate_cmd
     .description('validate the configuration')
-    .option('--config <path>', 'specify path to config')
     .action(async (options: { config: string }) => {
       const site_config = util.unsafeUnwrap(
-        await project.parse_site_config(cwd, options.config),
+        await project.parse_site_config(
+          cwd,
+          validate_cmd.parent?.opts().config,
+        ),
       )
       if (!site_config.valid)
         throw new Error(
@@ -48,18 +48,21 @@ export function config_cmd(cwd: string) {
         )
     })
 
-  return config_cmd
+  return validate_cmd
 }
 
 // comments --------------------------------------------------------------------
-export function comments_cmd(cwd: string) {
-  const comments_cmd = new Command('comments').description(
+export function comment_cmd(cwd: string) {
+  const comment_cmd = new Command('comment').description(
     'various supporting operations for working with r3ply comments',
   )
-  comments_cmd
+  const generate_cmd = comment_cmd
     .command('generate')
-    .description('generate an email inspired off current r3ply config')
-    .option('--config <config-path>', 'specify path to config')
+    .description('generate a comment using your r3ply config')
+
+  generate_cmd
+    .command('email')
+    .description('generate a comment as an email, based on your config')
     // Add email header options
     .option('--message-id <id>', 'override Message-ID header')
     .option('--date <date>', 'override Date header')
@@ -69,7 +72,6 @@ export function comments_cmd(cwd: string) {
     .option('--body <text>', 'override email body')
     .action(
       async (options: {
-        config?: string
         from?: string
         to?: string
         date?: string
@@ -78,9 +80,12 @@ export function comments_cmd(cwd: string) {
         messageId?: string
       }) => {
         let site_config: R3plySiteConfig
-        if (options.config) {
+        if (comment_cmd.parent?.opts().config) {
           site_config = util.unsafeUnwrap(
-            await project.get_site_config(cwd, options.config),
+            await project.get_site_config(
+              cwd,
+              comment_cmd.parent?.opts().config,
+            ),
           )
         } else {
           const project_dir = (await project.find_project_dir(cwd)).unwrap()
@@ -88,9 +93,6 @@ export function comments_cmd(cwd: string) {
             await project.get_site_config(project_dir, undefined),
           )
         }
-        site_config = util.unsafeUnwrap(
-          await project.get_site_config(cwd, options.config),
-        )
         const email = Result.safe(
           generate.email(
             site_config.domains[util.random_int(site_config.domains.length)],
@@ -100,7 +102,7 @@ export function comments_cmd(cwd: string) {
         )
         await email.then(async (email) => {
           if (email.isOk()) {
-            console.log(`${chalk.blueBright(email.unwrap())}`)
+            console.log(highlight(email.unwrap(), { language: 'yaml' }))
           } else {
             throw email.unwrapErr()
           }
@@ -108,12 +110,12 @@ export function comments_cmd(cwd: string) {
       },
     )
 
-  comments_cmd
-    .command('simulate-email')
-    .description(
-      'simulate receiving a comment via email with your current r3ply config',
-    )
-    .option('--config <config-path>', 'specify path to config')
+  const simulate_cmd = comment_cmd
+    .command('simulate')
+    .description('simulate receiving a comment using your r3ply config')
+
+  simulate_cmd
+    .command('email')
     // Add email header options
     .option('--message-id <id>', 'override Message-ID header')
     .option('--date <date>', 'override Date header')
@@ -122,24 +124,34 @@ export function comments_cmd(cwd: string) {
     .option('--subject <text>', 'override email subject')
     .option('--body <text>', 'override email body')
     .action(
-      async (options: {
-        config?: string
-        from?: string
-        to?: string
-        date?: string
-        subject?: string
-        body?: string
-        messageId?: string
-      }) => {
+      async (
+        options: {
+          from?: string
+          to?: string
+          date?: string
+          subject?: string
+          body?: string
+          messageId?: string
+        },
+        cmd,
+      ) => {
+        console.log(options)
+
         let site_config: R3plySiteConfig
         let site_config_path: string
         let file_resolver: (file_uri?: string) => Promise<string | undefined>
-        if (options.config) {
+        if (comment_cmd.parent?.opts().config) {
           site_config = util.unsafeUnwrap(
-            await project.get_site_config(cwd, options.config),
+            await project.get_site_config(
+              cwd,
+              comment_cmd.parent?.opts().config,
+            ),
           )
           site_config_path = util.unsafeUnwrap(
-            await project.get_site_config_path(cwd, options.config),
+            await project.get_site_config_path(
+              cwd,
+              comment_cmd.parent?.opts().config,
+            ),
           )
           file_resolver =
             project.resolve_file_relative_to_site_config(site_config_path)
@@ -277,5 +289,5 @@ export function comments_cmd(cwd: string) {
         })
       },
     )
-  return comments_cmd
+  return comment_cmd
 }
