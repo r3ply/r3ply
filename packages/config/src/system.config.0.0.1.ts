@@ -135,6 +135,9 @@ const basic_parser = schemasafe_parser(schema_ts as any, {
   includeErrors: true,
   allErrors: true,
 })
+
+export const schema = basic_parser.toJSON()
+
 export type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
   value?: T
 }

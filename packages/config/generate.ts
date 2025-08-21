@@ -1,6 +1,12 @@
 import { writeFileSync, mkdirSync } from 'fs'
-import { module as site_config_module } from './src/site.config.0.0.1'
-import { module as system_config_module } from './src/system.config.0.0.1'
+import {
+  module as site_config_module,
+  schema as site_config_schema,
+} from './src/site.config.0.0.1'
+import {
+  module as system_config_module,
+  schema as system_config_schema,
+} from './src/system.config.0.0.1'
 
 // Write generated file
 mkdirSync('./src/generated', { recursive: true })
@@ -31,3 +37,11 @@ export { parser as systemConfigParser } from './system.config.parser'
 export type { R3plySystemConfig } from './system.config.parser'
 `
 writeFileSync('./src/generated/index.ts', index_ts)
+writeFileSync(
+  './src/generated/site.config.schema.json',
+  JSON.stringify(site_config_schema, null, 2),
+)
+writeFileSync(
+  './src/generated/system.config.schema.json',
+  JSON.stringify(system_config_schema, null, 2),
+)

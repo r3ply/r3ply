@@ -517,6 +517,8 @@ const site_config_parser = schemasafe_parser(schema_ts as any, {
   allErrors: true,
 })
 
+export const schema = site_config_parser.toJSON()
+
 export type R3plySiteConfig = FromSchema<typeof schema_ts>
 export type R3plyNotifyConfig = FromSchema<
   typeof schema_ts.definitions.notify_config
