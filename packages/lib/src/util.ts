@@ -112,13 +112,31 @@ export async function computeHMAC(
   // Convert signature to hex string
   return bufferToHex(signature)
 }
-function bufferToHex(buffer: ArrayBuffer): string {
+export function bufferToHex(buffer: ArrayBuffer): string {
   const view = new DataView(buffer)
   let hex = ''
   for (let i = 0; i < view.byteLength; i++) {
     hex += view.getUint8(i).toString(16).padStart(2, '0')
   }
   return hex
+}
+export function toHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+export function base64UrlEncode(bytes: Uint8Array): string {
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+}
+export function base64UrlDecode(str: string): Uint8Array {
+  str = str.replace(/-/g, '+').replace(/_/g, '/')
+  const pad = str.length % 4
+  if (pad) str += '='.repeat(4 - pad)
+  const binary = atob(str)
+  return new Uint8Array([...binary].map((c) => c.charCodeAt(0)))
 }
 
 // TESTS

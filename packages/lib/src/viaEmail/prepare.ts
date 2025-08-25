@@ -3,9 +3,9 @@ import { get_auth_results, get_body_txt, get_date, get_subject } from './email'
 import { match, Result } from 'oxide.ts'
 import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
 import { DeliverableEmail } from './deliverable'
-import { CommentTemplateContext } from './process'
+import { CommentTemplateContext } from '../process'
 import { md_to_html, sanitize_html } from '@r3ply/wasm'
-import { CommentMetadata } from './receive'
+import { CommentMetadata } from '../receive'
 
 /**
  * This adds context for comments received via email

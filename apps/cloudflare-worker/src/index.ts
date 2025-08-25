@@ -1,11 +1,7 @@
 import { Hono } from 'hono'
 import api from './api'
 import { Result } from 'oxide.ts'
-import {
-  R3plySiteConfig,
-  siteConfigParser,
-  systemConfigParser,
-} from '@r3ply/config'
+import { siteConfigParser, systemConfigParser } from '@r3ply/config'
 import TOML from '@iarna/toml'
 import {
   Moderation,
@@ -61,7 +57,16 @@ export default {
 } satisfies ExportedHandler<Env>
 
 /**
- * Site owners store their r3ply config at (/.well-known)?/r3ply.config.{toml,json}. This function gets it.
+ * Fetches the r3ply config according to the order of precedence (high to low):
+ *
+ * https://${domain}/.well-known/r3ply/config.toml
+ * https://${domain}/.well-known/r3ply/config.json
+ * https://${domain}/.well-known/r3ply.config.toml
+ * https://${domain}/.well-known/r3ply.config.json
+ * https://${domain}/r3ply.config.toml
+ * https://${domain}/r3ply.config.json
+ * https://${domain}/r3ply.toml
+ * https://${domain}/r3ply.json
  *
  * @param domain the domain that the config pertains to
  * @returns a Result type of the file as a string, or an error if there is none

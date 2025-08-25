@@ -4,13 +4,13 @@ import {
   R3plySiteConfig,
   R3plySystemConfig,
 } from '@r3ply/config'
-import { accept, AcceptedEmail } from './accept'
-import { deliverable, DeliverableEmail } from './deliverable'
-import { prepare } from './prepare'
+import { accept, AcceptedEmail } from './viaEmail/accept'
+import { deliverable, DeliverableEmail } from './viaEmail/deliverable'
+import { prepare } from './viaEmail/prepare'
 import { CommentMetadata, receive } from './receive'
 import { CommentTemplateContext, process } from './process'
 import { createHMAC } from './util'
-import { prescreen, PrescreenResult } from './prescreen'
+import { prescreen, PrescreenResult } from './viaEmail/prescreen'
 import { Moderation, ModerationResult } from './moderation/moderation'
 
 export interface R3ply {
