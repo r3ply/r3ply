@@ -18,7 +18,7 @@ function api(r3ply: R3plySystemConfig) {
     const result = Signet.issue(c.env.SIGNET_KEY)(
       new_site_url.hostname,
       req_url.hostname,
-      issued
+      issued,
     )
     return result.then((result) => {
       const format = c.req.query('format')
@@ -29,9 +29,9 @@ r3ply = "${req_url.hostname}"
 signet = "${result.signet}"
 issued = ${result.issued}\n`)
       } else {
-        return c.json({ ...result, domain, r3ply: req_url.hostname })}
+        return c.json({ ...result, domain, r3ply: req_url.hostname })
       }
-    )
+    })
   })
 
   api.get('/comments/pending/get/:domain/:path{.+}', async (c) => {

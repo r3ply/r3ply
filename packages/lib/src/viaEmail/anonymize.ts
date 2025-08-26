@@ -46,7 +46,8 @@ export async function make_short_signet(
   // Generate a key ID based on the date for future roations
   const issued = issued_date ?? new Date().toISOString().split('T')[0]
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(issued)) throw new Error("issued must be formatted like: YYYY-MM-DD")
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(issued))
+    throw new Error('issued must be formatted like: YYYY-MM-DD')
 
   // Derive a per-site HMAC key
   const site_entry = new TextEncoder().encode(

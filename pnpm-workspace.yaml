@@ -2,5 +2,6 @@ packages:
   - crates/r3ply-wasm
   - packages/*
   - apps/*
+  - site/
 onlyBuiltDependencies:
   - sharp

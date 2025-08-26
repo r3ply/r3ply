@@ -12,7 +12,8 @@
     "build:all": "pnpm build:wasm && pnpm build:pkgs && pnpm build:apps",
     "test:ts": "vitest run",
     "test:ts:watch": "vitest",
-    "test:all": "pnpm -r test"
+    "test:all": "pnpm -r test",
+    "site": "pnpm -r --filter './site' run serve"
   },
   "pnpm": {
     "overrides": {}
