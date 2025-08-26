@@ -1,0 +1,107 @@
+{% set config = '
+
+```toml
+# r3ply configuration - see /docs for more
+version = "0.0.1"
+
+# each site x r3ply combo has an entry
+[[site]]
+domain = "example.com"
+r3ply = "localhost"
+signet = "iSQIIBcF7ka2UURJpFDkYw"
+issued = 2025-08-26
+
+# more moderation options, e.g. `type = "webhook"`, available
+[comments.email.moderation]
+type = "github"
+repo = "https://github.com/you/<YOUR_REPO>"
+"file_path_{}" = "/content/comments/{{ comment.id }}.md"
+```
+' %}
+
+<div id="quick-start-config" class="select-all">
+  {{ config | markdown | safe }}
+</div>
+
+{{ body | markdown | safe }}
+
+<div class="flex gap-2 mb-4">
+  <input
+    type="text"
+    id="domain-input"
+    title="Enter a valid domain name, e.g., example.com"
+    placeholder="example.com"
+    pattern="^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,6}$"
+    required
+    class="flex-1 p-2 border-2 border-black focus:outline-none focus:ring-2 focus:ring-yellow-300 rounded-lg"
+  />
+  <button
+    id="submit-btn"
+    class=" border-2 border-black bg-blue-400 text-white px-4 py-2 hover:bg-blue-600 rounded-lg cursor-pointer"
+  >
+  Generate Config
+</button>
+</div>
+
+<script>
+  const input = document.getElementById('domain-input');
+  const button = document.getElementById('submit-btn');
+  const codeBlock = document.querySelector('#quick-start-config code');
+
+  button.addEventListener('click', async () => {
+    const domain = input.value.trim();
+    if (!domain) {
+      alert('Please enter a domain');
+      return;
+    }
+    const base_url = new URL("https://example.com")
+    let custom_url;
+    try {
+      custom_url = new URL(`https:${domain}`)
+      custom_url = new URL(custom_url, base_url)
+    } catch (error) {
+      console.error(error)
+      alert(`domain "${domain}" isn't valid, please try again.`)
+      return
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8787/site/new/${custom_url.hostname}`);
+      if (!response.ok) throw new Error('API request failed');
+      const data = await response.json();
+
+      const spans = Array.from(codeBlock.querySelectorAll('span'));
+
+      // Go through all spans to find keys and update the value in the next span
+      for (let i = 0; i < spans.length; i++) {
+        const span = spans[i];
+        const text = span.textContent.trim();
+        const flash_timeout = 3000
+        if (text === 'domain') {
+          spans[i + 2].textContent = data.domain; // value span comes 2 spans after key span
+          spans[i + 2].classList.add('flash')
+          setTimeout(() => spans[i + 2].classList.remove('flash'), flash_timeout)
+        }
+        if (text === 'r3ply') {
+          spans[i + 2].textContent = data.r3ply;
+          spans[i + 2].classList.add('flash')
+          setTimeout(() => spans[i + 2].classList.remove('flash'), flash_timeout)
+        }
+        if (text === 'signet') {
+          spans[i + 2].textContent = data.signet;
+          spans[i + 2].classList.add('flash')
+          setTimeout(() => spans[i + 2].classList.remove('flash'), flash_timeout)
+        }
+        if (text === 'issued') {
+          spans[i + 2].textContent = data.issued + "\n";
+          spans[i + 2].classList.add('flash')
+          setTimeout(() => spans[i + 2].classList.remove('flash'), flash_timeout)
+        }
+      }
+
+    } catch (error) {
+      alert('Failed to fetch domain config. Please try again.');
+      console.error(error);
+    }
+  });
+</script>

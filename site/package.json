@@ -8,13 +8,14 @@
     "serve": "zola serve $SERVE_OPTS & npx @tailwindcss/cli  -i ./css/input.css -o ./public/style.css --watch && wait",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "@tailwindcss/typography": "^0.5.16",
-    "tailwindcss": "^4.1.11"
-  },
   "volta": {
     "node": "20.10.0"
   },
   "author": "Spencer Scorcelletti",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.16",
+    "tailwindcss": "^4.1.11"
+  }
 }

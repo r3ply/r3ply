@@ -1,39 +1,22 @@
 +++
 +++
 
-# r3ply
+# r3ply - Comments simple as email.
 
-Commenting as simple as email.
+r3ply is an open source project that allows websites to receive comments via email.
 
-Just add `./well-known/r3ply/config.toml` to your site, and receive comments via email at [`your-site.com@r3ply.com`](mailto:your-site.com@r3ply.com). <!-- TODO: add a subject in mailto link -->
+{% make_config() %}
 
-```toml
-version = "0.0.1"
-domains = ["<YOUR_SITE>.com"]
-r3ply = ["r3ply.com"]
+To get started, enter your website's config and press 'generate' to produce a `signet`. Then host the config at `/.well-known/r3ply/config.toml` from your domain.
 
-[comments.email.moderation]
-type = "github"
-repo = "https://github.com/you/<YOUR_REPO>"
-"file_path_{}" = "/content/comments/{{ comment.id }}.md"
-```
+{% end %}
 
-## Features
-
-- Designed especially for static sites but works with any backend
-- Comments via email out of the box with support for other channels
-- Moderation is included, e.g. GitHub PR or through other means
-- Self-hosting is also possible but r3ply.com is available right away
-- Privacy first: email addresses are redacted
-- There's a CLI to help with development
-
-Read the [getting started](#getting-started) to jump right in, or view individual topics for more detailed info.
+There is a r3ply CLI tool called `re` that is useful for local development. You can use it to simulate a comment arriving to your website, and iterate on your config.
 
 ## Table of Contents
 
 <!-- TOC -->
 
-- [Features](#features)
 - [Getting Started](#getting-started)
 - [Receiving Comments](#receiving-comments)
 - [Configuration](#configuration)
@@ -61,7 +44,7 @@ There are a few things to be aware of when receiving comments.
 
 **Also, use [`mailto`](https://en.wikipedia.org/wiki/Mailto) links on you website to create an email template for a visitor to leave a comment. E.g.**
 
-!["mailto link example"](./docs/mailto-comment-intake.png)
+<!-- !["mailto link example"](./docs/mailto-comment-intake.png) -->
 
 _(the [CLI](#cli) tool can help you with generating mailto links)_
 
