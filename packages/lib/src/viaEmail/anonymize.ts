@@ -22,17 +22,24 @@ import crypto from 'crypto'
  * - The service can decrypt or derive the underlying key using its own secrets
  *
  * @param encryption_key - Raw key material as Uint8Array
- * @param domain - The domain this signet is being issued to
+ * @param site_domain - The domain this signet is being issued to
  * @returns Short Base64URL string representing the signet (i.e. envelope) and its issue date (i.e. key id)
  */
 export async function make_short_signet(
   encryption_key: string,
-  domain: string,
-  issued_date?: string,
+  {
+    site_domain,
+    r3ply_domain,
+    issued_date,
+  }: {
+    site_domain: string
+    r3ply_domain: string
+    issued_date?: string
+  },
 ) {
   // Service master key stored in environment (32 bytes, base64)
-  const masterKeyBase64 = encryption_key
-  const masterKey = Uint8Array.from(atob(masterKeyBase64), (c) =>
+  const master_key_b64 = encryption_key
+  const masterKey = Uint8Array.from(atob(master_key_b64), (c) =>
     c.charCodeAt(0),
   )
 
@@ -40,8 +47,10 @@ export async function make_short_signet(
   const issued = issued_date ?? new Date().toISOString().split('T')[0]
 
   // Derive a per-site HMAC key
-  const siteData = new TextEncoder().encode(`${domain}:${issued}`)
-  const cryptoKey = await crypto.subtle.importKey(
+  const site_entry = new TextEncoder().encode(
+    `${r3ply_domain}:${issued}:${site_domain}`,
+  )
+  const crypto_key = await crypto.subtle.importKey(
     'raw',
     masterKey,
     { name: 'HMAC', hash: 'SHA-256' },
@@ -49,13 +58,13 @@ export async function make_short_signet(
     ['sign'],
   )
 
-  const hmacRaw = new Uint8Array(
-    await crypto.subtle.sign('HMAC', cryptoKey, siteData),
+  const hmac_raw = new Uint8Array(
+    await crypto.subtle.sign('HMAC', crypto_key, site_entry),
   )
 
   // Take first 16 bytes for a short envelope
-  const envelopeBytes = hmacRaw.slice(0, 16)
-  const signet = b64url(envelopeBytes) // ~22-char base64url string
+  const envelope_bytes = hmac_raw.slice(0, 16)
+  const signet = b64url(envelope_bytes) // ~22-char base64url string
 
   return { signet, issued }
 }
@@ -88,14 +97,16 @@ export async function hmac(
   email: string,
   {
     encryption_key,
-    domain,
+    site_domain,
+    r3ply_domain,
     signet,
-    signet_issued,
+    issued_date,
   }: {
     encryption_key: string
-    domain: string
+    site_domain: string
+    r3ply_domain: string
     signet: string
-    signet_issued: string
+    issued_date: string
   },
 ): Promise<string> {
   // Decode service master key (same one used to generate envelopes)
@@ -105,7 +116,9 @@ export async function hmac(
   )
 
   // Recompute expected envelope (sanity check)
-  const siteData = new TextEncoder().encode(`${domain}:${signet_issued}`)
+  const siteData = new TextEncoder().encode(
+    `${r3ply_domain}:${issued_date}:${site_domain}`,
+  )
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     masterKey,
@@ -149,8 +162,9 @@ export async function hmac(
 export type AnonymizeEmail = (
   email_address: string,
   site_domain: string,
+  r3ply_domain: string,
   signet: string,
-  signet_issued: string,
+  issued_date: string,
 ) => Promise<string>
 
 /**
@@ -162,14 +176,16 @@ export const Anonymize = {
     return (
       email_address: string,
       site_domain: string,
+      r3ply_domain: string,
       signet: string,
-      signet_issued: string,
+      issued_date: string,
     ) =>
       hmac(email_address, {
         encryption_key,
-        domain: site_domain,
+        site_domain,
+        r3ply_domain,
         signet,
-        signet_issued,
+        issued_date,
       })
   },
 }
@@ -180,8 +196,12 @@ export const Anonymize = {
 export const Signet = {
   // This is the one you probably want to use if you provide an implementation (i.e. app) of r3ply somewhere, e.g. the CLI or cloudflare-worker, to help people join your service
   issue: (encryption_key: string) => {
-    return (site_domain: string, issued_date?: string) =>
-      make_short_signet(encryption_key, site_domain, issued_date)
+    return (site_domain: string, r3ply_domain: string, issued_date?: string) =>
+      make_short_signet(encryption_key, {
+        site_domain,
+        r3ply_domain,
+        issued_date,
+      })
   },
 }
 
@@ -200,22 +220,23 @@ if (import.meta.vitest) {
   // openssl rand -base64 32
   const test_master_key = '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs='
   it('generates a key id and envelope, and can use that to make an hmac', async () => {
-    const result = await make_short_signet(
-      test_master_key,
-      'example.com',
-      '2025-08-25',
-    )
-    expect(result.signet).toBe('G8PIt_7Y6N2s7NZEznnoaw')
+    const result = await make_short_signet(test_master_key, {
+      r3ply_domain: 'r3ply.com',
+      site_domain: 'example.com',
+      issued_date: '2025-08-25',
+    })
+    expect(result.signet).toBe('IvDnuNdK51pGP4H6t1EfUQ')
 
     const result2 = await hmac('bob@foo.com', {
       encryption_key: test_master_key,
-      domain: 'example.com',
-      signet_issued: result.issued,
+      site_domain: 'example.com',
+      r3ply_domain: 'r3ply.com',
       signet: result.signet,
+      issued_date: result.issued,
     })
 
     expect(result2).toBe(
-      '5f1a242e4eeec2fa9cbd67c5fa20b09f1dd5a61263c77ec00b314efbd0556a4d',
+      '0075389005c7dd5eedd31aff1ad5d76c64e50fd5cb6535045acf35936849891f',
     )
   })
 }

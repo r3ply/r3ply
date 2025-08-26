@@ -26,8 +26,10 @@ export function init_cmd(cwd: string) {
         .init_r3ply_project_at(cwd, directory)
         .then(async (result) => {
           const { r3ply_dir, signet_key } = util.unsafeUnwrap(result)
-          const { signet, issued } =
-            await Signet.make(signet_key)('site.local.test')
+          const { signet, issued } = await Signet.issue(signet_key)(
+            'site.local.test',
+            'cli.r3ply.test',
+          )
           const toml_site_entry = `[[site]]
 domain = "site.local.test"
 r3ply = "cli.r3ply.test"

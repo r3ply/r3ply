@@ -157,6 +157,7 @@ if (import.meta.vitest) {
     let email_bytes = new TextEncoder().encode(real_001.default)
     const { signet, issued } = await Signet.issue(signet_key)(
       'spenc.es',
+      'r3ply.com',
       '2025-08-25',
     )
     let site_config = siteConfigParser(

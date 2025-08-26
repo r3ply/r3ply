@@ -15,9 +15,10 @@ function api(r3ply: R3plySystemConfig) {
     }
     const { domain } = c.req.param()
     const new_site_url = new URL(`https://${domain}`)
-    return Signet.issue(c.env.SIGNET_KEY)(new_site_url.hostname).then(
-      (result) => c.json({ ...result, domain, r3ply: req_url.hostname }),
-    )
+    return Signet.issue(c.env.SIGNET_KEY)(
+      new_site_url.hostname,
+      req_url.hostname,
+    ).then((result) => c.json({ ...result, domain, r3ply: req_url.hostname }))
   })
 
   api.get('/comments/pending/get/:domain/:path{.+}', async (c) => {

@@ -61,7 +61,7 @@ export async function deliverable(
 
   // check `From` is not on site's `block_list`
   const redact = (email_address: string) =>
-    anonymize(email_address, site.domain, site.signet, site.issued)
+    anonymize(email_address, site.domain, site.r3ply, site.signet, site.issued)
   const { pseudonym, token } = await from_field_is_deliverable(
     accepted.from,
     redact,
