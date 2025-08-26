@@ -7,7 +7,7 @@ version = "0.0.1"
 # each site x r3ply combo has an entry
 [[site]]
 domain = "example.com"
-r3ply = "localhost"
+r3ply = "r3ply.com"
 signet = "iSQIIBcF7ka2UURJpFDkYw"
 issued = 2025-08-26
 
@@ -15,7 +15,7 @@ issued = 2025-08-26
 [comments.email.moderation]
 type = "github"
 repo = "https://github.com/you/<YOUR_REPO>"
-"file_path_{}" = "/content/comments/{{ comment.id }}.md"
+"file_path_{}" = "/content/comments/{{ comment.id[:8] }}.md"
 ```
 ' %}
 
@@ -39,7 +39,7 @@ repo = "https://github.com/you/<YOUR_REPO>"
     id="submit-btn"
     class=" border-2 border-black bg-blue-400 text-white px-4 py-2 hover:bg-blue-600 rounded-lg cursor-pointer"
   >
-  Generate Config
+  Generate Config!
 </button>
 </div>
 

@@ -5,13 +5,18 @@
 
 r3ply is an open source project that allows websites to receive comments via email.
 
+## Getting Started
+
 {% make_config() %}
 
-To get started, enter your website's config and press 'generate' to produce a `signet`. Then host the config at `/.well-known/r3ply/config.toml` from your domain.
+1. Enter your website's domain and press 'generate' to produce a `signet`. Then host the config at `/.well-known/r3ply/config.toml` from the same domain.
 
 {% end %}
 
-There is a r3ply CLI tool called `re` that is useful for local development. You can use it to simulate a comment arriving to your website, and iterate on your config.
+2. On your website, generate `mailto:` links on the pages where you'd like to receive comments, by pre-populating the `to` and `subject` fields.
+3. Comments addressed to [<YOUR_DOMAIN>@<r3ply.com>](mailto:CHANGE_ME@r3ply.com) and referencing the subject (a URL) will arrive per the `moderation` section of the config, e.g. GitHub.
+
+There is also r3ply CLI tool called `re` that is useful for local development. Use it to simulate a comment arriving to your site, and iterate on your config with confidence.
 
 ## Table of Contents
 
