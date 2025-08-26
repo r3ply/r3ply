@@ -22,6 +22,12 @@ export interface EmailTemplateContext {
       dmarc: boolean
       pass: boolean
     }
+    from: {
+      pseudonym: string
+      signet: string
+      issued: string
+      token: string
+    }
   }
 }
 
@@ -38,7 +44,7 @@ export function prepare(
   metadata: CommentMetadata,
   config: R3plySiteConfig,
   system: R3plySystemConfig,
-) {
+): CommentTemplateContext & EmailTemplateContext {
   // get values from receive
   let { comment_id, ts_rcvd } = metadata
 
@@ -91,15 +97,18 @@ export function prepare(
   let template_context: CommentTemplateContext & EmailTemplateContext = {
     r3ply: {
       config_version: config.version,
-      server: deliverable.r3ply_domain,
-      site: deliverable.site_domain,
+      server: deliverable.site.r3ply,
+      site: deliverable.site.domain,
+      signet: deliverable.site.signet,
+      issued: deliverable.site.issued,
+    },
+    author: {
+      pseudonym: deliverable.from.pseudonym.value,
+      token: deliverable.from.token.value,
     },
     comment: {
       id: comment_id,
-      id_8: comment_id.slice(0, 8),
       ts_rcvd: ts_rcvd.toString(),
-      author: deliverable.from.value,
-      author_7: deliverable.from.value.slice(0, 7),
       subject: {
         url: deliverable.subject.href,
         origin: deliverable.subject.origin,
@@ -130,6 +139,14 @@ export function prepare(
           data.auth_results.dkim_pass &&
           data.auth_results.spf_pass &&
           data.auth_results.dmarc_pass,
+      },
+      from: {
+        pseudonym: deliverable.from.pseudonym.value,
+        signet: config.site.find((s) => s.domain == deliverable.site.domain)!
+          .signet,
+        issued: config.site.find((s) => s.domain == deliverable.site.domain)!
+          .issued,
+        token: deliverable.from.token.value,
       },
     },
   }

@@ -1,4 +1,14 @@
 /**
+ * Just a simple wrapper used to indicate that something has been encrypted
+ */
+export interface Encrypted<T> {
+  value: T
+}
+export function Encrypted<T>(value: T): Encrypted<T> {
+  return { value }
+}
+
+/**
  * Just a simple wrapper used to indicate that something has been redacted
  */
 export interface Redacted<T> {

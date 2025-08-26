@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander'
-import { comment_cmd, validate_cmd, init_cmd } from './cmd.js'
+import { comment_cmd, config_cmd, init_cmd } from './cmd.js'
 import chalk from 'chalk'
 
 program
@@ -10,7 +10,7 @@ program
   .option('--config <path>', 'specify path to config')
 
 program.addCommand(init_cmd(process.cwd()))
-program.addCommand(validate_cmd(process.cwd()))
+program.addCommand(config_cmd(process.cwd()))
 program.addCommand(comment_cmd(process.cwd()))
 program.parseAsync(process.argv).catch((error: Error) => {
   console.error(chalk.redBright(error.message))

@@ -8,39 +8,52 @@ import path from 'path'
 import { resolve_config_references } from '@r3ply/lib'
 import { highlight } from 'cli-highlight'
 import TOML from '@iarna/toml'
+import { Signet } from '@r3ply/lib'
+import crypto from 'crypto'
 
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
-  const config_cmd = new Command('init')
+  const init_cmd = new Command('init')
     .description('initialize a new r3ply project')
+    // TODO:
+    // .option('-f, --force', 'override existing initialization')
     .argument(
       '[directory]',
       'directory to initialize bare r3ply project within',
     )
     .action(async (directory) => {
-      return project.init_r3ply_project_at(cwd, directory).then((r3ply_dir) => {
-        console.log(
-          `Initialized empty r3ply project at ${chalk.greenBright(path.dirname(util.unsafeUnwrap(r3ply_dir)))}`,
-        )
-      })
+      return project
+        .init_r3ply_project_at(cwd, directory)
+        .then(async (result) => {
+          const { r3ply_dir, signet_key } = util.unsafeUnwrap(result)
+          const { signet, issued } =
+            await Signet.make(signet_key)('site.local.test')
+          const toml_site_entry = `[[site]]
+domain = "site.local.test"
+r3ply = "cli.r3ply.test"
+signet = "${signet}"
+issued = ${issued}
+`
+          console.log(
+            `Initialized empty r3ply project at ${chalk.greenBright(path.dirname(r3ply_dir))}`,
+            `\n\nAdd the following site entry to your config:`,
+            `\n\n${highlight(toml_site_entry, { language: 'toml' })}`,
+          )
+        })
     })
 
-  return config_cmd
+  return init_cmd
 }
 
 // config ----------------------------------------------------------------------
-export function validate_cmd(cwd: string) {
-  const validate_cmd = new Command('validate').description(
-    'various supporting operations for working with r3ply configs',
-  )
-  validate_cmd
-    .description('validate the configuration')
-    .action(async (options: { config: string }) => {
+export function config_cmd(cwd: string) {
+  const config_cmd = new Command('config').description('r3ply config commands')
+  const validate_cmd = config_cmd
+    .command('validate')
+    .description('validate your r3ply configuration')
+    .action(async () => {
       const site_config = util.unsafeUnwrap(
-        await project.parse_site_config(
-          cwd,
-          validate_cmd.parent?.opts().config,
-        ),
+        await project.parse_site_config(cwd, config_cmd.parent?.opts().config),
       )
       if (!site_config.valid)
         throw new Error(
@@ -48,13 +61,24 @@ export function validate_cmd(cwd: string) {
         )
     })
 
-  return validate_cmd
+  // TODO:
+  // const generate_cmd = config_cmd
+  // .command('generate')
+  // .description('generate a config')
+  // .option('-i, --interactive', 'generate the config interactively')
+  // .option('--domain', 'the domain that this config will be hosted on')
+  // .option('--r3ply', 'the domain the site will expect comments from')
+  // .option('--signet', '')
+  // .option('--issued')
+  // .action('')
+
+  return config_cmd
 }
 
 // comments --------------------------------------------------------------------
 export function comment_cmd(cwd: string) {
   const comment_cmd = new Command('comment').description(
-    'various supporting operations for working with r3ply comments',
+    'commands for comments, e.g. simulating a comment received via email based on the config',
   )
   const generate_cmd = comment_cmd
     .command('generate')
@@ -93,12 +117,9 @@ export function comment_cmd(cwd: string) {
             await project.get_site_config(project_dir, undefined),
           )
         }
+        const site = site_config.site[util.random_int(site_config.site.length)]
         const email = Result.safe(
-          generate.email(
-            site_config.domains[util.random_int(site_config.domains.length)],
-            site_config.r3ply[util.random_int(site_config.r3ply.length)],
-            options,
-          ),
+          generate.email(site.domain, site.r3ply, options),
         )
         await email.then(async (email) => {
           if (email.isOk()) {
@@ -135,8 +156,6 @@ export function comment_cmd(cwd: string) {
         },
         cmd,
       ) => {
-        console.log(options)
-
         let site_config: R3plySiteConfig
         let site_config_path: string
         let file_resolver: (file_uri?: string) => Promise<string | undefined>
@@ -173,7 +192,7 @@ export function comment_cmd(cwd: string) {
         )
         const cli_system_config_toml = TOML.parse(`
         version  = "0.0.1"
-        domains = ${JSON.stringify(site_config.r3ply)}
+        domains = ${JSON.stringify(site_config.site.map((s) => s.r3ply))}
         [[admin]]
         name = "Guybrush Threepwood"
         email = "guybrush@example.com"`)
@@ -181,12 +200,9 @@ export function comment_cmd(cwd: string) {
           JSON.stringify(cli_system_config_toml),
         ).value!
 
+        const site = site_config.site[util.random_int(site_config.site.length)]
         const email = generate
-          .email(
-            site_config.domains[util.random_int(site_config.domains.length)],
-            site_config.r3ply[util.random_int(site_config.r3ply.length)],
-            options,
-          )
+          .email(site.domain, site.r3ply, options)
           .then((email) => {
             // TODO: for some reason highlight.js doesn't support `eml`???
             console.log(
@@ -200,6 +216,7 @@ export function comment_cmd(cwd: string) {
             )
             return email
           })
+        const keys = await project.get_keys(cwd)
         const response = Result.safe(
           email.then((email) =>
             cli_handle_comment_via_email(
@@ -207,19 +224,13 @@ export function comment_cmd(cwd: string) {
               site_config,
               new TextEncoder().encode(email),
               file_resolver,
+              {
+                signet: keys.signet_key,
+                encrypt_email: keys.encrypt_email_key,
+              },
             ),
           ),
         )
-        // TODO:
-        // const msg_reply = createMimeMessage()
-        // msg_reply.setHeader('In-Reply-To', msg.headers.get('Message-ID')!)
-        // msg_reply.setSender(msg.to)
-        // msg_reply.setRecipient(msg.from)
-        // msg_reply.setSubject(msg.headers.get('Subject')!)
-        // msg_reply.addMessage({
-        //   contentType: 'text/plain',
-        //   data: `Hello, world!`,
-        // })
         await response.then(async (response) => {
           if (response.isOk()) {
             const email_event_response = response.unwrap()

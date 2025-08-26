@@ -27,6 +27,8 @@ export namespace project {
     `**/r3ply/config.{toml,json}`,
     `**/r3ply.config.{toml,json}`,
   ]
+  const SIGNET_KEY_FILENAME = 'signet.key'
+  const ENCRYPT_EMAIL_KEY_FILENAME = 'encrypt_email.key'
 
   /**
    * Finds the `.r3ply` dir that should be located at the top-level of the user's repository
@@ -195,35 +197,73 @@ export namespace project {
   export async function init_r3ply_project_at(
     cwd: string,
     dir?: string,
-  ): Promise<Result<string, Error>> {
+  ): Promise<
+    Result<
+      { r3ply_dir: string; signet_key: string; encrypt_email_key: string },
+      Error
+    >
+  > {
     const new_r3ply_dir = path.join(cwd, dir ?? '', R3PLY_DIR)
     const parent_project_exists = find_r3ply_dir(new_r3ply_dir)
-    const initialize_project = parent_project_exists.then(
-      (parent_project_exists) => {
-        const file_access = Result.safe(fs.promises.access(new_r3ply_dir))
-        return file_access.then((file_access) => {
-          if (file_access.isErr()) {
-            if (parent_project_exists.isOk())
-              throw new Error(
-                `Nested r3ply project. There is already a parent directory initialized at ${chalk.blue('`' + parent_project_exists.unwrap() + '`')}.${chalk.yellow('(Nested projects can lead to strange effects)')}`,
-              )
-            return fs.promises.mkdir(new_r3ply_dir).then(() => {
-              return fs.promises
-                .writeFile(
-                  path.join(new_r3ply_dir, 'placeholder.txt'),
-                  'This is just an empty file so the .r3ply directory is picked up by source control. In the future there will be more things to store here, so this file will be unnecessary.',
-                )
-                .then((_) => new_r3ply_dir)
-            })
-          } else {
+    const signet_key = crypto.randomBytes(32).toString('base64')
+    const encrypt_email_key = crypto.randomBytes(32).toString('base64')
+    const result = parent_project_exists.then((parent_project_exists) => {
+      const file_access = Result.safe(fs.promises.access(new_r3ply_dir))
+      return file_access.then((file_access) => {
+        if (file_access.isErr()) {
+          if (parent_project_exists.isOk()) {
             throw new Error(
-              `Project already initialized at \`${chalk.reset(path.dirname(new_r3ply_dir))}\``,
+              `Nested r3ply project. There is already a parent directory initialized at ${chalk.blue('`' + parent_project_exists.unwrap() + '`')}.${chalk.yellow('(Nested projects can lead to strange effects)')}`,
             )
           }
-        })
-      },
-    )
-    return Result.safe(initialize_project)
+          return fs.promises.mkdir(new_r3ply_dir).then(() => {
+            return fs.promises
+              .writeFile(
+                path.join(new_r3ply_dir, SIGNET_KEY_FILENAME),
+                signet_key,
+              )
+              .then((_) => {
+                return fs.promises.writeFile(
+                  path.join(new_r3ply_dir, ENCRYPT_EMAIL_KEY_FILENAME),
+                  encrypt_email_key,
+                )
+              })
+              .then((_) => {
+                return {
+                  r3ply_dir: new_r3ply_dir,
+                  signet_key,
+                  encrypt_email_key,
+                }
+              })
+          })
+        } else {
+          throw new Error(
+            `Project already initialized at \`${chalk.reset(path.dirname(new_r3ply_dir))}\``,
+          )
+        }
+      })
+    })
+    return Result.safe(result)
+  }
+
+  export async function get_keys(
+    cwd: string,
+  ): Promise<{ signet_key: string; encrypt_email_key: string }> {
+    return find_r3ply_dir(cwd).then((r3ply_dir) => {
+      const signet_key = fs.promises
+        .readFile(path.join(util.unsafeUnwrap(r3ply_dir), SIGNET_KEY_FILENAME))
+        .then((buffer) => buffer.toString())
+      const encrypt_email_key = fs.promises
+        .readFile(
+          path.join(util.unsafeUnwrap(r3ply_dir), ENCRYPT_EMAIL_KEY_FILENAME),
+        )
+        .then((buffer) => buffer.toString())
+      return Promise.all([signet_key, encrypt_email_key]).then(
+        ([signet_key, encrypt_email_key]) => {
+          return { signet_key, encrypt_email_key }
+        },
+      )
+    })
   }
 }
 
@@ -337,8 +377,11 @@ export async function cli_handle_comment_via_email(
   site_config: R3plySiteConfig,
   email_bytes: Uint8Array,
   file_resolver: (file_uri?: string) => Promise<string | undefined>,
+  keys: {
+    signet: string
+    encrypt_email: string
+  },
 ) {
-  const redact = util.sha256_0x
   const fetch = async (input: URL | RequestInfo, init?: RequestInit) => {
     return Response.json({
       id: 'A temporary ID',
@@ -367,7 +410,11 @@ export async function cli_handle_comment_via_email(
     else throw 'Not yet implemented'
   }
   const r3ply = R3ply(system_config)
-  const comment_via_email_handler = r3ply.comments.viaEmail(redact, moderation)
+  const comment_via_email_handler = r3ply.comments.viaEmail(
+    keys.signet,
+    keys.encrypt_email,
+    moderation,
+  )
   return comment_via_email_handler([site_config, email_bytes])
 }
 

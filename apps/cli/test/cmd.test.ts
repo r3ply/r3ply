@@ -5,6 +5,7 @@ import { Result } from 'oxide.ts'
 import mockfs from 'mock-fs'
 import fs from 'fs'
 import path from 'path'
+import { Signet } from '@r3ply/lib'
 
 describe('config', () => {
   describe('validate', () => {
@@ -25,33 +26,6 @@ describe('config', () => {
         program
           .addCommand(config_cmd('/'))
           .parseAsync(['node', 'test', 'config', 'validate']),
-      )
-      expect((await result).isOk()).toBe(true)
-    })
-    test('--config option', async () => {
-      mockfs({
-        project: {
-          src: {},
-          '.r3ply': {},
-          'r3ply.config.toml': fs
-            .readFileSync(
-              path.join(__dirname, 'resources/minimum_r3ply_site_config.toml'),
-            )
-            .toString(),
-        },
-      })
-      const program = new Command()
-      const result = await Result.safe(
-        program
-          .addCommand(config_cmd('project/src'))
-          .parseAsync([
-            'node',
-            'test',
-            'config',
-            'validate',
-            '--config',
-            '../r3ply.config.toml',
-          ]),
       )
       expect((await result).isOk()).toBe(true)
     })

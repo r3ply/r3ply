@@ -7,7 +7,7 @@ export const schema_ts = {
   description:
     "JSON Schema to describe a site's configuration for use with the r3ply commenting system. See https://r3ply.com for more info.",
   type: 'object',
-  required: ['version', 'domains', 'r3ply', 'comments'],
+  required: ['version', 'site', 'comments'],
   additionalProperties: false,
   definitions: {
     notify_config: {
@@ -155,7 +155,7 @@ A new comment has been received
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
               default:
-                'New comment ({{ comment.id_8 }}) on {{ comment.subject.url }} by author `{{ comment.author_7 }}`',
+                'New comment ({{ comment.id[:16] }}) on {{ comment.subject.url }} by author `{{ author.pseudonym[:12] }}`',
             },
             'pr_body_{}': {
               type: 'string',
@@ -211,7 +211,7 @@ A new comment has been received
                 'The new branch that will be created when submitting a comment for moderation. Uses templates.',
               pattern: '^[\\s\\S]*$',
               maxLength: 256,
-              default: 'comment-{{ comment.ts_rcvd }}-{{ comment.id_8 }}.md',
+              default: 'comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md',
             },
             'file_path_{}': {
               type: 'string',
@@ -231,7 +231,7 @@ A new comment has been received
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
               default: `Comment submitted:
-Sender: {{ comment.author }}
+Sender: {{ author.pseudonym }}
 Timestamp: {{ comment.ts_rcvd }}
 Subject: {{ comment.subject.url }}
 Comment: > {{ comment.txt | split(pat="\n") | join(sep="> ") }}`,
@@ -247,7 +247,7 @@ Comment: > {{ comment.txt | split(pat="\n") | join(sep="> ") }}`,
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
               default:
-                'New comment ({{ comment.id_8 }}) on {{ comment.subject.url }} by author `{{ comment.author_7 }}`',
+                'New comment ({{ comment.id[:16] }}) on {{ comment.subject.url }} by author `{{ author.pseudonym[:12] }}`',
             },
             'pr_body_{}': {
               type: 'string',
@@ -481,27 +481,58 @@ Comment: > {{ comment.txt | split(pat="\n") | join(sep="> ") }}`,
         'Comments will not be processed if set to false. Default is true.',
       default: true,
     },
-    domains: {
-      description: 'The domains that this site is configuring',
+    site: {
       type: 'array',
+      description:
+        'Configuration for each site, including domain, r3ply server, and signet information.',
       items: {
-        type: 'string',
-        format: 'hostname',
+        type: 'object',
+        required: ['domain', 'r3ply', 'signet', 'issued'],
+        properties: {
+          domain: {
+            type: 'string',
+            format: 'hostname',
+            description:
+              "The domain that this configuration applies to. Wildcards are allowed (e.g., '*.example.com').",
+          },
+          r3ply: {
+            type: 'string',
+            format: 'hostname',
+            description:
+              "The r3ply server that this site expects to receive comments from. Wildcards are allowed (e.g., '*.r3ply.com').",
+          },
+          signet: {
+            type: 'string',
+            description:
+              'The service-issued signet key used to generate deterministic HMAC identities for commenters.',
+            pattern: '^[A-Za-z0-9_-]{22}$',
+            examples: ['qhQ6YSUvQNLb1lCdw3kDRg'],
+          },
+          issued: {
+            type: 'string',
+            format: 'date',
+            description:
+              'The date this signet was issued. Used for rotation and versioning.',
+            examples: ['2025-08-22'],
+          },
+        },
+        additionalProperties: false,
       },
       minItems: 1,
-      examples: ['lucasarts.com', 'ghosts.lucasarts.com'],
-      $comment: 'must match the domain that serves the config',
-    },
-    r3ply: {
-      description: 'The domains this site expects to receive r3plies from',
-      type: 'array',
-      items: {
-        type: 'string',
-        format: 'hostname',
-      },
-      examples: ['r3ply.com', 'my-test-r3ply-server.net'],
-      $comment:
-        "It is not recommended to accept r3plies from servers you don't know",
+      examples: [
+        {
+          domain: 'spenc.es',
+          r3ply: 'r3ply.com',
+          signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
+          issued: '2025-08-22',
+        },
+        {
+          domain: '*.spence.pages.dev',
+          r3ply: 'test.r3ply.com',
+          signet: 'J9cDuB3tBit3WDGQmvbCIw',
+          issued: '2025-08-20',
+        },
+      ],
     },
     comments: { $ref: '#/definitions/comments_config' },
   },

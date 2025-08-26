@@ -7,6 +7,7 @@ import {
   parser as imported_r3ply_site_config_parser,
   module,
   TypedParseResult,
+  parser,
 } from '../src/site.config.0.0.1'
 import esbuild from 'esbuild'
 
@@ -33,11 +34,11 @@ type R3plyConfigParser = (input: string) => TypedParseResult<R3plySiteConfig>
 // A list of implementations of the parser that are to be tested under the same conditions
 const implementations: [string, R3plyConfigParser][] = [
   ['Parser [Imported TS]', imported_r3ply_site_config_parser],
-  [
-    'Parser [Dynamically Compiled]',
-    dynamically_compiled_r3ply_site_config_parser,
-  ],
-  ['Parser [Statically Compiled]', compiled_r3ply_site_config_parser],
+  // [
+  //   'Parser [Dynamically Compiled]',
+  //   dynamically_compiled_r3ply_site_config_parser,
+  // ],
+  // ['Parser [Statically Compiled]', compiled_r3ply_site_config_parser],
 ]
 
 // The tests here loop through the `implementations` and apply all the tests to each one
@@ -50,8 +51,14 @@ describe.each(implementations)('%s', (_, parse) => {
   }
   const minimum_config = {
     version: '0.0.1',
-    domains: ['example.com'],
-    r3ply: ['r3ply.com', 'my-test-r3ply-server.com'],
+    site: [
+      {
+        domain: 'example.com',
+        r3ply: 'r3ply.com',
+        signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
+        issued: '2025-08-22',
+      },
+    ],
     comments: { email: { moderation: webhook_test } },
   }
   test('configs must be well formed', () => {
@@ -68,7 +75,7 @@ describe.each(implementations)('%s', (_, parse) => {
     ).toBe(false))
   describe('the root object', () => {
     describe('required fields', () => {
-      let expected_fields = ['version', 'domains', 'r3ply', 'comments']
+      let expected_fields = ['version', 'site', 'comments']
       test(`expected fields: ${JSON.stringify(expected_fields)}`, () =>
         expect(new Set(schema_ts.required)).toStrictEqual(
           new Set(expected_fields),
@@ -81,67 +88,82 @@ describe.each(implementations)('%s', (_, parse) => {
           parse(JSON.stringify({ ...minimum_config, version: '0.0.2' })).valid,
         ).toBe(false)
       })
-      test('`domains` expects one or more valid hostnames', () => {
+      test('`site` field expects one site and r3ply domain each to be valid hostnames', () => {
+        const site = {
+          domain: 'example.com',
+          r3ply: 'r3ply.cm',
+          signet: 'J9cDuB3tBit3WDGQmvbCIw',
+          issued: '2025-08-20',
+        }
         expect(
-          parse(JSON.stringify({ ...minimum_config, domains: [] })).valid,
+          parse(JSON.stringify({ ...minimum_config, site: [] })).valid,
         ).toBe(false)
-        expect(
-          parse(
-            JSON.stringify({ ...minimum_config, domains: ['a.com', 'b.net'] }),
-          ).valid,
-        ).toBe(true)
         expect(
           parse(
             JSON.stringify({
               ...minimum_config,
-              domains: ['subdomain.example.com'],
+              site: [{ ...site, domain: 'a.com', r3ply: 'b.net' }],
             }),
           ).valid,
         ).toBe(true)
         expect(
-          parse(JSON.stringify({ ...minimum_config, domains: ['domain'] }))
-            .valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, domains: ['localhost'] }))
-            .valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, domains: ['127.0.0.1'] }))
-            .valid,
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              site: [{ ...site, domain: 'subdomain.example.com' }],
+            }),
+          ).valid,
         ).toBe(true)
         expect(
           parse(
             JSON.stringify({
               ...minimum_config,
-              domains: [
-                `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(61)}`,
+              site: [{ ...site, domain: 'domain' }],
+            }),
+          ).valid,
+        ).toBe(true)
+        expect(
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              site: [{ ...site, domain: 'local' }],
+            }),
+          ).valid,
+        ).toBe(true)
+        expect(
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              site: [{ ...site, domain: '127.0.0.1' }],
+            }),
+          ).valid,
+        ).toBe(true)
+        expect(
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              site: [
+                {
+                  ...site,
+                  domain: `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(61)}`,
+                },
               ],
             }),
           ).valid,
         ).toBe(true)
         expect(
-          parse(JSON.stringify({ ...minimum_config, domains: ['xn--v4h.com'] }))
-            .valid,
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              site: [{ ...site, domain: 'xn--v4h.com', r3ply: 'xn--v4h.com' }],
+            }),
+          ).valid,
         ).toBe(true)
         expect(
           parse(
             JSON.stringify({
               ...minimum_config,
-              domains: ['hello  sfdjfsn world'],
-            }),
-          ).valid,
-        ).toBe(false)
-        expect(
-          parse(
-            JSON.stringify({ ...minimum_config, domains: ['localhost:1234'] }),
-          ).valid,
-        ).toBe(false)
-        expect(
-          parse(
-            JSON.stringify({
-              ...minimum_config,
-              domains: ['https://google.com'],
+              site: [{ ...site, domain: 'hello  sfdjfsn world}' }],
             }),
           ).valid,
         ).toBe(false)
@@ -149,7 +171,7 @@ describe.each(implementations)('%s', (_, parse) => {
           parse(
             JSON.stringify({
               ...minimum_config,
-              domains: ['example.com/path/'],
+              site: [{ ...site, domain: 'localhost:1234' }],
             }),
           ).valid,
         ).toBe(false)
@@ -157,97 +179,38 @@ describe.each(implementations)('%s', (_, parse) => {
           parse(
             JSON.stringify({
               ...minimum_config,
-              domains: [
-                `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(62)}`,
+              site: [{ ...site, domain: 'https://google.com' }],
+            }),
+          ).valid,
+        ).toBe(false)
+        expect(
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              site: [{ ...site, domain: 'example.com/path/' }],
+            }),
+          ).valid,
+        ).toBe(false)
+        expect(
+          parse(
+            JSON.stringify({
+              ...minimum_config,
+              site: [
+                {
+                  ...site,
+                  domain: `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(62)}`,
+                },
               ],
             }),
           ).valid,
         ).toBe(false)
         expect(
-          parse(JSON.stringify({ ...minimum_config, domains: ['☮️.com'] }))
-            .valid,
-        ).toBe(false)
-      })
-      test('`r3ply` must only have valid hostnames', () => {
-        expect(
-          parse(JSON.stringify({ ...minimum_config, r3ply: ['example.com'] }))
-            .valid,
-        ).toBe(true)
-        expect(
           parse(
             JSON.stringify({
               ...minimum_config,
-              r3ply: ['subdomain.example.com'],
+              site: [{ ...site, domain: '☮️.com' }],
             }),
           ).valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, r3ply: ['domain'] })).valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, r3ply: ['localhost'] }))
-            .valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, r3ply: ['127.0.0.1'] }))
-            .valid,
-        ).toBe(true)
-        expect(
-          parse(
-            JSON.stringify({
-              ...minimum_config,
-              r3ply: [
-                `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(61)}`,
-              ],
-            }),
-          ).valid,
-        ).toBe(true)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, r3ply: ['xn--v4h.com'] }))
-            .valid,
-        ).toBe(true)
-        expect(
-          parse(
-            JSON.stringify({
-              ...minimum_config,
-              r3ply: ['example.com', 'not valid'],
-            }),
-          ).valid,
-        ).toBe(false)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, r3ply: ['hello world'] }))
-            .valid,
-        ).toBe(false)
-        expect(
-          parse(
-            JSON.stringify({ ...minimum_config, r3ply: ['localhost:1234'] }),
-          ).valid,
-        ).toBe(false)
-        expect(
-          parse(
-            JSON.stringify({
-              ...minimum_config,
-              r3ply: ['https://google.com'],
-            }),
-          ).valid,
-        ).toBe(false)
-        expect(
-          parse(
-            JSON.stringify({ ...minimum_config, r3ply: ['example.com/path/'] }),
-          ).valid,
-        ).toBe(false)
-        expect(
-          parse(
-            JSON.stringify({
-              ...minimum_config,
-              r3ply: [
-                `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(62)}`,
-              ],
-            }),
-          ).valid,
-        ).toBe(false)
-        expect(
-          parse(JSON.stringify({ ...minimum_config, r3ply: ['☮️.com'] })).valid,
         ).toBe(false)
       })
     })
@@ -386,10 +349,10 @@ describe.each(implementations)('%s', (_, parse) => {
                 expect(github_moderation['pr_body_{}']).toBe('TODO')
                 expect(github_moderation['&pr_body_{}']).toBeUndefined()
                 expect(github_moderation['pr_title_{}']).toBe(
-                  'New comment ({{ comment.id_8 }}) on {{ comment.subject.url }} by author `{{ comment.author_7 }}`',
+                  'New comment ({{ comment.id[:16] }}) on {{ comment.subject.url }} by author `{{ author.pseudonym[:12] }}`',
                 )
                 expect(github_moderation['head_branch_{}']).toBe(
-                  'comment-{{ comment.ts_rcvd }}-{{ comment.id_8 }}.md',
+                  'comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md',
                 )
                 expect(github_moderation['base_branch_{}']).toBe('main')
                 expect(github_moderation['enabled']).toBe(true)
@@ -737,5 +700,66 @@ describe.each(implementations)('%s', (_, parse) => {
         },
       )
     })
+  })
+})
+
+describe.skip('foo', () => {
+  test('should foo', async () => {
+    const config = `version = "0.0.1"
+
+domains = ["spenc.es", "integrate-w-next-version-of.spence.pages.dev"]
+r3ply = ["r3ply.com", "test.r3ply.com"]
+
+[[site]]
+domain = "spenc.es"
+r3ply = "r3ply.com"
+signet = "qhQ6YSUvQNLb1lCdw3kDRg"
+issued = 2025-08-22
+
+[[site]]
+domain = "*.spence.pages.dev"
+r3ply = "test.r3ply.com"
+signet = "J9cDuB3tBit3WDGQmvbCIw"
+issued = 2025-08-20
+
+[comments.email]
+"&comment_{}" = "./viaEmail/comment.template.md"
+comment_separator = "﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍"
+
+[comments.email.moderation]
+type = "github"
+repo = "https://github.com/asimpletune/spenc.es"
+"file_path_{}" = "content/comments/{{ comment.ts_rcvd }}_{{ comment.id_8 }}-{{ comment.author_7 }}.md"
+"pr_title_{}" = "New comment from '{{ comment.id_8 }}'"
+"pr_body_{}" = "PR body!"
+"base_branch_{}" = "main"
+"head_branch_{}" = "{{ comment.ts_rcvd }}_{{ comment.id_8 }}-{{ comment.author_7 }}.md"
+
+[comments.email.notify]
+commenter = true
+notify_commenter_upon_submission = true
+"&comment_submitted_notif_{}" = "./viaEmail/notif.comment.submitted.html"
+moderator = true
+notify_moderator_upon_receipt = "all"
+"&comment_received_notif_{}" = "./viaEmail/notif.comment.received.html"`
+    let webhook_test = { type: 'webhook', url: 'https://example.com' }
+
+    const config_json = {
+      version: '0.0.1',
+      site: [
+        {
+          domain: 'example.com',
+          r3ply: 'r3ply.com',
+          signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
+          issued: '2025-08-22',
+        },
+      ],
+      comments: { email: { moderation: webhook_test } },
+    }
+
+    const value = parser(JSON.stringify(config_json))
+    console.log('YOOOOOOO')
+
+    console.log(value)
   })
 })

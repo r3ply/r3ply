@@ -42,7 +42,8 @@ export default {
     return comment_via_email(msg, {
       db: undefined,
       gist_token: env.R3PLY_GIST_TOKEN,
-      hmac_secret: env.HMAC_SECRET,
+      signet_key: env.SIGNET_KEY,
+      encrypt_email_key: env.EMAIL_ENCRYPT_KEY,
       gh_pw: env.GITHUB_APP_PW,
     }).then((result) => {
       if (result.isOk()) {
@@ -115,7 +116,8 @@ export async function comment_via_email(
   deps: {
     db?: D1Database
     gist_token: string
-    hmac_secret: string
+    signet_key: string
+    encrypt_email_key: string
     gh_pw: string
   },
 ) {
@@ -146,7 +148,8 @@ export async function comment_via_email(
     }
 
     const handle_comment_via_email = cf_r3ply_w_dependencies.comments.viaEmail(
-      createHMAC(deps.hmac_secret),
+      deps.signet_key,
+      deps.encrypt_email_key,
       moderation,
     )
     return handle_comment_via_email([site_config, email_bytes])

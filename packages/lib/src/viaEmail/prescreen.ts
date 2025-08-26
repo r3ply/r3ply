@@ -24,7 +24,7 @@ export interface PrescreenResult {
 /**
  * This function acts as an assertion before processing an email any further.
  * @param checks an object that contains various things to check
- * @param site	site config
+ * @param config	site config
  * @param system	system config
  * @returns void if ok, otherwise throws an error
  *
@@ -34,18 +34,29 @@ export function prescreen(
   checks: {
     email_size_bytes: number
   },
-  site: R3plySiteConfig,
+  config: R3plySiteConfig,
   system: R3plySystemConfig,
 ): PrescreenResult {
   // Check if system and site are enabled
-  r3ply_is_disabled(system.enabled, system.domains, site.enabled, site.domains)
+  r3ply_is_disabled(
+    system.enabled,
+    system.domains,
+    config.enabled,
+    config.site.map((site) => site.domain),
+  )
   // Check if system accepts comments on behalf of site
-  system_accepts_comments_for_site(site.domains, system.sites)
+  system_accepts_comments_for_site(
+    config.site.map((site) => site.domain),
+    system.sites,
+  )
   // Check if site accepts comments from system
-  site_accepts_comments_from_system(site.r3ply, system.domains)
+  site_accepts_comments_from_system(
+    config.site.map((site) => site.r3ply),
+    system.domains,
+  )
   // Check if incoming email exceeds min of system or site configurations
   const max_bytes_allowed = Math.min(
-    site.comments.email.max_size_bytes,
+    config.comments.email.max_size_bytes,
     system.email.max_size_bytes,
   )
   email_size_exceeds_max(checks.email_size_bytes, max_bytes_allowed)

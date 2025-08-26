@@ -19,6 +19,8 @@ import { CommentState } from './state/d1'
 import { GistClient, GistFiles } from './state/gist'
 import { Result } from 'oxide.ts'
 import mime from 'mime'
+import { Anonymize, AnonymizeEmail } from '@r3ply/lib'
+import { Encrypt, EncryptEmail } from '@r3ply/lib'
 
 interface CloudflareR3ply extends R3ply {}
 export function CloudflareR3ply(system_config: R3plySystemConfig) {
@@ -27,9 +29,14 @@ export function CloudflareR3ply(system_config: R3plySystemConfig) {
     comment_state?: CommentState,
   ): CloudflareR3ply {
     function email_handler(
-      redactor: (input: string) => Promise<string>,
+      anonymize_key: string,
+      encrypt_key: string,
       moderator?: (type: 'github' | 'webhook') => Moderation<any, any>,
     ) {
+      // pass keys to functions immediately to minimize accidentally logging
+      const anonymize: AnonymizeEmail = Anonymize.hmac(anonymize_key)
+      const encrypt_email: EncryptEmail = Encrypt.email(encrypt_key)
+
       const handle_email_event: (
         email_event: [recipient: R3plySiteConfig, bytes: Uint8Array],
       ) => Promise<EmailEventResponse> = async ([site_config, email_bytes]) => {
@@ -44,14 +51,14 @@ export function CloudflareR3ply(system_config: R3plySystemConfig) {
           comment_state,
         )
         const deliverable_email = (
-          await cf_deliverable(
-            accepted_email,
+          await cf_deliverable(accepted_email, {
+            anonymize,
+            encrypt_email,
             metadata,
-            redactor,
             site_config,
             system_config,
             comment_state,
-          )
+          })
         )
           .mapErr((e) => {
             throw e
@@ -173,14 +180,29 @@ export async function cf_accept(
 
 export async function cf_deliverable(
   accepted_email: AcceptedEmail,
-  metadata: CommentMetadata,
-  redact: (input: string) => Promise<string>,
-  site_config: R3plySiteConfig,
-  system_config: R3plySystemConfig,
-  comment_state?: CommentState,
+  {
+    anonymize,
+    encrypt_email,
+    metadata,
+    site_config,
+    system_config,
+    comment_state,
+  }: {
+    anonymize: AnonymizeEmail
+    encrypt_email: EncryptEmail
+    metadata: CommentMetadata
+    site_config: R3plySiteConfig
+    system_config: R3plySystemConfig
+    comment_state?: CommentState
+  },
 ) {
   const deliverable_email = Result.safe(
-    deliverable(accepted_email, redact, site_config, system_config),
+    deliverable(accepted_email, {
+      config: site_config,
+      system: system_config,
+      anonymize,
+      encrypt: encrypt_email,
+    }),
   )
   if (comment_state) {
     return deliverable_email.then((deliverable_email) => {

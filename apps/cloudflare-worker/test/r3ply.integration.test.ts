@@ -6,7 +6,6 @@ import { siteConfigParser, systemConfigParser } from '@r3ply/config'
 import TOML from '@iarna/toml'
 import { GistClient } from '../src/state/gist'
 import { CommentState } from '../src/state/d1'
-import { createHMAC } from '../src/util'
 import { Result } from 'oxide.ts'
 
 describe.skip('Cloudflare r3ply Tests', () => {
@@ -31,15 +30,23 @@ email = "theghostlpirate@monkeyisland.com"`),
       GistClient(env.R3PLY_GIST_TOKEN),
       CommentState(env.TEST_DB),
     )
+    const { signet, issued } = await Signet.make(env.SIGNET_KEY)(
+      'banana-picker.com',
+      '2025-08-25',
+    )
     const handle_email = r3ply.comments.viaEmail(
-      createHMAC('integration test hmac key'),
+      env.SIGNET_KEY,
+      env.EMAIL_ENCRYPT_KEY,
     )
     const site_config = siteConfigParser(
       JSON.stringify(
         TOML.parse(`
 version = "0.0.1"
-domains = ["banana-picker.com"]
-r3ply = ["r3ply.com"]
+[[site]]
+domain = "banana-picker.com"
+r3ply = "r3ply.com"
+signet = "${signet}"
+issued = ${issued}
 
 [comments.email]
 block_list = ["lemonhead@*"]
@@ -47,27 +54,27 @@ block_list = ["lemonhead@*"]
 "comment_{}" = """
 +++
 render = false
-author = "{{ comment.author_7 }}"
+author = "{{ author.pseudonym[:7] }}"
 date = {{ email.date }}
-slug = "{{ comment.id_8 }}"
+slug = "{{ comment.id[:8] }}"
 
 [taxonomies]
-comment = ["{{ comment.id_8 }}"]
+comment = ["{{ comment.id[:8] }}"]
 comments = ["{{ comment.subject.path }}"]
-commenters = ["{{ comment.author_7 }}"]
+commenters = ["{{ author.pseudonym[:7] }}"]
 threads = ["all"]
-replies = ["0", "{{ comment.id_8 }}"]
+replies = ["0", "{{ comment.id[:8] }}"]
 
 [extra]
 object_path = "{{ comment.subject.path }}"
-filename = "{{ comment.ts_rcvd }}_{{ comment.id_8 }}-{{ comment.author_7 }}.md"
+filename = "{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"
 dt_written = {{ email.date }}
 ts_rcvd = {{ comment.ts_rcvd }}
 parent = "0"
-comment_id = "{{ comment.id_8 }}"
+comment_id = "{{ comment.id[:8] }}"
 comment_id_full = "{{ comment.id }}"
-commenter_id = "{{ comment.author_7 }}"
-email_hash = "{{ comment.author }}"
+commenter_id = "{{ author.pseudonym[:7] }}"
+email_hash = "{{ author.pseudonym }}"
 email_hash_version = "1.0.0"
 auth = {{ email.auth.pass }}
 dkim_pass = {{ email.auth.dkim }}
@@ -157,3 +164,4 @@ A subset of markdown can be used
 })
 
 import { comment_via_email } from '../src'
+import { Signet } from '@r3ply/lib'

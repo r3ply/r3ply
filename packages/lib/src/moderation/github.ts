@@ -308,13 +308,18 @@ if (import.meta.vitest) {
         config_version: '0.0.1',
         server: 'r3ply.com',
         site: 'example.com',
+        signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
+        issued: '2025-08-22',
+      },
+      author: {
+        pseudonym:
+          '5f1a242e4eeec2fa9cbd67c5fa20b09f1dd5a61263c77ec00b314efbd0556a4d',
+        token:
+          'iypUPU0EPutGE2w8-uFPoweAgjfQyvpJuIYS1O741kXmJPStr9ABofrgULrPRIusvQsB9-biIiN3xI1FOO45UGjVb_sHAaYJMCF2e7m9BiDFaDyyoyUhBHGu4Oj3VGA8n4hwKVXLP6D-koflm0X_x_nykXZYGvLXsetA1pO8dvVZf3k7grDZ0dom0nkIyYHyaNhGrFO-xy3iTMO97OXZaTu-tGyGGvAn-fo0oAVjdFIQuTeCp5CYm02eMRDWrFAW1OGT-b-sGGBuU6oZNEtfWcO-YeiFRmVjxRkyYTqBK2MK7PvG4JaKto7SojP6Egg0j-vbRHieFkBw2eM4Eemqar4XhBTM1PKpoaqAFdf7fs9PqgYcITsXXpdqZ1QlsYBmQ7vxKLiX6ad-nbYwbpaOMNrX7b3RGQDArIwgWHzUExmtgjvcJubgEMOF0UQw8MhAOPYgfiXnVs9x0cWr',
       },
       comment: {
         id: '1234567890',
-        id_8: '12345678',
         ts_rcvd: Math.floor(Date.now() / 1000).toString(),
-        author: '9876543210',
-        author_7: '7654321',
         subject: {
           url: 'https://example.com/blog/post/',
           origin: 'https://example.com',
@@ -336,11 +341,12 @@ if (import.meta.vitest) {
       'file_path_{}': 'content/comments/{{ comment.id }}.txt',
       allow_list: ['*'],
       'base_branch_{}': 'main',
-      'head_branch_{}': 'comment-{{ comment.author_7 }}-{{ comment.id_8 }}',
+      'head_branch_{}':
+        'comment-{{ author.pseudonym[:7] }}-{{ comment.id[:8] }}',
       'commit_msg_{}': 'new comment: \n> {{ comment.txt }}\n',
-      'pr_title_{}': 'merge comment {{ comment.id_8 }}',
+      'pr_title_{}': 'merge comment {{ comment.id[:8] }}',
       'pr_body_{}':
-        'this is a PR to merge comment from user {{ comment.author_7 }}, with content: \n> {{ comment.txt }}',
+        'this is a PR to merge comment from user {{ author.pseudonym[:7] }}, with content: \n> {{ comment.txt }}',
     }
     const result = create_pr_args(comment, context, github_moderation, {
       base_branch: github_moderation['base_branch_{}'],
@@ -355,14 +361,14 @@ if (import.meta.vitest) {
       repo_name: 'blog',
       repo_url: 'https://github.com/example.com/blog/',
       source_branch: 'main',
-      target_branch: 'comment-7654321-12345678',
+      target_branch: 'comment-5f1a242-12345678',
       comment_data: 'This is a comment',
       new_comment_filepath: 'content/comments/1234567890.txt',
       commit_msg: 'new comment: \n> this is a comment\n',
       pr: {
         msg_title: 'merge comment 12345678',
         msg_body:
-          'this is a PR to merge comment from user 7654321, with content: \n' +
+          'this is a PR to merge comment from user 5f1a242, with content: \n' +
           '> this is a comment',
       },
     })

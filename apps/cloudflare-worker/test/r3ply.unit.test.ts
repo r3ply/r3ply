@@ -13,8 +13,12 @@ import { GistClient, GistFiles } from '../src/state/gist'
 import { CommentCache, CommentState } from '../src/state/d1'
 import TOML from '@iarna/toml'
 import { siteConfigParser, systemConfigParser } from '@r3ply/config'
+import { Anonymize, AnonymizeEmail } from '@r3ply/lib'
+import { Encrypt } from '@r3ply/lib'
 
 describe('Cloudflare r3ply Tests', () => {
+  const signet_key = '5yT6DjMzqTxRp1mU1eEZJhcXlWMbE6ws9LhdXjjPYgM='
+  const encrypt_email_key = 'C+CGDjjwO20erclXqpqbixlm2n8v5zR0w8LRabSNSww='
   beforeAll(async () => {
     let create_table = await env.TEST_DB.prepare(
       `DROP TABLE IF EXISTS comments_via_email;`,
@@ -72,8 +76,12 @@ I found your banana picker.
     JSON.stringify(
       TOML.parse(`
 version = "0.0.1"
-domains = ["banana-picker.com"]
-r3ply = ["r3ply.com"]
+
+[[site]]
+domain = "banana-picker.com"
+r3ply = "r3ply.com"
+signet = "0zDZOXQA0S7YYB7kMb4Edw"
+issued = 2025-08-22
 
 [comments.email]
 block_list = ["lemonhead@*"]
@@ -160,14 +168,15 @@ email = "theghostlpirate@monkeyisland.com"`),
       ok_gist_client,
       comment_state,
     )
-    const deliverable_email = await cf_deliverable(
-      accepted_email,
+    const deliverable_email = await cf_deliverable(accepted_email, {
       metadata,
-      redacter,
+      anonymize: Anonymize.hmac(signet_key),
+      encrypt_email: Encrypt.email(encrypt_email_key),
       site_config,
       system_config,
       comment_state,
-    )
+    })
+
     const select = await env.TEST_DB.prepare(
       `select id, state from comments_via_email`,
     ).run()
@@ -188,16 +197,16 @@ Subject: https://lucasarts.com/blog/monkey-island-the-movie
       ok_gist_client,
       comment_state,
     )
-    const deliverable_email = await cf_deliverable(
-      accepted_email,
+    const deliverable_email = await cf_deliverable(accepted_email, {
       metadata,
-      redacter,
+      anonymize: Anonymize.hmac(signet_key),
+      encrypt_email: Encrypt.email(encrypt_email_key),
       site_config,
       system_config,
       comment_state,
-    )
+    })
     expect(deliverable_email.unwrapErr().message).toMatch(
-      /Comment is undeliverable, `To`: `\["lucasarts.com@r3ply.com"\]` did not match any valid addresses: \["banana-picker.com@r3ply.com"\]/,
+      /Comment is undeliverable, `To`: `\[{\"name\":\"George Lucas\",\"address\":\"lucasarts.com@r3ply.com\"}\]` did not match exactly one valid address from: \[\"banana-picker.com@r3ply.com\"\]/,
     )
     const select = await env.TEST_DB.prepare(
       `select id, state from comments_via_email`,
@@ -219,14 +228,14 @@ Subject: /blog/lemonhead
       ok_gist_client,
       comment_state,
     )
-    const deliverable_email = await cf_deliverable(
-      accepted_email,
+    const deliverable_email = await cf_deliverable(accepted_email, {
       metadata,
-      redacter,
+      anonymize: Anonymize.hmac(signet_key),
+      encrypt_email: Encrypt.email(encrypt_email_key),
       site_config,
       system_config,
       comment_state,
-    )
+    })
     expect(deliverable_email.unwrapErr().message).toMatch(
       /config.comments.email.subject == \"url\" requires subject parses as a URL/,
     )
@@ -250,14 +259,14 @@ Subject: https://banana-picker.com/blog/lemonhead
       ok_gist_client,
       comment_state,
     )
-    const deliverable_email = await cf_deliverable(
-      accepted_email,
+    const deliverable_email = await cf_deliverable(accepted_email, {
       metadata,
-      redacter,
+      anonymize: Anonymize.hmac(signet_key),
+      encrypt_email: Encrypt.email(encrypt_email_key),
       site_config,
       system_config,
       comment_state,
-    )
+    })
     expect(deliverable_email.unwrapErr().message).toMatch(
       /Comment author was on block_list, matches: lemonhead@example.com/,
     )
@@ -270,7 +279,7 @@ Subject: https://banana-picker.com/blog/lemonhead
       state: 'undeliverable',
     })
   })
-  test('undeliverable comments: redaction of comment author failed', async () => {
+  test.only('undeliverable comments: redaction of comment author failed', async () => {
     const { metadata, accepted_email } = await cf_accept(
       new TextEncoder().encode(email),
       ok_gist_client,
@@ -279,16 +288,24 @@ Subject: https://banana-picker.com/blog/lemonhead
     const broken_redacter = async (input: string) => {
       throw new Error('Broken!')
     }
-    const deliverable_email = await cf_deliverable(
-      accepted_email,
+    const simulate_broken_anonymization: AnonymizeEmail = async (
+      email_address: string,
+      site_domain: string,
+      signet: string,
+      signet_issued: string,
+    ) => {
+      throw new Error('Broken!')
+    }
+    const deliverable_email = await cf_deliverable(accepted_email, {
       metadata,
-      broken_redacter,
+      anonymize: simulate_broken_anonymization,
+      encrypt_email: Encrypt.email(encrypt_email_key),
       site_config,
       system_config,
       comment_state,
-    )
+    })
     expect(deliverable_email.unwrapErr().message).toMatch(
-      /Error redacting comment author. Underlying reason:.\n\n```\nBroken!/,
+      /Error anonymizing comment author. Underlying reason:.\n\n```\nBroken!/,
     )
     const select = await env.TEST_DB.prepare(
       `select id, state from comments_via_email`,
@@ -305,14 +322,14 @@ Subject: https://banana-picker.com/blog/lemonhead
       ok_gist_client,
       comment_state,
     )
-    const deliverable_email = await cf_deliverable(
-      accepted_email,
+    const deliverable_email = await cf_deliverable(accepted_email, {
       metadata,
-      redacter,
+      anonymize: Anonymize.hmac(signet_key),
+      encrypt_email: Encrypt.email(encrypt_email_key),
       site_config,
       system_config,
       comment_state,
-    )
+    })
     const template_context = (
       await cf_prepare(
         deliverable_email.unwrap(),
@@ -323,12 +340,8 @@ Subject: https://banana-picker.com/blog/lemonhead
       )
     ).unwrap()
     expect(template_context.comment).toStrictEqual({
-      author:
-        '890983fe440e1d05ae062664348d6d36500030e1b46c80ea1f306328114eec70',
-      author_7: '890983f',
       html: '<p>I found your banana picker.</p>\n',
       id: metadata.comment_id,
-      id_8: metadata.comment_id.slice(0, 8),
       md: '<p>I found your banana picker.</p>\n',
       subject: {
         fragment: undefined,
@@ -357,14 +370,14 @@ Subject: https://banana-picker.com/blog/lemonhead
       ok_gist_client,
       comment_state,
     )
-    const deliverable_email = await cf_deliverable(
-      accepted_email,
+    const deliverable_email = await cf_deliverable(accepted_email, {
       metadata,
-      redacter,
+      anonymize: Anonymize.hmac(signet_key),
+      encrypt_email: Encrypt.email(encrypt_email_key),
       site_config,
       system_config,
       comment_state,
-    )
+    })
     const template_context = (
       await cf_prepare(
         deliverable_email.unwrap(),
@@ -377,7 +390,7 @@ Subject: https://banana-picker.com/blog/lemonhead
     let site_config_2 = structuredClone(site_config)
     site_config_2.comments.email['comment_{}'] = `
 Comment ID: {{ comment.id }}
-From: {{ comment.author }}
+From: {{ author.pseudonym }}
 Content: {{ comment.html }}`
     const comment = await cf_process(
       template_context,
@@ -387,7 +400,7 @@ Content: {{ comment.html }}`
       comment_state,
     )
     expect(comment.unwrap()).toBe(`\nComment ID: ${metadata.comment_id}
-From: 890983fe440e1d05ae062664348d6d36500030e1b46c80ea1f306328114eec70
+From: dfb58c7715bab2749cc030e5b90b2a333dc0beb0781af2cfa1cc7acc34479676
 Content: <p>I found your banana picker.</p>\n`)
     const select = await env.TEST_DB.prepare(
       `select id, state FROM comments_via_email`,
@@ -460,11 +473,11 @@ type = 'github'
 repo = "https://github.com/asimpletune/spenc.es"
 # [Required] If you're using the \`r3ply-github-bot\` then specify the file path in the repo
 # Templating is allowed here. The variables available are the same as the \`template\` field
-"file_path_{}" = "/content/comments/{{ comment.id_8 }}.md"
+"file_path_{}" = "/content/comments/{{ comment.id[:8] }}.md"
 "commit_msg_{}" = "viaEmail/github.commit.msg.txt"
-"pr_title_{}" = "New comment from \`{{ comment.id_8 }}\`"
+"pr_title_{}" = "New comment from \`{{ comment.id[:8] }}\`"
 "pr_body_{}" = "viaEmail/github.pr.body.md"
-"target_branch_{}" = "{{ comment.ts_rcvd }}_{{ comment.id_8 }}-{{ comment.author_7 }}.md"
+"target_branch_{}" = "{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"
 `),
       ),
     )

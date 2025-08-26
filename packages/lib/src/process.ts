@@ -16,13 +16,16 @@ export interface CommentTemplateContext {
     config_version: string
     server: string
     site: string
+    signet: string
+    issued: string
+  }
+  author: {
+    pseudonym: string
+    token: string
   }
   comment: {
     id: string
-    id_8: string
     ts_rcvd: string
-    author: string
-    author_7: string
     subject: {
       url: string
       origin: string

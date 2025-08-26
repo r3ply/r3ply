@@ -159,8 +159,14 @@ if (import.meta.vitest) {
     const parsed_config = siteConfigParser(
       JSON.stringify({
         version: '0.0.1',
-        domains: ['example.com'],
-        r3ply: ['r3ply.com'],
+        site: [
+          {
+            domain: 'spenc.es',
+            r3ply: 'r3ply.com',
+            signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
+            issued: '2025-08-22',
+          },
+        ],
         comments: {
           email: {
             enabled: false,

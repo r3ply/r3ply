@@ -1,4 +1,5 @@
 import { base64UrlDecode, base64UrlEncode } from '../util'
+import crypto from 'crypto'
 
 // fixed length for padded emails
 const EMAIL_PAD_LEN = 320
@@ -77,6 +78,18 @@ export async function encrypt_email(
 
   // Base64URL encode
   return base64UrlEncode(token_bytes)
+}
+
+/**
+ *  Type used to represent a function that accepts an email address and returns a future opaque, encrypted token
+ *  note: the encryption key is expected to be curried
+ */
+export type EncryptEmail = (email_address: string) => Promise<string>
+export const Encrypt = {
+  email:
+    (encryption_key: string): EncryptEmail =>
+    (email_address: string) =>
+      encrypt_email(encryption_key, email_address),
 }
 
 /**

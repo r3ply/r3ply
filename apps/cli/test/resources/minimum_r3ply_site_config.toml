@@ -1,6 +1,10 @@
 version = "0.0.1"
-domains = ["foo.com"]
-r3ply = ['bar.com']
+
+[[site]]
+domain = "foo.com"
+r3ply = "bar.com"
+signet = "GG1WXgh7J-vaf1QsbejOJg"
+issued = 2025-08-26
 
 [comments.email.moderation]
 type = 'webhook'

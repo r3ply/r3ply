@@ -41,19 +41,4 @@ export namespace util {
   export function random_int(ceiling: number, floor: number = 0) {
     return Math.floor(Math.random() * (ceiling - floor)) + floor
   }
-
-  export async function sha256_0x(str: string) {
-    const encoded = new TextEncoder().encode(str)
-    return crypto.subtle
-      .digest({ name: 'SHA-256' }, encoded)
-      .then((hashed_buffer) => {
-        const hashArray = new Uint8Array(hashed_buffer)
-        const hashHex = Array.prototype.map
-          .call(hashArray, (byte: number) => {
-            return ('00' + byte.toString(16)).slice(-2)
-          })
-          .join('')
-        return hashHex
-      })
-  }
 }

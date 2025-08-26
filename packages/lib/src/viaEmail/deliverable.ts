@@ -1,86 +1,122 @@
-import { match, Option, Result } from 'oxide.ts'
-import { Redacted, Secret } from './types'
+import { Option, Result } from 'oxide.ts'
+import { Encrypted, Redacted as Anonymized, Secret } from './types'
 import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
 import micromatch from 'micromatch'
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
 import { AcceptedEmail } from './accept'
-import { Util } from './email'
+import { AnonymizeEmail } from './anonymize'
+import { EncryptEmail } from './encrypt'
 
 export interface DeliverableEmail {
-  from: Redacted<string>
   to: string
   subject: URL
   email: Email
-  site_domain: string
-  r3ply_domain: string
+  site: {
+    r3ply: string
+    domain: string
+    signet: string
+    issued: string
+  }
+  from: {
+    pseudonym: Anonymized<string>
+    token: Encrypted<string>
+  }
 }
 
 export async function deliverable(
   accepted: AcceptedEmail,
-  redact: (input: string) => Promise<string>,
-  site: R3plySiteConfig,
-  system: R3plySystemConfig,
+  {
+    config,
+    system,
+    anonymize,
+    encrypt,
+  }: {
+    config: R3plySiteConfig
+    system: R3plySystemConfig
+    anonymize: AnonymizeEmail
+    encrypt: EncryptEmail
+  },
 ): Promise<DeliverableEmail> {
   // check `To` has address, and is addressed properly (to this site + r3ply pair, i.e. <YOUR_SITE>@<R3PLY>)
-  const to = to_field_is_deliverable(accepted.to, site.domains, system.domains)
-  const [site_domain, r3ply_domain] = to.split('@', 2)
+  const site = to_field_is_deliverable(accepted.to, config.site)
 
   // check `Subject` header of comment is deliverable (note: if future subject types besides URL are added, here is where to integrate that logic)
   let subject: URL
-  if (site.comments.email.subject == 'url') {
+  if (config.comments.email.subject == 'url') {
     subject = subject_field_is_deliverable(
       Option(accepted.subject).expect(
         `config.comments.email.subject == "url" requires subject`,
       ),
-      site.domains,
-      site.comments.paths,
+      [site.domain],
+      config.comments.paths,
     )
   } else {
     throw new Error(
-      `Not implemented for config.comments.email.subject == ${site.comments.email.subject}`,
+      `Not implemented for config.comments.email.subject == ${config.comments.email.subject}`,
     )
   }
 
   // check `Subject` header's domain is the same as local portion of to `To` address
-  subject_domain_matches_site_domain(subject, site_domain)
+  subject_domain_matches_site_domain(subject, site.domain)
 
   // check `From` is not on site's `block_list`
-  const from = await from_field_is_deliverable(
+  const redact = (email_address: string) =>
+    anonymize(email_address, site.domain, site.signet, site.issued)
+  const { pseudonym, token } = await from_field_is_deliverable(
     accepted.from,
     redact,
-    site.comments.email.block_list,
+    config.comments.email.block_list,
+    encrypt,
   )
 
-  return { from, to, subject, email: accepted.email, site_domain, r3ply_domain }
+  return {
+    to: site.to,
+    subject,
+    email: accepted.email,
+    site,
+    from: { pseudonym, token },
+  }
 }
 
 /**
  * @description for the `To` field to be deliverable it must have exactly one deliverable address (additional non-deliverable addresses are ok)
  * @param to a list of addresses the email is addressed to (in address includes name and email address)
- * @param site_domains the domains the site config accepts emails at
+ * @param site_to_domain_mappings the domains the site config accepts emails at
  * @param system_domains the systems the site config accepts emails from
  * @returns the relevant `To` field (only the email address) and it ignores the others
  */
 function to_field_is_deliverable(
   to: Addr[],
-  site_domains: string[],
-  system_domains: string[],
+  site_to_r3ply_mappings: {
+    domain: string
+    r3ply: string
+    signet: string
+    issued: string
+  }[],
 ) {
-  const valid_possible_to_headers = site_domains.flatMap((site_domain) =>
-    system_domains.map((system_domain) => `${site_domain}@${system_domain}`),
-  )
-  return match(
-    Result.safe(() => Util.unique_addr(to, valid_possible_to_headers)),
-    {
-      Ok: (to) => to.address,
-      Err: (error) => {
-        const to_addresses = to.map((to) => to.address)
-        throw new Error(
-          `Comment is undeliverable, \`To\`: \`${JSON.stringify(to_addresses)}\` did not match any valid addresses: ${JSON.stringify(valid_possible_to_headers)}`,
-        )
-      },
-    },
-  )
+  const valid_possible_to_headers = site_to_r3ply_mappings.map((site) => {
+    return {
+      to: `${site.domain}@${site.r3ply}`,
+      ...site,
+    }
+  })
+  let matches = to.filter((to) => {
+    if (to.address) {
+      if (valid_possible_to_headers.map((h) => h.to).includes(to.address))
+        return true
+      else return false
+    } else return false
+  })
+  if (matches.length != 1) {
+    const to_addresses = valid_possible_to_headers.map((site) => site.to)
+    throw new Error(
+      `Comment is undeliverable, \`To\`: \`${JSON.stringify(to)}\` did not match exactly one valid address from: ${JSON.stringify(to_addresses)}`,
+    )
+  } else {
+    const [m] = matches
+    const result = valid_possible_to_headers.find((h) => h.to == m.address)!
+    return result
+  }
 }
 
 /**
@@ -133,33 +169,36 @@ function subject_domain_matches_site_domain(subject: URL, site_domain: string) {
 /**
  * @description for the `From` field to be deliverable it must not match with the site's configured block_list
  * @param from_secret the from field, wrapped in a `Secret` type
- * @param redact a function that's used to obscure the secret, e.g. a hash function or an hmac
+ * @param anonymize a function that's used to obscure the secret, e.g. a hash function or an hmac
  * @param block_list a list of strings that can be patterns
  * @returns the `From` field but redacted
  */
 async function from_field_is_deliverable(
   from_secret: Secret<string>,
-  redact: (input: string) => Promise<string>,
+  anonymize: (email_address: string) => Promise<string>,
   block_list: string[],
-) {
-  const from = Redacted(
-    (await Result.safe(redact(from_secret.value)))
+  encrypt: EncryptEmail,
+): Promise<{ pseudonym: Anonymized<string>; token: Encrypted<string> }> {
+  const pseudonym = Anonymized(
+    (await Result.safe(anonymize(from_secret.value)))
       .mapErr((err) => {
         throw new Error(
-          `Error redacting comment author. Underlying reason: \n\n\`\`\`\n${err.message}\n\`\`\`\n`,
+          `Error anonymizing comment author. Underlying reason: \n\n\`\`\`\n${err.message}\n\`\`\`\n`,
         )
       })
       .expect('Error redacting `From` header.'),
   )
+
   const author_on_site_block_list = micromatch(
-    [from_secret.value, from.value],
+    [from_secret.value, pseudonym.value],
     block_list,
   )
   if (author_on_site_block_list.length > 0)
     throw new Error(
       `Comment author was on block_list, matches: ${author_on_site_block_list}`,
     )
-  return from
+  const token = Encrypted(await encrypt(from_secret.value))
+  return { pseudonym, token }
 }
 
 if (import.meta.vitest) {
@@ -167,6 +206,20 @@ if (import.meta.vitest) {
   test('to_field_is_deliverable', () => {
     const site_domains = ['a.com', 'test.a.com']
     const system_domains = ['r3ply.com', 'test.r3ply.com']
+    const site_to_r3ply_mappings = [
+      {
+        domain: 'a.com',
+        r3ply: 'r3ply.com',
+        signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
+        issued: '2025-08-22',
+      },
+      {
+        domain: 'test.a.com',
+        r3ply: 'test.r3ply.com',
+        signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
+        issued: '2025-08-22',
+      },
+    ]
     const a_at_r3ply: Addr = { address: `a.com@r3ply.com`, name: null }
     const a_at_test_r3ply: Addr = {
       address: `a.com@test.r3ply.com`,
@@ -184,51 +237,45 @@ if (import.meta.vitest) {
     expect(
       to_field_is_deliverable(
         [a_at_r3ply, { address: 'unrelated.com', name: null }],
-        site_domains,
-        system_domains,
-      ),
+        site_to_r3ply_mappings,
+      ).to,
     ).toBe('a.com@r3ply.com')
-    expect(
+    expect(() =>
       to_field_is_deliverable(
         [a_at_test_r3ply, { address: 'unrelated.com', name: null }],
-        site_domains,
-        system_domains,
+        site_to_r3ply_mappings,
       ),
-    ).toBe('a.com@test.r3ply.com')
-    expect(
+    ).throws(/Comment is undeliverable/)
+    expect(() =>
       to_field_is_deliverable(
         [test_a_at_r3ply, { address: 'unrelated.com', name: null }],
-        site_domains,
-        system_domains,
+        site_to_r3ply_mappings,
       ),
-    ).toBe('test.a.com@r3ply.com')
+    ).throws(/Comment is undeliverable/)
     expect(
       to_field_is_deliverable(
         [test_a_at_test_r3ply, { address: 'unrelated.com', name: null }],
-        site_domains,
-        system_domains,
-      ),
+        site_to_r3ply_mappings,
+      ).to,
     ).toBe('test.a.com@test.r3ply.com')
-    expect(() =>
+    expect(
       to_field_is_deliverable(
         [test_a_at_r3ply, test_a_at_test_r3ply],
-        site_domains,
-        system_domains,
-      ),
-    ).toThrowError(/Comment is undeliverable/)
+        site_to_r3ply_mappings,
+      ).to,
+    ).toBe(test_a_at_test_r3ply.address)
     expect(() =>
       to_field_is_deliverable(
         [test_a_at_r3ply, test_a_at_r3ply],
-        site_domains,
-        system_domains,
+        site_to_r3ply_mappings,
       ),
     ).toThrowError(/Comment is undeliverable/)
     expect(() =>
-      to_field_is_deliverable([c], site_domains, system_domains),
+      to_field_is_deliverable([c], site_to_r3ply_mappings),
     ).toThrowError(/Comment is undeliverable/)
-    expect(() =>
-      to_field_is_deliverable([a_at_r3ply], site_domains, ['notr3ply.com']),
-    ).toThrowError(/Comment is undeliverable/)
+    expect(
+      to_field_is_deliverable([a_at_r3ply], site_to_r3ply_mappings).to,
+    ).toBe(a_at_r3ply.address)
   })
   test('subject_is_a_url', () => {
     expect(
@@ -256,6 +303,7 @@ if (import.meta.vitest) {
         from,
         (input: string) => Promise.resolve(input),
         [],
+        (input: string) => Promise.resolve(input),
       ),
     ).resolves.not.toThrowError()
     await expect(
@@ -263,6 +311,7 @@ if (import.meta.vitest) {
         from,
         (input: string) => Promise.resolve(input),
         ['alice@example.com'],
+        (input: string) => Promise.resolve(input),
       ),
     ).resolves.not.toThrowError()
     await expect(
@@ -270,6 +319,7 @@ if (import.meta.vitest) {
         from,
         (input: string) => Promise.resolve(input),
         ['bob@example.com'],
+        (input: string) => Promise.resolve(input),
       ),
     ).rejects.toThrowError(/Comment author was on block_list/)
   })

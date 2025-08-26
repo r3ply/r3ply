@@ -1,4 +1,5 @@
 import { toHex } from '../util'
+import crypto from 'crypto'
 
 /**
  * Generates a short, user-friendly envelope string, called a `signet` from a binary master key.
@@ -22,11 +23,12 @@ import { toHex } from '../util'
  *
  * @param encryption_key - Raw key material as Uint8Array
  * @param domain - The domain this signet is being issued to
- * @returns Short Base64URL string representing the envelope
+ * @returns Short Base64URL string representing the signet (i.e. envelope) and its issue date (i.e. key id)
  */
 export async function make_short_signet(
   encryption_key: string,
   domain: string,
+  issued_date?: string,
 ) {
   // Service master key stored in environment (32 bytes, base64)
   const masterKeyBase64 = encryption_key
@@ -35,10 +37,10 @@ export async function make_short_signet(
   )
 
   // Generate a key ID based on the date for future roations
-  const key_id = new Date().toISOString().split('T')[0]
+  const issued = issued_date ?? new Date().toISOString().split('T')[0]
 
   // Derive a per-site HMAC key
-  const siteData = new TextEncoder().encode(`${domain}:${key_id}`)
+  const siteData = new TextEncoder().encode(`${domain}:${issued}`)
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     masterKey,
@@ -51,11 +53,11 @@ export async function make_short_signet(
     await crypto.subtle.sign('HMAC', cryptoKey, siteData),
   )
 
-  // 4️⃣ Take first 16 bytes for a short envelope
+  // Take first 16 bytes for a short envelope
   const envelopeBytes = hmacRaw.slice(0, 16)
-  const envelope = b64url(envelopeBytes) // ~22-char base64url string
+  const signet = b64url(envelopeBytes) // ~22-char base64url string
 
-  return { key_id, envelope }
+  return { signet, issued }
 }
 
 /**
@@ -140,6 +142,49 @@ export async function hmac(
   return toHex(emailHmac)
 }
 
+/**
+ *  Type used to represent a function that takes the parameters required to anonymize and returns a future pseudonym
+ *  note: the encryption key is expected to be curried
+ */
+export type AnonymizeEmail = (
+  email_address: string,
+  site_domain: string,
+  signet: string,
+  signet_issued: string,
+) => Promise<string>
+
+/**
+ *  Convenience object to curry encryption keys
+ */
+export const Anonymize = {
+  // This is the one you want you probably want to use when passing to the `viaEmail` function on an instance of the `R3ply` type
+  hmac: (encryption_key: string): AnonymizeEmail => {
+    return (
+      email_address: string,
+      site_domain: string,
+      signet: string,
+      signet_issued: string,
+    ) =>
+      hmac(email_address, {
+        encryption_key,
+        domain: site_domain,
+        signet,
+        signet_issued,
+      })
+  },
+}
+
+/**
+ *  Convenience object to curry encryption keys
+ */
+export const Signet = {
+  // This is the one you probably want to use if you provide an implementation (i.e. app) of r3ply somewhere, e.g. the CLI or cloudflare-worker, to help people join your service
+  make: (encryption_key: string) => {
+    return (site_domain: string, issued_date?: string) =>
+      make_short_signet(encryption_key, site_domain, issued_date)
+  },
+}
+
 function b64url(bytes: ArrayBuffer | Uint8Array): string {
   const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)
   let str = ''
@@ -155,14 +200,18 @@ if (import.meta.vitest) {
   // openssl rand -base64 32
   const test_master_key = '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs='
   it('generates a key id and envelope, and can use that to make an hmac', async () => {
-    const result = await make_short_signet(test_master_key, 'example.com')
-    expect(result.envelope).toBe('G8PIt_7Y6N2s7NZEznnoaw')
+    const result = await make_short_signet(
+      test_master_key,
+      'example.com',
+      '2025-08-25',
+    )
+    expect(result.signet).toBe('G8PIt_7Y6N2s7NZEznnoaw')
 
     const result2 = await hmac('bob@foo.com', {
       encryption_key: test_master_key,
       domain: 'example.com',
-      signet_issued: result.key_id,
-      signet: result.envelope,
+      signet_issued: result.issued,
+      signet: result.signet,
     })
 
     expect(result2).toBe(
