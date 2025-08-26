@@ -6,19 +6,32 @@ import { R3plySystemConfig } from '@r3ply/config'
 function api(r3ply: R3plySystemConfig) {
   const api = new Hono<{ Bindings: Env }>()
 
-  api.get('/site/new/:domain', async (c) => {
+  api.get('/site/new/:domain/:issued?', async (c) => {
     const req_url = new URL(c.req.url)
     if (!r3ply.domains.includes(req_url.hostname)) {
       throw new Error(
         'This r3ply service is not configured to serve at this domain',
       )
     }
-    const { domain } = c.req.param()
+    const { domain, issued } = c.req.param()
     const new_site_url = new URL(`https://${domain}`)
-    return Signet.issue(c.env.SIGNET_KEY)(
+    const result = Signet.issue(c.env.SIGNET_KEY)(
       new_site_url.hostname,
       req_url.hostname,
-    ).then((result) => c.json({ ...result, domain, r3ply: req_url.hostname }))
+      issued
+    )
+    return result.then((result) => {
+      const format = c.req.query('format')
+      if (format == 'toml') {
+        return c.text(`[[site]]
+domain = "${domain}"
+r3ply = "${req_url.hostname}"
+signet = "${result.signet}"
+issued = ${result.issued}\n`)
+      } else {
+        return c.json({ ...result, domain, r3ply: req_url.hostname })}
+      }
+    )
   })
 
   api.get('/comments/pending/get/:domain/:path{.+}', async (c) => {
