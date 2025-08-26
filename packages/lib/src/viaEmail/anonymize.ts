@@ -179,7 +179,7 @@ export const Anonymize = {
  */
 export const Signet = {
   // This is the one you probably want to use if you provide an implementation (i.e. app) of r3ply somewhere, e.g. the CLI or cloudflare-worker, to help people join your service
-  make: (encryption_key: string) => {
+  issue: (encryption_key: string) => {
     return (site_domain: string, issued_date?: string) =>
       make_short_signet(encryption_key, site_domain, issued_date)
   },

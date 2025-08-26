@@ -9,7 +9,6 @@ import { deliverable, DeliverableEmail } from './viaEmail/deliverable'
 import { prepare } from './viaEmail/prepare'
 import { CommentMetadata, receive } from './receive'
 import { CommentTemplateContext, process } from './process'
-import { createHMAC } from './util'
 import { prescreen, PrescreenResult } from './viaEmail/prescreen'
 import { Moderation, ModerationResult } from './moderation/moderation'
 import { Anonymize, Signet } from './viaEmail/anonymize'
@@ -156,7 +155,7 @@ if (import.meta.vitest) {
     // @ts-ignore todo: figure out how to get vscode to recognize these vitest raw imports
     const real_001 = await import('../../test-data/eml/real/001.eml?raw')
     let email_bytes = new TextEncoder().encode(real_001.default)
-    const { signet, issued } = await Signet.make(signet_key)(
+    const { signet, issued } = await Signet.issue(signet_key)(
       'spenc.es',
       '2025-08-25',
     )

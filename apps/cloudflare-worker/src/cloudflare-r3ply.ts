@@ -342,10 +342,5 @@ export const resolve_config_references_at_domain: DerferenceFile = async (
   base_uri: string,
   file_uri_ref?: string,
 ): Promise<string | undefined> => {
-  console.log('Resolving config reference:')
-  console.log(base_uri)
-  console.log(file_uri_ref)
-  console.log()
-
   return resolve_file_from_domain(new URL(base_uri))(file_uri_ref)
 }

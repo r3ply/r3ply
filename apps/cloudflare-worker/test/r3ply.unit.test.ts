@@ -7,7 +7,6 @@ import {
   cf_prepare,
   cf_process,
 } from '../src/cloudflare-r3ply'
-import { createHMAC } from '../src/util'
 import { Ok, Result } from 'oxide.ts'
 import { GistClient, GistFiles } from '../src/state/gist'
 import { CommentCache, CommentState } from '../src/state/d1'
@@ -71,7 +70,6 @@ Subject: https://banana-picker.com/blog/lemonhead
 
 I found your banana picker.
 `
-  const redacter = createHMAC('MY TEST HMAC SECRET')
   const site_config = siteConfigParser(
     JSON.stringify(
       TOML.parse(`

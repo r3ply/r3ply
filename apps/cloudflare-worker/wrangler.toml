@@ -15,8 +15,7 @@ enabled = true
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
 [vars]
-EMAIL_MAX_BYTES_DEFAULT = 26214400  # Cloudflare limits emails to 25MB
-EMAIL_HASH_PEPPER_VERSION = "1.0.0" # The pepper used to hash emails is versioned
+EMAIL_MAX_BYTES_DEFAULT = 26214400 # Cloudflare limits emails to 25MB
 
 # The following is needed for CF pages + D1 local development
 # [Cloudflare Docs](https://developers.cloudflare.com/d1/learning/local-development/)

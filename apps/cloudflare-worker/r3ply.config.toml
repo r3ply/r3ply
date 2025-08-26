@@ -1,5 +1,10 @@
 version = "0.0.1"
-domains = ["r3ply.com", "test.r3ply.com"]
+domains = [
+  "r3ply.com",
+  "test.r3ply.com",
+  "localhost",
+  "r3ply-cloudflare-worker.spence.workers.dev",
+]
 
 [[admin]]
 name = "Guybrush Threepwood"

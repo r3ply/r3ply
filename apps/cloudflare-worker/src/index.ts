@@ -8,7 +8,6 @@ import {
   R3plyGithubBot,
   resolve_config_references,
 } from '@r3ply/lib'
-import { createHMAC } from './util'
 // @ts-ignore
 import r3ply_system_config_toml from '../r3ply.config.toml'
 import {
@@ -18,15 +17,15 @@ import {
 import { GistClient } from './state/gist'
 import { CommentState } from './state/d1'
 
-// initialization for fetch handler
-const app = new Hono()
-app.route('/', api)
-
 // initialization for email handler
 const r3ply_system_config = systemConfigParser(
   JSON.stringify(TOML.parse(r3ply_system_config_toml)),
 ).value!
 const r3ply = CloudflareR3ply(r3ply_system_config)
+
+// initialization for fetch handler
+const app = new Hono()
+app.route('/', api(r3ply_system_config))
 
 export default {
   // E.g. curl -X POST --data-binary @003.eml  localhost:8787
@@ -40,7 +39,7 @@ export default {
     ctx: ExecutionContext,
   ): Promise<void> {
     return comment_via_email(msg, {
-      db: undefined,
+      db: env.R3PLY_STAGING_DB,
       gist_token: env.R3PLY_GIST_TOKEN,
       signet_key: env.SIGNET_KEY,
       encrypt_email_key: env.EMAIL_ENCRYPT_KEY,
@@ -159,10 +158,12 @@ export async function comment_via_email(
     console.error(
       `Error processing email into comment, underlying reason:\n\n${result.unwrapErr()}`,
     )
-  } else {
-    console.log(
-      `Comment!\n\n\`\`\`\n${JSON.stringify(result.unwrap(), null, 2)}\n\`\`\``,
-    )
   }
+  // For Debugging:
+  // else {
+  //   console.log(
+  //     `Comment!\n\n\`\`\`\n${JSON.stringify(result.unwrap(), null, 2)}\n\`\`\``,
+  //   )
+  // }
   return result
 }
