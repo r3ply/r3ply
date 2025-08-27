@@ -346,7 +346,7 @@ describe.each(implementations)('%s', (_, parse) => {
                   /Comment submitted/,
                 )
                 expect(github_moderation['&commit_msg_{}']).toBeUndefined()
-                expect(github_moderation['pr_body_{}']).toBe('TODO')
+                expect(github_moderation['pr_body_{}']).toBe('')
                 expect(github_moderation['&pr_body_{}']).toBeUndefined()
                 expect(github_moderation['pr_title_{}']).toBe(
                   'New comment ({{ comment.id[:16] }}) on {{ comment.subject.url }} by author `{{ author.pseudonym[:12] }}`',

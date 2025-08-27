@@ -1,4 +1,4 @@
-# r3ply configuration - see /docs for more
+# r3ply configuration - see /docs/config for more
 version = "0.0.1"
 
 # each site x r3ply combo has an entry
@@ -15,34 +15,61 @@ r3ply = "cli.r3ply.test"
 signet = "uV9NgkYqTol24KdUo3D4HQ"
 issued = 2025-08-27
 
-# more moderation options, e.g. `type = "webhook"`, available
-[comments.email.moderation]
-type = "github"
-repo = "https://github.com/you/<YOUR_REPO>"
-"file_path_{}" = "content/comments/{{ comment.id[:8] }}.md"
+[comments]
+# disable all comments if `false. Default is `true`.
+enabled = true
+# URL paths to enable comments on (micromatch patterns), e.g. `["/**", "!/private"]` means _"allow comments at all paths except `/private`"_. Default is `['/**']`
+paths = ["/**", "!/private"]
+# enable comment caching on r3ply serve. Default is `true`
+cache = true
+# convert markdown to HTML? Default is `true`
+md_to_html = true
+# sanitize HTML output? Default is `true`
+sanitize_html = true
+# allowed HTML tags (requires `sanitize_html`). See below.
+allow_tags = ["p", "a"]
 
 [comments.email]
-"comment_{}" = """
-<!-- Comment Details:
-  version = {{ r3ply.config_version }}
-  server = {{ r3ply.server }}
-  site = {{ r3ply.site }}
-  signet = {{ r3ply.signet }}
-  issued = {{ r3ply.issued }}
-  author_token: {{ author.token }}
-  author_pseudonym: {{ author.pseudonym }}
--->
+# disable email comments if false. Default is `true`
+enabled = true
+# subject line handling (for now only `url` is valid). Default is `url`
+subject = 'url'
+# used to separate comment body from email signature or instructions. Default is `\n`.
+comment_separator = '﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍'
+# allow email attachments. Default is `false`
+attachments = false
+# max email size in bytes. Default is 1MB
+max_size_bytes = 1_048_576
+# email/ID blocklist. For example, `['e8a20d6*', 'mallory@evil.com', '*@spam.com']`. Default is `[]`
+block_list = ['e8a20d6*', 'mallory@evil.com', '*@spam.com']
+#  path to a file that contains the template for comments. Default is `undefined`
+"&comment_{}" = "/comment.template.html"
+# specify mime type for comment template. Default is `undefined`
+"comment_{}_mime" = "text/markdown"
 
-<div class="comment" id="{{ comment.id[:12] }}">
-  <div class="meta">
-    <span class="author">{{ author.pseudonym[:8] }}</span> ·
-    <time datetime="{{ email.date }}">{{ email.date }}</time>
-  </div>
-  <div class="content">
-    {{ comment.html }}
-  </div>
-  <div class="subject">
-    <a href="{{ comment.subject.url }}">View subject</a>
-  </div>
-</div>
-"""
+[comments.email.moderation]
+# indicates the type of moderation. Either `github` or `webhook` are supported
+type = "github"
+# matches from this list will skip moderation. Uses glob patterns
+"allow_list" = ["18a793ce3d", "*@spenc.es"]
+# gitHub repository, e.g. "https://github.com/asimpletune/spenc.es"
+repo = "getzola/zola"
+# the base branch. Default is main
+"base_branch_{}" = "main"
+# the head branch. Default is `comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md`
+"head_branch_{}" = "{{ comment.ts_rcvd }}.md"
+# where the comment will be saved.
+"file_path_{}" = "content/comments/{{ comment.ts_rcvd }}.md"
+# commit message template (template string)
+"commit_msg_{}" = "Add comment by {{ author.pseudonym[:8] }}"
+# pull request body template (template string)
+"&pr_body_{}" = "../pr.template.txt"
+
+[comments.notify]
+commenter = false
+notify_commenter_upon_submission = false
+"comment_submitted_notif_{}" = "Your comment has been successfully submitted!"
+"&comment_submitted_notif_{}" = "./comment.submission.notif.html"
+moderator = false
+notify_moderator_upon_receipt = false
+"&comment_received_notif_{}" = "./comment.received.notif.html"

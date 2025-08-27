@@ -65,7 +65,7 @@ A new comment has been received
         notify_moderator_upon_receipt: {
           type: 'string',
           description:
-            'Set to `"none"` to disable notifying the moderator upon receipt of a new email comment. `"all"` wll notify the moderator upon every comment submission. `"approval_required"` will notify the moderator only when a comment is waiting for moderation.',
+            'Set to `"none"` to disable notifying the moderator upon receipt of a new email comment. `"all"` will notify the moderator upon every comment submission. `"approval_required"` will notify the moderator only when a comment is waiting for moderation.',
           enum: ['all', 'approval_required', 'none'],
           default: 'all',
         },
@@ -250,7 +250,7 @@ Comment: > {{ comment.txt | split(pat="\n") | join(sep="> ") }}`,
               description: 'Pull request body template (template string)',
               pattern: '^[\\s\\S]*$',
               maxLength: 2096,
-              default: `TODO`,
+              default: ``,
             },
             '&pr_body_{}': {
               type: 'string',
@@ -280,6 +280,8 @@ Comment: > {{ comment.txt | split(pat="\n") | join(sep="> ") }}`,
             url: {
               type: 'string',
               format: 'uri',
+              description:
+                'URL of the webhook where the comment should be delivered.',
             },
           },
         },
@@ -408,6 +410,8 @@ Comment: > {{ comment.txt | split(pat="\n") | join(sep="> ") }}`,
             comment_separator: {
               type: 'string',
               pattern: '^[\\s\\S]*$',
+              description:
+                'Used to separate comment body from email signature or instructions',
               default: '\n',
             },
             attachments: {

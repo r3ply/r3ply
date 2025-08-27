@@ -58,7 +58,7 @@ As you can see, the CLI tool will also provide your site with a signet for simul
 After following the steps above we should have a config similar to the following, although your config will have slightly different values to reflect your site's domain.
 
 ```toml
-# r3ply configuration - see /docs for more
+# r3ply configuration - see /docs/config for more
 version = "0.0.1"
 
 # each site x r3ply combo has an entry
