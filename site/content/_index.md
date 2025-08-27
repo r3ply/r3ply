@@ -1,4 +1,6 @@
 +++
+title = "r3ply home"
+template="index.html"
 +++
 
 # r3ply - Comments, simple as email.
@@ -25,7 +27,7 @@ r3ply is simple to add to your site, with just a few steps:
 
 3. Comments addressed to [\<your-site\>@r3ply.com](mailto:CHANGE_ME@r3ply.com) and referencing the subject (a URL) will arrive per the `moderation` section of the config, e.g. GitHub.
 
-**You can learn more about how to fine tune the configuration in the <!-- TODO -->[config docs](/).**
+**You can learn more about how to fine tune the configuration in the <!-- TODO -->[config docs](/docs).**
 
 There is also a r3ply CLI tool called `re` that is useful for local development. Use it to simulate a comment arriving to your site, and iterate on your config with confidence.
 
@@ -36,7 +38,7 @@ re config validate
 
 ---
 
-Next read the <!-- todo -->[docs](/) or scroll down to learn more about r3ply.
+Next read the [docs](/docs) or scroll down to learn more about r3ply.
 
 ## Why Email as a Commenting System?
 
@@ -93,13 +95,13 @@ The above command generates a similar mailto link as the screenshot above ([demo
 
 **Overall the user experience is actually very nice!**
 
-<div class=" overflow-hidden h-[390px] rounded-lg shadow-xl shadow-gray-800">
+<div class=" overflow-hidden h-[370px] rounded-lg shadow-xl shadow-gray-800">
   <img src="screenrecording_md.webp" alt="A screen recording of what using r3ply looks like, end to end." class="scale-[1.085] -translate-y-[35px]">
 </div>
 
 ## FAQ
 
-Below are answers to common questions. Check the <!-- TODO -->[docs](/) for more details.
+Below are answers to common questions. Check the [docs](/docs) for more details.
 
 **Table of Contents:**
 

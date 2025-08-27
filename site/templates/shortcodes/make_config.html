@@ -15,7 +15,7 @@ issued = 2025-08-26
 [comments.email.moderation]
 type = "github"
 repo = "https://github.com/you/<YOUR_REPO>"
-"file_path_{}" = "/content/comments/{{ comment.id[:8] }}.md"
+"file_path_{}" = "content/comments/{{ comment.id[:8] }}.md"
 ```
 ' %}
 
@@ -33,6 +33,7 @@ repo = "https://github.com/you/<YOUR_REPO>"
     placeholder="example.com"
     pattern="^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,6}$"
     required
+    autocomplete="off"
     class="flex-1 p-2 border-2 border-black focus:outline-none focus:ring-2 focus:ring-yellow-300 rounded-lg"
   />
   <button

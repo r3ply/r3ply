@@ -7,8 +7,9 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  {% include "includes/top-nav.html" %}
   <main class="py-10">
-    <article class="mx-auto prose prose-li:marker:text-black prose-pink prose-hr:border-black">
+    <article class="px-4 md:px-0 mx-auto prose prose-li:marker:text-black prose-pink prose-hr:border-black">
       {{ section.content | safe }}
     </article>
   </main>
