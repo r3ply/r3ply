@@ -27,12 +27,12 @@ export function init_cmd(cwd: string) {
         .then(async (result) => {
           const { r3ply_dir, signet_key } = util.unsafeUnwrap(result)
           const { signet, issued } = await Signet.issue(signet_key)(
-            'site.local.test',
-            'cli.r3ply.test',
+            project.DEFAULT_SITE_DOMAIN,
+            project.DEFAULT_R3PLY_DOMAIN,
           )
           const toml_site_entry = `[[site]]
-domain = "site.local.test"
-r3ply = "cli.r3ply.test"
+domain = "${project.DEFAULT_SITE_DOMAIN}"
+r3ply = "${project.DEFAULT_R3PLY_DOMAIN}"
 signet = "${signet}"
 issued = ${issued}
 `
@@ -159,7 +159,9 @@ export function generate_cmd(cwd: string) {
             await project.get_site_config(project_dir, undefined),
           )
         }
+
         const site = site_config.site[util.random_int(site_config.site.length)]
+
         const email = Result.safe(
           generate.email(site.domain, site.r3ply, options),
         )
@@ -248,7 +250,15 @@ export function simulate_cmd(cwd: string) {
           JSON.stringify(cli_system_config_toml),
         ).value!
 
-        const site = site_config.site[util.random_int(site_config.site.length)]
+        const site = ((to: string | undefined) => {
+          let site_domain = to ? to.split('@')[0] : project.DEFAULT_SITE_DOMAIN
+          const site = site_config.site.find((k) => k.domain == site_domain)
+          if (site) {
+            return site
+          } else {
+            return site_config.site[util.random_int(site_config.site.length)]
+          }
+        })(options.to)
         const email = generate
           .email(site.domain, site.r3ply, options)
           .then((email) => {

@@ -29,6 +29,8 @@ export namespace project {
   ]
   const SIGNET_KEY_FILENAME = 'signet.key'
   const ENCRYPT_EMAIL_KEY_FILENAME = 'encrypt_email.key'
+  export const DEFAULT_SITE_DOMAIN = 'site.local.test'
+  export const DEFAULT_R3PLY_DOMAIN = 'cli.r3ply.test'
 
   /**
    * Finds the `.r3ply` dir that should be located at the top-level of the user's repository
