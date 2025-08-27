@@ -69,6 +69,34 @@ In that scenario, the website owner had full moderation, but the commenter only 
 
 With r3ply then, users never have to sign up for anything, therefore there's no account friction preventing users from leave comments on r3ply enabled websites, and site owners can still moderate content that goes to their website.
 
+## How Visitors Send Comments to Your Site
+
+Once you're hosting a [r3ply config](#getting-started) from your site, you can begin receiving comments at `<your-site's-domain>@r3ply.com`. r3ply expects the subject line of the email to be the URL of what the comment is in response to.
+
+For this reason it's recommended for your website to pre-populate [`mailto:`](https://en.wikipedia.org/wiki/Mailto) links with the `To` and `Subject` headers pre-populated. Additionally, an email body can be pre-populated with instructions to the user.
+
+![A screenshot of how pre-filled mailto links can look](mailto-comment-intake.png)
+
+_Note: by pre-filling the mailto link, you can help r3ply strip out the email signature, by configuring a `comment_separator` value_
+
+---
+
+The r3ply CLI tool, `re`, can be useful for generating one-off mailto links:
+
+```sh
+cat body.txt | re generate mailto --to "spenc.es@r3ply.com" --subject https://spenc.es/writing/email-as-a-commenting-system/ | pbcopy
+```
+
+The above command generates a similar mailto link as the screenshot above ([demo](<mailto:?to=spenc.es%40r3ply.com&subject=https%3A%2F%2Fspenc.es%2Fwriting%2Femail-as-a-commenting-system%2F&body=%0D%0A%0D%0A%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%0D%0A1.%20Write%20you%20comment%20above%20this%20%E2%98%9D%EF%B8%8F%20line%0D%0A2.%20When%20you're%20ready%20just%20hit%20send%20%F0%9F%93%A4%0D%0A3.%20Do%20NOT%20edit%20the%20email%20subject%20%E2%9A%A0%EF%B8%8F%0D%0A%0D%0ANOTE%3A%20Your%20email%20address%20will%20remain%20private%0D%0A%0D%0A%0D%0AA%20subset%20of%20markdown%20can%20be%20used%0D%0A(no%20images%2C%20headings%2C%20or%20script%20tags)%0D%0A%0D%0A(Email%20signatures%20below%20%F0%9F%91%87%20will%20be%20ignored)%0D%0A%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%0D%0A%0D%0A>))
+
+---
+
+**Overall the user experience is actually very nice!**
+
+<div class=" overflow-hidden h-[390px] rounded-lg shadow-xl shadow-gray-800">
+  <img src="screenrecording_md.webp" alt="A screen recording of what using r3ply looks like, end to end." class="scale-[1.085] -translate-y-[35px]">
+</div>
+
 ## FAQ
 
 Below are answers to common questions. Check the <!-- TODO -->[docs](/) for more details.

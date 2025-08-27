@@ -22,3 +22,8 @@ code:not(pre code) {
   color: var(--color-blue-600);
   background-color: var(--color-yellow-200);
 }
+
+pre code {
+  white-space: pre-wrap;   /* Wrap long lines */
+  word-break: break-word;  /* Break words if needed */
+}

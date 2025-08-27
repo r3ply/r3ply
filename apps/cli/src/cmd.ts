@@ -92,7 +92,15 @@ export function generate_cmd(cwd: string) {
     .option('--cc <email>', 'cc header of email', util.collect_opts, [])
     .option('--bcc <email>', 'bcc header of email', util.collect_opts, [])
     .action(
-      async (body, options: { to: []; subject?: string; cc: []; bcc: [] }) => {
+      async (
+        body,
+        options: {
+          to: string[]
+          subject?: string
+          cc: string[]
+          bcc: string[]
+        },
+      ) => {
         const { to, subject, cc, bcc } = options
 
         // If stdin is piped (not a TTY), read from it
