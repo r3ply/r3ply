@@ -1,0 +1,14 @@
+{% set prev_text = prev_text | default(value="Previous") %}
+{% set next_text = next_text | default(value="Next") %}
+<nav class="flex text-3xl text-blue-400 font-bold font-serif py-12">
+  {% if prev_path %}
+  <span>
+    <span>👈 </span><a href="{{ prev_path }}" class="no-underline text-blue-400 font-bold">{{ prev_text }}</a>
+  </span>
+  {% endif %}
+  {% if next_path %}
+  <span class="ml-auto">
+    <a href="{{ next_path }}" class="no-underline text-blue-400 font-bold">{{ next_text }}</a><span> 👉</span>
+  </span>
+  {% endif %}
+</nav>

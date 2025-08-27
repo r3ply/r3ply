@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ section.title | default(value=config.title) }}</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  {% include "includes/top-nav.html" %}
+  <main class="flex">
+    <aside>
+      {% include "includes/side-nav.html" %}
+    </aside>
+    <article id="content" class="py-10 mx-auto prose prose-li:marker:text-black prose-pink prose-hr:border-black">
+      {% set content = section.content | default(value=page.content) %}
+      {{ content | safe }}
+    </article>
+  </main>
+</body>
+</html>

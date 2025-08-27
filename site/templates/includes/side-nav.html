@@ -1,0 +1,51 @@
+{% set shared_nav_styles = "hover:underline decoration-black" %}
+<nav id="secondary-nav" class=" w-72 sticky top-0 min-h-screen">
+  <ul id="toc" class="py-4 px-4 list-disc list-inside font-medium">
+    <li class="list-none"><a href="/docs" class="font-extrabold text-lg {{ shared_nav_styles }}">r3ply Docs:</a></li>
+    <li>
+      <a href="/docs#getting-started" class="{{ shared_nav_styles }}">Getting Started</a>
+      <ul class="px-4 list-disc list-inside font-light">
+          <li>
+              <a href="/docs#generate-a-config-signet" class="{{ shared_nav_styles }}">Generating a Config/Signet</a>
+          </li>
+          <li>
+              <a href="/docs#install-r3ply-cli-tool" class="{{ shared_nav_styles }}">Install r3ply CLI tool</a>
+          </li>
+          <li>
+              <a href="/docs#putting-it-all-together" class="{{ shared_nav_styles }}">Putting it All Together</a>
+          </li>
+      </ul>
+    </li>
+    <li>
+      <a href="/docs/overview" class="{{ shared_nav_styles }}">Overview</a>
+      <ul class="px-4 list-disc list-inside font-light">
+          <li>
+              <a href="/docs/overview#hello-world" class="{{ shared_nav_styles }}">Hello, World!</a>
+          </li>
+          <li>
+            <a href="/docs/overview#tracing-a-comment" class="{{ shared_nav_styles }}">Tracing a Comment</a>
+            <ol class="px-4 list-decimal list-inside font-light">
+              <li>
+                <a href="/docs/overview#initial-email" class="{{ shared_nav_styles }}">Initial Email</a>
+              </li>
+              <li>
+                <a href="/docs/overview#configs-gathered" class="{{ shared_nav_styles }}">Configs Gathered</a>
+              </li>
+              <li>
+                <a href="/docs/overview#checks-performed" class="{{ shared_nav_styles }}">Checks Performed</a>
+              </li>
+              <li>
+                <a href="/docs/overview#template-prepared" class="{{ shared_nav_styles }}">Template Prepared</a>
+              </li>
+              <li>
+                <a href="/docs/overview#comment-processed" class="{{ shared_nav_styles }}">Comment Processed</a>
+              </li>
+            </ol>
+          </li>
+          <li>
+              <a href="/docs/overview#iterating-on-this" class="{{ shared_nav_styles }}">Iterating on This</a>
+          </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
