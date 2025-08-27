@@ -41,4 +41,16 @@ export namespace util {
   export function random_int(ceiling: number, floor: number = 0) {
     return Math.floor(Math.random() * (ceiling - floor)) + floor
   }
+
+  /**
+   * used with command options to accumulate the same option repeated into an array
+   * @example `cmd.option('--to <email>', 'to header of email', util.collect_opts, [])`
+   * @example `mailto --to bob@example.com --to alice@example.com`
+   * @param value
+   * @param previous
+   * @returns
+   */
+  export function collect_opts(value: string, previous: string[] = []) {
+    return previous.concat([value])
+  }
 }

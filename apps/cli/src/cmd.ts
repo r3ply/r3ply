@@ -77,16 +77,56 @@ export function config_cmd(cwd: string) {
   return config_cmd
 }
 
-// comments --------------------------------------------------------------------
-export function comment_cmd(cwd: string) {
-  const comment_cmd = new Command('comment').description(
-    'commands for comments, e.g. simulating a comment received via email based on the config',
-  )
-  const generate_cmd = comment_cmd
-    .command('generate')
-    .description('generate a comment using your r3ply config')
+// generate --------------------------------------------------------------------
 
-  generate_cmd
+export function generate_cmd(cwd: string) {
+  const generate_cmd = new Command('generate').description(
+    'generate useful text',
+  )
+
+  const mailto_cmd = generate_cmd
+    .command('mailto [body]')
+    .description('generate a one-off `mailto:` link')
+    .option('--to <email>', 'to header of email', util.collect_opts, [])
+    .option('--subject <string>', 'subject header of email')
+    .option('--cc <email>', 'cc header of email', util.collect_opts, [])
+    .option('--bcc <email>', 'bcc header of email', util.collect_opts, [])
+    .action(
+      async (body, options: { to: []; subject?: string; cc: []; bcc: [] }) => {
+        const { to, subject, cc, bcc } = options
+
+        // If stdin is piped (not a TTY), read from it
+        if (!process.stdin.isTTY) {
+          body = await new Promise<string>((resolve, reject) => {
+            let data = ''
+            process.stdin.setEncoding('utf8')
+            process.stdin.on('data', (chunk) => (data += chunk))
+            process.stdin.on('end', () => resolve(data))
+            process.stdin.on('error', reject)
+          })
+        }
+
+        // to, cc, and bcc are arrays and always defined
+        const params = {
+          to: to.join(','),
+          subject,
+          cc: cc.join(','),
+          bcc: bcc.join(','),
+          body: body ? body.replace(/\r?\n/g, '\r\n') : undefined,
+        }
+
+        // create URL encoded query string
+        const query = Object.entries(params)
+          .filter(([_, v]) => v !== undefined && v !== '')
+          .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v!)}`)
+          .join('&')
+
+        // output result
+        console.log(`mailto:${query ? `?${query}` : ''}`)
+      },
+    )
+
+  const email_cmd = generate_cmd
     .command('email')
     .description('generate a comment as an email, based on your config')
     // Add email header options
@@ -106,11 +146,11 @@ export function comment_cmd(cwd: string) {
         messageId?: string
       }) => {
         let site_config: R3plySiteConfig
-        if (comment_cmd.parent?.opts().config) {
+        if (generate_cmd.parent?.opts().config) {
           site_config = util.unsafeUnwrap(
             await project.get_site_config(
               cwd,
-              comment_cmd.parent?.opts().config,
+              generate_cmd.parent?.opts().config,
             ),
           )
         } else {
@@ -133,9 +173,15 @@ export function comment_cmd(cwd: string) {
       },
     )
 
-  const simulate_cmd = comment_cmd
-    .command('simulate')
-    .description('simulate receiving a comment using your r3ply config')
+  return generate_cmd
+}
+
+// simulate --------------------------------------------------------------------
+
+export function simulate_cmd(cwd: string) {
+  const simulate_cmd = new Command('simulate').description(
+    'simulate receiving a comment using your r3ply config',
+  )
 
   simulate_cmd
     .command('email')
@@ -161,17 +207,17 @@ export function comment_cmd(cwd: string) {
         let site_config: R3plySiteConfig
         let site_config_path: string
         let file_resolver: (file_uri?: string) => Promise<string | undefined>
-        if (comment_cmd.parent?.opts().config) {
+        if (simulate_cmd.parent?.opts().config) {
           site_config = util.unsafeUnwrap(
             await project.get_site_config(
               cwd,
-              comment_cmd.parent?.opts().config,
+              simulate_cmd.parent?.opts().config,
             ),
           )
           site_config_path = util.unsafeUnwrap(
             await project.get_site_config_path(
               cwd,
-              comment_cmd.parent?.opts().config,
+              simulate_cmd.parent?.opts().config,
             ),
           )
           file_resolver =
@@ -302,5 +348,5 @@ export function comment_cmd(cwd: string) {
         })
       },
     )
-  return comment_cmd
+  return simulate_cmd
 }
