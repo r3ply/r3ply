@@ -111,7 +111,7 @@ spf_pass = {{ email.details.spf  }}
 allow_list = ['*@alice.com', 'bob@example.com']
 type = "github"
 repo = "https://github.com/you/yoursite"
-file_path = "/content/comments/{{ comment.id | slice(end=8) }}.md"
+file_path = "content/comments/{{ comment.id | slice(end=8) }}.md"
 commit_msg = """
 Comment "{{ comment.body_txt | truncate(length=32) }}" from `{{ commentor.id | slice(end=7) }}`
 
@@ -295,7 +295,7 @@ type = "github"
 repo = "https://github.com/you/yoursite"
 # [Required] If you're using the `r3ply-github-bot` then specify the file path in the repo
 # Templating is allowed here. The variables available are the same as the `template` field
-"file_path_{}" = "/content/comments/{{ comment.id | slice(end=8) }}.md"
+"file_path_{}" = "content/comments/{{ comment.id | slice(end=8) }}.md"
 # [Optional, see (TODO: link) for default]
 "commit_msg_{}" = """
 Comment "{{ comment.body_txt | truncate(length=32) }}" from `{{ commentor.id | slice(end=7) }}`

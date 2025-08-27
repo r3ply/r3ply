@@ -15,7 +15,8 @@
   "scripts": {
     "build:generate": "tsx generate.ts",
     "build:compile": "tsup src/generated/index.ts --dts --clean --format esm,cjs",
-    "build": "npm run build:generate && npm run build:compile",
+    "build:copy": "cp src/generated/*.schema.json dist",
+    "build": "npm run build:generate && npm run build:compile && npm run build:copy",
     "test": "npx vitest run",
     "test:watch": "npx vitest"
   },

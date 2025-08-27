@@ -132,9 +132,7 @@ A new comment has been received
                 'File path template for new comment (template string).',
               pattern: '^[\\s\\S]*$',
               maxLength: 1024,
-              examples: [
-                '/content/comments/{{ comment.id | slice(end=8) }}.md',
-              ],
+              examples: ['content/comments/{{ comment.id | slice(end=8) }}.md'],
               $comment:
                 'compiled template must be 400 characters or less and be a valid file path',
             },
@@ -219,9 +217,7 @@ A new comment has been received
                 'File path template for new comment (template string).',
               pattern: '^(?!\\s*/)[\\s\\S]*$',
               maxLength: 1024,
-              examples: [
-                '/content/comments/{{ comment.id | slice(end=8) }}.md',
-              ],
+              examples: ['content/comments/{{ comment.id | slice(end=8) }}.md'],
               $comment:
                 'compiled template must be 400 characters or less and be a valid file path',
             },
