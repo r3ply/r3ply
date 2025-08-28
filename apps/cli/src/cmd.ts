@@ -11,6 +11,7 @@ import TOML from '@iarna/toml'
 import { Signet } from '@r3ply/lib'
 import crypto from 'crypto'
 import prompts, { PromptObject } from 'prompts'
+import dayjs from 'dayjs'
 
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
@@ -149,21 +150,64 @@ export function generate_cmd(cwd: string) {
       project.DEFAULT_R3PLY_DOMAIN,
     )
     .option('--date <string>', 'date signet was issued (default: today)')
-    .action(async (options: { site: string; r3ply: string; date?: string }) => {
-      const keys = await project.get_keys(cwd)
-      const result = await Signet.issue(keys.signet_key)(
-        options.site,
-        options.r3ply,
-        options.date,
-      )
-      console.log(
-        highlight(
-          TOML.stringify({
-            site: [{ domain: options.site, r3ply: options.r3ply, ...result }],
-          }),
-        ),
-      )
-    })
+    .option('--interactive', 'foo', false)
+    .action(
+      async (options: {
+        site: string
+        r3ply: string
+        date?: string
+        interactive: boolean
+      }) => {
+        const keys = await project.get_keys(cwd)
+        const result = await Signet.issue(keys.signet_key)(
+          options.site,
+          options.r3ply,
+          options.date,
+        )
+        if (options.interactive) {
+          const questions: PromptObject[] = [
+            {
+              type: 'text',
+              name: 'site',
+              message: 'To what domain will the signet be issued?',
+              initial: options.site,
+              validate: (site) =>
+                Result.safe(() => new URL(`https://${site}`)).isOk(),
+              format: (site) => new URL(`https://${site}`).hostname,
+            },
+            {
+              type: 'text',
+              name: 'r3ply',
+              message: 'What r3ply domain will issue the signet?',
+              initial: options.r3ply,
+              validate: (r3ply) =>
+                Result.safe(() => new URL(`https://${r3ply}`)).isOk(),
+              format: (r3ply) => new URL(`https://${r3ply}`).hostname,
+            },
+            {
+              type: 'text',
+              name: 'date',
+              message: 'What date should the signet be issued for?',
+              initial: dayjs().format('YYYY-MM-DD'),
+              validate: async (date) => {
+                return dayjs(date).isValid()
+              },
+            },
+          ]
+          const answers = await prompts(questions)
+          options.site = answers.site
+          options.r3ply = answers.r3ply
+          options.date = answers.date
+        }
+        console.log(
+          highlight(
+            TOML.stringify({
+              site: [{ domain: options.site, r3ply: options.r3ply, ...result }],
+            }),
+          ),
+        )
+      },
+    )
 
   const config_cmd = generate_cmd
     .command('config')

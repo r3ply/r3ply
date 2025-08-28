@@ -21,7 +21,7 @@ Enter your website's domain and generate your config. It should ultimately be ho
 
 {% end %}
 
-**Note: it is very common to use the same config across multiple domains, such as staging changes on a subdomain while you test out a big feature. To do this just generate another signet for each domain, and add it as another site entry to your config.**
+_**Note: you can also use the r3ply CLI tool, `re`, to generate a signet `re generate signet`.**_
 
 ### Install r3ply CLI Tool
 
