@@ -32,6 +32,8 @@ Envelope mismatch — possible tampered config
 
 What's happening here is this wall of text is a trace of our simulated email comment as it moved through r3ply system. Let's examine the important parts to get an understanding of what's happening here.
 
+_**(Note: the output of `simulate email` can be silenced or filtered, e.g. `re simulate email --filter config,process`. See `re simulate email --help` or refer to the <!-- TODO -->[CLI](/docs/cli) docs for more).**_
+
 ## Tracing a Comment
 
 Each step in the process is begins with text `=== Like This ===` and it constitutes a stage in the process.

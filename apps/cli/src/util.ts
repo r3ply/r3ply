@@ -53,4 +53,74 @@ export namespace util {
   export function collect_opts(value: string, previous: string[] = []) {
     return previous.concat([value])
   }
+
+  /**
+   * used with a command option to receive a comma separate list and turn it into an array
+   * @example `--quiet email,moderation,config`
+   * @param value
+   * @returns
+   */
+  export function split_list(param: string): string[] {
+    return param.split(',').map((item) => item.trim())
+  }
+
+  export function print_w_quiet_and_filter_opts(
+    params: {
+      quiet?: undefined | boolean | string[]
+      filter?: undefined | boolean | string[]
+    },
+    condition: string,
+  ): boolean {
+    const { quiet, filter } = params
+    if (filter) {
+      // filter == true means filter nothing, otherwise only allow if `condition` is included
+      if (
+        filter == true ||
+        filter.some((stage) => {
+          if (condition.includes('=')) {
+            return condition.includes(stage)
+          } else {
+            return stage.startsWith(condition)
+          }
+        })
+      ) {
+        // quiet overrides filter
+        return print_w_quiet(quiet, condition)
+      } else {
+        return false
+      }
+    }
+    return print_w_quiet(quiet, condition)
+  }
+  function print_w_quiet(
+    quiet: undefined | boolean | string[],
+    condition: string,
+  ): boolean {
+    if (quiet) {
+      // quiet == true means silence everything, otherwise only silence if `condition` is included
+      if (quiet == true) {
+        return false
+      } else {
+        // if one the stages in quiet matches the condition, then check the match more closely
+        if (
+          quiet.some((stage) => {
+            if (condition.startsWith(stage)) {
+              if (condition.includes('=')) {
+                return condition == stage
+              } else {
+                console.log('condition does not include = ')
+                return true
+              }
+            } else {
+              return false
+            }
+          })
+        ) {
+          return false
+        } else return true
+      }
+    } else {
+      return true
+    }
+  }
 }

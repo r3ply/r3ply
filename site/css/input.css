@@ -19,8 +19,8 @@ body {
 }
 
 code:not(pre code) {
-  color: var(--color-blue-600);
-  background-color: var(--color-yellow-200);
+  color: var(--color-blue-700);
+  background-color: var(--color-green-200);
 }
 
 pre code {

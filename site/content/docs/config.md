@@ -11,6 +11,18 @@ Configuration is a big topic, so we'll cover the broad ideas that always apply f
 
 Your website's config is how you will control most of r3ply's behavior. Here are some details that will help you understand how r3ply expects configs to work in general.
 
+### Versioning of r3ply
+
+r3ply uses semantic versioning and this is enforced by the `version` config key, which is required. All the components of r3ply – the server, config, CLI, etc... – are designed to work with their corresponding major version.
+
+- Small changes such as bug fixes change the patch version number, i.e. 0.0.X
+- New features that are backwards compatible change the minor version number, i.e. 0.X.0
+- Breaking changes update the major version and, i.e. X.0.0
+
+---
+
+In other words, if you're using a config at version 0.0.1, and a r3ply server is using 0.0.5 or 0.6.2, your config **SHOULD** _still_ work. The same also applies for the CLI tool.
+
 ### TOML/JSON Files at Well Known Locations { #toml-or-json }
 
 r3ply configs can be written in either TOML or JSON. The r3ply servers will choose the first file that exists at the following locations, with precedence high to low:
@@ -211,7 +223,7 @@ The `moderation` key is also required by `comments`. This controls the parameter
 # "pr_body_{}" = "Received on {{ comment.ts_rcvd }}"
 "&pr_body_{}" = "../pr.template.txt"# "&commit_msg_{}" = "/commit.template.txt"type = "github"
 "allow_list" = ["18a793ce3d", "*@spenc.es"]
-repo = "getzola/zola"
+repo = "https://github.com/getzola/zola"
 "base_branch_{}" = "main"
 "head_branch_{}" = "{{ comment.ts_rcvd }}.md"
 "file_path_{}" = "content/comments/{{ comment.ts_rcvd }}.md"
@@ -332,7 +344,7 @@ type = "github"
 # matches from this list will skip moderation. Uses glob patterns
 "allow_list" = ["18a793ce3d", "*@spenc.es"]
 # gitHub repository, e.g. "https://github.com/asimpletune/spenc.es"
-repo = "getzola/zola"
+repo = "https://github.com/getzola/zola"
 # the base branch. Default is main
 "base_branch_{}" = "main"
 # the head branch. Default is `comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md`

@@ -195,13 +195,22 @@ export function simulate_cmd(cwd: string) {
 
   simulate_cmd
     .command('email')
-    // Add email header options
     .option('--message-id <id>', 'override Message-ID header')
     .option('--date <date>', 'override Date header')
     .option('--from <address>', 'override From header')
     .option('--to <address>', 'override To header')
     .option('--subject <text>', 'override email subject')
     .option('--body <text>', 'override email body')
+    .option(
+      '-q, --quiet [stage...]',
+      `silence output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,process,moderate,notify]. Note: stages themselves can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,process=comment,moderate=request,moderate=response,notify=commenter,notify=site]`,
+      util.split_list,
+    )
+    .option(
+      '-f, --filter [stage...]',
+      `filter output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,process,comment,moderate,notify]. Note: stages themselves can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderate=request,moderate=response,notify=commenter,notify=site]`,
+      util.split_list,
+    )
     .action(
       async (
         options: {
@@ -211,6 +220,8 @@ export function simulate_cmd(cwd: string) {
           subject?: string
           body?: string
           messageId?: string
+          quiet?: boolean | string[]
+          filter?: boolean | string[]
         },
         cmd,
       ) => {
@@ -270,16 +281,18 @@ export function simulate_cmd(cwd: string) {
         const email = generate
           .email(site.domain, site.r3ply, options)
           .then((email) => {
-            // TODO: for some reason highlight.js doesn't support `eml`???
-            console.log(
-              `${chalk.whiteBright('=== Input Email ===\n')}`,
-              '\n' +
-                highlight(email.replace(/\r/g, ''), {
-                  language: 'yaml',
-                  ignoreIllegals: true,
-                }) +
-                '\n\n',
-            )
+            if (util.print_w_quiet_and_filter_opts(options, 'email')) {
+              // TODO: for some reason highlight.js doesn't support `eml`???
+              console.log(
+                `${chalk.whiteBright('=== Input Email ===\n')}`,
+                '\n' +
+                  highlight(email.replace(/\r/g, ''), {
+                    language: 'yaml',
+                    ignoreIllegals: true,
+                  }) +
+                  '\n\n',
+              )
+            }
             return email
           })
         const keys = await project.get_keys(cwd)
@@ -300,66 +313,100 @@ export function simulate_cmd(cwd: string) {
         await response.then(async (response) => {
           if (response.isOk()) {
             const email_event_response = response.unwrap()
-            console.log(
-              `${chalk.whiteBright('=== System Config ===\n')}`,
-              '\n' +
-                highlight(
-                  `# Generated using site config \n${TOML.stringify(cli_system_config_toml)}`,
+            if (util.print_w_quiet_and_filter_opts(options, 'config')) {
+              if (
+                util.print_w_quiet_and_filter_opts(options, 'config=system')
+              ) {
+                console.log(
+                  `${chalk.whiteBright('=== System Config ===\n')}`,
+                  '\n' +
+                    highlight(
+                      `# Generated using site config \n${TOML.stringify(cli_system_config_toml)}`,
+                      { language: 'toml', ignoreIllegals: true },
+                    ) +
+                    '\n',
+                )
+              }
+              if (util.print_w_quiet_and_filter_opts(options, 'config=site')) {
+                console.log(
+                  `${chalk.whiteBright('=== Site Config ===\n')}`,
+                  `\n${highlight(
+                    `# From path ${site_config_path} \n${TOML.stringify(site_config)}`,
+                    { language: 'toml', ignoreIllegals: true },
+                  )}`,
+                )
+              }
+            }
+            if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
+              console.log(
+                `${chalk.whiteBright('=== Prescreening Results ===')}\n`,
+                `\n${highlight(
+                  TOML.stringify(email_event_response.prescreening as any),
                   { language: 'toml', ignoreIllegals: true },
-                ) +
-                '\n',
-            )
-            console.log(
-              `${chalk.whiteBright('=== Site Config ===\n')}`,
-              `\n${highlight(
-                `# From path ${site_config_path} \n${TOML.stringify(site_config)}`,
-                { language: 'toml', ignoreIllegals: true },
-              )}`,
-            )
-            console.log(
-              `${chalk.whiteBright('=== Prescreening Results ===')}\n`,
-              `\n${highlight(
-                TOML.stringify(email_event_response.prescreening as any),
-                { language: 'toml', ignoreIllegals: true },
-              )}`,
-            )
-            console.log(
-              `\n${chalk.whiteBright('=== Comment Received ===')}\n`,
-              `\n${highlight(
-                TOML.stringify(email_event_response.received as any),
-                { language: 'toml', ignoreIllegals: true },
-              )}`,
-            )
+                )}`,
+              )
+            }
+            if (util.print_w_quiet_and_filter_opts(options, 'receive')) {
+              console.log(
+                `\n${chalk.whiteBright('=== Comment Received ===')}\n`,
+                `\n${highlight(
+                  TOML.stringify(email_event_response.received as any),
+                  { language: 'toml', ignoreIllegals: true },
+                )}`,
+              )
+            }
             const { email, ...deliverable_details } =
               email_event_response.deliverable
-            console.log(
-              `\n${chalk.whiteBright('=== Deliverability Details ===')}\n`,
-              `\n${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details as any), { language: 'toml', ignoreIllegals: true })}`,
-            )
-            console.log(
-              `\n${chalk.whiteBright('=== Template Context ===')}\n`,
-              `\n${highlight('# These are the values available to your templates\n' + TOML.stringify(email_event_response.prepared as any), { language: 'toml', ignoreIllegals: true })}`,
-            )
-            console.log(
-              `\n${chalk.whiteBright('=== Comment ===')}\n`,
-              `\n${highlight(email_event_response.comment as any)}`,
-            )
-            console.log(
-              `\n${chalk.whiteBright('=== Moderation Args ===')}\n`,
-              `\n${highlight('# These are the arguments used for moderation, alongside the comment\n' + TOML.stringify(email_event_response.moderation?.args as any), { language: 'toml', ignoreIllegals: true })}`,
-            )
-            console.log(
-              `\n${chalk.whiteBright('=== Notification Context ===')}\n`,
-              `\n${highlight('# These values are available within notification templates\n' + TOML.stringify(email_event_response.moderation?.context as any), { language: 'toml', ignoreIllegals: true })}`,
-            )
-            console.log(
-              `\n${chalk.whiteBright('=== Comment Submitted Notification ===')}\n`,
-              `\n${highlight(email_event_response.moderation?.commenter_notif ?? 'none', { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
-            )
-            console.log(
-              `\n${chalk.whiteBright('=== Comment Received Notification ===')}\n`,
-              `\n${highlight(email_event_response.moderation?.moderator_notif ?? 'none', { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
-            )
+            if (util.print_w_quiet_and_filter_opts(options, 'deliverable')) {
+              console.log(
+                `\n${chalk.whiteBright('=== Deliverability Details ===')}\n`,
+                `\n${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details as any), { language: 'toml', ignoreIllegals: true })}`,
+              )
+            }
+            if (util.print_w_quiet_and_filter_opts(options, 'prepare')) {
+              console.log(
+                `\n${chalk.whiteBright('=== Template Context ===')}\n`,
+                `\n${highlight('# These are the values available to your templates\n' + TOML.stringify(email_event_response.prepared as any), { language: 'toml', ignoreIllegals: true })}`,
+              )
+            }
+            if (util.print_w_quiet_and_filter_opts(options, 'process')) {
+              console.log(`\n${chalk.whiteBright('=== Comment ===')}\n`)
+              console.log(`${highlight(email_event_response.comment as any)}`)
+            }
+            if (util.print_w_quiet_and_filter_opts(options, 'moderate')) {
+              if (
+                util.print_w_quiet_and_filter_opts(options, 'moderate=request')
+              ) {
+                console.log(
+                  `\n${chalk.whiteBright('=== Moderation Args ===')}\n`,
+                  `\n${highlight('# These are the arguments used for moderation, alongside the comment\n' + TOML.stringify(email_event_response.moderation?.args as any), { language: 'toml', ignoreIllegals: true })}`,
+                )
+              }
+              if (
+                util.print_w_quiet_and_filter_opts(options, 'moderate=response')
+              ) {
+                console.log(
+                  `\n${chalk.whiteBright('=== Notification Context ===')}\n`,
+                  `\n${highlight('# These values are available within notification templates\n' + TOML.stringify(email_event_response.moderation?.context as any), { language: 'toml', ignoreIllegals: true })}`,
+                )
+              }
+            }
+            if (util.print_w_quiet_and_filter_opts(options, 'notify')) {
+              if (
+                util.print_w_quiet_and_filter_opts(options, 'notify=commenter')
+              ) {
+                console.log(
+                  `\n${chalk.whiteBright('=== Comment Submitted Notification ===')}\n`,
+                  `\n${highlight(email_event_response.moderation?.commenter_notif ?? 'none', { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
+                )
+              }
+              if (util.print_w_quiet_and_filter_opts(options, 'notify=site')) {
+                console.log(
+                  `\n${chalk.whiteBright('=== Comment Received Notification ===')}\n`,
+                  `\n${highlight(email_event_response.moderation?.moderator_notif ?? 'none', { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
+                )
+              }
+            }
           } else {
             throw response.unwrapErr()
           }

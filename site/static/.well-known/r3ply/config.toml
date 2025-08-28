@@ -42,8 +42,6 @@ attachments = false
 max_size_bytes = 1_048_576
 # email/ID blocklist. For example, `['e8a20d6*', 'mallory@evil.com', '*@spam.com']`. Default is `[]`
 block_list = ['e8a20d6*', 'mallory@evil.com', '*@spam.com']
-#  path to a file that contains the template for comments. Default is `undefined`
-"&comment_{}" = "/comment.template.html"
 # specify mime type for comment template. Default is `undefined`
 "comment_{}_mime" = "text/markdown"
 
@@ -53,7 +51,7 @@ type = "github"
 # matches from this list will skip moderation. Uses glob patterns
 "allow_list" = ["18a793ce3d", "*@spenc.es"]
 # gitHub repository, e.g. "https://github.com/asimpletune/spenc.es"
-repo = "getzola/zola"
+repo = "https://github.com/getzola/zola"
 # the base branch. Default is main
 "base_branch_{}" = "main"
 # the head branch. Default is `comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md`
@@ -62,14 +60,3 @@ repo = "getzola/zola"
 "file_path_{}" = "content/comments/{{ comment.ts_rcvd }}.md"
 # commit message template (template string)
 "commit_msg_{}" = "Add comment by {{ author.pseudonym[:8] }}"
-# pull request body template (template string)
-"&pr_body_{}" = "../pr.template.txt"
-
-[comments.notify]
-commenter = false
-notify_commenter_upon_submission = false
-"comment_submitted_notif_{}" = "Your comment has been successfully submitted!"
-"&comment_submitted_notif_{}" = "./comment.submission.notif.html"
-moderator = false
-notify_moderator_upon_receipt = false
-"&comment_received_notif_{}" = "./comment.received.notif.html"
