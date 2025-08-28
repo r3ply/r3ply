@@ -6,7 +6,7 @@ import { R3plySystemConfig } from '@r3ply/config'
 function api(r3ply: R3plySystemConfig) {
   const api = new Hono<{ Bindings: Env }>()
 
-  api.get('/site/new/:domain/:issued?', async (c) => {
+  api.get('/signet/:domain/:issued?', async (c) => {
     const req_url = new URL(c.req.url)
     c.res.headers.set('Access-Control-Allow-Origin', '*')
     if (!r3ply.domains.includes(req_url.hostname)) {

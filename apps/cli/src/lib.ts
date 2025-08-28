@@ -411,10 +411,14 @@ export namespace generate {
     return `${crypto.randomUUID()}@${domain}`
   }
 
-  export function subject(url: URL) {
-    const site_path = site_paths[util.random_int(0, site_paths.length)]
-    const site_slug = site_slugs[util.random_int(0, site_slugs.length)]
-    return new URL(path.resolve(site_path, site_slug), url).href
+  export function subject(url: URL, path_opt?: string) {
+    if (path_opt) {
+      return new URL(path_opt, url).href
+    } else {
+      const site_path = site_paths[util.random_int(0, site_paths.length)]
+      const site_slug = site_slugs[util.random_int(0, site_slugs.length)]
+      return new URL(path.join(site_path, site_slug), url).href
+    }
   }
 
   export function comment_body(seed?: string[]) {
@@ -447,6 +451,7 @@ export namespace generate {
       from?: string
       to?: string
       subject?: string
+      subjectPath?: string
       body?: string
     },
   ) {
@@ -461,8 +466,10 @@ export namespace generate {
     const date = dayjs(options?.date ?? new Date(generate.date()))
     const to = options?.to || `${site_domain}@${r3ply_domain}`
     const [to_local, _] = to.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
+    const subject_url = new URL(`https://${to_local}/`)
+    if (options?.subjectPath) subject_url.pathname = options?.subjectPath
     const subject =
-      options?.subject || generate.subject(new URL(`https://${to_local}/`))
+      options?.subject || generate.subject(subject_url, options?.subjectPath)
     const body = options?.body || (await generate.comment_body())
     const email = Result.safe(() =>
       build_email(
@@ -515,7 +522,7 @@ export namespace generate {
     } else {
       return fetch(
         new URL(
-          `https://${r3ply}/site/new/${domain}${issued ? `/${issued}` : ''}`,
+          `https://${r3ply}/signet/${domain}${issued ? `/${issued}` : ''}`,
         ),
       ).then((response) => {
         if (response.ok)

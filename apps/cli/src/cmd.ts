@@ -3,10 +3,7 @@ import { cli_handle_comment_via_email, project, generate } from './lib.js'
 import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
-import {
-  R3plySiteConfig,
-  siteConfigParser,
-} from '@r3ply/config'
+import { R3plySiteConfig, siteConfigParser } from '@r3ply/config'
 import path from 'path'
 import { resolve_config_references } from '@r3ply/lib'
 import { highlight } from 'cli-highlight'
@@ -62,8 +59,12 @@ export function config_cmd(cwd: string) {
     .command('validate')
     .description('validate your r3ply configuration')
     .action(async () => {
+      const site_config_path = await project.resolve_config_path(
+        cwd,
+        config_cmd.parent?.opts().config,
+      )
       const site_config = util.unsafeUnwrap(
-        await project.parse_site_config(cwd, config_cmd.parent?.opts().config),
+        await project.parse_site_config(cwd, site_config_path),
       )
       if (!site_config.valid)
         throw new Error(
@@ -212,6 +213,7 @@ export function generate_cmd(cwd: string) {
           options.r3ply,
           options.date,
         )
+
         // TODO - add back in the interactive version once I've figured out an elegant UX for generating the config
         if (options.interactive) {
           const answers = await prompts(
@@ -228,7 +230,7 @@ export function generate_cmd(cwd: string) {
         console.log(
           highlight(
             TOML.stringify({
-              signet,
+              site: [signet],
             }),
           ),
         )
@@ -295,7 +297,8 @@ export function generate_cmd(cwd: string) {
     .option('--date <date>', 'override Date header')
     .option('--from <address>', 'override From header')
     .option('--to <address>', 'override To header')
-    .option('--subject <text>', 'override email subject')
+    .option('--subject <url>', 'override email subject')
+    .option('--subject-path <path>', 'override just path of subject')
     .option('--body <text>', 'override email body')
     .action(
       async (options: {
@@ -303,6 +306,7 @@ export function generate_cmd(cwd: string) {
         to?: string
         date?: string
         subject?: string
+        subjectPath?: string
         body?: string
         messageId?: string
       }) => {
@@ -341,7 +345,8 @@ export function simulate_cmd(cwd: string) {
     .option('--date <date>', 'override Date header')
     .option('--from <address>', 'override From header')
     .option('--to <address>', 'override To header')
-    .option('--subject <text>', 'override email subject')
+    .option('--subject <url>', 'override email subject')
+    .option('--subject-path <path>', 'override just path of subject')
     .option('--body <text>', 'override email body')
     .option('--no-heading', 'hide headings for each stage of simulation', true)
     .option(
@@ -361,6 +366,7 @@ export function simulate_cmd(cwd: string) {
           to?: string
           date?: string
           subject?: string
+          subjectPath?: string
           body?: string
           messageId?: string
           quiet?: boolean | string[]

@@ -67,7 +67,7 @@ repo = "https://github.com/you/<YOUR_REPO>"
     }
 
     try {
-      const response = await fetch(`http://localhost:8787/site/new/${custom_url.hostname}`);
+      const response = await fetch(`http://localhost:8787/signet/${custom_url.hostname}`);
       if (!response.ok) throw new Error('API request failed');
       const data = await response.json();
 

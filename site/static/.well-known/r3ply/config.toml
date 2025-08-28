@@ -2,7 +2,7 @@
 version = "0.0.1"
 
 # each site x r3ply combo has an entry
-[signet]
+[[site]]
 domain = "test.r3ply.com"
 r3ply = "test.r3ply.com"
 signet = "dwabG6E5RrxECsIoIllR-Q"
