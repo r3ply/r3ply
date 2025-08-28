@@ -86,26 +86,32 @@ The `--quite` and `--filter` options allow you to respectively silence or isolat
 
 - `email` - the initial email itself
 - `config` - r3ply fetches the appropriate site and system configs
+  - `config=system` - refine the config filter to just the system's config
+  - `config=site` - refine the config filter to just the sites's config
 - `prescreen` - prescreen checks are performed
 - `receive` - the email is received and assigned metadata (an id and timestamp)
 - `deliverable` - deliverability of email is checked against the configs
 - `prepare` - the email is parsed and becomes a template context
-- `process` - the template context is used and the comment is formed
+- `comment` - the template context is used and the comment is formed
 - `moderate` - the comment along with its moderation arguments are prepared
+  - `moderate=request` - refine the `moderate` filter to just the request
+  - `moderate=response` - refine the `moderate` filter to just the response
 - `notify` - notifications are prepared per the config
+  - `notify=commenter` - just notification prepared for the commenter
+  - `notify=site` - just the notification prepared for the site maintainer
 
 Using these you can filter output. For example if you wanted to only see the initial email and the resulting comment then you could run:
 
 ```text
-# only show output of the `email` and `process` stages
-re simulate email --filter email,process
+# only show output of the `email` and `comment` stages
+re simulate email --filter email,comment
 ```
 
-Alternatively you could silence everything _but_ the `email` and `process` stages
+Alternatively you could silence everything _but_ the `email` and `comment` stages
 
 ```text
-# silence only the `email` and `process` stages
-re simulate email --quiet email,process
+# silence only the `email` and `comment` stages
+re simulate email --quiet email,comment
 ```
 
 Three important corner cases are:
@@ -113,3 +119,11 @@ Three important corner cases are:
 - if `--quiet` and `--filter` are used together, `--quiet` will take precedence
 - if `--quiet` is used without arguments then all output is silenced
 - if `--filter` is used without arguments than all output is allowed
+
+### Writing Output { #write-simulation-output }
+
+You can save the output of a comment simulation by redirecting `STDOUT` to a file. The `--no-heading` option will remove the `=== Example ===` heading above each stage in the comment simulation pipeline. Here's an example of how you would save an email comment as a file:
+
+```bash
+re simulate comment --filter email > comment_output.html --no-heading
+```
