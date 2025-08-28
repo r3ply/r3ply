@@ -1,1 +1,0 @@
-This is just an empty file so the .r3ply directory is picked up by source control. In the future there will be more things to store here, so this file will be unnecessary.
