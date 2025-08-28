@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { toHex } from '../util'
 import crypto from 'crypto'
+import { R3plySystemConfig } from '@r3ply/config'
 
 /**
  * Generates a short, user-friendly envelope string, called a `signet` from a binary master key.
@@ -26,7 +27,7 @@ import crypto from 'crypto'
  * @param site_domain - The domain this signet is being issued to
  * @returns Short Base64URL string representing the signet (i.e. envelope) and its issue date (i.e. key id)
  */
-export async function make_short_signet(
+async function make_short_signet(
   encryption_key: string,
   {
     site_domain,
@@ -198,13 +199,24 @@ export const Anonymize = {
  */
 export const Signet = {
   // This is the one you probably want to use if you provide an implementation (i.e. app) of r3ply somewhere, e.g. the CLI or cloudflare-worker, to help people join your service
-  issue: (encryption_key: string) => {
-    return (site_domain: string, r3ply_domain: string, issued_date?: string) =>
-      make_short_signet(encryption_key, {
-        site_domain,
-        r3ply_domain,
-        issued_date,
-      })
+  issue: (encryption_key: string, system_config: R3plySystemConfig) => {
+    return (
+      site_domain: string,
+      r3ply_domain: string,
+      issued_date?: string,
+    ) => {
+      if (system_config.domains.includes(r3ply_domain)) {
+        return make_short_signet(encryption_key, {
+          site_domain,
+          r3ply_domain,
+          issued_date,
+        })
+      } else {
+        throw new Error(
+          'A r3ply service can only issue signets from its own domain.',
+        )
+      }
+    }
   },
 }
 

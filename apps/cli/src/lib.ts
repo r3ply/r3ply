@@ -14,7 +14,7 @@ import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
 import { RiMarkov, RiTa } from 'rita'
 import { fileURLToPath } from 'url'
-import { DerferenceFile, R3ply, R3plyGithubBot } from '@r3ply/lib'
+import { DerferenceFile, R3ply, R3plyGithubBot, Signet } from '@r3ply/lib'
 import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
 import crypto from 'crypto'
@@ -27,6 +27,8 @@ export namespace project {
     `**/r3ply/config.{toml,json}`,
     `**/r3ply.config.{toml,json}`,
   ]
+  const CLI_SYSTEM_CONFIG_FILENAME = 'r3ply.system.config.toml'
+  const CLI_SETTINGS_FILENAME = 'r3ply.cli.settings.toml'
   const SIGNET_KEY_FILENAME = 'signet.key'
   const ENCRYPT_EMAIL_KEY_FILENAME = 'encrypt_email.key'
   export const DEFAULT_SITE_DOMAIN = 'site.local.test'
@@ -98,12 +100,14 @@ export namespace project {
           await find_site_config_files(cwd, config_path),
         )
         if (relative_files.length == 0)
-          throw new Error(`No config found at ${path.join(cwd, config_path)}`)
+          throw new Error(
+            `No config found at ${path.resolve(cwd, config_path)}`,
+          )
         else if (relative_files.length > 1)
           throw new Error(
             `Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`,
           )
-        else return path.join(cwd, relative_files[0])
+        else return path.resolve(cwd, relative_files[0])
       } else {
         const relative_files = util.unsafeUnwrap(
           await find_site_config_files(project_dir),
@@ -114,7 +118,7 @@ export namespace project {
           throw new Error(
             `Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`,
           )
-        else return path.join(project_dir, relative_files[0])
+        else return path.resolve(project_dir, relative_files[0])
       }
     })()
     return Result.safe(full_config_path)
@@ -164,6 +168,74 @@ export namespace project {
     return Result.safe(site_config)
   }
 
+  export async function resolve_config(cwd: string, config_option?: string) {
+    const site_config_path = await resolve_config_path(cwd, config_option)
+    return util.unsafeUnwrap(await get_site_config(cwd, site_config_path))
+  }
+
+  export async function resolve_config_path(
+    cwd: string,
+    config_option?: string,
+  ) {
+    let site_config_path: string
+    if (config_option) {
+      site_config_path = util.unsafeUnwrap(
+        await project.get_site_config_path(cwd, config_option),
+      )
+    } else {
+      const project_dir = (await project.find_project_dir(cwd)).unwrap()
+      const cli_settings: any = util.unsafeUnwrap(
+        await project.get_cli_settings(cwd),
+      )
+      site_config_path = util.unsafeUnwrap(
+        await project.get_site_config_path(
+          project_dir,
+          cli_settings.default_config_path,
+        ),
+      )
+    }
+    return site_config_path
+  }
+
+  export async function get_cli_system_config(cwd: string) {
+    const r3ply_dir = find_r3ply_dir(cwd)
+    const result = r3ply_dir
+      .then((r3ply_dir) => {
+        return fs.promises.readFile(
+          path.resolve(
+            util.unsafeUnwrap(r3ply_dir),
+            CLI_SYSTEM_CONFIG_FILENAME,
+          ),
+        )
+      })
+      .then((text) => {
+        return systemConfigParser(
+          JSON.stringify(TOML.parse(text.toString())) as any,
+        ).value!
+      })
+    return Result.safe(result)
+  }
+
+  export async function get_cli_settings(cwd: string) {
+    const r3ply_dir = util.unsafeUnwrap(await project.find_r3ply_dir(cwd))
+    const cli_settings_path = path.resolve(r3ply_dir, CLI_SETTINGS_FILENAME)
+    const settings = Result.safe(
+      fs.promises
+        .readFile(cli_settings_path)
+        .then((bytes) => bytes.toString())
+        .then((settings) => TOML.parse(settings)),
+    )
+    return settings
+  }
+
+  export async function set_cli_settings(cwd: string, new_settings: any) {
+    const r3ply_dir = util.unsafeUnwrap(await project.find_r3ply_dir(cwd))
+    const cli_settings_path = path.resolve(r3ply_dir, CLI_SETTINGS_FILENAME)
+    return Result.safe(
+      fs.promises.writeFile(cli_settings_path, TOML.stringify(new_settings)),
+    )
+  }
+
   export const dereference_local_file: DerferenceFile = async (
     base_uri: string,
     file_uri_ref?: string,
@@ -209,6 +281,18 @@ export namespace project {
     const parent_project_exists = find_r3ply_dir(new_r3ply_dir)
     const signet_key = crypto.randomBytes(32).toString('base64')
     const encrypt_email_key = crypto.randomBytes(32).toString('base64')
+    let system_config = systemConfigParser(
+      JSON.stringify(
+        TOML.parse(`
+    version = "0.0.1"
+    domains = ["${project.DEFAULT_R3PLY_DOMAIN}"]
+    sites = ["${project.DEFAULT_SITE_DOMAIN}"]
+
+    [[admin]]
+    name = "Guybrush Threepwood"
+    email = "guybrush@example.com"`),
+      ),
+    ).value!
     const result = parent_project_exists.then((parent_project_exists) => {
       const file_access = Result.safe(fs.promises.access(new_r3ply_dir))
       return file_access.then((file_access) => {
@@ -221,13 +305,25 @@ export namespace project {
           return fs.promises.mkdir(new_r3ply_dir).then(() => {
             return fs.promises
               .writeFile(
-                path.join(new_r3ply_dir, SIGNET_KEY_FILENAME),
+                path.resolve(new_r3ply_dir, SIGNET_KEY_FILENAME),
                 signet_key,
               )
               .then((_) => {
                 return fs.promises.writeFile(
-                  path.join(new_r3ply_dir, ENCRYPT_EMAIL_KEY_FILENAME),
+                  path.resolve(new_r3ply_dir, ENCRYPT_EMAIL_KEY_FILENAME),
                   encrypt_email_key,
+                )
+              })
+              .then((_) => {
+                return fs.promises.writeFile(
+                  path.resolve(new_r3ply_dir, CLI_SYSTEM_CONFIG_FILENAME),
+                  TOML.stringify(system_config),
+                )
+              })
+              .then((_) => {
+                return fs.promises.writeFile(
+                  path.resolve(new_r3ply_dir, CLI_SETTINGS_FILENAME),
+                  '',
                 )
               })
               .then((_) => {
@@ -253,11 +349,16 @@ export namespace project {
   ): Promise<{ signet_key: string; encrypt_email_key: string }> {
     return find_r3ply_dir(cwd).then((r3ply_dir) => {
       const signet_key = fs.promises
-        .readFile(path.join(util.unsafeUnwrap(r3ply_dir), SIGNET_KEY_FILENAME))
+        .readFile(
+          path.resolve(util.unsafeUnwrap(r3ply_dir), SIGNET_KEY_FILENAME),
+        )
         .then((buffer) => buffer.toString())
       const encrypt_email_key = fs.promises
         .readFile(
-          path.join(util.unsafeUnwrap(r3ply_dir), ENCRYPT_EMAIL_KEY_FILENAME),
+          path.resolve(
+            util.unsafeUnwrap(r3ply_dir),
+            ENCRYPT_EMAIL_KEY_FILENAME,
+          ),
         )
         .then((buffer) => buffer.toString())
       return Promise.all([signet_key, encrypt_email_key]).then(
@@ -266,6 +367,22 @@ export namespace project {
         },
       )
     })
+  }
+
+  export async function set_default_cli_config_path(
+    cwd: string,
+    config_path: string,
+  ) {
+    const project_dir = util.unsafeUnwrap(await find_project_dir(cwd))
+    const proposed_path = path.resolve(project_dir, config_path)
+    const relative = path.relative(project_dir, proposed_path)
+    if (relative.startsWith('..'))
+      throw new Error(
+        `Config path can not be outside of project directory "${project_dir}"`,
+      )
+    const settings = util.unsafeUnwrap(await get_cli_settings(cwd))
+    settings['default_config_path'] = config_path
+    return set_cli_settings(cwd, settings)
   }
 }
 
@@ -297,14 +414,14 @@ export namespace generate {
   export function subject(url: URL) {
     const site_path = site_paths[util.random_int(0, site_paths.length)]
     const site_slug = site_slugs[util.random_int(0, site_slugs.length)]
-    return new URL(path.join(site_path, site_slug), url).href
+    return new URL(path.resolve(site_path, site_slug), url).href
   }
 
   export function comment_body(seed?: string[]) {
     // use meta imports to determine where the model file is stored
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = path.dirname(__filename)
-    const modelPath = path.join(__dirname, 'comments-markov-model.json')
+    const modelPath = path.resolve(__dirname, 'comments-markov-model.json')
 
     // load the model into markov chain and generate text
     const model_data = fs.promises.readFile(modelPath, 'utf-8')
@@ -371,6 +488,52 @@ export namespace generate {
       const email_addr = (email_matches! ?? [''])[1].trim()
       return { name, addr: email_addr }
     } else return { name: undefined, addr: email }
+  }
+
+  export async function signet(
+    key: string,
+    cli_system: R3plySystemConfig,
+    domain: string,
+    r3ply: string,
+    issued?: string,
+  ): Promise<{
+    domain: string
+    r3ply: string
+    signet: string
+    issued: string
+  }> {
+    if (r3ply == project.DEFAULT_R3PLY_DOMAIN) {
+      return Signet.issue(key, cli_system)(domain, r3ply, issued).then(
+        (signet) => {
+          return {
+            domain,
+            r3ply,
+            ...signet,
+          }
+        },
+      )
+    } else {
+      return fetch(
+        new URL(
+          `https://${r3ply}/site/new/${domain}${issued ? `/${issued}` : ''}`,
+        ),
+      ).then((response) => {
+        if (response.ok)
+          return response.json().then(
+            (json) =>
+              json as {
+                domain: string
+                r3ply: string
+                signet: string
+                issued: string
+              },
+          )
+        else
+          return response.text().then((text) => {
+            throw new Error(text)
+          })
+      })
+    }
   }
 
   export function config(site_config: R3plySiteConfig) {

@@ -155,7 +155,19 @@ if (import.meta.vitest) {
     // @ts-ignore todo: figure out how to get vscode to recognize these vitest raw imports
     const real_001 = await import('../../test-data/eml/real/001.eml?raw')
     let email_bytes = new TextEncoder().encode(real_001.default)
-    const { signet, issued } = await Signet.issue(signet_key)(
+    let system_config = systemConfigParser(
+      JSON.stringify(
+        TOML.parse(`
+    version = "0.0.1"
+    domains = ["r3ply.com"]
+
+    [[admin]]
+    name = "Guybrush Threepwood"
+    email = "guybrush@example.com"
+    `),
+      ),
+    ).value!
+    const { signet, issued } = await Signet.issue(signet_key, system_config)(
       'spenc.es',
       'r3ply.com',
       '2025-08-25',
@@ -211,19 +223,7 @@ url = "https://example.com/comments"
 `),
       ),
     )
-    let system_config = systemConfigParser(
-      JSON.stringify(
-        TOML.parse(`
-version = "0.0.1"
-domains = ["r3ply.com"]
-
-[[admin]]
-name = "Guybrush Threepwood"
-email = "guybrush@example.com"
-`),
-      ),
-    )
-    let r3ply = R3ply(system_config.value!)
+    let r3ply = R3ply(system_config)
 
     let email_handler = r3ply.comments.viaEmail(signet_key, encrypt_email_key)
     await expect(

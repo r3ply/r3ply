@@ -3,7 +3,10 @@ import { cli_handle_comment_via_email, project, generate } from './lib.js'
 import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
-import { R3plySiteConfig, systemConfigParser } from '@r3ply/config'
+import {
+  R3plySiteConfig,
+  siteConfigParser,
+} from '@r3ply/config'
 import path from 'path'
 import { resolve_config_references } from '@r3ply/lib'
 import { highlight } from 'cli-highlight'
@@ -27,11 +30,14 @@ export function init_cmd(cwd: string) {
       return project
         .init_r3ply_project_at(cwd, directory)
         .then(async (result) => {
-          const { r3ply_dir, signet_key } = util.unsafeUnwrap(result)
-          const { signet, issued } = await Signet.issue(signet_key)(
-            project.DEFAULT_SITE_DOMAIN,
-            project.DEFAULT_R3PLY_DOMAIN,
+          const system_config = util.unsafeUnwrap(
+            await project.get_cli_system_config(cwd),
           )
+          const { r3ply_dir, signet_key } = util.unsafeUnwrap(result)
+          const { signet, issued } = await Signet.issue(
+            signet_key,
+            system_config,
+          )(project.DEFAULT_SITE_DOMAIN, project.DEFAULT_R3PLY_DOMAIN)
           const toml_site_entry = `[[site]]
 domain = "${project.DEFAULT_SITE_DOMAIN}"
 r3ply = "${project.DEFAULT_R3PLY_DOMAIN}"
@@ -63,6 +69,13 @@ export function config_cmd(cwd: string) {
         throw new Error(
           `config failed validation:\n\n${JSON.stringify(site_config.errors, null, 2)}`,
         )
+    })
+
+  config_cmd
+    .command('set-default <path>')
+    .description('the default config path r3ply will use')
+    .action(async (path) => {
+      await project.set_default_cli_config_path(cwd, path)
     })
 
   // TODO:
@@ -135,7 +148,38 @@ export function generate_cmd(cwd: string) {
         console.log(`mailto:${query ? `?${query}` : ''}`)
       },
     )
-
+  function signet_questions(site: string, r3ply: string, date: string) {
+    const signet_questions: PromptObject[] = [
+      {
+        type: 'text',
+        name: 'site',
+        message: 'To what domain will the signet be issued?',
+        initial: site,
+        validate: (site) =>
+          Result.safe(() => new URL(`https://${site}`)).isOk(),
+        format: (site) => new URL(`https://${site}`).hostname,
+      },
+      {
+        type: 'text',
+        name: 'r3ply',
+        message: 'What r3ply domain will issue the signet?',
+        initial: r3ply,
+        validate: (r3ply) =>
+          Result.safe(() => new URL(`https://${r3ply}`)).isOk(),
+        format: (r3ply) => new URL(`https://${r3ply}`).hostname,
+      },
+      {
+        type: 'text',
+        name: 'date',
+        message: 'What is the date of issue?',
+        initial: date,
+        validate: async (date) => {
+          return dayjs(date).isValid()
+        },
+      },
+    ]
+    return signet_questions
+  }
   const signet_cmd = generate_cmd
     .command('signet')
     .description('get a signet issued')
@@ -150,7 +194,6 @@ export function generate_cmd(cwd: string) {
       project.DEFAULT_R3PLY_DOMAIN,
     )
     .option('--date <string>', 'date signet was issued (default: today)')
-    .option('--interactive', 'foo', false)
     .action(
       async (options: {
         site: string
@@ -159,42 +202,25 @@ export function generate_cmd(cwd: string) {
         interactive: boolean
       }) => {
         const keys = await project.get_keys(cwd)
-        const result = await Signet.issue(keys.signet_key)(
+        const cli_system_config = util.unsafeUnwrap(
+          await project.get_cli_system_config(cwd),
+        )
+        const signet = await generate.signet(
+          keys.signet_key,
+          cli_system_config,
           options.site,
           options.r3ply,
           options.date,
         )
+        // TODO - add back in the interactive version once I've figured out an elegant UX for generating the config
         if (options.interactive) {
-          const questions: PromptObject[] = [
-            {
-              type: 'text',
-              name: 'site',
-              message: 'To what domain will the signet be issued?',
-              initial: options.site,
-              validate: (site) =>
-                Result.safe(() => new URL(`https://${site}`)).isOk(),
-              format: (site) => new URL(`https://${site}`).hostname,
-            },
-            {
-              type: 'text',
-              name: 'r3ply',
-              message: 'What r3ply domain will issue the signet?',
-              initial: options.r3ply,
-              validate: (r3ply) =>
-                Result.safe(() => new URL(`https://${r3ply}`)).isOk(),
-              format: (r3ply) => new URL(`https://${r3ply}`).hostname,
-            },
-            {
-              type: 'text',
-              name: 'date',
-              message: 'What date should the signet be issued for?',
-              initial: dayjs().format('YYYY-MM-DD'),
-              validate: async (date) => {
-                return dayjs(date).isValid()
-              },
-            },
-          ]
-          const answers = await prompts(questions)
+          const answers = await prompts(
+            signet_questions(
+              options.site,
+              options.r3ply,
+              options.date ?? dayjs().format('YYYY-MM-DD'),
+            ),
+          )
           options.site = answers.site
           options.r3ply = answers.r3ply
           options.date = answers.date
@@ -202,7 +228,7 @@ export function generate_cmd(cwd: string) {
         console.log(
           highlight(
             TOML.stringify({
-              site: [{ domain: options.site, r3ply: options.r3ply, ...result }],
+              signet,
             }),
           ),
         )
@@ -212,27 +238,53 @@ export function generate_cmd(cwd: string) {
   const config_cmd = generate_cmd
     .command('config')
     .description('generate a config')
-    .option('-i, --interactive', 'interactively generate config', false)
-    .action(async (options: { interactive: boolean }) => {
-      const questions: PromptObject[] = [
-        {
-          type: 'text',
-          name: 'username',
-          message: 'What is your GitHub username?',
+    .option(
+      '--site <string>',
+      `domain the signet is issued to (default: ${project.DEFAULT_SITE_DOMAIN})`,
+      project.DEFAULT_SITE_DOMAIN,
+    )
+    .option(
+      '--r3ply <string>',
+      `domain of issuing r3ply server (default: ${project.DEFAULT_R3PLY_DOMAIN})`,
+      project.DEFAULT_R3PLY_DOMAIN,
+    )
+    .option('--date <string>', 'date signet was issued (default: today)')
+    .option(
+      '--moderation <github | webhook>',
+      'moderation method (default: github)',
+      'github',
+    )
+    .action(async (options: { site: string; r3ply: string; date?: string }) => {
+      const site = await project.get_keys(cwd).then((keys) =>
+        project.get_cli_system_config(cwd).then((system_config) => {
+          return generate.signet(
+            keys.signet_key,
+            util.unsafeUnwrap(system_config),
+            options.site,
+            options.r3ply,
+            options.date,
+          )
+        }),
+      )
+      const minimal_github_config = {
+        type: 'github',
+        repo: 'https://github.com/<YOUR_USERNAME>/<YOUR_PROJECT>',
+        'file_path_{}': '',
+      }
+      const minimal_config = {
+        version: '0.0.1',
+        site: [site],
+        comments: {
+          email: {
+            moderation: {
+              ...minimal_github_config,
+            },
+          },
         },
-        {
-          type: 'number',
-          name: 'age',
-          message: 'How old are you?',
-        },
-        {
-          type: 'text',
-          name: 'about',
-          message: 'Tell something about yourself',
-          initial: 'Why should I?',
-        },
-      ]
-      console.log(await prompts(questions))
+      }
+      const parsed = siteConfigParser(JSON.stringify(minimal_config)).value!
+      console.log(highlight(TOML.stringify(parsed)))
+      return
     })
 
   const email_cmd = generate_cmd
@@ -254,21 +306,10 @@ export function generate_cmd(cwd: string) {
         body?: string
         messageId?: string
       }) => {
-        let site_config: R3plySiteConfig
-        if (generate_cmd.parent?.opts().config) {
-          site_config = util.unsafeUnwrap(
-            await project.get_site_config(
-              cwd,
-              generate_cmd.parent?.opts().config,
-            ),
-          )
-        } else {
-          const project_dir = (await project.find_project_dir(cwd)).unwrap()
-          site_config = util.unsafeUnwrap(
-            await project.get_site_config(project_dir, undefined),
-          )
-        }
-
+        let site_config: R3plySiteConfig = await project.resolve_config(
+          cwd,
+          generate_cmd.parent?.opts().config,
+        )
         const site = site_config.site[util.random_int(site_config.site.length)]
 
         const email = Result.safe(
@@ -328,50 +369,24 @@ export function simulate_cmd(cwd: string) {
         },
         cmd,
       ) => {
-        let site_config: R3plySiteConfig
-        let site_config_path: string
-        let file_resolver: (file_uri?: string) => Promise<string | undefined>
-        if (simulate_cmd.parent?.opts().config) {
-          site_config = util.unsafeUnwrap(
-            await project.get_site_config(
-              cwd,
-              simulate_cmd.parent?.opts().config,
-            ),
-          )
-          site_config_path = util.unsafeUnwrap(
-            await project.get_site_config_path(
-              cwd,
-              simulate_cmd.parent?.opts().config,
-            ),
-          )
-          file_resolver =
-            project.resolve_file_relative_to_site_config(site_config_path)
-        } else {
-          const project_dir = (await project.find_project_dir(cwd)).unwrap()
-          site_config = util.unsafeUnwrap(
-            await project.get_site_config(project_dir, undefined),
-          )
-          site_config_path = util.unsafeUnwrap(
-            await project.get_site_config_path(project_dir, undefined),
-          )
-          file_resolver =
-            project.resolve_file_relative_to_site_config(site_config_path)
-        }
+        let site_config_path: string = await project.resolve_config_path(
+          cwd,
+          simulate_cmd.parent?.opts().config,
+        )
+        let site_config: R3plySiteConfig = await project.resolve_config(
+          cwd,
+          simulate_cmd.parent?.opts().config,
+        )
+        let file_resolver: (file_uri?: string) => Promise<string | undefined> =
+          project.resolve_file_relative_to_site_config(site_config_path)
         site_config = await resolve_config_references(
           site_config,
           site_config_path,
           project.dereference_local_file,
         )
-        const cli_system_config_toml = TOML.parse(`
-        version  = "0.0.1"
-        domains = ${JSON.stringify(site_config.site.map((s) => s.r3ply))}
-        [[admin]]
-        name = "Guybrush Threepwood"
-        email = "guybrush@example.com"`)
-        const cli_system_config = systemConfigParser(
-          JSON.stringify(cli_system_config_toml),
-        ).value!
-
+        const cli_system_config = util.unsafeUnwrap(
+          await project.get_cli_system_config(cwd),
+        )
         const site = ((to: string | undefined) => {
           let site_domain = to ? to.split('@')[0] : project.DEFAULT_SITE_DOMAIN
           const site = site_config.site.find((k) => k.domain == site_domain)
@@ -423,7 +438,7 @@ export function simulate_cmd(cwd: string) {
                   console.log(`${chalk.whiteBright('=== System Config ===\n')}`)
                 console.log(
                   highlight(
-                    `# Generated using site config \n${TOML.stringify(cli_system_config_toml)}`,
+                    `# Generated using site config \n${TOML.stringify(cli_system_config)}`,
                     { language: 'toml', ignoreIllegals: true },
                   ) + '\n',
                 )

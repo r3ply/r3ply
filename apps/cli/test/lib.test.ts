@@ -155,7 +155,7 @@ describe('CLI library', () => {
       ).unwrapErr().message,
     ).toMatch(/No config found at/)
   })
-  test.only('resolve_file_relative_to_site_config', async () => {
+  test('resolve_file_relative_to_site_config', async () => {
     mockfs({
       '/.r3ply': {},
       '/public/.well-known/r3ply/config.toml': '',
@@ -196,11 +196,12 @@ describe('CLI library', () => {
         e: {},
       },
     })
-    expect((await project.init_r3ply_project_at('root/a')).unwrap()).toBe(
-      'root/a/.r3ply',
-    )
     expect(
-      (await project.init_r3ply_project_at('root/a', '../e')).unwrapUnchecked(),
+      (await project.init_r3ply_project_at('root/a')).unwrap().r3ply_dir,
+    ).toBe('root/a/.r3ply')
+    expect(
+      (await project.init_r3ply_project_at('root/a', '../e')).unwrap()
+        .r3ply_dir,
     ).toBe('root/e/.r3ply')
     expect(
       (await project.init_r3ply_project_at('root', 'b')).unwrapErr().message,

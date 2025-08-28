@@ -16,7 +16,7 @@ function api(r3ply: R3plySystemConfig) {
     }
     const { domain, issued } = c.req.param()
     const new_site_url = new URL(`https://${domain}`)
-    const result = Signet.issue(c.env.SIGNET_KEY)(
+    const result = Signet.issue(c.env.SIGNET_KEY, r3ply)(
       new_site_url.hostname,
       req_url.hostname,
       issued,
