@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { toHex } from '../util'
 import crypto from 'crypto'
 
@@ -44,10 +45,9 @@ export async function make_short_signet(
   )
 
   // Generate a key ID based on the date for future roations
-  const issued = issued_date ?? new Date().toISOString().split('T')[0]
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(issued))
-    throw new Error('issued must be formatted like: YYYY-MM-DD')
+  const day = dayjs(issued_date ?? new Date())
+  if (!day.isValid()) throw new Error('issued must be a valid date')
+  const issued = day.format('YYYY-MM-DD')
 
   // Derive a per-site HMAC key
   const site_entry = new TextEncoder().encode(

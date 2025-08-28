@@ -372,6 +372,10 @@ export namespace generate {
       return { name, addr: email_addr }
     } else return { name: undefined, addr: email }
   }
+
+  export function config(site_config: R3plySiteConfig) {
+    return TOML.stringify(site_config)
+  }
 }
 
 export async function cli_handle_comment_via_email(

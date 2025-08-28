@@ -10,6 +10,7 @@ import { highlight } from 'cli-highlight'
 import TOML from '@iarna/toml'
 import { Signet } from '@r3ply/lib'
 import crypto from 'crypto'
+import prompts, { PromptObject } from 'prompts'
 
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
@@ -133,6 +134,62 @@ export function generate_cmd(cwd: string) {
         console.log(`mailto:${query ? `?${query}` : ''}`)
       },
     )
+
+  const signet_cmd = generate_cmd
+    .command('signet')
+    .description('get a signet issued')
+    .option(
+      '--site <string>',
+      `domain the signet is issued to (default: ${project.DEFAULT_SITE_DOMAIN})`,
+      project.DEFAULT_SITE_DOMAIN,
+    )
+    .option(
+      '--r3ply <string>',
+      `domain of issuing r3ply server (default: ${project.DEFAULT_R3PLY_DOMAIN})`,
+      project.DEFAULT_R3PLY_DOMAIN,
+    )
+    .option('--date <string>', 'date signet was issued (default: today)')
+    .action(async (options: { site: string; r3ply: string; date?: string }) => {
+      const keys = await project.get_keys(cwd)
+      const result = await Signet.issue(keys.signet_key)(
+        options.site,
+        options.r3ply,
+        options.date,
+      )
+      console.log(
+        highlight(
+          TOML.stringify({
+            site: [{ domain: options.site, r3ply: options.r3ply, ...result }],
+          }),
+        ),
+      )
+    })
+
+  const config_cmd = generate_cmd
+    .command('config')
+    .description('generate a config')
+    .option('-i, --interactive', 'interactively generate config', false)
+    .action(async (options: { interactive: boolean }) => {
+      const questions: PromptObject[] = [
+        {
+          type: 'text',
+          name: 'username',
+          message: 'What is your GitHub username?',
+        },
+        {
+          type: 'number',
+          name: 'age',
+          message: 'How old are you?',
+        },
+        {
+          type: 'text',
+          name: 'about',
+          message: 'Tell something about yourself',
+          initial: 'Why should I?',
+        },
+      ]
+      console.log(await prompts(questions))
+    })
 
   const email_cmd = generate_cmd
     .command('email')

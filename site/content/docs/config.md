@@ -282,9 +282,9 @@ notify_moderator_upon_receipt = false
 - `comment_received_notif_{}"` - new comment notification template (string template)
 - `&comment_received_notif_{}"` - new comment notification template (file reference)
 
-## Full Config
+## Complete Config
 
-Below is the full config, with all values filled out. Note that the vast majority of these values have defaults.
+Below are all config keys, commented, with example values filled out. Note that the vast majority of these values have defaults.
 
 <div class="select-all">
 
@@ -355,6 +355,15 @@ repo = "https://github.com/getzola/zola"
 "commit_msg_{}" = "Add comment by {{ author.pseudonym[:8] }}"
 # pull request body template (template string)
 "&pr_body_{}" = "../pr.template.txt"
+
+## webhook moderation shown here commented out
+#[comments.email.moderation]
+## indicates the type of moderation. Either `github` or `webhook` are supported
+#type = "webhook"
+## matches from this list will skip moderation. Uses glob patterns
+#"allow_list" = ["18a793ce3d", "*@spenc.es"]
+## url of where new comments will be posted
+#url = "https://example/coment/new"
 
 [comments.email.notify]
 # set to false to disable all notifications to the commenter. Default is false.
