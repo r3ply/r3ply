@@ -2,7 +2,7 @@
   "name": "@r3ply/docs",
   "version": "0.0.1",
   "description": "r3ply site and documentation",
-  "public": false,
+  "private": true,
   "scripts": {
     "build": "zola build $BUILD_OPTS && npx @tailwindcss/cli -i ./css/input.css -o ./public/style.css -m",
     "serve": "zola serve $SERVE_OPTS & npx @tailwindcss/cli  -i ./css/input.css -o ./public/style.css --watch && wait",
