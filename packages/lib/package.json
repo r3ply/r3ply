@@ -5,10 +5,15 @@
   "description": "The r3ply commenting system.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "devDependencies": {
     "@types/micromatch": "^4.0.9",
     "typescript": "^5.5.4",
-    "vitest": "^3.0.8"
+    "vitest": "^3.0.8",
+    "tsup": "^8.4.0"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -17,8 +22,7 @@
     "@r3ply/wasm": "file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz",
     "dayjs": "^1.11.13",
     "micromatch": "^4.0.8",
-    "oxide.ts": "^1.1.0",
-    "tsup": "^8.4.0"
+    "oxide.ts": "^1.1.0"
   },
   "scripts": {
     "build": "tsup",
