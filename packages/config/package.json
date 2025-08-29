@@ -12,6 +12,10 @@
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build:generate": "tsx generate.ts",
     "build:compile": "tsup src/generated/index.ts --dts --clean --format esm,cjs",
