@@ -8,6 +8,10 @@
   "bin": {
     "re": "./dist/index.mjs"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "build:watch": "tsup --watch",
