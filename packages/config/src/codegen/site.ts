@@ -31,7 +31,7 @@ export function mk_site_singleton(site_parser: ConfigParser<R3plySiteConfig>) {
       required: { site: R3plySignetConfig[] },
       overrides?: DeepPartial<R3plySiteConfig>,
     ) {
-      const minimal_config = {
+      const minimal_config: DeepPartial<R3plySiteConfig> = {
         site: required.site,
         comments: {
           email: {},
