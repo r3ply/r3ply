@@ -1,12 +1,12 @@
 import { writeFileSync, mkdirSync } from 'fs'
 import {
   module as site_config_module,
-  schema as site_config_schema,
-} from './src/site.config.0.0.1'
+  site_schema as site_config_schema,
+} from './src/schema/site.config.0.0.1'
 import {
   module as system_config_module,
   schema as system_config_schema,
-} from './src/system.config.0.0.1'
+} from './src/schema/system.config.0.0.1'
 
 // Write generated file
 mkdirSync('./src/generated', { recursive: true })
@@ -27,14 +27,29 @@ writeFileSync(
 
 // Export generated files
 let index_ts = `
-export { parser as siteConfigParser } from './site.config.parser'
+
 export type { R3plySiteConfig } from './site.config.parser'
-export type { R3plyNotifyConfig } from './site.config.parser'
-export type { R3plyModerationConfig } from './site.config.parser'
-export type { R3plyCommentsConfig } from './site.config.parser'
+export type { R3plySignetConfig } from '../subschema/signet'
+export type { R3plyNotifyConfig } from '../subschema/notify'
+export type { R3plyModerationConfig } from '../subschema/moderation/moderation'
+export type { R3plyCommentsConfig } from '../subschema/comments'
 
 export { parser as systemConfigParser } from './system.config.parser'
+// import { parser as systemConfigParser } from './system.config.parser'
+export { parser as siteConfigParser } from './site.config.parser'
 export type { R3plySystemConfig } from './system.config.parser'
+
+import { make_generic_parser } from '../util'
+import { parser } from './site.config.parser'
+import { site } from '../site.config.0.0.1'
+import { FromSchema } from 'json-schema-to-ts'
+
+// export type R3plySiteConfig = FromSchema<typeof site>
+// export const R3plySiteConfig: any = {}
+// R3plySiteConfig['parse'] = make_generic_parser<R3plySiteConfig>(parser)
+// export const foo = make_generic_parser(systemConfigParser)
+
+
 `
 writeFileSync('./src/generated/index.ts', index_ts)
 writeFileSync(
