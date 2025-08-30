@@ -2,17 +2,16 @@ import { Schema } from '@exodus/schemasafe'
 import {
   FromSchema,
   FromSchemaDefaultOptions,
-  FromSchemaOptions,
   JSONSchema,
 } from 'json-schema-to-ts'
 import { notify } from './notify'
 import { moderation } from './moderation'
-import { github } from './moderation/github'
-import { webhook } from './moderation/webhook'
+import { github } from './github'
+import { webhook } from './webhook'
 
 export const comments = {
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/comments.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
-  $id: 'https://r3ply.com/schema/comments',
   title: 'r3ply site config for comments',
   description: 'JSON Schema to configure how comments are handled',
   type: 'object',
@@ -150,14 +149,14 @@ export const comments = {
           type: 'array',
           description: 'Configuration of moderation steps.',
           items: {
-            $ref: 'https://r3ply.com/schema/moderation#',
+            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json',
           },
           default: [],
           $comment:
             "Each moderation config will be processed in the order they're defined",
         },
         notify: {
-          $ref: 'https://r3ply.com/schema/notify',
+          $ref: 'https://r3ply.com/schemas/v0.0.1/config/notify.v0.0.1.json',
           default: {
             commenter: false,
             notify_commenter_upon_submission: false,

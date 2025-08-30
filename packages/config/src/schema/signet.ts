@@ -2,8 +2,8 @@ import { Schema } from '@exodus/schemasafe'
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 
 export const signet = {
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/signet.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
-  $id: 'https://r3ply.com/schema/signet',
   $anchor: 'signet',
   description:
     'Configuration for each site, including domain, r3ply server, and signet information.',
