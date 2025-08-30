@@ -1,4 +1,8 @@
-import { JSONSchema } from 'json-schema-to-ts'
+import {
+  FromSchema,
+  FromSchemaDefaultOptions,
+  JSONSchema,
+} from 'json-schema-to-ts'
 import { parser } from '@exodus/schemasafe'
 import { github } from './moderation/github'
 import { webhook } from './moderation/webhook'
@@ -7,10 +11,8 @@ import { notify } from './notify'
 import { comments } from './comments'
 import { signet } from './signet'
 import { make_config_parser, make_typed_parser, ConfigParser } from '../util'
-import {
-  mk_r3ply_singleton,
-  R3plySiteConfig as R3plySignetConfigGenerated,
-} from '../generate'
+import { R3plySiteConfig as R3plySignetConfigGenerated } from '../codegen'
+import { mk_r3ply_singleton } from '../codegen/site'
 export const site = {
   $schema: 'http://json-schema.org/draft-04/schema#',
   title: 'r3ply site config schema v0.0.1',
@@ -53,4 +55,16 @@ const site_parser: ConfigParser<R3plySignetConfigGenerated> =
     make_typed_parser<R3plySignetConfigGenerated>(raw_site_parser),
   )
 export const R3plySiteConfig = mk_r3ply_singleton(site_parser)
-export type R3plySiteConfig = R3plySignetConfigGenerated
+export type R3plySiteConfig = FromSchema<
+  typeof site,
+  FromSchemaDefaultOptions & {
+    references: [
+      typeof signet,
+      typeof comments,
+      typeof moderation,
+      typeof github,
+      typeof webhook,
+      typeof notify,
+    ]
+  }
+>

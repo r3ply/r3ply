@@ -17,12 +17,8 @@
     "README.md"
   ],
   "scripts": {
-    "build:foo": "tsx src/generate/generate.ts",
-    "build:foo:compile": "tsup src/generated2/index.ts --dts --clean --format esm,cjs --external @iarna/toml",
-    "build:bar": "tsx deleteme/generate.ts",
-    "build:bar:compile": "tsup src/bar/index.ts --dts --clean --format esm,cjs --external @iarna/toml",
-    "build:generate": "tsx generate.ts",
-    "build:compile": "tsup src/generated/index.ts --dts --clean --format esm,cjs",
+    "build:generate": "tsx src/codegen/generate.ts",
+    "build:compile": "tsup src/generated/index.ts --dts --clean --format esm,cjs --external @iarna/toml",
     "build:copy": "cp src/generated/*.schema.json dist",
     "build": "npm run build:generate && npm run build:compile && npm run build:copy",
     "test": "npx vitest run",
