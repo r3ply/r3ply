@@ -1,1 +1,8 @@
 export { R3plySiteConfig, site_parser } from './site'
+export { R3plySignetConfig } from '../schema/signet'
+export { R3plyCommentsConfig } from '../schema/comments'
+export { R3plyModerationConfig } from '../schema/moderation'
+export { R3plyGithubConfig } from '../schema/github'
+export { R3plyWebhookConfig } from '../schema/webhook'
+export { R3plyNotifyConfig } from '../schema/notify'
+export { R3plySystemConfig } from '../schema/r3ply'

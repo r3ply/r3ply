@@ -2,8 +2,8 @@ import { Schema } from '@exodus/schemasafe'
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 
 export const github = {
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/github.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
-  $id: 'https://r3ply.com/schema/github',
   type: 'object',
   required: ['owner', 'repo', 'type', 'file_path_{}'],
   additionalProperties: false,

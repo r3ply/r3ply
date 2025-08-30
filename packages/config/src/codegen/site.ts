@@ -7,7 +7,7 @@ import {
   merge_with_defaults,
   TypedParseResult,
 } from '../util'
-import { R3plySiteConfig as R3plySiteConfigLibrary } from '../schema/site.config.0.0.1'
+import { R3plySiteConfig as R3plySiteConfigLibrary } from '../schema/site'
 import { R3plySignetConfig } from '../schema/signet'
 
 export const raw_parser_module = '<RAW_SITE_PARSER_MODULE>'
@@ -18,8 +18,8 @@ export const site_parser: ConfigParser<R3plySiteConfig> = make_config_parser(
   make_typed_parser<R3plySiteConfig>(raw_site_parser),
 )
 export type R3plySiteConfig = R3plySiteConfigLibrary
-export const R3plySiteConfig = mk_r3ply_singleton(site_parser)
-export function mk_r3ply_singleton(site_parser: ConfigParser<R3plySiteConfig>) {
+export const R3plySiteConfig = mk_site_singleton(site_parser)
+export function mk_site_singleton(site_parser: ConfigParser<R3plySiteConfig>) {
   type SiteConfigGenerator = (
     required: { site: R3plySignetConfig[] },
     overrides?: DeepPartial<R3plySiteConfig>,

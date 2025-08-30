@@ -9,8 +9,8 @@ import { github } from './github'
 import { webhook } from './webhook'
 
 export const moderation = {
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
-  $id: 'https://r3ply.com/schema/moderation',
   title: 'r3ply schema for moderation of comments via email',
   description:
     "JSON Schema to configure what should happen to comments received via email, after they've been processed.",
@@ -22,10 +22,10 @@ export const moderation = {
   },
   oneOf: [
     {
-      $ref: 'https://r3ply.com/schema/github',
+      $ref: 'https://r3ply.com/schemas/v0.0.1/config/github.v0.0.1.json',
     },
     {
-      $ref: 'https://r3ply.com/schema/webhook',
+      $ref: 'https://r3ply.com/schemas/v0.0.1/config/webhook.v0.0.1.json',
     },
   ],
 } as const satisfies JSONSchema & Schema

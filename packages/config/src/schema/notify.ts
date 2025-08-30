@@ -2,8 +2,8 @@ import { Schema } from '@exodus/schemasafe'
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 
 export const notify = {
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/notify.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
-  $id: 'https://r3ply.com/schema/notify',
   title: 'r3ply schema for notifications of comments via email',
   description: 'JSON Schema to configure notifications.',
   type: 'object',

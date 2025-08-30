@@ -1,7 +1,10 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
-import { parser as schemasafe_parser, ParseResult } from '@exodus/schemasafe'
+import { parser, Schema } from '@exodus/schemasafe'
+import { ConfigParser, make_config_parser, make_typed_parser } from '../util'
+import { mk_r3ply_singleton } from '../codegen/r3ply'
 
-export const schema_ts = {
+export const r3ply = {
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/r3ply.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
   title: 'r3ply system config schema v0.0.1',
   description:
@@ -32,14 +35,14 @@ export const schema_ts = {
       type: 'boolean',
       default: true,
     },
-    sites: {
+    'sites*': {
       type: 'array',
       items: {
         type: 'string',
         pattern: '^[\\S]*$',
         maxLength: 128,
       },
-      default: ['*'],
+      default: ['**'],
     },
     admin: {
       type: 'array',
@@ -79,7 +82,7 @@ export const schema_ts = {
       default: {
         enabled: true,
         moderation: false,
-        attachments: true,
+        attachments: false,
         max_size_bytes: 5242880,
         block_list: [],
       },
@@ -109,12 +112,11 @@ export const schema_ts = {
         },
         attachments: {
           description: 'If false attachments are ignored',
-          type: 'boolean',
-          default: false,
+          const: false,
           $comment:
             'Warning: if disabled, site configs for attachments will be ignored',
         },
-        block_list: {
+        'block*': {
           description:
             'system-wide block list, works upstream of site blocklists',
           type: 'array',
@@ -129,42 +131,15 @@ export const schema_ts = {
       },
     },
   },
-} as const satisfies JSONSchema
-const basic_parser = schemasafe_parser(schema_ts as any, {
+} as const satisfies JSONSchema & Schema
+export const raw_system_parser = parser(r3ply, {
   useDefaults: true,
   includeErrors: true,
   allErrors: true,
 })
-
-export const schema = basic_parser.toJSON()
-
-export type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
-  value?: T
-}
-export type R3plySystemConfig = FromSchema<typeof schema_ts>
-export const parser = (input: string) => {
-  let parse_result = basic_parser(input)
-  return parse_result as TypedParseResult<R3plySystemConfig>
-}
-
-export const module = `/** This file is generated. DO NOT EDIT. */
-import { ParseResult } from '@exodus/schemasafe'
-import { FromSchema } from 'json-schema-to-ts'
-
-const schema = ${JSON.stringify(basic_parser.toJSON())} as const;
-
-type TypedParseResult<T> = Omit<ParseResult, 'value'> & {
-  value?: T
-}
-
-export type R3plySystemConfig = FromSchema<typeof schema>
-
-// The generated raw parser function.
-const raw_parser = ${basic_parser.toModule()}
-
-// A wrapper that adds type safety.
-export const parser = (input: string): TypedParseResult<R3plySystemConfig> => {
-  const parse_result = raw_parser(input) as ParseResult
-  return parse_result as TypedParseResult<R3plySystemConfig>
-}
-`
+export const system_schema = raw_system_parser.toJSON()
+const system_parser: ConfigParser<R3plySystemConfig> = make_config_parser(
+  make_typed_parser<R3plySystemConfig>(raw_system_parser),
+)
+export const R3plySystemConfig = mk_r3ply_singleton(system_parser)
+export type R3plySystemConfig = FromSchema<typeof r3ply>

@@ -3,17 +3,17 @@ import {
   FromSchemaDefaultOptions,
   JSONSchema,
 } from 'json-schema-to-ts'
-import { parser } from '@exodus/schemasafe'
-import { github } from './moderation/github'
-import { webhook } from './moderation/webhook'
+import { parser, Schema } from '@exodus/schemasafe'
+import { github } from './github'
+import { webhook } from './webhook'
 import { moderation } from './moderation'
 import { notify } from './notify'
 import { comments } from './comments'
 import { signet } from './signet'
 import { make_config_parser, make_typed_parser, ConfigParser } from '../util'
-import { R3plySiteConfig as R3plySignetConfigGenerated } from '../codegen'
-import { mk_r3ply_singleton } from '../codegen/site'
+import { mk_site_singleton } from '../codegen/site'
 export const site = {
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/site.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
   title: 'r3ply site config schema v0.0.1',
   description:
@@ -36,25 +36,25 @@ export const site = {
     site: {
       type: 'array',
       items: {
-        $ref: 'https://r3ply.com/schema/signet',
+        $ref: 'https://r3ply.com/schemas/v0.0.1/config/signet.v0.0.1.json',
       },
     },
     comments: {
-      $ref: 'https://r3ply.com/schema/comments',
+      $ref: 'https://r3ply.com/schemas/v0.0.1/config/comments.v0.0.1.json',
     },
   },
-} as const satisfies JSONSchema
-export const raw_site_parser = parser(site as any, {
+} as const satisfies JSONSchema & Schema
+export const raw_site_parser = parser(site, {
   useDefaults: true,
   includeErrors: true,
   allErrors: true,
   schemas: [signet, comments, moderation, github, webhook, notify],
 })
-const site_parser: ConfigParser<R3plySignetConfigGenerated> =
-  make_config_parser(
-    make_typed_parser<R3plySignetConfigGenerated>(raw_site_parser),
-  )
-export const R3plySiteConfig = mk_r3ply_singleton(site_parser)
+export const site_schema = raw_site_parser.toJSON()
+const site_parser: ConfigParser<R3plySiteConfig> = make_config_parser(
+  make_typed_parser<R3plySiteConfig>(raw_site_parser),
+)
+export const R3plySiteConfig = mk_site_singleton(site_parser)
 export type R3plySiteConfig = FromSchema<
   typeof site,
   FromSchemaDefaultOptions & {
