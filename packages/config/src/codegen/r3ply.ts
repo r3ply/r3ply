@@ -12,15 +12,15 @@ import { R3plySystemConfig as R3plySystemConfigLibrary } from '../schema/r3ply'
 export const raw_parser_module = '<RAW_SYSTEM_PARSER_MODULE>'
 
 /** PARSER */
-const raw_site_parser: Parse = raw_parser_module as any as Parse
+const raw_r3ply_parser: Parse = raw_parser_module as any as Parse
 export const system_parser: ConfigParser<R3plySystemConfig> =
-  make_config_parser(make_typed_parser<R3plySystemConfig>(raw_site_parser))
+  make_config_parser(make_typed_parser<R3plySystemConfig>(raw_r3ply_parser))
 export type R3plySystemConfig = R3plySystemConfigLibrary
 export const R3plySiteConfig = mk_r3ply_singleton(system_parser)
 export function mk_r3ply_singleton(
   system_parser: ConfigParser<R3plySystemConfig>,
 ) {
-  type SiteConfigGenerator = (
+  type SystemConfigGenerator = (
     required: {
       domains: string[]
       admin: {
@@ -32,7 +32,7 @@ export function mk_r3ply_singleton(
   ) => TypedParseResult<R3plySystemConfig>
   function make_r3ply_generator(
     system_parser: ConfigParser<R3plySystemConfig>,
-  ): SiteConfigGenerator {
+  ): SystemConfigGenerator {
     return function (
       required: {
         domains: string[]
@@ -46,6 +46,7 @@ export function mk_r3ply_singleton(
       const minimal_config: DeepPartial<R3plySystemConfig> = {
         admin: required.admin,
         domains: required.domains,
+        version: '0.0.1',
       }
       const defaults: R3plySystemConfig = system_parser(
         minimal_config,
