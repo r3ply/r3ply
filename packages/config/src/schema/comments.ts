@@ -1,7 +1,6 @@
 import { Schema } from '@exodus/schemasafe'
 import {
   FromSchema,
-  FromSchemaDefaultOptions,
   JSONSchema,
 } from 'json-schema-to-ts'
 import { notify } from './notify'
@@ -170,7 +169,7 @@ export const comments = {
 } as const satisfies JSONSchema & Schema
 export type R3plyCommentsConfig = FromSchema<
   typeof comments,
-  FromSchemaDefaultOptions & {
+  {
     references: [
       typeof moderation,
       typeof github,
