@@ -1,6 +1,10 @@
 import { writeFileSync, mkdirSync, readFileSync } from 'fs'
-import { raw_site_parser, site_schema } from '../schema/site'
-import { raw_system_parser, system_schema } from '../schema/r3ply'
+import {
+  raw_site_parser,
+  site_schema,
+  raw_system_parser,
+  system_schema,
+} from '../schema'
 
 // prepare directory
 mkdirSync('./src/generated', { recursive: true })

@@ -6,7 +6,7 @@ import {
   FromSchemaDefaultOptions,
 } from 'json-schema-to-ts'
 import { github } from './github'
-import { webhook } from './webhook'
+// import { webhook } from './webhook'
 
 export const moderation = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json',
@@ -24,12 +24,17 @@ export const moderation = {
     {
       $ref: 'https://r3ply.com/schemas/v0.0.1/config/github.v0.0.1.json',
     },
-    {
-      $ref: 'https://r3ply.com/schemas/v0.0.1/config/webhook.v0.0.1.json',
-    },
+    // {
+    //   $ref: 'https://r3ply.com/schemas/v0.0.1/config/webhook.v0.0.1.json',
+    // },
   ],
 } as const satisfies JSONSchema & Schema
 export type R3plyModerationConfig = FromSchema<
   typeof moderation,
-  FromSchemaDefaultOptions & { references: [typeof github, typeof webhook] }
+  FromSchemaDefaultOptions & {
+    references: [
+      typeof github,
+      // typeof webhook
+    ]
+  }
 >

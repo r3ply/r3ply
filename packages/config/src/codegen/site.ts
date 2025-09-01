@@ -1,14 +1,14 @@
 import { Parse } from '@exodus/schemasafe'
 import {
   ConfigParser,
-  DeepPartial,
   make_config_parser,
   make_typed_parser,
-  merge_with_defaults,
   TypedParseResult,
 } from '../util'
-import { R3plySiteConfig as R3plySiteConfigLibrary } from '../schema/site'
-import { R3plySignetConfig } from '../schema/signet'
+import {
+  MinimalR3plySiteConfig as MinR3plySiteConfigLib,
+  R3plySiteConfig as R3plySiteConfigLib,
+} from '../schema'
 
 export const raw_parser_module = '<RAW_SITE_PARSER_MODULE>'
 
@@ -17,33 +17,18 @@ const raw_site_parser: Parse = raw_parser_module as any as Parse
 export const site_parser: ConfigParser<R3plySiteConfig> = make_config_parser(
   make_typed_parser<R3plySiteConfig>(raw_site_parser),
 )
-export type R3plySiteConfig = R3plySiteConfigLibrary
+export type R3plySiteConfig = R3plySiteConfigLib
+export type MinimalR3plySiteConfig = MinR3plySiteConfigLib
 export const R3plySiteConfig = mk_site_singleton(site_parser)
 export function mk_site_singleton(site_parser: ConfigParser<R3plySiteConfig>) {
   type SiteConfigGenerator = (
-    required: { site: R3plySignetConfig[] },
-    overrides?: DeepPartial<R3plySiteConfig>,
+    min_site_config: MinimalR3plySiteConfig,
   ) => TypedParseResult<R3plySiteConfig>
   function make_site_generator(
     site_parser: ConfigParser<R3plySiteConfig>,
   ): SiteConfigGenerator {
-    return function (
-      required: { site: R3plySignetConfig[] },
-      overrides?: DeepPartial<R3plySiteConfig>,
-    ) {
-      const minimal_config: DeepPartial<R3plySiteConfig> = {
-        site: required.site,
-        comments: {
-          email: {},
-        },
-        version: '0.0.1',
-      }
-      const defaults: R3plySiteConfig = site_parser(
-        minimal_config,
-        'json',
-      ).value!
-      const overriden = merge_with_defaults(defaults, overrides)
-      return site_parser(overriden, 'json')
+    return function (min_site_config: MinimalR3plySiteConfig) {
+      return site_parser(min_site_config, 'json')
     }
   }
   return Object.assign(make_site_generator(site_parser), {

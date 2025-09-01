@@ -1,13 +1,14 @@
 import { Parse } from '@exodus/schemasafe'
 import {
   ConfigParser,
-  DeepPartial,
   make_config_parser,
   make_typed_parser,
-  merge_with_defaults,
   TypedParseResult,
 } from '../util'
-import { R3plySystemConfig as R3plySystemConfigLibrary } from '../schema/r3ply'
+import {
+  MinimalR3plySystemConfig,
+  R3plySystemConfig as R3plySystemConfigLibrary,
+} from '../schema'
 
 export const raw_parser_module = '<RAW_SYSTEM_PARSER_MODULE>'
 
@@ -21,39 +22,13 @@ export function mk_r3ply_singleton(
   system_parser: ConfigParser<R3plySystemConfig>,
 ) {
   type SystemConfigGenerator = (
-    required: {
-      domains: string[]
-      admin: {
-        email: string
-        name: string
-      }[]
-    },
-    overrides?: DeepPartial<R3plySystemConfig>,
+    minimal_sys_config: MinimalR3plySystemConfig,
   ) => TypedParseResult<R3plySystemConfig>
   function make_r3ply_generator(
     system_parser: ConfigParser<R3plySystemConfig>,
   ): SystemConfigGenerator {
-    return function (
-      required: {
-        domains: string[]
-        admin: {
-          email: string
-          name: string
-        }[]
-      },
-      overrides?: DeepPartial<R3plySystemConfig>,
-    ) {
-      const minimal_config: DeepPartial<R3plySystemConfig> = {
-        admin: required.admin,
-        domains: required.domains,
-        version: '0.0.1',
-      }
-      const defaults: R3plySystemConfig = system_parser(
-        minimal_config,
-        'json',
-      ).value!
-      const overriden = merge_with_defaults(defaults, overrides)
-      return system_parser(overriden, 'json')
+    return function (minimal_sys_config: MinimalR3plySystemConfig) {
+      return system_parser(minimal_sys_config, 'json')
     }
   }
   return Object.assign(make_r3ply_generator(system_parser), {

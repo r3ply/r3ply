@@ -10,7 +10,7 @@ export const r3ply = {
   description:
     'JSON Schema to describe the configuration of a r3ply system. See https://r3ply.com for more info.',
   type: 'object',
-  required: ['version', 'domains', 'admin'],
+  required: ['domains'],
   additionalProperties: false,
   properties: {
     version: {
@@ -18,16 +18,23 @@ export const r3ply = {
         'used to determine what version of the schema to use (and the version of r3ply)',
       type: 'string',
       enum: ['0.0.1'],
+      default: '0.0.1',
     },
     domains: {
       description: 'The r3ply domains that configuration applies to',
       type: 'array',
-      items: {
+      items: [
+        {
+          type: 'string',
+          format: 'hostname',
+        },
+      ],
+      additionalItems: {
         type: 'string',
         format: 'hostname',
       },
       minItems: 1,
-      examples: ['r3ply.com', 'test.r3ply.com'],
+      examples: [['r3ply.com'], ['test.r3ply.com']],
       $comment: 'must match the domain that serves the config',
     },
     enabled: {
@@ -143,3 +150,9 @@ const system_parser: ConfigParser<R3plySystemConfig> = make_config_parser(
 )
 export const R3plySystemConfig = mk_r3ply_singleton(system_parser)
 export type R3plySystemConfig = FromSchema<typeof r3ply>
+export type MinimalR3plySystemConfig = FromSchema<
+  typeof r3ply,
+  {
+    keepDefaultedPropertiesOptional: true
+  }
+>
