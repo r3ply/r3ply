@@ -1,16 +1,10 @@
-import {
-  FromSchema,
-  FromSchemaDefaultOptions,
-  JSONSchema,
-} from 'json-schema-to-ts'
-import {
-  signet,
-  comments,
-  moderation,
-  notify,
-  github,
-  // webhook,
-} from '../schema'
+import { FromSchema, JSONSchema } from 'json-schema-to-ts'
+import { signet } from './signet'
+import { comments } from './comments'
+import { moderation } from './moderation'
+import { github } from './github'
+import { webhook } from './webhook'
+import { notify } from './notify'
 import { make_config_parser, make_typed_parser, ConfigParser } from '../util'
 import { mk_site_singleton } from '../codegen/site'
 import { parser, Schema } from '@exodus/schemasafe'
@@ -57,7 +51,7 @@ export const raw_site_parser = parser(site, {
     comments,
     moderation,
     github,
-    // webhook,
+    webhook,
     notify,
   ],
 })
@@ -68,10 +62,10 @@ const site_parser: ConfigParser<R3plySiteConfig> = make_config_parser(
 export const R3plySiteConfig = mk_site_singleton(site_parser)
 export type R3plySiteConfig = FromSchema<
   typeof site,
-  FromSchemaDefaultOptions & {
+  {
     // prettier-ignore
     references: [ typeof signet, typeof comments, typeof moderation, typeof github,
-      // typeof webhook,
+      typeof webhook,
       typeof notify]
   }
 >
@@ -81,7 +75,7 @@ export type MinimalR3plySiteConfig = FromSchema<
     keepDefaultedPropertiesOptional: true
     // prettier-ignore
     references: [ typeof signet, typeof comments, typeof moderation, typeof github,
-      // typeof webhook,
+      typeof webhook,
       typeof notify]
   }
 >
