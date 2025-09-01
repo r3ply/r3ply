@@ -138,3 +138,78 @@ export function make_config_parser<T>(parser: TypedParse<T>): ConfigParser<T> {
     })(content_to_parse)
   }
 }
+
+/**
+ * This was a way I came up with and didn't end up using, but I didn't want to throw it away either.
+ * It's a way of doing something like changing the optionality of properties in a schema if they have defaults
+ * This already exists in `json-schema-to-ts`, but marking that property as required overrides the behavior.
+ * Unfortunately, I didn't realize that parsers will not supply defaults if a property is marked as required.
+ * But I think the approach was interesting and a kind of metaprogramming on schema that could be useful one day.
+ *
+ * @example
+ *   type UserDefaultsMarked = FromSchema<
+ *   typeof user_schema,
+ *     {
+ *       deserialize: [
+ *         {
+ *           pattern: {
+ *             default: {},
+ *           },
+ *           output: { required: false }
+ *         },
+ *       ]
+ *     }
+ *   >
+ *  type OptionalizedUser = ApplyOptionals<FromSchema<typeof user_schema>, UserDefaultsMarked>
+ *  // Or you can apply them deeply (i.e. nested)
+ *  type DeepOptionalizedUser = ApplyOptionalsDeep<FromSchema<typeof user_schema>, UserDefaultsMarked>
+ */
+type ApplyOptionals<
+  Base extends Record<string, any>,
+  Markers extends Record<keyof Base, any>,
+> = {
+  [K in keyof Base as Markers[K] extends { required: false }
+    ? K
+    : never]?: Base[K]
+} & {
+  [K in keyof Base as Markers[K] extends { required: false }
+    ? never
+    : K]: Base[K]
+}
+
+/**
+ * @see ApplyOptionals
+ */
+type ApplyOptionalsDeep<Base, Markers> =
+  // Case 1: marker says this is optional
+  Markers extends { required: false }
+    ? Base | undefined
+    : // Case 2: objects
+      Base extends Record<string, any>
+      ? Markers extends Record<string, any>
+        ? {
+            [K in keyof Base as K extends keyof Markers
+              ? Markers[K] extends { required: false }
+                ? K
+                : never
+              : never]?: ApplyOptionalsDeep<
+              Base[K],
+              K extends keyof Markers ? Markers[K] : never
+            >
+          } & {
+            [K in keyof Base as K extends keyof Markers
+              ? Markers[K] extends { required: false }
+                ? never
+                : K
+              : K]: ApplyOptionalsDeep<
+              Base[K],
+              K extends keyof Markers ? Markers[K] : never
+            >
+          }
+        : Base
+      : // Case 3: arrays
+        Base extends Array<infer U>
+        ? Markers extends Array<infer M>
+          ? ApplyOptionalsDeep<U, M>[]
+          : Base
+        : Base
