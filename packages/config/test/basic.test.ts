@@ -31,6 +31,31 @@ describe.each(site_implementations)('%s', (_, SiteConfig) => {
     expect(generated_min_config.valid).toBe(true)
     expect(parsed_min_config.value!).toStrictEqual(generated_min_config.value!)
   })
+  test('local moderation', async () => {
+    const generated_config = SiteConfig({
+      site: [],
+      comments: {
+        email: {
+          moderation: [
+            {
+              type: 'local',
+              'file_path_{}': '../foo.html',
+            },
+          ],
+        },
+      },
+    })
+    const toml = `
+    site = []
+    [[comments.email.moderation]]
+    type = "local"
+    "file_path_{}" = "../foo.html"`
+    const parsed_config = SiteConfig.parse(toml)
+    expect(parsed_config.valid).toBe(true)
+    expect(generated_config.valid).toBe(true)
+    expect(parsed_config.value!).toStrictEqual(generated_config.value!)
+    expect(generated_config.value?.comments.email.moderation[0].type)
+  })
 })
 
 // A list of implementations of the parser that are to be tested under the same conditions
