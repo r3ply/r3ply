@@ -1,12 +1,9 @@
 import { Schema } from '@exodus/schemasafe'
-import {
-  FromSchema,
-  JSONSchema,
-} from 'json-schema-to-ts'
+import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 import { notify } from './notify'
-import { moderation } from './moderation'
 import { github } from './github'
 import { webhook } from './webhook'
+import { local } from './local'
 
 export const comments = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/comments.v0.0.1.json',
@@ -148,7 +145,20 @@ export const comments = {
           type: 'array',
           description: 'Configuration of moderation steps.',
           items: {
-            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json',
+            discriminator: {
+              propertyName: 'type',
+            },
+            oneOf: [
+              {
+                $ref: 'https://r3ply.com/schemas/v0.0.1/config/github.v0.0.1.json',
+              },
+              {
+                $ref: 'https://r3ply.com/schemas/v0.0.1/config/webhook.v0.0.1.json',
+              },
+              {
+                $ref: 'https://r3ply.com/schemas/v0.0.1/config/local.v0.0.1.json',
+              },
+            ],
           },
           default: [],
           $comment:
@@ -170,11 +180,6 @@ export const comments = {
 export type R3plyCommentsConfig = FromSchema<
   typeof comments,
   {
-    references: [
-      typeof moderation,
-      typeof github,
-      typeof webhook,
-      typeof notify,
-    ]
+    references: [typeof github, typeof webhook, typeof local, typeof notify]
   }
 >
