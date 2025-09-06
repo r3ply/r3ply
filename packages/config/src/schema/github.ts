@@ -5,16 +5,11 @@ export const github = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/github.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
   type: 'object',
-  required: ['owner', 'repo', 'type', 'file_path_{}'],
+  required: ['type', 'owner', 'repo', 'file_path_{}'],
   additionalProperties: false,
   properties: {
     type: {
       const: 'github',
-    },
-    enabled: {
-      type: 'boolean',
-      description: 'If false, this moderation step is skipped.',
-      default: true,
     },
     owner: {
       type: 'string',
@@ -29,6 +24,19 @@ export const github = {
       pattern: '^[\\S]+$',
       maxLength: 1024,
       examples: ['yoursite'],
+    },
+    'file_path_{}': {
+      type: 'string',
+      description: 'File path template of new comment.',
+      pattern: '^(?!\\s*/)[\\s\\S]*$',
+      maxLength: 1024,
+      examples: ['content/comments/{{ comment.id | slice(end=8) }}.md'],
+      $comment: 'Template string. Can never begin with a `/`.',
+    },
+    enabled: {
+      type: 'boolean',
+      description: 'If false, this moderation step is skipped.',
+      default: true,
     },
     'allow*': {
       type: 'array',
@@ -55,14 +63,6 @@ export const github = {
       default: 'comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md',
       examples: ['{{ comment.id[:8] }}-{{ comment.ts_rcvd }}'],
       $comment: 'Template string.',
-    },
-    'file_path_{}': {
-      type: 'string',
-      description: 'File path template of new comment.',
-      pattern: '^(?!\\s*/)[\\s\\S]*$',
-      maxLength: 1024,
-      examples: ['content/comments/{{ comment.id | slice(end=8) }}.md'],
-      $comment: 'Template string. Can never begin with a `/`.',
     },
     'commit_msg_{}': {
       type: 'string',
