@@ -1,9 +1,9 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 import { signet } from './signet'
 import { comments } from './comments'
-import { moderation } from './moderation'
 import { github } from './github'
 import { webhook } from './webhook'
+import { local } from './local'
 import { notify } from './notify'
 import { make_config_parser, make_typed_parser, ConfigParser } from '../util'
 import { mk_site_singleton } from '../codegen/site'
@@ -46,14 +46,7 @@ export const raw_site_parser = parser(site, {
   useDefaults: true,
   includeErrors: true,
   allErrors: true,
-  schemas: [
-    signet,
-    comments,
-    moderation,
-    github,
-    webhook,
-    notify,
-  ],
+  schemas: [signet, comments, github, webhook, local, notify],
 })
 export const site_schema = raw_site_parser.toJSON()
 const site_parser: ConfigParser<R3plySiteConfig> = make_config_parser(
@@ -64,9 +57,7 @@ export type R3plySiteConfig = FromSchema<
   typeof site,
   {
     // prettier-ignore
-    references: [ typeof signet, typeof comments, typeof moderation, typeof github,
-      typeof webhook,
-      typeof notify]
+    references: [ typeof signet, typeof comments, typeof github, typeof webhook, typeof local, typeof notify]
   }
 >
 export type MinimalR3plySiteConfig = FromSchema<
@@ -74,8 +65,6 @@ export type MinimalR3plySiteConfig = FromSchema<
   {
     keepDefaultedPropertiesOptional: true
     // prettier-ignore
-    references: [ typeof signet, typeof comments, typeof moderation, typeof github,
-      typeof webhook,
-      typeof notify]
+    references: [ typeof signet, typeof comments, typeof github, typeof webhook, typeof local, typeof notify]
   }
 >

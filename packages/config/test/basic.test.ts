@@ -23,7 +23,9 @@ describe.each(site_implementations)('%s', (_, SiteConfig) => {
       site: [],
       comments: { email: {} },
     })
-    const toml = `site = []\n[comments.email]`
+    const toml = `
+    site = []
+    [comments.email]`
     const parsed_min_config = SiteConfig.parse(toml)
     expect(parsed_min_config.valid).toBe(true)
     expect(generated_min_config.valid).toBe(true)
@@ -36,8 +38,11 @@ const r3ply_implementations: [
   string,
   typeof imported_r3ply_system_config_parser,
 ][] = [
-  ['Parser [Imported TS]', imported_r3ply_system_config_parser],
-  ['Parser [Statically Compiled]', compiled_r3ply_system_config_parser],
+  ['R3plySystemConfig [Imported TS]', imported_r3ply_system_config_parser],
+  [
+    'R3plySystemConfig [Statically Compiled]',
+    compiled_r3ply_system_config_parser,
+  ],
 ]
 describe.each(r3ply_implementations)('%s', (_, SystemConfig) => {
   test('system', async () => {
