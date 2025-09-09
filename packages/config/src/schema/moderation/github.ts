@@ -5,12 +5,9 @@ export const github = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/github.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
   type: 'object',
-  required: ['type', 'owner', 'repo', 'file_path_{}'],
-  additionalProperties: false,
+  required: ['owner', 'repo', 'file_path_{}'],
+  unevaluatedProperties: false,
   properties: {
-    type: {
-      const: 'github',
-    },
     owner: {
       type: 'string',
       description: 'Name of GitHub owner.',
@@ -32,20 +29,6 @@ export const github = {
       maxLength: 1024,
       examples: ['content/comments/{{ comment.id | slice(end=8) }}.md'],
       $comment: 'Template string. Can never begin with a `/`.',
-    },
-    enabled: {
-      type: 'boolean',
-      description: 'If false, this moderation step is skipped.',
-      default: true,
-    },
-    'allow*': {
-      type: 'array',
-      description: 'Pseudonym/email address allow list.',
-      items: { type: 'string', pattern: '^[\\s\\S]*$', maxLength: 256 },
-      default: [],
-      examples: ['*@alice.com', 'bob@example.com'],
-      $comment:
-        'A list of pseudonyms (or email addresses) to skip moderation. Globbing can be used.',
     },
     'base_branch_{}': {
       type: 'string',
