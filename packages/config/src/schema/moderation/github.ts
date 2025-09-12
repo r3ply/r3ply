@@ -29,7 +29,7 @@ export const github = {
     'file_path_{}': {
       title: 'File path template (string)',
       description:
-        'Specifies the file path of the new comment. The "file_path_{}" name means the string will be interpreted as a template. Tera 2 is the templating engine. See the r3ply or tera docs for more info.',
+        'Specifies the file path of the new comment. The "file_path_{}" name means the string will be interpreted as a template. It can never begin with a "/". Tera 2 is the templating engine. See the r3ply or tera docs for more info.',
       type: 'string',
       pattern: '^(?!\\s*/)[\\s\\S]*$',
       maxLength: 1024,
