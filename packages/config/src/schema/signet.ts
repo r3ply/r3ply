@@ -11,35 +11,39 @@ export const signet = {
   required: ['domain', 'r3ply', 'signet', 'issued'],
   properties: {
     domain: {
+      title: 'Site domain',
+      description:
+        'The domain that this configuration applies to. Hostname only, protocol, port, or path.',
       type: 'string',
       format: 'hostname',
-      description:
-        "The domain that this configuration applies to. Wildcards are allowed (e.g., '*.example.com').",
     },
     r3ply: {
+      title: 'r3ply service',
+      description:
+        'The r3ply server that this site expects to receive comments from. Hostname only, protocol, port, or path (note: you have to add a new site config item in order to add another r3ply service for the same site domain).',
       type: 'string',
       format: 'hostname',
-      description:
-        "The r3ply server that this site expects to receive comments from. Wildcards are allowed (e.g., '*.r3ply.com').",
     },
     signet: {
-      type: 'string',
+      title: 'signet',
       description:
-        'The service-issued signet key used to generate deterministic HMAC identities for commenters.',
+        'The r3ply-issued signet key. It is only valid per site x r3ply service x issue date. See docs for more info.',
+      type: 'string',
       pattern: '^[A-Za-z0-9_-]{22}$',
       examples: ['qhQ6YSUvQNLb1lCdw3kDRg'],
     },
     issued: {
+      title: 'Issue date (of signet)',
+      description:
+        'The date this signet was issued. Used for rotation and versioning of signet key.',
       type: 'string',
       format: 'date',
-      description:
-        'The date this signet was issued. Used for rotation and versioning.',
       examples: ['2025-08-22'],
     },
     label: {
       title: 'Site label',
       description:
-        'A human readable label of a site that. Useful for filtering further downstream. Note: while uniqueness is not technically required it is recommended.',
+        'A human readable label of a site that. Useful for filtering further downstream (note: while uniqueness is not technically required it is recommended).',
       type: 'string',
       pattern: '^[\\s\\S]+$',
       maxLength: 256,
