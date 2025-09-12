@@ -17,18 +17,23 @@ export const site = {
   additionalProperties: false,
   properties: {
     version: {
+      title: 'r3ply version',
+      description: 'Declares what version of r3ply this config conforms to.',
       type: 'string',
       enum: ['0.0.1'],
-      description: 'The version of the config file.',
       default: '0.0.1',
     },
     enabled: {
-      type: 'boolean',
+      title: 'Toggle on/off',
       description:
         'Comments will not be processed if set to false. Default is true.',
+      type: 'boolean',
       default: true,
     },
     site: {
+      title: 'New site configuration',
+      description:
+        'Declares a new site this config applies to, consisting of domain x r3ply service, and signet. See docs for more info.',
       type: 'array',
       items: {
         $ref: 'https://r3ply.com/schemas/v0.0.1/config/signet.v0.0.1.json',
