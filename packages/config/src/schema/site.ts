@@ -13,7 +13,7 @@ export const site = {
   description:
     "JSON Schema to describe a site's configuration for use with the r3ply commenting system. See https://r3ply.com for more info.",
   type: 'object',
-  required: ['site', 'comments'],
+  required: [],
   additionalProperties: false,
   properties: {
     version: {

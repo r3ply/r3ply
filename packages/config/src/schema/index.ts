@@ -1,8 +1,9 @@
+// Root configs
+export * from './site'
+export * from './r3ply'
+// Leaves
+export * from './signet'
+export * from './notify'
+// Nested
 export * from './comments'
 export * from './moderation'
-export * from './notify'
-export * from './r3ply'
-export * from './signet'
-export * from './site'
-export * from './comments'
-export * from './r3ply'
