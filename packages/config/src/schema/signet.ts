@@ -36,6 +36,14 @@ export const signet = {
         'The date this signet was issued. Used for rotation and versioning.',
       examples: ['2025-08-22'],
     },
+    label: {
+      title: 'Site label',
+      description: 'A human readable label of a site that. Useful for filtering further downstream. Note: while uniqueness is not technically required it is recommended.',
+      type: 'string',
+      pattern: "^[\\s\\S]+$",
+      maxLength: 256,
+      examples: ['test', 'test #1', 'production', 'website']
+    }
   },
   additionalProperties: false,
   examples: [
