@@ -51,8 +51,8 @@ export const comments = {
       default: ['a','br','p','span','strong','s','del','em','u','ul','ol','li','blockquote','hr','code','pre','table','tr','td','th','caption','thead','tbody','tfoot','kbd','mark','sub','small',],
       // prettier-ignore
       examples: [
-            ['a','br','p','span','strong','s','del','em','u','ul','ol','li','blockquote','hr','code','pre','table','tr','td','th','caption','thead','tbody','tfoot','kbd','mark','sub','small',],
-          ],
+        ['a','br','p','span','strong','s','del','em','u','ul','ol','li','blockquote','hr','code','pre','table','tr','td','th','caption','thead','tbody','tfoot','kbd','mark','sub','small',],
+      ],
     },
     email: {
       $ref: 'https://r3ply.com/schemas/v0.0.1/config/comments/email.v0.0.1.json',

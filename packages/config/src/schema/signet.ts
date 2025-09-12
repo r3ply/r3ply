@@ -38,12 +38,13 @@ export const signet = {
     },
     label: {
       title: 'Site label',
-      description: 'A human readable label of a site that. Useful for filtering further downstream. Note: while uniqueness is not technically required it is recommended.',
+      description:
+        'A human readable label of a site that. Useful for filtering further downstream. Note: while uniqueness is not technically required it is recommended.',
       type: 'string',
-      pattern: "^[\\s\\S]+$",
+      pattern: '^[\\s\\S]+$',
       maxLength: 256,
-      examples: ['test', 'test #1', 'production', 'website']
-    }
+      examples: ['test', 'test #1', 'production', 'website'],
+    },
   },
   additionalProperties: false,
   examples: [
