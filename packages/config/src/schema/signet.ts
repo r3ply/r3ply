@@ -49,6 +49,9 @@ export const signet = {
       maxLength: 256,
       examples: ['test', 'test #1', 'production', 'website'],
     },
+    extra: {
+      $ref: 'https://r3ply.com/schemas/v0.0.1/config/extra.v0.0.1.json',
+    }
   },
   additionalProperties: false,
   examples: [
