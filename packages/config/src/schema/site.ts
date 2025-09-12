@@ -1,4 +1,5 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
+import { extra } from './extra'
 import { signet } from './signet'
 import { comments, email } from './comments'
 import { moderation, github, webhook, local } from './moderation'
@@ -46,6 +47,9 @@ export const site = {
     moderation: {
       $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json',
     },
+    extra: {
+      $ref: 'https://r3ply.com/schemas/v0.0.1/config/extra.v0.0.1.json',
+    },
   },
 } as const satisfies JSONSchema & Schema
 export const raw_site_parser = parser(site, {
@@ -53,6 +57,7 @@ export const raw_site_parser = parser(site, {
   includeErrors: true,
   allErrors: true,
   schemas: [
+    extra,
     signet,
     comments,
     email,
@@ -72,6 +77,7 @@ export type R3plySiteConfig = FromSchema<
   typeof site,
   {
     references: [
+      typeof extra,
       typeof signet,
       typeof comments,
       typeof email,
@@ -88,6 +94,7 @@ export type MinimalR3plySiteConfig = FromSchema<
   {
     keepDefaultedPropertiesOptional: true
     references: [
+      typeof extra,
       typeof signet,
       typeof comments,
       typeof email,
