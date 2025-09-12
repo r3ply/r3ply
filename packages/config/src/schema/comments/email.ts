@@ -17,6 +17,15 @@ export const email = {
       type: 'boolean',
       default: true,
     },
+    'filter*': {
+      title: 'Filter site',
+      description:
+        "Specifies which sites, by label, will have email comments handled. The 'filter*' name means a glob pattern can be provided. See `site` config key for more details. Default is ['**'] (all sites).",
+      type: 'array',
+      items: { type: 'string', pattern: '^[\\s\\S]*$' },
+      default: ['**'],
+      examples: ['test*', '!local'],
+    },
     subject: {
       title: 'Subject line handling',
       description:
