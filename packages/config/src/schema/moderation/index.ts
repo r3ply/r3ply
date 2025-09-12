@@ -56,7 +56,7 @@ export const moderation = {
             $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json#/definitions/options',
           },
           {
-            $ref: 'https://r3ply.com/schemas/v0.0.1/config/github.v0.0.1.json',
+            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/github.v0.0.1.json',
           },
         ],
       },
@@ -70,7 +70,7 @@ export const moderation = {
             $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json#/definitions/options',
           },
           {
-            $ref: 'https://r3ply.com/schemas/v0.0.1/config/webhook.v0.0.1.json',
+            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/webhook.v0.0.1.json',
           },
         ],
       },
@@ -83,7 +83,9 @@ export const moderation = {
           {
             $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json#/definitions/options',
           },
-          { $ref: 'https://r3ply.com/schemas/v0.0.1/config/local.v0.0.1.json' },
+          {
+            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/local.v0.0.1.json',
+          },
         ],
       },
       default: [],

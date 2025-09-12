@@ -2,7 +2,7 @@ import { Schema } from '@exodus/schemasafe'
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 
 export const local = {
-  $id: 'https://r3ply.com/schemas/v0.0.1/config/local.v0.0.1.json',
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/moderation/local.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
   type: 'object',
   required: ['file_path_{}'],

@@ -55,7 +55,7 @@ export const comments = {
           ],
     },
     email: {
-      $ref: 'https://r3ply.com/schemas/v0.0.1/config/email.v0.0.1.json',
+      $ref: 'https://r3ply.com/schemas/v0.0.1/config/comments/email.v0.0.1.json',
     },
   },
 } as const satisfies JSONSchema & Schema
