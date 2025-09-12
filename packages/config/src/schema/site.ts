@@ -10,9 +10,9 @@ import { parser, Schema } from '@exodus/schemasafe'
 export const site = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/site.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
-  title: 'r3ply site config schema v0.0.1',
+  title: 'r3ply config',
   description:
-    "JSON Schema to describe a site's configuration for use with the r3ply commenting system. See https://r3ply.com for more info.",
+    'Describe a configuration for use with the r3ply commenting system. See https://r3ply.com/docs for more info.',
   type: 'object',
   required: [],
   additionalProperties: false,
@@ -26,8 +26,7 @@ export const site = {
     },
     enabled: {
       title: 'Toggle on/off',
-      description:
-        'Comments will not be processed if set to false. Default is true.',
+      description: 'Turn off r3ply altogether. Default is true.',
       type: 'boolean',
       default: true,
     },
