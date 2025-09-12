@@ -3,7 +3,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 import { notify } from '../notify'
 
 export const email = {
-  $id: 'https://r3ply.com/schemas/v0.0.1/config/email.v0.0.1.json',
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/comments/email.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
   title: 'TODO',
   description: 'TODO',
