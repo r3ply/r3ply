@@ -26,10 +26,10 @@ export const comments = {
       type: 'array',
       description:
         'Specifies which path to allow comments on. The "paths*" name means glob patterns can be used.',
-      $comment: 'glob patterns can be used',
       items: { type: 'string', pattern: '^[\\s\\S]*$' },
       default: ['/**'],
       examples: ['/**', '!/private'],
+      $comment: 'glob patterns can be used',
     },
     cache: {
       title: 'Cache pending comments',
