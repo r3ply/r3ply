@@ -19,13 +19,8 @@ const site_implementations: [
 // The tests here loop through the `implementations` and apply all the tests to each one
 describe.each(site_implementations)('%s', (_, SiteConfig) => {
   test('minimal site config', async () => {
-    const generated_min_config = SiteConfig({
-      site: [],
-      comments: { email: {} },
-    })
-    const toml = `
-    site = []
-    [comments.email]`
+    const generated_min_config = SiteConfig({})
+    const toml = ``
     const parsed_min_config = SiteConfig.parse(toml)
     expect(parsed_min_config.valid).toBe(true)
     expect(generated_min_config.valid).toBe(true)
