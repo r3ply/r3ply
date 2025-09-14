@@ -1,5 +1,6 @@
 import { Schema } from '@exodus/schemasafe'
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
+import { extra } from './extra'
 
 export const signet = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/signet.v0.0.1.json',
@@ -69,4 +70,9 @@ export const signet = {
     },
   ],
 } as const satisfies JSONSchema & Schema
-export type R3plySignetConfig = FromSchema<typeof signet>
+export type R3plySignetConfig = FromSchema<
+  typeof signet,
+  {
+    references: [typeof extra]
+  }
+>

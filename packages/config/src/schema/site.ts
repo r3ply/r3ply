@@ -2,7 +2,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 import { extra } from './extra'
 import { signet } from './signet'
 import { comments, email } from './comments'
-import { moderation, github, webhook, local } from './moderation'
+import { moderation, github, webhook, local, options } from './moderation'
 import { notify } from './notify'
 import { make_config_parser, make_typed_parser, ConfigParser } from '../util'
 import { mk_site_singleton } from '../codegen/site'
@@ -61,6 +61,7 @@ export const raw_site_parser = parser(site, {
     comments,
     email,
     moderation,
+    options,
     github,
     webhook,
     local,
@@ -81,6 +82,7 @@ export type R3plySiteConfig = FromSchema<
       typeof comments,
       typeof email,
       typeof moderation,
+      typeof options,
       typeof github,
       typeof webhook,
       typeof local,
@@ -98,6 +100,7 @@ export type MinimalR3plySiteConfig = FromSchema<
       typeof comments,
       typeof email,
       typeof moderation,
+      typeof options,
       typeof github,
       typeof webhook,
       typeof local,
