@@ -95,6 +95,10 @@ export type R3plyModerationConfig = FromSchema<
     references: [typeof moderation, typeof github, typeof webhook, typeof local]
   }
 >
+// actually declaring `unevaluatedProperties` on options requires `anyOf`, which blows up the parser
+export type R3plyModerationOptions = FromSchema<
+  typeof moderation.definitions.options & { unevaluatedProperties: false }
+>
 export type R3plyGithubConfig = R3plyModerationConfig['github'][number]
 export type R3plyWebhookConfig = R3plyModerationConfig['webhook'][number]
 export type R3plyLocalModerationConfig = R3plyModerationConfig['local'][number]
