@@ -2,14 +2,19 @@ import { Schema } from '@exodus/schemasafe'
 import { JSONSchema } from 'json-schema-to-ts'
 
 export const local = {
+  $id: 'https://r3ply.com/schemas/v0.0.1/config/moderation/local.v0.0.1.json',
+  $schema: 'http://json-schema.org/draft-04/schema#',
   title: 'Local moderation',
   description:
     'Specifies moderation that happens locally, usually via the r3ply CLI tool.',
-  $id: 'https://r3ply.com/schemas/v0.0.1/config/moderation/local.v0.0.1.json',
-  $schema: 'http://json-schema.org/draft-04/schema#',
   type: 'object',
   required: ['file_path_{}'],
   unevaluatedProperties: false,
+  allOf: [
+    {
+      $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json#/definitions/options',
+    },
+  ],
   properties: {
     'file_path_{}': {
       title: 'File path template (string)',

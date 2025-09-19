@@ -15,7 +15,7 @@ export const site = {
     'Describe a configuration for use with the r3ply commenting system. See https://r3ply.com/docs for more info.',
   type: 'object',
   required: [],
-  additionalProperties: false,
+  unevaluatedProperties: false,
   properties: {
     version: {
       title: 'r3ply version',
