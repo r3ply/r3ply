@@ -69,6 +69,10 @@ export const comments = {
     email: {
       $ref: 'https://r3ply.com/schemas/v0.0.1/config/comments/email.v0.0.1.json',
     },
+    $comment_sources: {
+      const: ['email'],
+      default: ['email'],
+    },
   },
 } as const satisfies JSONSchema & Schema
 export type R3plyCommentsConfig = FromSchema<
@@ -84,3 +88,4 @@ export type R3plyCommentsConfig = FromSchema<
     ]
   }
 >
+export type R3plyCommentSource = R3plyCommentsConfig['$comment_sources'][number]
