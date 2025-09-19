@@ -69,42 +69,21 @@ export const moderation = {
     github: {
       type: 'array',
       items: {
-        allOf: [
-          {
-            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json#/definitions/options',
-          },
-          {
-            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/github.v0.0.1.json',
-          },
-        ],
+        $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/github.v0.0.1.json',
       },
       default: [],
     },
     webhook: {
       type: 'array',
       items: {
-        allOf: [
-          {
-            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json#/definitions/options',
-          },
-          {
-            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/webhook.v0.0.1.json',
-          },
-        ],
+        $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/webhook.v0.0.1.json',
       },
       default: [],
     },
     local: {
       type: 'array',
       items: {
-        allOf: [
-          {
-            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json#/definitions/options',
-          },
-          {
-            $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/local.v0.0.1.json',
-          },
-        ],
+        $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/local.v0.0.1.json',
       },
       default: [],
     },

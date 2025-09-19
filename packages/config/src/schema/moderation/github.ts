@@ -9,6 +9,11 @@ export const github = {
   type: 'object',
   required: ['owner', 'repo', 'file_path_{}'],
   unevaluatedProperties: false,
+  allOf: [
+    {
+      $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json#/definitions/options',
+    },
+  ],
   properties: {
     owner: {
       title: 'Repo owner',

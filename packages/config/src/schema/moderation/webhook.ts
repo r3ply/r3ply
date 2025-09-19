@@ -9,6 +9,11 @@ export const webhook = {
   type: 'object',
   required: ['url'],
   unevaluatedProperties: false,
+  allOf: [
+    {
+      $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json#/definitions/options',
+    },
+  ],
   properties: {
     url: {
       title: 'Webhook URL',
