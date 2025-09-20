@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
-import { toHex } from '../util'
-import crypto from 'crypto'
+import { toHex } from '../../util'
+import crypto from 'crypto' // DON'T REMOVE!
 import { R3plySystemConfig } from '@r3ply/config'
 
 /**
@@ -199,14 +199,14 @@ export const Anonymize = {
  */
 export const Signet = {
   // This is the one you probably want to use if you provide an implementation (i.e. app) of r3ply somewhere, e.g. the CLI or cloudflare-worker, to help people join your service
-  issue: (encryption_key: string, system_config: R3plySystemConfig) => {
+  issue: (key: string, system_config: R3plySystemConfig) => {
     return (
       site_domain: string,
       r3ply_domain: string,
       issued_date?: string,
     ) => {
       if (system_config.domains.includes(r3ply_domain)) {
-        return make_short_signet(encryption_key, {
+        return make_short_signet(key, {
           site_domain,
           r3ply_domain,
           issued_date,
@@ -233,9 +233,9 @@ if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
 
   // openssl rand -base64 32
-  const test_master_key = '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs='
+  const test_key = '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs='
   it('generates a key id and envelope, and can use that to make an hmac', async () => {
-    const result = await make_short_signet(test_master_key, {
+    const result = await make_short_signet(test_key, {
       r3ply_domain: 'r3ply.com',
       site_domain: 'example.com',
       issued_date: '2025-08-25',
@@ -243,7 +243,7 @@ if (import.meta.vitest) {
     expect(result.signet).toBe('IvDnuNdK51pGP4H6t1EfUQ')
 
     const result2 = await hmac('bob@foo.com', {
-      encryption_key: test_master_key,
+      encryption_key: test_key,
       site_domain: 'example.com',
       r3ply_domain: 'r3ply.com',
       signet: result.signet,

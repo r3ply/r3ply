@@ -1,5 +1,5 @@
-import { base64UrlDecode, base64UrlEncode } from '../util'
-import crypto from 'crypto'
+import { base64UrlDecode, base64UrlEncode } from '../../util'
+import crypto from 'crypto' // DON'T REMOVE!
 
 // fixed length for padded emails
 const EMAIL_PAD_LEN = 320
@@ -92,6 +92,14 @@ export const Encrypt = {
       encrypt_email(encryption_key, email_address),
 }
 
+export type DecryptEmail = (token: string) => Promise<string>
+export const Decrypt = {
+  email:
+    (decryption_key: string): DecryptEmail =>
+    (token: string) =>
+      decrypt_email(decryption_key, token),
+}
+
 /**
  * Decrypts a token produced by `encryptEmail` to recover the original email address.
  *
@@ -121,11 +129,11 @@ export const Encrypt = {
  * @returns The original email address as a string
  */
 export async function decrypt_email(
-  symmetric_encryption_master_key: string,
+  symmetric_decryption_master_key: string,
   token: string,
 ): Promise<string> {
   // Convert base64 stored key to an array
-  const masterKeyBase64 = symmetric_encryption_master_key
+  const masterKeyBase64 = symmetric_decryption_master_key
   const masterKey = Uint8Array.from(atob(masterKeyBase64), (c) =>
     c.charCodeAt(0),
   )
@@ -169,32 +177,30 @@ if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
 
   // openssl rand -base64 32
-  const test_encryption_master_key =
-    '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
+  const test_key = '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
   it('encrypts/decrypts an email/token', async () => {
-    const encrypted_token = await encrypt_email(
-      test_encryption_master_key,
-      'bob@example.com',
-    )
-    const email = await decrypt_email(
-      test_encryption_master_key,
-      encrypted_token,
-    )
+    const encrypted_token = await encrypt_email(test_key, 'bob@example.com')
+    const email = await decrypt_email(test_key, encrypted_token)
+    expect(email).toBe('bob@example.com')
+  })
+
+  it('curries the encrypt/decrypt keys', async () => {
+    const encrypt = Encrypt.email(test_key)
+    const decrypt = Decrypt.email(test_key)
+    const encrypted_token = await encrypt('bob@example.com')
+    const email = await decrypt(encrypted_token)
     expect(email).toBe('bob@example.com')
   })
 
   it('should encrypt to a fixed length', async () => {
-    const token1 = await encrypt_email(test_encryption_master_key, 'a@b.com')
-    const token2 = await encrypt_email(
-      test_encryption_master_key,
-      'bob@example.com',
-    )
+    const token1 = await encrypt_email(test_key, 'a@b.com')
+    const token2 = await encrypt_email(test_key, 'bob@example.com')
     const token3 = await encrypt_email(
-      test_encryption_master_key,
+      test_key,
       'fourscoureandsevenyearsagotoday@example.com',
     )
     const token4 = await encrypt_email(
-      test_encryption_master_key,
+      test_key,
       'ipledgeallegiencetotheflagoftheunitedstatesofamericaandtotherepublicforwhichitstands@example.com',
     )
     const expected_token_length = 464

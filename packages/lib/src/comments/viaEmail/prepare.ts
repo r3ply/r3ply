@@ -1,7 +1,12 @@
 import { Message as Email } from '@mail-parser/ts-bindings'
 import { get_auth_results, get_body_txt, get_date, get_subject } from './email'
 import { match, Result } from 'oxide.ts'
-import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
+import {
+  R3plyCommentsConfig,
+  R3plyEmailCommentsConfig,
+  R3plySiteConfig,
+  R3plySystemConfig,
+} from '@r3ply/config'
 import { DeliverableEmail } from './deliverable'
 import { CommentTemplateContext } from '../process'
 import { md_to_html, sanitize_html } from '@r3ply/wasm'
@@ -43,6 +48,8 @@ export function prepare(
   deliverable: DeliverableEmail,
   metadata: CommentMetadata,
   config: R3plySiteConfig,
+  comments_config: R3plyCommentsConfig,
+  email_comments_config: R3plyEmailCommentsConfig,
   system: R3plySystemConfig,
 ): CommentTemplateContext & EmailTemplateContext {
   // get values from receive
@@ -66,13 +73,15 @@ export function prepare(
   data.email_body_txt = match(
     Result.safe(
       () =>
-        data.email_body_txt.split(config.comments.email.comment_separator)[0],
+        data.email_body_txt.split(
+          email_comments_config.email_signature_separator,
+        )[0],
     ),
     {
       Ok: (email_body_txt) => email_body_txt,
       Err: (error) => {
         console.error(
-          `Error while trying to separate email body from signature. Message:\n\n${error.message}\n\nEmail body:\n\n${data.email_body_txt}\n\nSeparator: "${config.comments.email.comment_separator}"`,
+          `Error while trying to separate email body from signature. Message:\n\n${error.message}\n\nEmail body:\n\n${data.email_body_txt}\n\nSeparator: "${email_comments_config.email_signature_separator}"`,
         )
         throw new Error('Error separting email body from signature.')
       },
@@ -80,17 +89,17 @@ export function prepare(
   )
 
   // Extract md -> html if enabled
-  let body_md = config.comments.md_to_html
+  let body_md = comments_config.md_to_html
     ? md_to_html(data.email_body_txt)
     : undefined
 
   // Extract html -> sanitized_html if enabled
   let body_html: string | undefined
-  if (config.comments.sanitize_html) {
+  if (comments_config.sanitize_html) {
     if (body_md) {
-      body_html = sanitize_html(body_md, config.comments.allow_tags)
+      body_html = sanitize_html(body_md, comments_config.allow_tags)
     } else {
-      body_html = sanitize_html(data.email_body_txt, config.comments.allow_tags)
+      body_html = sanitize_html(data.email_body_txt, comments_config.allow_tags)
     }
   }
 

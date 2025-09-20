@@ -44,20 +44,18 @@ export const moderation = {
         comments: {
           title: 'Comment sources',
           description:
-            'Specify which commenting sources to allow for this moderation channel. Default is all comment sources.',
+            'Specify which commenting sources to allow for this moderation channel. Default is undefined, which skips this check altogether.',
           type: 'array',
           items: {
             enum: ['email'],
           },
-          default: ['email'],
         },
         'filter*': {
           title: 'Filter site',
           description:
-            "Specifies which sites, by label, will have comments moderated. The 'filter*' name means a glob pattern can be provided. See `site` config key for more details. Default is ['**'] (all sites).",
+            "Specifies which sites, by label, will have comments moderated. The 'filter*' name means a glob pattern can be provided. See `site` config key for more details. Default is undefined, which skips this check altogether.",
           type: 'array',
           items: { type: 'string', pattern: '^[\\s\\S]*$' },
-          default: ['**'],
           examples: ['test*', '!local'],
         },
       },
@@ -102,3 +100,6 @@ export type R3plyModerationOptions = FromSchema<
 export type R3plyGithubConfig = R3plyModerationConfig['github'][number]
 export type R3plyWebhookConfig = R3plyModerationConfig['webhook'][number]
 export type R3plyLocalModerationConfig = R3plyModerationConfig['local'][number]
+export type R3plyModerationChannelType = keyof R3plyModerationConfig
+export type R3plyModerationChannelConfig =
+  R3plyModerationConfig[keyof R3plyModerationConfig][number]

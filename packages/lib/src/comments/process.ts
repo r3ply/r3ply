@@ -1,15 +1,12 @@
 import { match, Result } from 'oxide.ts'
 import { R3plySiteConfig } from '@r3ply/config'
 import { tera } from '@r3ply/wasm'
+import { EmailTemplateContext } from './viaEmail/prepare' // Don't remove!
 
 /**
- * The basic context that can always be expected to be available when rendering a template into a comment.
- * Addditional context can be provided via the `&` type operator, e.g.
+ * The basic context that can always be expected to be available when rendering a template.
  *
- * ```
- * // See `EmailTemplateContext` for more
- * let template_context: CommentTemplateContext & EmailTemplateContext
- * ```
+ * @see EmailTemplateContext for more
  */
 export interface CommentTemplateContext {
   r3ply: {

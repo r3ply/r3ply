@@ -1,11 +1,15 @@
 import { Option, Result } from 'oxide.ts'
 import { Encrypted, Redacted as Anonymized, Secret } from './types'
-import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/config'
+import {
+  R3plySignetConfig,
+  R3plyEmailCommentsConfig,
+  R3plyCommentsConfig,
+} from '@r3ply/config'
 import micromatch from 'micromatch'
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
 import { AcceptedEmail } from './accept'
 import { AnonymizeEmail } from './anonymize'
-import { EncryptEmail } from './encrypt'
+import { EncryptEmail } from './crypto'
 
 export interface DeliverableEmail {
   to: string
@@ -26,34 +30,47 @@ export interface DeliverableEmail {
 export async function deliverable(
   accepted: AcceptedEmail,
   {
-    config,
-    system,
+    sites,
+    comments_config,
+    email_comments_config,
     anonymize,
     encrypt,
   }: {
-    config: R3plySiteConfig
-    system: R3plySystemConfig
+    sites: R3plySignetConfig[]
+    comments_config: R3plyCommentsConfig
+    email_comments_config: R3plyEmailCommentsConfig
     anonymize: AnonymizeEmail
     encrypt: EncryptEmail
   },
 ): Promise<DeliverableEmail> {
   // check `To` has address, and is addressed properly (to this site + r3ply pair, i.e. <YOUR_SITE>@<R3PLY>)
-  const site = to_field_is_deliverable(accepted.to, config.site)
+  const site = to_field_is_deliverable(accepted.to, sites)
 
-  // check `Subject` header of comment is deliverable (note: if future subject types besides URL are added, here is where to integrate that logic)
+  // check `Subject` header of comment is deliverable (note: if future subject types b are added, here is where to integrate that logic)
   let subject: URL
-  if (config.comments.email.subject == 'url') {
-    subject = subject_field_is_deliverable(
-      Option(accepted.subject).expect(
-        `config.comments.email.subject == "url" requires subject`,
-      ),
-      [site.domain],
-      config.comments.paths,
-    )
-  } else {
-    throw new Error(
-      `Not implemented for config.comments.email.subject == ${config.comments.email.subject}`,
-    )
+  switch (email_comments_config.subject) {
+    case 'url':
+      subject = url_subject_field_is_deliverable(
+        Option(accepted.subject).expect(
+          `config.comments.email.subject == "url" requires subject`,
+        ),
+        site.domain,
+        comments_config['paths*'],
+      )
+      break
+    case 'path':
+      subject = path_subject_field_is_deliverable(
+        Option(accepted.subject).expect(
+          `config.comments.email.subject == "path" requires subject`,
+        ),
+        site.domain,
+        comments_config['paths*'],
+      )
+      break
+    default:
+      throw new Error(
+        `Not implemented for config.comments.email.subject == ${email_comments_config.subject}`,
+      )
   }
 
   // check `Subject` header's domain is the same as local portion of to `To` address
@@ -65,7 +82,7 @@ export async function deliverable(
   const { pseudonym, token } = await from_field_is_deliverable(
     accepted.from,
     redact,
-    config.comments.email.block_list,
+    email_comments_config['block*'],
     encrypt,
   )
 
@@ -87,12 +104,7 @@ export async function deliverable(
  */
 function to_field_is_deliverable(
   to: Addr[],
-  site_to_r3ply_mappings: {
-    domain: string
-    r3ply: string
-    signet: string
-    issued: string
-  }[],
+  site_to_r3ply_mappings: R3plySignetConfig[],
 ) {
   const valid_possible_to_headers = site_to_r3ply_mappings.map((site) => {
     return {
@@ -120,15 +132,18 @@ function to_field_is_deliverable(
 }
 
 /**
+ * subject as url is deliverable
+ *
  * @description for the `Subject` field to be deliverable it must be a URL, whose hostname is the same as one of the site's configured domains, with a path the site accepts comments at
+ *
  * @param subject_str the email's subject field
  * @param site_domains the domains the site config accepts emails at
  * @param site_comment_paths the paths the site config accepts comments at
  * @returns
  */
-function subject_field_is_deliverable(
+function url_subject_field_is_deliverable(
   subject_str: string,
-  site_domains: string[],
+  site_domain: string,
   site_comment_paths: string[],
 ) {
   const subject = Result.safe(() => new URL(subject_str)).expect(
@@ -136,9 +151,9 @@ function subject_field_is_deliverable(
   )
 
   // check subject has same hostname is inclued in `site.domains`, as well as pathname as `site.comments.paths`
-  if (!site_domains.includes(subject.hostname))
+  if (site_domain != subject.hostname)
     throw new Error(
-      `Site not configured to accept subjects on domain '${subject.hostname}'`,
+      `Site domain '${site_domain}' differs from intended recipient '${subject.hostname}'. The local portion of the email must match the configured domain.`,
     )
   const subject_matches_configured_paths = micromatch(
     [subject.pathname],
@@ -150,6 +165,24 @@ function subject_field_is_deliverable(
     )
 
   return subject
+}
+
+function path_subject_field_is_deliverable(
+  subject_str: string,
+  site_domain: string,
+  site_comment_paths: string[],
+) {
+  const base_url = new URL('https://example.com')
+  base_url.hostname = site_domain
+  if (base_url.hostname != site_domain)
+    throw new Error(`${site_domain} could not be assigned as a hostname`)
+  base_url.pathname = subject_str
+  // if (base_url.pathname != subject_str) throw new Error(`${subject_str} could not as be assigned as a pathname`)
+  return url_subject_field_is_deliverable(
+    base_url.toString(),
+    site_domain,
+    site_comment_paths,
+  )
 }
 
 /**
@@ -279,14 +312,36 @@ if (import.meta.vitest) {
   })
   test('subject_is_a_url', () => {
     expect(
-      subject_field_is_deliverable('https://a.com', ['a.com', 'b.com'], ['/']),
+      url_subject_field_is_deliverable('https://a.com', 'a.com', ['/']),
     ).toStrictEqual(new URL('https://a.com'))
     expect(() =>
-      subject_field_is_deliverable('https://a.com', ['b.com'], ['/']),
-    ).toThrowError(/not configured to accept subjects on domain/)
+      url_subject_field_is_deliverable('https://a.com', 'b.com', ['/']),
+    ).toThrowError(/differs from intended recipient/)
     expect(() =>
-      subject_field_is_deliverable('https://a.com', ['a.com'], ['/blog']),
+      url_subject_field_is_deliverable('https://a.com', 'a.com', ['/blog']),
     ).toThrowError(/not configured to accept comments at path/)
+  })
+  test('subject_is_a_path', () => {
+    expect(
+      path_subject_field_is_deliverable('/example/blog', 'example.com', ['**']),
+    ).toStrictEqual(new URL('https://example.com/example/blog'))
+    expect(
+      path_subject_field_is_deliverable('../example/blog', 'example.com', [
+        '**',
+      ]),
+    ).toStrictEqual(new URL('https://example.com/example/blog'))
+    expect(
+      path_subject_field_is_deliverable(
+        'https://evil.com/example/blog',
+        'example.com',
+        ['**'],
+      ),
+    ).toStrictEqual(
+      new URL('https://example.com/https://evil.com/example/blog'),
+    )
+    expect(
+      path_subject_field_is_deliverable('hello world', 'example.com', ['**']),
+    ).toStrictEqual(new URL('https://example.com/hello%20world'))
   })
   test('subject_domain_matches_site_domain', () => {
     expect(() =>
