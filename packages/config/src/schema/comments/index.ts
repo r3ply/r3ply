@@ -11,7 +11,7 @@ export const comments = {
   title: 'Comments configuration',
   description: 'Configure the various commenting channels, e.g. "email"',
   type: 'object',
-  required: ['email'],
+  required: [],
   additionalProperties: false,
   properties: {
     enabled: {

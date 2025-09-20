@@ -1,0 +1,142 @@
+import { tera } from '@r3ply/wasm'
+import {
+  bypass_moderation,
+  can_moderate,
+  ModerationChannel,
+  ModerationRequest,
+  ModerationResult,
+} from '.'
+import { CommentTemplateContext } from '../process'
+import {
+  R3plyCommentSource,
+  R3plyLocalModerationConfig,
+  R3plySignetConfig,
+  R3plySiteConfig,
+} from '@r3ply/config'
+import { DecryptEmail, Encrypt } from '../viaEmail/crypto'
+
+type LocalModerationArgs = {
+  relative_path: string
+  comment: string
+}
+type LocalModerationRep = {
+  absolute_path?: string
+}
+type LocalModerationTemplateContext = {}
+
+export interface LocalModeration<InCtx extends CommentTemplateContext>
+  extends ModerationChannel<
+    'local',
+    R3plyLocalModerationConfig,
+    InCtx,
+    LocalModerationTemplateContext,
+    LocalModerationArgs,
+    LocalModerationRep
+  > {}
+
+export function LocalModeration<InCtx extends CommentTemplateContext>(
+  site: R3plySignetConfig,
+  comment_source: R3plyCommentSource,
+  config: R3plyLocalModerationConfig,
+  write: (args: LocalModerationArgs) => Promise<string | undefined>,
+  decrypt?: DecryptEmail,
+): LocalModeration<InCtx> | undefined {
+  if (can_moderate(site, comment_source, config)) {
+    const local_moderation: LocalModeration<InCtx> = {
+      type: 'local',
+      config,
+      prepare: async function (
+        context: InCtx,
+      ): Promise<LocalModerationTemplateContext & InCtx> {
+        return context
+      },
+      process: async function (
+        comment: string,
+        context: LocalModerationTemplateContext & InCtx,
+      ): Promise<ModerationRequest<LocalModerationArgs>> {
+        return bypass_moderation(
+          context.author,
+          config['allow*'],
+          decrypt,
+        ).then((bypass_moderation) => {
+          const request: ModerationRequest<LocalModerationArgs> = {
+            args: {
+              relative_path: tera(config['file_path_{}'], context),
+              comment,
+            },
+            allow: bypass_moderation,
+          }
+          return request
+        })
+      },
+      send: async function <R>(
+        req: ModerationRequest<LocalModerationArgs>,
+      ): Promise<ModerationResult<LocalModerationRep>> {
+        return write(req.args).then((response) => {
+          const result: ModerationResult<LocalModerationRep> = {
+            result: {
+              absolute_path: response,
+            },
+          }
+          return result
+        })
+      },
+    }
+    return local_moderation
+  } else {
+    return undefined
+  }
+}
+
+if (import.meta.vitest) {
+  const { test, expect } = import.meta.vitest
+  test('Local', async () => {
+    const config = R3plySiteConfig({
+      moderation: {
+        local: [
+          {
+            'file_path_{}': 'content/comments/{{ comment.id[:8] }}.txt',
+          },
+        ],
+      },
+    }).value!
+    const site = config.site[0]
+    const local_config = config.moderation!.local[0]
+    const write = async (args: LocalModerationArgs) => {
+      return '/Users/foo/Developer/website' + args.relative_path
+    }
+    expect(LocalModeration(site, 'email', local_config, write)).toBeDefined()
+    const local_mod = LocalModeration(site, 'email', local_config, write)!
+    const key = '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
+    const url = new URL('https://example.com/blog/post/1')
+    const local_context = await local_mod.prepare({
+      r3ply: {
+        config_version: '0.0.1',
+        server: 'r3ply.com',
+        site: 'example.com',
+        signet: 'a'.repeat(22),
+        issued: '2025--0-19',
+      },
+      author: {
+        pseudonym: 'foo bar',
+        token: await Encrypt.email(key)('bob@example.com'),
+      },
+      comment: {
+        id: '123',
+        ts_rcvd: '456',
+        subject: { ...url, url: url.toString(), path: url.pathname },
+        txt: 'Hello, world',
+        md: undefined,
+        html: undefined,
+      },
+    })
+    const local_args = await local_mod.process(
+      'this is a comment',
+      local_context,
+    )
+    const response = await local_mod.send(local_args)
+    expect(response.result.absolute_path).toBe(
+      '/Users/foo/Developer/websitecontent/comments/123.txt',
+    )
+  })
+}

@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'crypto' // DON'T REMOVE!
 
 export type CommentMetadata = { comment_id: string; ts_rcvd: string }
 
