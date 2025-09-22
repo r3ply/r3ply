@@ -240,7 +240,7 @@ async function handle_email_event(
     process(
       template_context,
       email_event.config,
-      email_event.config.comments?.email?.['&comment_{}'],
+      email_event.config.comments?.email?.['comment_{}'],
     ),
   )
   return results

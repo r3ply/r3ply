@@ -3,13 +3,12 @@ import { cli_handle_comment_via_email, project, generate } from './lib.js'
 import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
-import { R3plySiteConfig, siteConfigParser } from '@r3ply/config'
+import { R3plySiteConfig } from '@r3ply/schema'
 import path from 'path'
-import { resolve_config_references } from '@r3ply/lib'
 import { highlight } from 'cli-highlight'
 import TOML from '@iarna/toml'
-import { Signet } from '@r3ply/lib'
-import crypto from 'crypto'
+import { Signet, util as r3ply_util } from '@r3ply/lib'
+import crypto from 'crypto' // DON'T REMOVE!
 import prompts, { PromptObject } from 'prompts'
 import dayjs from 'dayjs'
 
@@ -40,6 +39,7 @@ domain = "${project.DEFAULT_SITE_DOMAIN}"
 r3ply = "${project.DEFAULT_R3PLY_DOMAIN}"
 signet = "${signet}"
 issued = ${issued}
+label = "CLI"
 `
           console.log(
             `Initialized empty r3ply project at ${chalk.greenBright(path.dirname(r3ply_dir))}`,
@@ -284,8 +284,17 @@ export function generate_cmd(cwd: string) {
           },
         },
       }
-      const parsed = siteConfigParser(JSON.stringify(minimal_config)).value!
-      console.log(highlight(TOML.stringify(parsed)))
+      const parsed = R3plySiteConfig({
+        site: [{ ...site, label: 'local' }],
+        moderation: {
+          local: [
+            {
+              'file_path_{}': '',
+            },
+          ],
+        },
+      })
+      console.log(highlight(TOML.stringify(parsed.value as any)))
       return
     })
 
@@ -385,7 +394,7 @@ export function simulate_cmd(cwd: string) {
         )
         let file_resolver: (file_uri?: string) => Promise<string | undefined> =
           project.resolve_file_relative_to_site_config(site_config_path)
-        site_config = await resolve_config_references(
+        site_config = await r3ply_util.config.resolve_references(
           site_config,
           site_config_path,
           project.dereference_local_file,
@@ -454,7 +463,7 @@ export function simulate_cmd(cwd: string) {
                   console.log(`${chalk.whiteBright('=== Site Config ===\n')}`)
                 console.log(
                   `${highlight(
-                    `# From path ${site_config_path} \n${TOML.stringify(site_config)}`,
+                    `# From path ${site_config_path} \n${TOML.stringify(site_config as any)}`,
                     { language: 'toml', ignoreIllegals: true },
                   )}`,
                 )
@@ -467,7 +476,9 @@ export function simulate_cmd(cwd: string) {
                 )
               console.log(
                 `${highlight(
-                  TOML.stringify(email_event_response.prescreening as any),
+                  TOML.stringify(
+                    email_event_response.prescreening.unwrapUnchecked() as any,
+                  ),
                   { language: 'toml', ignoreIllegals: true },
                 )}`,
               )
@@ -481,8 +492,10 @@ export function simulate_cmd(cwd: string) {
                 )}`,
               )
             }
-            const { email, ...deliverable_details } =
-              email_event_response.deliverable
+            // TODO: remove this
+            // const { email, ...deliverable_details } = email_event_response.deliverable
+            const deliverable_details =
+              email_event_response.deliverable?.unwrapUnchecked()
             if (util.print_w_quiet_and_filter_opts(options, 'deliverable')) {
               if (options.heading)
                 console.log(
@@ -498,62 +511,65 @@ export function simulate_cmd(cwd: string) {
                   `${chalk.whiteBright('=== Template Context ===')}\n`,
                 )
               console.log(
-                `${highlight('# These are the values available to your templates\n' + TOML.stringify(email_event_response.prepared as any), { language: 'toml', ignoreIllegals: true })}`,
+                `${highlight('# These are the values available to your templates\n' + TOML.stringify(email_event_response.prepared?.unwrapUnchecked() as any), { language: 'toml', ignoreIllegals: true })}`,
               )
             }
             if (util.print_w_quiet_and_filter_opts(options, 'comment')) {
               if (options.heading)
                 console.log(`${chalk.whiteBright('=== Comment ===')}\n`)
-              console.log(`${highlight(email_event_response.comment as any)}`)
+              console.log(
+                `${highlight(email_event_response.comment?.unwrapUnchecked() as any)}`,
+              )
             }
-            if (util.print_w_quiet_and_filter_opts(options, 'moderate')) {
-              if (
-                util.print_w_quiet_and_filter_opts(options, 'moderate=request')
-              ) {
-                if (options.heading)
-                  console.log(
-                    `${chalk.whiteBright('=== Moderation Args ===')}\n`,
-                  )
-                console.log(
-                  `${highlight('# These are the arguments used for moderation, alongside the comment\n' + TOML.stringify(email_event_response.moderation?.args as any), { language: 'toml', ignoreIllegals: true })}`,
-                )
-              }
-              if (
-                util.print_w_quiet_and_filter_opts(options, 'moderate=response')
-              ) {
-                if (options.heading)
-                  console.log(
-                    `${chalk.whiteBright('=== Notification Context ===')}\n`,
-                  )
-                console.log(
-                  `${highlight('# These values are available within notification templates\n' + TOML.stringify(email_event_response.moderation?.context as any), { language: 'toml', ignoreIllegals: true })}`,
-                )
-              }
-            }
-            if (util.print_w_quiet_and_filter_opts(options, 'notify')) {
-              if (
-                util.print_w_quiet_and_filter_opts(options, 'notify=commenter')
-              ) {
-                if (options.heading)
-                  console.log(
-                    `${chalk.whiteBright('=== Comment Submitted Notification ===')}\n`,
-                  )
-                if (email_event_response.moderation?.commenter_notif)
-                  console.log(
-                    `${highlight(email_event_response.moderation?.commenter_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
-                  )
-              }
-              if (util.print_w_quiet_and_filter_opts(options, 'notify=site')) {
-                if (options.heading)
-                  console.log(
-                    `${chalk.whiteBright('=== Comment Received Notification ===')}\n`,
-                  )
-                if (email_event_response.moderation?.moderator_notif)
-                  console.log(
-                    `${highlight(email_event_response.moderation?.moderator_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
-                  )
-              }
-            }
+            // TODO: for now moderation and notifying need to be refactored
+            // if (util.print_w_quiet_and_filter_opts(options, 'moderate')) {
+            //   if (
+            //     util.print_w_quiet_and_filter_opts(options, 'moderate=request')
+            //   ) {
+            //     if (options.heading)
+            //       console.log(
+            //         `${chalk.whiteBright('=== Moderation Args ===')}\n`,
+            //       )
+            //     console.log(
+            //       `${highlight('# These are the arguments used for moderation, alongside the comment\n' + TOML.stringify(email_event_response.moderation?.args as any), { language: 'toml', ignoreIllegals: true })}`,
+            //     )
+            //   }
+            //   if (
+            //     util.print_w_quiet_and_filter_opts(options, 'moderate=response')
+            //   ) {
+            //     if (options.heading)
+            //       `console.log`(
+            //         `${chalk.whiteBright('=== Notification Context ===')}\n`,
+            //       )
+            //     console.log(
+            //       `${highlight('# These values are available within notification templates\n' + TOML.stringify(email_event_response.moderation?.context as any), { language: 'toml', ignoreIllegals: true })}`,
+            //     )
+            //   }
+            // }
+            // if (util.print_w_quiet_and_filter_opts(options, 'notify')) {
+            //   if (
+            //     util.print_w_quiet_and_filter_opts(options, 'notify=commenter')
+            //   ) {
+            //     if (options.heading)
+            //       console.log(
+            //         `${chalk.whiteBright('=== Comment Submitted Notification ===')}\n`,
+            //       )
+            //     if (email_event_response.moderation?.commenter_notif)
+            //       console.log(
+            //         `${highlight(email_event_response.moderation?.commenter_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
+            //       )
+            //   }
+            //   if (util.print_w_quiet_and_filter_opts(options, 'notify=site')) {
+            //     if (options.heading)
+            //       console.log(
+            //         `${chalk.whiteBright('=== Comment Received Notification ===')}\n`,
+            //       )
+            //     if (email_event_response.moderation?.moderator_notif)
+            //       console.log(
+            //         `${highlight(email_event_response.moderation?.moderator_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
+            //       )
+            //   }
+            // }
           } else {
             throw response.unwrapErr()
           }
