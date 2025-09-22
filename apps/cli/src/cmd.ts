@@ -238,62 +238,84 @@ export function generate_cmd(cwd: string) {
     .command('config')
     .description('generate a config')
     .option(
-      '--site <string>',
-      `domain the signet is issued to (default: ${project.DEFAULT_SITE_DOMAIN})`,
+      '--site <domain>',
+      `site domain the signet is issued to`,
       project.DEFAULT_SITE_DOMAIN,
     )
     .option(
-      '--r3ply <string>',
-      `domain of issuing r3ply server (default: ${project.DEFAULT_R3PLY_DOMAIN})`,
+      '--r3ply <r3ply domain>',
+      `domain of issuing r3ply server`,
       project.DEFAULT_R3PLY_DOMAIN,
     )
-    .option('--date <string>', 'date signet was issued (default: today)')
     .option(
-      '--moderation <github | webhook>',
-      'moderation method (default: github)',
-      'github',
+      '--date <YYYY-MM-DD>',
+      'date signet was issued',
+      dayjs().format('YYYY-MM-DD'),
     )
-    .action(async (options: { site: string; r3ply: string; date?: string }) => {
-      const site = await project.get_keys(cwd).then((keys) =>
-        project.get_cli_system_config(cwd).then((system_config) => {
-          return generate.signet(
-            keys.signet_key,
-            util.unsafeUnwrap(system_config),
-            options.site,
-            options.r3ply,
-            options.date,
-          )
-        }),
-      )
-      const minimal_github_config = {
-        type: 'github',
-        repo: 'https://github.com/<YOUR_USERNAME>/<YOUR_PROJECT>',
-        'file_path_{}': '',
-      }
-      const minimal_config = {
-        version: '0.0.1',
-        site: [site],
-        comments: {
-          email: {
-            moderation: {
-              ...minimal_github_config,
-            },
+    .option(
+      '--label <string>',
+      'name for this signet, e.g. "production", "test"',
+      'local',
+    )
+    .option(
+      '--moderation <github | webhook | local>',
+      'moderation method',
+      'local',
+    )
+    .action(
+      async (options: {
+        site: string
+        r3ply: string
+        date: string
+        label: string
+        moderation: string
+      }) => {
+        const site = await project.get_keys(cwd).then((keys) =>
+          project.get_cli_system_config(cwd).then((system_config) => {
+            return generate.signet(
+              keys.signet_key,
+              util.unsafeUnwrap(system_config),
+              options.site,
+              options.r3ply,
+              options.date,
+            )
+          }),
+        )
+        const minimal_github_config = {
+          owner: '<YOUR_GITHUB_USERNAME>',
+          repo: '<YOUR_PROJECT>',
+          'file_path_{}': '<TODO>',
+        }
+        const minimal_webhook_config = {
+          url: 'https://TODO',
+        }
+        const minimal_local_config = {
+          'file_path_{}': 'TODO',
+        }
+        const parsed = R3plySiteConfig({
+          site: [{ ...site, label: options.label }],
+          moderation: {
+            [options.moderation]: [
+              (() => {
+                if (options.moderation == 'github') {
+                  return minimal_github_config
+                } else if (options.moderation == 'webhook') {
+                  return minimal_webhook_config
+                } else if (options.moderation == 'local') {
+                  return minimal_local_config
+                } else {
+                  throw new Error(
+                    `Unknown moderation type: ${options.moderation}`,
+                  )
+                }
+              })(),
+            ],
           },
-        },
-      }
-      const parsed = R3plySiteConfig({
-        site: [{ ...site, label: 'local' }],
-        moderation: {
-          local: [
-            {
-              'file_path_{}': '',
-            },
-          ],
-        },
-      })
-      console.log(highlight(TOML.stringify(parsed.value as any)))
-      return
-    })
+        })
+        console.log(highlight(TOML.stringify(parsed.value as any)))
+        return
+      },
+    )
 
   const email_cmd = generate_cmd
     .command('email')
