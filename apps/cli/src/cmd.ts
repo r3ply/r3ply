@@ -176,22 +176,32 @@ export function generate_cmd(cwd: string) {
     .command('signet')
     .description('get a signet issued')
     .option(
-      '--site <string>',
-      `domain the signet is issued to (default: ${project.DEFAULT_SITE_DOMAIN})`,
+      '--site <domain>',
+      `domain the signet is issued to`,
       project.DEFAULT_SITE_DOMAIN,
     )
     .option(
-      '--r3ply <string>',
-      `domain of issuing r3ply server (default: ${project.DEFAULT_R3PLY_DOMAIN})`,
+      '--r3ply <r3ply domain>',
+      `domain of issuing r3ply server`,
       project.DEFAULT_R3PLY_DOMAIN,
     )
-    .option('--date <string>', 'date signet was issued (default: today)')
+    .option(
+      '--date <YYYY-MM-DD>',
+      'date signet was issued',
+      dayjs().format('YYYY-MM-DD'),
+    )
+    .option(
+      '--label <string>',
+      'name for this signet, e.g. "production", "test"',
+      'local',
+    )
     .action(
       async (options: {
         site: string
         r3ply: string
-        date?: string
+        date: string
         interactive: boolean
+        label: string
       }) => {
         const keys = await project.get_keys(cwd)
         const cli_system_config = util.unsafeUnwrap(
@@ -208,11 +218,7 @@ export function generate_cmd(cwd: string) {
         // TODO - add back in the interactive version once I've figured out an elegant UX for generating the config
         if (options.interactive) {
           const answers = await prompts(
-            signet_questions(
-              options.site,
-              options.r3ply,
-              options.date ?? dayjs().format('YYYY-MM-DD'),
-            ),
+            signet_questions(options.site, options.r3ply, options.date),
           )
           options.site = answers.site
           options.r3ply = answers.r3ply
@@ -221,7 +227,7 @@ export function generate_cmd(cwd: string) {
         console.log(
           highlight(
             TOML.stringify({
-              site: [signet],
+              site: [{ ...signet, label: options.label }],
             }),
           ),
         )
