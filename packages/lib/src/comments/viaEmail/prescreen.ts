@@ -1,10 +1,5 @@
 import micromatch from 'micromatch'
-import {
-  R3plyCommentsConfig,
-  R3plyEmailCommentsConfig,
-  R3plySiteConfig,
-  R3plySystemConfig,
-} from '@r3ply/config'
+import { comments, R3plySiteConfig, R3plySystemConfig } from '@r3ply/schema'
 import { Err, Ok, Result } from 'oxide.ts'
 
 namespace PrescreenChecks {
@@ -43,13 +38,13 @@ namespace PrescreenChecks {
   export namespace comments_configured {
     export type pass = {
       result: 'pass'
-      general_comments: R3plyCommentsConfig
-      email_comments: R3plyEmailCommentsConfig
+      general_comments: comments.R3plyCommentsConfig
+      email_comments: comments.R3plyEmailCommentsConfig
     }
     export type fail = {
       result: 'fail'
       errors: [string, ...string[]]
-      general_comments?: R3plyCommentsConfig
+      general_comments?: comments.R3plyCommentsConfig
     }
   }
   export type comments_configured =
@@ -387,7 +382,9 @@ namespace comments_configured {
     else throw new Error('No comments configuration found')
   }
 
-  export function email_comments_config_exists(comments: R3plyCommentsConfig) {
+  export function email_comments_config_exists(
+    comments: comments.R3plyCommentsConfig,
+  ) {
     const email_comments_config = comments.email
     if (email_comments_config) return email_comments_config
     else throw new Error('No configuration found for email comments')

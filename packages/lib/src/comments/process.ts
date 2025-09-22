@@ -1,5 +1,5 @@
 import { match, Result } from 'oxide.ts'
-import { R3plySiteConfig } from '@r3ply/config'
+import { R3plySiteConfig } from '@r3ply/schema'
 import { tera } from '@r3ply/wasm'
 import { EmailTemplateContext } from './viaEmail/prepare' // Don't remove!
 

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { toHex } from '../../util'
 import crypto from 'crypto' // DON'T REMOVE!
-import { R3plySystemConfig } from '@r3ply/config'
+import { R3plySystemConfig } from '@r3ply/schema'
 
 /**
  * Generates a short, user-friendly envelope string, called a `signet` from a binary master key.

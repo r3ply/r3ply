@@ -26,12 +26,12 @@ importers:
       '@iarna/toml':
         specifier: ^2.2.5
         version: 2.2.5
-      '@r3ply/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@r3ply/lib':
         specifier: workspace:*
         version: link:../../packages/lib
+      '@r3ply/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
       '@r3ply/wasm':
         specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
         version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
@@ -102,12 +102,12 @@ importers:
       '@octokit/types':
         specifier: ^12.3.0
         version: 12.6.0
-      '@r3ply/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@r3ply/lib':
         specifier: workspace:*
         version: link:../../packages/lib
+      '@r3ply/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
       '@r3ply/wasm':
         specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
         version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
@@ -145,11 +145,45 @@ importers:
 
   crates/r3ply-wasm: {}
 
-  packages/config:
+  packages/lib:
     dependencies:
-      '@esbuild/darwin-arm64':
-        specifier: ^0.25.1
-        version: 0.25.1
+      '@iarna/toml':
+        specifier: ^2.2.5
+        version: 2.2.5
+      '@mail-parser/ts-bindings':
+        specifier: file:../../tools/mail-parser-ts-bindings-0.9.1.tgz
+        version: file:tools/mail-parser-ts-bindings-0.9.1.tgz
+      '@r3ply/schema':
+        specifier: workspace:*
+        version: link:../schema
+      '@r3ply/wasm':
+        specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
+        version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
+      micromatch:
+        specifier: ^4.0.8
+        version: 4.0.8
+      oxide.ts:
+        specifier: ^1.1.0
+        version: 1.1.0
+    devDependencies:
+      '@types/micromatch':
+        specifier: ^4.0.9
+        version: 4.0.9
+      tsup:
+        specifier: ^8.4.0
+        version: 8.4.0(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)
+      typescript:
+        specifier: ^5.5.4
+        version: 5.8.2
+      vitest:
+        specifier: ^3.0.8
+        version: 3.0.8(@types/node@24.2.1)
+
+  packages/schema:
+    dependencies:
       '@exodus/schemasafe':
         specifier: ^1.3.0
         version: 1.3.0
@@ -157,9 +191,12 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1
     devDependencies:
+      '@iarna/toml':
+        specifier: ^2.2.5
+        version: 2.2.5
       esbuild:
         specifier: ^0.25.1
-        version: 0.25.1
+        version: 0.25.4
       tsup:
         specifier: ^8.4.0
         version: 8.4.0(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)
@@ -173,52 +210,15 @@ importers:
         specifier: ^3.0.8
         version: 3.0.8(@types/node@24.2.1)
 
-  packages/lib:
-    dependencies:
-      '@iarna/toml':
-        specifier: ^2.2.5
-        version: 2.2.5
-      '@mail-parser/ts-bindings':
-        specifier: file:../../tools/mail-parser-ts-bindings-0.9.1.tgz
-        version: file:tools/mail-parser-ts-bindings-0.9.1.tgz
-      '@r3ply/config':
-        specifier: workspace:*
-        version: link:../config
-      '@r3ply/wasm':
-        specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
-        version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
-      dayjs:
-        specifier: ^1.11.13
-        version: 1.11.13
-      micromatch:
-        specifier: ^4.0.8
-        version: 4.0.8
-      oxide.ts:
-        specifier: ^1.1.0
-        version: 1.1.0
-      tsup:
-        specifier: ^8.4.0
-        version: 8.4.0(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)
-    devDependencies:
-      '@types/micromatch':
-        specifier: ^4.0.9
-        version: 4.0.9
-      typescript:
-        specifier: ^5.5.4
-        version: 5.8.2
-      vitest:
-        specifier: ^3.0.8
-        version: 3.0.8(@types/node@24.2.1)
-
   site:
     dependencies:
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
     devDependencies:
-      '@r3ply/config':
+      '@r3ply/schema':
         specifier: workspace:*
-        version: link:../packages/config
+        version: link:../packages/schema
       '@tailwindcss/forms':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@4.1.12)
@@ -2533,7 +2533,8 @@ snapshots:
   '@esbuild/darwin-arm64@0.24.2':
     optional: true
 
-  '@esbuild/darwin-arm64@0.25.1': {}
+  '@esbuild/darwin-arm64@0.25.1':
+    optional: true
 
   '@esbuild/darwin-arm64@0.25.4':
     optional: true
