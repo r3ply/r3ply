@@ -14,38 +14,30 @@ import dayjs from 'dayjs'
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
   const init_cmd = new Command('init')
-    .description('initialize a new r3ply project')
-    // TODO:
-    // .option('-f, --force', 'override existing initialization')
-    .argument(
-      '[directory]',
-      'directory to initialize bare r3ply project within',
-    )
-    .action(async (directory) => {
-      return project
-        .init_r3ply_project_at(cwd, directory)
-        .then(async (result) => {
-          const system_config = util.unsafeUnwrap(
-            await project.get_cli_system_config(cwd),
-          )
-          const { r3ply_dir, signet_key } = util.unsafeUnwrap(result)
-          const { signet, issued } = await Signet.issue(
-            signet_key,
-            system_config,
-          )(project.DEFAULT_SITE_DOMAIN, project.DEFAULT_R3PLY_DOMAIN)
-          const toml_site_entry = `[[site]]
+    .description('initialize a new r3ply project (at current directory)')
+    .action(async () => {
+      return project.init_r3ply_project_at(cwd).then(async (result) => {
+        const system_config = util.unsafeUnwrap(
+          await project.get_cli_system_config(cwd),
+        )
+        const { r3ply_dir, signet_key } = util.unsafeUnwrap(result)
+        const { signet, issued } = await Signet.issue(
+          signet_key,
+          system_config,
+        )(project.DEFAULT_SITE_DOMAIN, project.DEFAULT_R3PLY_DOMAIN)
+        const toml_site_entry = `[[site]]
 domain = "${project.DEFAULT_SITE_DOMAIN}"
 r3ply = "${project.DEFAULT_R3PLY_DOMAIN}"
 signet = "${signet}"
 issued = ${issued}
-label = "CLI"
+label = "local"
 `
-          console.log(
-            `Initialized empty r3ply project at ${chalk.greenBright(path.dirname(r3ply_dir))}`,
-            `\n\nAdd the following site entry to your config:`,
-            `\n\n${highlight(toml_site_entry, { language: 'toml' })}`,
-          )
-        })
+        console.log(
+          `Initialized empty r3ply project at ${chalk.greenBright(path.dirname(r3ply_dir))}`,
+          `\n\nAdd the following site entry to your config:`,
+          `\n\n${highlight(toml_site_entry, { language: 'toml' })}`,
+        )
+      })
     })
 
   return init_cmd
