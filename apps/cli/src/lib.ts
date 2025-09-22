@@ -1,19 +1,18 @@
 import path from 'path'
 import fs from 'fs'
-import { Err, Ok, Result } from 'oxide.ts'
+import { Result } from 'oxide.ts'
 import { util } from './util.js'
 import fg from 'fast-glob'
 import TOML from '@iarna/toml'
 import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/schema'
 import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
-import { RiMarkov, RiTa } from 'rita'
+import { RiMarkov } from 'rita'
 import { fileURLToPath } from 'url'
-import { util as r3ply_util, R3ply, comments, Signet } from '@r3ply/lib'
+import { util as r3ply_util, R3ply, Signet } from '@r3ply/lib'
 import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
-import crypto from 'crypto' // DON'T REMOVE!
-import { config } from 'packages/lib/src/util.js'
+import crypto from 'crypto'
 
 // project stuff ---------------------------------------------------------------
 export namespace project {

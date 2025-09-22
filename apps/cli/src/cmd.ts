@@ -8,7 +8,6 @@ import path from 'path'
 import { highlight } from 'cli-highlight'
 import TOML from '@iarna/toml'
 import { Signet, util as r3ply_util } from '@r3ply/lib'
-import crypto from 'crypto' // DON'T REMOVE!
 import prompts, { PromptObject } from 'prompts'
 import dayjs from 'dayjs'
 
