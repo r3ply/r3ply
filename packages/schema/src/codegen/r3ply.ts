@@ -8,7 +8,7 @@ import {
 import {
   MinimalR3plySystemConfig,
   R3plySystemConfig as R3plySystemConfigLibrary,
-} from '../schema'
+} from '../config'
 
 export const raw_parser_module = '<RAW_SYSTEM_PARSER_MODULE>'
 
