@@ -2,7 +2,7 @@ export * from './accept'
 export * from './deliverable'
 export * from './prepare'
 export * from './prescreen'
-export * from './anonymize'
+export * from '../../signet'
 export * from './crypto'
 import { R3plySystemConfig, R3plySiteConfig, comments } from '@r3ply/schema'
 import {
@@ -19,7 +19,7 @@ import {
 } from './deliverable'
 import { prepare as r3ply_prepare, EmailTemplateContext } from './prepare'
 import { process as r3ply_process, CommentTemplateContext } from '../process'
-import { Anonymize, Signet } from './anonymize'
+import { Anonymize, Signet } from '../../signet'
 import { Encrypt } from './crypto'
 import { Result } from 'oxide.ts'
 

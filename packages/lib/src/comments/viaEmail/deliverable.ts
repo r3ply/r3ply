@@ -4,7 +4,7 @@ import { R3plySignetConfig, comments } from '@r3ply/schema'
 import micromatch from 'micromatch'
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
 import { AcceptedEmail } from './accept'
-import { AnonymizeEmail } from './anonymize'
+import { AnonymizeEmail } from '../../signet'
 import { EncryptEmail } from './crypto'
 
 export interface DeliverableEmail {
