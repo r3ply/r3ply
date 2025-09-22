@@ -1,5 +1,5 @@
-import { R3plySystemConfig } from '@r3ply/config'
-import { CommentViaEmailHandler, CommentViaEmail } from './comments/viaEmail/'
+import { R3plySystemConfig } from '@r3ply/schema'
+import { receive, process, email } from './comments'
 
 /**
  * The main interface for implementing r3ply.
@@ -20,7 +20,15 @@ export interface R3ply {
     viaEmail: (
       anonymize_key: string,
       encrypt_key: string,
-    ) => CommentViaEmailHandler
+      pipeline?: {
+        prescreen?: typeof email.prescreen
+        receive?: typeof receive
+        accept?: typeof email.accept
+        deliverable?: typeof email.deliverable
+        prepare?: typeof email.prepare
+        process?: typeof process
+      },
+    ) => email.CommentViaEmailHandler
   }
 }
 export const R3ply = mk_r3ply
@@ -36,8 +44,21 @@ export const R3ply = mk_r3ply
 function mk_r3ply(system: R3plySystemConfig): R3ply {
   return {
     comments: {
-      viaEmail: (anonymize_key: string, encrypt_key: string) =>
-        CommentViaEmail(system, anonymize_key, encrypt_key),
+      viaEmail: (
+        anonymize_key: string,
+        encrypt_key: string,
+        pipeline?: {
+          prescreen?: typeof email.prescreen
+          receive?: typeof receive
+          accept?: typeof email.accept
+          deliverable?: typeof email.deliverable
+          prepare?: typeof email.prepare
+          process?: typeof process
+        },
+      ) =>
+        email.CommentViaEmail(system, anonymize_key, encrypt_key, {
+          ...pipeline,
+        }),
     },
   }
 }
@@ -50,7 +71,7 @@ function mk_r3ply(system: R3plySystemConfig): R3ply {
 //   const encrypt_email_key = 'C+CGDjjwO20erclXqpqbixlm2n8v5zR0w8LRabSNSww='
 //   test('make', async () => {
 //     const { siteConfigParser, systemConfigParser } = await import(
-//       '@r3ply/config'
+//       '@r3ply/schema'
 //     )
 //     const TOML = await import('@iarna/toml')
 //     // @ts-ignore todo: figure out how to get vscode to recognize these vitest raw imports
