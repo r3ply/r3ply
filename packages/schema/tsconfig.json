@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "types": ["vitest/importMeta"],
-    "outDir": "./dist",
-    "paths": { "@r3ply/schema": ["src/index.ts"] }
+    "outDir": "./dist"
   },
   "include": ["src/**/*"],
   "exclude": ["test/**/*"]
