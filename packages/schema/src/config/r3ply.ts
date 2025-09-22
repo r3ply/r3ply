@@ -91,7 +91,7 @@ export const r3ply = {
         moderation: false,
         attachments: false,
         max_size_bytes: 5242880,
-        block_list: [],
+        'block*': [],
       },
       properties: {
         enabled: {

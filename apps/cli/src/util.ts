@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import { Result } from 'oxide.ts'
-import crypto from 'crypto'
+import crypto from 'crypto' // DON'T REMOVE!
 
 export namespace util {
   export async function find_up(

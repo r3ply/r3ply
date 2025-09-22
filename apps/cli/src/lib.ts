@@ -4,20 +4,16 @@ import { Err, Ok, Result } from 'oxide.ts'
 import { util } from './util.js'
 import fg from 'fast-glob'
 import TOML from '@iarna/toml'
-import {
-  R3plySiteConfig,
-  R3plySystemConfig,
-  siteConfigParser,
-  systemConfigParser,
-} from '@r3ply/config'
+import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/schema'
 import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
 import { RiMarkov, RiTa } from 'rita'
 import { fileURLToPath } from 'url'
-import { DerferenceFile, R3ply, R3plyGithubBot, Signet } from '@r3ply/lib'
+import { util as r3ply_util, R3ply, comments, Signet } from '@r3ply/lib'
 import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
-import crypto from 'crypto'
+import crypto from 'crypto' // DON'T REMOVE!
+import { config } from 'packages/lib/src/util.js'
 
 // project stuff ---------------------------------------------------------------
 export namespace project {
@@ -145,9 +141,7 @@ export namespace project {
               ? TOML.parse(site_config_str)
               : JSON.parse(site_config_str),
           )
-          .then((site_config_json) =>
-            siteConfigParser(JSON.stringify(site_config_json)),
-          )
+          .then((site_config_json) => R3plySiteConfig.parse(site_config_json))
       })
     return Result.safe(parsed_site_config)
   }
@@ -209,9 +203,7 @@ export namespace project {
         )
       })
       .then((text) => {
-        return systemConfigParser(
-          JSON.stringify(TOML.parse(text.toString())) as any,
-        ).value!
+        return R3plySystemConfig.parse(text.toString()).value!
       })
     return Result.safe(result)
   }
@@ -236,13 +228,14 @@ export namespace project {
     )
   }
 
-  export const dereference_local_file: DerferenceFile = async (
-    base_uri: string,
-    file_uri_ref?: string,
-  ): Promise<string | undefined> => {
-    const resolver = resolve_file_relative_to_site_config(base_uri)
-    return resolver(file_uri_ref)
-  }
+  export const dereference_local_file: r3ply_util.config.DerferenceFile =
+    async (
+      base_uri: string,
+      file_uri_ref?: string,
+    ): Promise<string | undefined> => {
+      const resolver = resolve_file_relative_to_site_config(base_uri)
+      return resolver(file_uri_ref)
+    }
 
   /**
    * Creates a file resolver based on the location of the r3ply site config
@@ -281,18 +274,15 @@ export namespace project {
     const parent_project_exists = find_r3ply_dir(new_r3ply_dir)
     const signet_key = crypto.randomBytes(32).toString('base64')
     const encrypt_email_key = crypto.randomBytes(32).toString('base64')
-    let system_config = systemConfigParser(
-      JSON.stringify(
-        TOML.parse(`
-    version = "0.0.1"
-    domains = ["${project.DEFAULT_R3PLY_DOMAIN}"]
-    sites = ["${project.DEFAULT_SITE_DOMAIN}"]
-
-    [[admin]]
-    name = "Guybrush Threepwood"
-    email = "guybrush@example.com"`),
-      ),
-    ).value!
+    let system_config = R3plySystemConfig({
+      domains: [project.DEFAULT_R3PLY_DOMAIN],
+      admin: [
+        {
+          name: 'Guybrush Threepwood',
+          email: 'guybrush@example.com',
+        },
+      ],
+    }).value!
     const result = parent_project_exists.then((parent_project_exists) => {
       const file_access = Result.safe(fs.promises.access(new_r3ply_dir))
       return file_access.then((file_access) => {
@@ -544,7 +534,7 @@ export namespace generate {
   }
 
   export function config(site_config: R3plySiteConfig) {
-    return TOML.stringify(site_config)
+    return TOML.stringify(site_config as any)
   }
 }
 
@@ -580,16 +570,16 @@ export async function cli_handle_comment_via_email(
       changed_files: 0,
     })
   }
-  const github_moderation = R3plyGithubBot('no password', fetch)
-  const moderation = (type: 'github' | 'webhook') => {
-    if (type == 'github') return github_moderation
-    else throw 'Not yet implemented'
-  }
+  // TODO: for now no moderation
+  // const github_moderation = R3plyGithubBot('no password', fetch)
+  // const moderation = (type: 'github' | 'webhook') => {
+  //   if (type == 'github') return github_moderation
+  //   else throw 'Not yet implemented'
+  // }
   const r3ply = R3ply(system_config)
   const comment_via_email_handler = r3ply.comments.viaEmail(
     keys.signet,
     keys.encrypt_email,
-    moderation,
   )
   return comment_via_email_handler([site_config, email_bytes])
 }

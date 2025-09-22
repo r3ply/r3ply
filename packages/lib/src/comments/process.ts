@@ -1,7 +1,7 @@
 import { match, Result } from 'oxide.ts'
 import { R3plySiteConfig } from '@r3ply/schema'
 import { tera } from '@r3ply/wasm'
-import { EmailTemplateContext } from './viaEmail/prepare' // Don't remove!
+import { EmailTemplateContext } from './viaEmail/prepare' // DON'T REMOVE!
 
 /**
  * The basic context that can always be expected to be available when rendering a template.
