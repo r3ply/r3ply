@@ -8,7 +8,7 @@ import {
 import {
   MinimalR3plySiteConfig as MinR3plySiteConfigLib,
   R3plySiteConfig as R3plySiteConfigLib,
-} from '../schema'
+} from '../config'
 
 export const raw_parser_module = '<RAW_SITE_PARSER_MODULE>'
 

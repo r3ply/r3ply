@@ -1,23 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import {
-  comments,
-  email,
-  github,
   R3plySiteConfig as imported_r3ply_site_config_parser,
   R3plySystemConfig as imported_r3ply_system_config_parser,
-  local,
-  moderation,
-  notify,
-  signet,
-  site,
-  webhook,
-} from '../src/schema'
+} from '@r3ply/schema'
 import {
   R3plySiteConfig as compiled_r3ply_site_config_parser,
   R3plySystemConfig as compiled_r3ply_system_config_parser,
 } from '../dist'
-import { parser } from '@exodus/schemasafe'
-import { extra } from '../src/schema/extra'
 // A list of implementations of the parser that are to be tested under the same conditions
 const site_implementations: [
   string,
@@ -98,22 +87,14 @@ describe.each(site_implementations)('%s', (_, SiteConfig) => {
     })
     test('options', async () => {
       const github = github_moderation.value!.moderation?.github[0]!
-      expect(github.enabled).toBe(true)
-      expect(github['allow*']).toStrictEqual([])
-      expect(github['filter*']).toStrictEqual(['**'])
-      expect(github.comments).toStrictEqual(['email'])
-
       const webhook = webhook_moderation.value!.moderation?.webhook[0]!
-      expect(webhook.enabled).toBe(true)
-      expect(webhook['allow*']).toStrictEqual([])
-      expect(webhook['filter*']).toStrictEqual(['**'])
-      expect(webhook.comments).toStrictEqual(['email'])
-
       const local = local_moderation.value!.moderation?.local[0]!
-      expect(local.enabled).toBe(true)
-      expect(local['allow*']).toStrictEqual([])
-      expect(local['filter*']).toStrictEqual(['**'])
-      expect(local.comments).toStrictEqual(['email'])
+      for (const options of [github, webhook, local]) {
+        expect(options.enabled).toBe(true)
+        expect(options['allow*']).toStrictEqual([])
+        expect(options['filter*']).toBeUndefined()
+        expect(options.comments).toBeUndefined()
+      }
     })
   })
 })

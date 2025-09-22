@@ -82,7 +82,7 @@ This is a new project and a lot of help is needed. To get involved just file an 
 This repository is a monorepo written in a mixture of Typescript and Rust. It contains all the pieces needed to make this work:
 
 - [@r3ply/lib](./packages/lib/) - the core functionality
-- [@r3ply/config](./packages/config) - handles the schema definitions and their parsers
+- [@r3ply/schema](./packages/schema) - handles the schema definitions and their parsers
 - [@r3ply/wasm](./crates/r3ply-wasm/) - consolidates the rust libraries used and exports them as functions in wasm
 - [@r3ply/cli](./apps/cli) - a small CLI app to help site owners develop locally, instead of having to send actual emails
 - [@r3ply/cloudflare-worker](./apps/cloudflare-worker/) - the Cloudflare email worker that receives email

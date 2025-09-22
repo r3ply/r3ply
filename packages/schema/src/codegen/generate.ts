@@ -4,7 +4,7 @@ import {
   site_schema,
   raw_system_parser,
   system_schema,
-} from '../schema'
+} from '../config'
 
 // prepare directory
 mkdirSync('./src/generated', { recursive: true })
