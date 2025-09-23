@@ -538,6 +538,7 @@ export namespace generate {
   }
 }
 
+// TODO: I don't think this is needed anymore and can probably be safely removed
 export async function cli_handle_comment_via_email(
   system_config: R3plySystemConfig,
   site_config: R3plySiteConfig,
