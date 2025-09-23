@@ -10,6 +10,7 @@ import TOML from '@iarna/toml'
 import { Signet, util as r3ply_util } from '@r3ply/lib'
 import prompts, { PromptObject } from 'prompts'
 import dayjs from 'dayjs'
+import { mailbox } from 'typescript-mailbox-parser'
 
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
@@ -422,7 +423,20 @@ export function simulate_cmd(cwd: string) {
           await project.get_cli_system_config(cwd),
         )
         const site = ((to: string | undefined) => {
-          let site_domain = to ? to.split('@')[0] : project.DEFAULT_SITE_DOMAIN
+          let site_domain: string = (() => {
+            if (to) {
+              const mb = mailbox(to)
+              if (Array.isArray(mb))
+                throw new Error(
+                  `Unable to parse --to '${to}', reasons: ${JSON.stringify(mb)}`,
+                )
+              else {
+                return mb.local
+              }
+            } else {
+              return project.DEFAULT_SITE_DOMAIN
+            }
+          })()
           const site = site_config.site.find((k) => k.domain == site_domain)
           if (site) {
             return site
