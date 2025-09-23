@@ -502,57 +502,106 @@ export function simulate_cmd(cwd: string) {
                 )
               }
             }
-            if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
-              if (options.heading)
-                console.log(
-                  `${chalk.whiteBright('=== Prescreening Results ===')}\n`,
-                )
-              console.log(
-                `${highlight(
-                  TOML.stringify(
-                    email_event_response.prescreening.unwrapUnchecked() as any,
-                  ),
-                  { language: 'toml', ignoreIllegals: true },
-                )}`,
-              )
+
+            // Prescreen
+            const prescreen_details = email_event_response.prescreening
+            if (prescreen_details) {
+              if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
+                if (options.heading)
+                  console.log(
+                    chalk.whiteBright('=== Prescreening Results ===') + '\n',
+                  )
+                if (prescreen_details.isOk()) {
+                  console.log(
+                    highlight(
+                      TOML.stringify(prescreen_details.unwrap() as any),
+                      { language: 'toml', ignoreIllegals: true },
+                    ),
+                  )
+                } else {
+                  chalk.redBright(prescreen_details.unwrapErr() + '\n')
+                }
+              }
             }
-            if (util.print_w_quiet_and_filter_opts(options, 'receive')) {
-              console.log(
-                `\n${chalk.whiteBright('=== Comment Received ===')}\n`,
-                `\n${highlight(
-                  TOML.stringify(email_event_response.received as any),
-                  { language: 'toml', ignoreIllegals: true },
-                )}`,
-              )
+
+            // Receive
+            const receive_details = email_event_response.received
+            if (receive_details) {
+              if (util.print_w_quiet_and_filter_opts(options, 'receive')) {
+                if (options.heading) {
+                  console.log(
+                    chalk.whiteBright('=== Comment Received ===') + '\n',
+                  )
+                  if (receive_details.isOk()) {
+                    console.log(
+                      highlight(
+                        TOML.stringify(receive_details.unwrap() as any),
+                        { language: 'toml', ignoreIllegals: true },
+                      ),
+                    )
+                  } else {
+                    console.log(
+                      chalk.redBright(receive_details.unwrapErr() + '\n'),
+                    )
+                  }
+                }
+              }
             }
-            // TODO: remove this
-            // const { email, ...deliverable_details } = email_event_response.deliverable
-            const deliverable_details =
-              email_event_response.deliverable?.unwrapUnchecked()
-            if (util.print_w_quiet_and_filter_opts(options, 'deliverable')) {
-              if (options.heading)
-                console.log(
-                  `${chalk.whiteBright('=== Deliverability Details ===')}\n`,
-                )
-              console.log(
-                `${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details as any), { language: 'toml', ignoreIllegals: true })}`,
-              )
+
+            // Deliverable
+            const deliverable_details = email_event_response.deliverable
+            if (deliverable_details) {
+              if (util.print_w_quiet_and_filter_opts(options, 'deliverable')) {
+                if (options.heading)
+                  console.log(
+                    `${chalk.whiteBright('=== Deliverability Details ===')}\n`,
+                  )
+                if (deliverable_details.isOk()) {
+                  console.log(
+                    `${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
+                  )
+                } else {
+                  console.log(
+                    `${chalk.redBright(deliverable_details.unwrapErr())}\n`,
+                  )
+                }
+              }
             }
-            if (util.print_w_quiet_and_filter_opts(options, 'prepare')) {
-              if (options.heading)
-                console.log(
-                  `${chalk.whiteBright('=== Template Context ===')}\n`,
-                )
-              console.log(
-                `${highlight('# These are the values available to your templates\n' + TOML.stringify(email_event_response.prepared?.unwrapUnchecked() as any), { language: 'toml', ignoreIllegals: true })}`,
-              )
+
+            // Prepare
+            const prepare_details = email_event_response.prepared
+            if (prepare_details) {
+              if (util.print_w_quiet_and_filter_opts(options, 'prepare')) {
+                if (options.heading)
+                  console.log(
+                    `${chalk.whiteBright('=== Template Context ===')}\n`,
+                  )
+                if (prepare_details.isOk()) {
+                  console.log(
+                    `${highlight('# These are the values available to your templates\n' + TOML.stringify(prepare_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
+                  )
+                } else {
+                  console.log(
+                    chalk.redBright(prepare_details.unwrapErr() + '\n'),
+                  )
+                }
+              }
             }
-            if (util.print_w_quiet_and_filter_opts(options, 'comment')) {
-              if (options.heading)
-                console.log(`${chalk.whiteBright('=== Comment ===')}\n`)
-              console.log(
-                `${highlight(email_event_response.comment?.unwrapUnchecked() as any)}`,
-              )
+
+            // Process
+            const process_details = email_event_response.comment
+            if (process_details) {
+              if (util.print_w_quiet_and_filter_opts(options, 'comment')) {
+                if (options.heading)
+                  console.log(`${chalk.whiteBright('=== Comment ===')}\n`)
+                if (process_details.isOk()) {
+                  console.log(highlight(process_details.unwrap()))
+                } else {
+                  console.log(
+                    chalk.redBright(process_details.unwrapErr() + '\n'),
+                  )
+                }
+              }
             }
             // TODO: for now moderation and notifying need to be refactored
             // if (util.print_w_quiet_and_filter_opts(options, 'moderate')) {
