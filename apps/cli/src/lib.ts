@@ -13,6 +13,7 @@ import { util as r3ply_util, R3ply, Signet } from '@r3ply/lib'
 import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
 import crypto from 'crypto'
+import { mailbox } from 'typescript-mailbox-parser'
 
 // project stuff ---------------------------------------------------------------
 export namespace project {
@@ -444,18 +445,16 @@ export namespace generate {
       body?: string
     },
   ) {
-    let from: { name?: string; addr: string }
+    let from: { addr: string; name?: string; local: string; domain: string }
     if (options?.from) {
       from = parse_email_addr(options.from)
     } else {
       from = generate.email_addr()
     }
-    const [local, domain] = from.addr.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
-    const message_id = options?.messageId || generate.message_id(domain)
+    const message_id = options?.messageId || generate.message_id(from.domain)
     const date = dayjs(options?.date ?? new Date(generate.date()))
-    const to = options?.to || `${site_domain}@${r3ply_domain}`
-    const [to_local, _] = to.match(/^(.+?)@(.+?)$/)!.slice(1, 3)
-    const subject_url = new URL(`https://${to_local}/`)
+    const to = parse_email_addr(options?.to || `${site_domain}@${r3ply_domain}`)
+    const subject_url = new URL(`https://${to.local}/`)
     if (options?.subjectPath) subject_url.pathname = options?.subjectPath
     const subject =
       options?.subject || generate.subject(subject_url, options?.subjectPath)
@@ -466,7 +465,7 @@ export namespace generate {
         BigInt(date.unix()),
         from.name,
         from.addr,
-        to,
+        to.addr,
         subject,
         body,
       ),
@@ -474,16 +473,18 @@ export namespace generate {
     return email.unwrap()
   }
 
-  // TODO: bring in my actual email parsing library to handle this stuff. This is not how an email address should be parsed!
-  function parse_email_addr(email: string): { name?: string; addr: string } {
-    const name_matches = email.match(/^(.*?)</)
-    let name: string | undefined
-    if (name_matches) {
-      name = name_matches[1].trim()
-      const email_matches = email.match(/<(.+?)>/)
-      const email_addr = (email_matches! ?? [''])[1].trim()
-      return { name, addr: email_addr }
-    } else return { name: undefined, addr: email }
+  function parse_email_addr(email: string): {
+    addr: string
+    name?: string
+    local: string
+    domain: string
+  } {
+    const result = mailbox(email)
+    if (Array.isArray(result))
+      throw new Error(
+        `Unable to parse email ${email}, errors: ${JSON.stringify(result)}`,
+      )
+    return result
   }
 
   export async function signet(
