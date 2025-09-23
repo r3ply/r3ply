@@ -1,5 +1,5 @@
 import { Command } from 'commander'
-import { cli_handle_comment_via_email, project, generate } from './lib.js'
+import { project, generate } from './lib.js'
 import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
@@ -7,7 +7,7 @@ import { R3plySiteConfig } from '@r3ply/schema'
 import path from 'path'
 import { highlight } from 'cli-highlight'
 import TOML from '@iarna/toml'
-import { Signet, util as r3ply_util } from '@r3ply/lib'
+import { R3ply, Signet, util as r3ply_util } from '@r3ply/lib'
 import prompts, { PromptObject } from 'prompts'
 import dayjs from 'dayjs'
 import { mailbox } from 'typescript-mailbox-parser'
@@ -444,7 +444,7 @@ export function simulate_cmd(cwd: string) {
             return site_config.site[util.random_int(site_config.site.length)]
           }
         })(options.to)
-        const email = generate
+        const email = await generate
           .email(site.domain, site.r3ply, options)
           .then((email) => {
             if (util.print_w_quiet_and_filter_opts(options, 'email')) {
@@ -461,19 +461,13 @@ export function simulate_cmd(cwd: string) {
             return email
           })
         const keys = await project.get_keys(cwd)
+        const r3ply = R3ply(cli_system_config)
+        const email_handler = r3ply.comments.viaEmail(
+          keys.signet_key,
+          keys.encrypt_email_key,
+        )
         const response = Result.safe(
-          email.then((email) =>
-            cli_handle_comment_via_email(
-              cli_system_config,
-              site_config,
-              new TextEncoder().encode(email),
-              file_resolver,
-              {
-                signet: keys.signet_key,
-                encrypt_email: keys.encrypt_email_key,
-              },
-            ),
-          ),
+          email_handler([site_config, new TextEncoder().encode(email)]),
         )
         await response.then(async (response) => {
           if (response.isOk()) {
@@ -603,6 +597,7 @@ export function simulate_cmd(cwd: string) {
                 }
               }
             }
+
             // TODO: for now moderation and notifying need to be refactored
             // if (util.print_w_quiet_and_filter_opts(options, 'moderate')) {
             //   if (
