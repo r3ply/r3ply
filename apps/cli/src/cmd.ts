@@ -1,5 +1,5 @@
 import { Command } from 'commander'
-import { project, generate } from './lib.js'
+import { project, generate, moderation } from './lib.js'
 import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
@@ -14,7 +14,7 @@ import TOML from '@iarna/toml'
 import {
   R3ply,
   Signet,
-  moderation,
+  moderation as mod_todo,
   util as r3ply_util,
   comments,
 } from '@r3ply/lib'
@@ -383,6 +383,7 @@ export function simulate_cmd(cwd: string) {
 
   type SimulateCmdEmailOpts = {
     moderation: boolean
+    dryRun: boolean
     from?: string
     to?: string
     date?: string
@@ -397,6 +398,7 @@ export function simulate_cmd(cwd: string) {
   simulate_cmd
     .command('email')
     .option('--moderation', 'send comment for moderation (local-only)', false)
+    .option('--dry-run', 'print output but have no side effects', false)
     .option('--message-id <id>', 'override Message-ID header')
     .option('--date <date>', 'override Date header')
     .option('--from <address>', 'override From header')
@@ -423,8 +425,6 @@ export function simulate_cmd(cwd: string) {
         cwd,
         simulate_cmd.parent?.opts().config,
       )
-      let file_resolver: (file_uri?: string) => Promise<string | undefined> =
-        project.resolve_file_relative_to_site_config(site_config_path)
       site_config = await r3ply_util.config.resolve_references(
         site_config,
         site_config_path,
@@ -498,41 +498,12 @@ export function simulate_cmd(cwd: string) {
           if (site_config.moderation.local) {
             const local_moderators = site_config.moderation.local
               .map((local_moderation_config) => {
-                return moderation.LocalModeration(
+                return mod_todo.LocalModeration(
                   signet,
                   'email',
                   local_moderation_config,
-                  async (args) => {
-                    const project_dir = project.find_project_dir(cwd)
-                    return project_dir.then((project_dir_result) => {
-                      const project_dir = util.unsafeUnwrap(project_dir_result)
-                      const proposed_path = path.join(
-                        project_dir,
-                        args.relative_path,
-                      )
-                      const path_relative_to_project = path.relative(
-                        project_dir,
-                        proposed_path,
-                      )
-                      if (path_relative_to_project.startsWith('..'))
-                        throw new Error(
-                          `Can not write comment to '${path_relative_to_project}' because path is outside r3ply project directory!`,
-                        )
-                      else {
-                        // TODO: maybe change the return type to include an optional error?
-                        // try {
-                        const result = fs.writeFileSync(
-                          proposed_path,
-                          args.comment,
-                        )
-                        // } catch (error) {
-                        //   console.log("FOO ERROR")
-                        //   console.log(JSON.stringify(error, null, 2));
-                        // }
-                        return proposed_path
-                      }
-                    })
-                  },
+                  (args) =>
+                    moderation.write_comment_locally(cwd, args, options.dryRun),
                 )
               })
               .filter((local_moderator) => local_moderator != undefined)

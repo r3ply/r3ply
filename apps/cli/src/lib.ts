@@ -9,7 +9,12 @@ import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
 import { RiMarkov } from 'rita'
 import { fileURLToPath } from 'url'
-import { util as r3ply_util, R3ply, Signet } from '@r3ply/lib'
+import {
+  util as r3ply_util,
+  R3ply,
+  Signet,
+  moderation as mod_todo,
+} from '@r3ply/lib'
 import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
 import crypto from 'crypto'
@@ -771,3 +776,25 @@ const site_paths = [
   'rankings',
   'opinion',
 ]
+
+export namespace moderation {
+  export async function write_comment_locally(
+    cwd: string,
+    args: mod_todo.LocalModerationArgs,
+    dryrun: boolean = false,
+  ) {
+    const project_dir = util.unsafeUnwrap(await project.find_project_dir(cwd))
+    const proposed_path = path.join(project_dir, args.relative_path)
+    const path_rel_to_proj = path.relative(project_dir, proposed_path)
+    if (path_rel_to_proj.startsWith('..'))
+      throw new Error(
+        `Can't write comment to '${proposed_path}' because path is outside r3ply project directory!`,
+      )
+    else {
+      if (!dryrun) {
+        const result = fs.writeFileSync(proposed_path, args.comment)
+      }
+      return proposed_path
+    }
+  }
+}
