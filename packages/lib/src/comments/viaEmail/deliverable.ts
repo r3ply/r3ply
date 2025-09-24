@@ -170,12 +170,11 @@ function path_subject_field_is_deliverable(
 ) {
   const base_url = new URL('https://example.com')
   base_url.hostname = site_domain
-  if (base_url.hostname != site_domain)
+  const url = new URL(subject_str, base_url)
+  if (url.hostname != site_domain)
     throw new Error(`${site_domain} could not be assigned as a hostname`)
-  base_url.pathname = subject_str
-  // if (base_url.pathname != subject_str) throw new Error(`${subject_str} could not as be assigned as a pathname`)
   return url_subject_field_is_deliverable(
-    base_url.toString(),
+    url.toString(),
     site_domain,
     site_comment_paths,
   )

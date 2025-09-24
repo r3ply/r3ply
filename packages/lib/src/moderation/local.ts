@@ -28,19 +28,18 @@ export interface LocalModeration<InCtx extends CommentTemplateContext>
   extends ModerationChannel<
     'local',
     InCtx,
-    LocalModerationContext,
     LocalModerationArgs,
     LocalModerationResult
   > {}
 
 export function LocalModeration<InCtx extends CommentTemplateContext>(
-  site: R3plySignetConfig,
+  signet: R3plySignetConfig,
   comment_source: comments.R3plyCommentSource,
   config: moderation.R3plyLocalModerationConfig,
   write: (args: LocalModerationArgs) => Promise<string | undefined>,
   decrypt?: DecryptEmail,
 ): LocalModeration<InCtx> | undefined {
-  if (can_moderate(site, comment_source, config)) {
+  if (can_moderate(signet, comment_source, config)) {
     const local_moderation: LocalModeration<InCtx> = {
       type: 'local',
       config,
@@ -103,7 +102,7 @@ if (import.meta.vitest) {
     const local_mod = LocalModeration(site, 'email', local_config, write)!
     const key = '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
     const url = new URL('https://example.com/blog/post/1')
-    const local_context = await local_mod.prepare({
+    const local_context = {
       r3ply: {
         config_version: '0.0.1',
         server: 'r3ply.com',
@@ -123,7 +122,7 @@ if (import.meta.vitest) {
         md: undefined,
         html: undefined,
       },
-    })
+    }
     const local_args = await local_mod.process(
       'this is a comment',
       local_context,
