@@ -792,7 +792,7 @@ export namespace moderation {
       )
     else {
       if (!dryrun) {
-        const result = fs.writeFileSync(proposed_path, args.comment)
+        fs.writeFileSync(proposed_path, args.comment)
       }
       return proposed_path
     }

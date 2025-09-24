@@ -513,20 +513,16 @@ export function simulate_cmd(cwd: string) {
                 comment,
                 prepared,
               )
-              console.log(`=== Moderation: Local[${count}]: Request ===\n`)
-              console.log(
-                TOML.stringify({
-                  ...local_moderation_request.args,
-                  comment: undefined,
-                } as any) + '\n',
-              )
+              console.log(`=== Moderation: Local[${count}] ===\n`)
               const local_moderation_response = await local.send(
                 local_moderation_request,
               )
-              console.log(`=== Moderation: Local[${count}]: Response ===\n`)
-              console.log(
-                TOML.stringify(local_moderation_response.result) + '\n',
-              )
+              if (options.dryRun) {
+                console.log('# [DRY RUN] Comment would be written to:')
+              } else {
+                console.log('# Comment written to:')
+              }
+              console.log(local_moderation_response.result.absolute_path, '\n')
               count++
             }
           }
