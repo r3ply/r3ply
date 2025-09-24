@@ -3,7 +3,7 @@ import { project, generate } from './lib.js'
 import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
-import { R3plySiteConfig } from '@r3ply/schema'
+import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/schema'
 import path from 'path'
 import { highlight } from 'cli-highlight'
 import TOML from '@iarna/toml'
@@ -11,6 +11,7 @@ import { R3ply, Signet, util as r3ply_util } from '@r3ply/lib'
 import prompts, { PromptObject } from 'prompts'
 import dayjs from 'dayjs'
 import { mailbox } from 'typescript-mailbox-parser'
+import { CommentEmailEventResponse } from 'packages/lib/src/comments/viaEmail/index.js'
 
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
@@ -368,6 +369,18 @@ export function simulate_cmd(cwd: string) {
     'simulate receiving a comment using your r3ply config',
   )
 
+  type SimulateCmdEmailOpts = {
+    from?: string
+    to?: string
+    date?: string
+    subject?: string
+    subjectPath?: string
+    body?: string
+    messageId?: string
+    quiet?: boolean | string[]
+    filter?: boolean | string[]
+    heading: boolean
+  }
   simulate_cmd
     .command('email')
     .option('--message-id <id>', 'override Message-ID header')
@@ -388,270 +401,252 @@ export function simulate_cmd(cwd: string) {
       `filter output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderate,notify]. Note: stages themselves can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderate=request,moderate=response,notify=commenter,notify=site]`,
       util.split_list,
     )
-    .action(
-      async (
-        options: {
-          from?: string
-          to?: string
-          date?: string
-          subject?: string
-          subjectPath?: string
-          body?: string
-          messageId?: string
-          quiet?: boolean | string[]
-          filter?: boolean | string[]
-          heading: boolean
-        },
-        cmd,
-      ) => {
-        let site_config_path: string = await project.resolve_config_path(
-          cwd,
-          simulate_cmd.parent?.opts().config,
-        )
-        let site_config: R3plySiteConfig = await project.resolve_config(
-          cwd,
-          simulate_cmd.parent?.opts().config,
-        )
-        let file_resolver: (file_uri?: string) => Promise<string | undefined> =
-          project.resolve_file_relative_to_site_config(site_config_path)
-        site_config = await r3ply_util.config.resolve_references(
-          site_config,
-          site_config_path,
-          project.dereference_local_file,
-        )
-        const cli_system_config = util.unsafeUnwrap(
-          await project.get_cli_system_config(cwd),
-        )
-        const site = ((to: string | undefined) => {
-          let site_domain: string = (() => {
-            if (to) {
-              const mb = mailbox(to)
-              if (Array.isArray(mb))
-                throw new Error(
-                  `Unable to parse --to '${to}', reasons: ${JSON.stringify(mb)}`,
-                )
-              else {
-                return mb.local
-              }
-            } else {
-              return project.DEFAULT_SITE_DOMAIN
-            }
-          })()
-          const site = site_config.site.find((k) => k.domain == site_domain)
-          if (site) {
-            return site
-          } else {
-            return site_config.site[util.random_int(site_config.site.length)]
-          }
-        })(options.to)
-        const email = await generate
-          .email(site.domain, site.r3ply, options)
-          .then((email) => {
-            if (util.print_w_quiet_and_filter_opts(options, 'email')) {
-              // TODO: for some reason highlight.js doesn't support `eml`???
-              if (options.heading)
-                console.log(`${chalk.whiteBright('=== Input Email ===\n')}`)
-              console.log(
-                highlight(email.replace(/\r/g, ''), {
-                  language: 'yaml',
-                  ignoreIllegals: true,
-                }) + '\n\n',
+    .action(async (options: SimulateCmdEmailOpts, cmd) => {
+      let site_config_path: string = await project.resolve_config_path(
+        cwd,
+        simulate_cmd.parent?.opts().config,
+      )
+      let site_config: R3plySiteConfig = await project.resolve_config(
+        cwd,
+        simulate_cmd.parent?.opts().config,
+      )
+      let file_resolver: (file_uri?: string) => Promise<string | undefined> =
+        project.resolve_file_relative_to_site_config(site_config_path)
+      site_config = await r3ply_util.config.resolve_references(
+        site_config,
+        site_config_path,
+        project.dereference_local_file,
+      )
+      const cli_system_config = util.unsafeUnwrap(
+        await project.get_cli_system_config(cwd),
+      )
+      const site = ((to: string | undefined) => {
+        let site_domain: string = (() => {
+          if (to) {
+            const mb = mailbox(to)
+            if (Array.isArray(mb))
+              throw new Error(
+                `Unable to parse --to '${to}', reasons: ${JSON.stringify(mb)}`,
               )
+            else {
+              return mb.local
             }
-            return email
-          })
-        const keys = await project.get_keys(cwd)
-        const r3ply = R3ply(cli_system_config)
-        const email_handler = r3ply.comments.viaEmail(
-          keys.signet_key,
-          keys.encrypt_email_key,
-        )
-        const response = Result.safe(
-          email_handler([site_config, new TextEncoder().encode(email)]),
-        )
-        await response.then(async (response) => {
-          if (response.isOk()) {
-            const email_event_response = response.unwrap()
-            if (util.print_w_quiet_and_filter_opts(options, 'config')) {
-              if (
-                util.print_w_quiet_and_filter_opts(options, 'config=system')
-              ) {
-                if (options.heading)
-                  console.log(`${chalk.whiteBright('=== System Config ===\n')}`)
-                console.log(
-                  highlight(
-                    `# Generated using site config \n${TOML.stringify(cli_system_config)}`,
-                    { language: 'toml', ignoreIllegals: true },
-                  ) + '\n',
-                )
-              }
-              if (util.print_w_quiet_and_filter_opts(options, 'config=site')) {
-                if (options.heading)
-                  console.log(`${chalk.whiteBright('=== Site Config ===\n')}`)
-                console.log(
-                  `${highlight(
-                    `# From path ${site_config_path} \n${TOML.stringify(site_config as any)}`,
-                    { language: 'toml', ignoreIllegals: true },
-                  )}`,
-                )
-              }
-            }
-
-            // Prescreen
-            const prescreen_details = email_event_response.prescreening
-            if (prescreen_details) {
-              if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
-                if (options.heading)
-                  console.log(
-                    chalk.whiteBright('=== Prescreening Results ===') + '\n',
-                  )
-                if (prescreen_details.isOk()) {
-                  console.log(
-                    highlight(
-                      TOML.stringify(prescreen_details.unwrap() as any),
-                      { language: 'toml', ignoreIllegals: true },
-                    ),
-                  )
-                } else {
-                  chalk.redBright(prescreen_details.unwrapErr() + '\n')
-                }
-              }
-            }
-
-            // Receive
-            const receive_details = email_event_response.received
-            if (receive_details) {
-              if (util.print_w_quiet_and_filter_opts(options, 'receive')) {
-                if (options.heading) {
-                  console.log(
-                    chalk.whiteBright('=== Comment Received ===') + '\n',
-                  )
-                  if (receive_details.isOk()) {
-                    console.log(
-                      highlight(
-                        TOML.stringify(receive_details.unwrap() as any),
-                        { language: 'toml', ignoreIllegals: true },
-                      ),
-                    )
-                  } else {
-                    console.log(
-                      chalk.redBright(receive_details.unwrapErr() + '\n'),
-                    )
-                  }
-                }
-              }
-            }
-
-            // Deliverable
-            const deliverable_details = email_event_response.deliverable
-            if (deliverable_details) {
-              if (util.print_w_quiet_and_filter_opts(options, 'deliverable')) {
-                if (options.heading)
-                  console.log(
-                    `${chalk.whiteBright('=== Deliverability Details ===')}\n`,
-                  )
-                if (deliverable_details.isOk()) {
-                  console.log(
-                    `${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
-                  )
-                } else {
-                  console.log(
-                    `${chalk.redBright(deliverable_details.unwrapErr())}\n`,
-                  )
-                }
-              }
-            }
-
-            // Prepare
-            const prepare_details = email_event_response.prepared
-            if (prepare_details) {
-              if (util.print_w_quiet_and_filter_opts(options, 'prepare')) {
-                if (options.heading)
-                  console.log(
-                    `${chalk.whiteBright('=== Template Context ===')}\n`,
-                  )
-                if (prepare_details.isOk()) {
-                  console.log(
-                    `${highlight('# These are the values available to your templates\n' + TOML.stringify(prepare_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
-                  )
-                } else {
-                  console.log(
-                    chalk.redBright(prepare_details.unwrapErr() + '\n'),
-                  )
-                }
-              }
-            }
-
-            // Process
-            const process_details = email_event_response.comment
-            if (process_details) {
-              if (util.print_w_quiet_and_filter_opts(options, 'comment')) {
-                if (options.heading)
-                  console.log(`${chalk.whiteBright('=== Comment ===')}\n`)
-                if (process_details.isOk()) {
-                  console.log(highlight(process_details.unwrap()))
-                } else {
-                  console.log(
-                    chalk.redBright(process_details.unwrapErr() + '\n'),
-                  )
-                }
-              }
-            }
-
-            // TODO: for now moderation and notifying need to be refactored
-            // if (util.print_w_quiet_and_filter_opts(options, 'moderate')) {
-            //   if (
-            //     util.print_w_quiet_and_filter_opts(options, 'moderate=request')
-            //   ) {
-            //     if (options.heading)
-            //       console.log(
-            //         `${chalk.whiteBright('=== Moderation Args ===')}\n`,
-            //       )
-            //     console.log(
-            //       `${highlight('# These are the arguments used for moderation, alongside the comment\n' + TOML.stringify(email_event_response.moderation?.args as any), { language: 'toml', ignoreIllegals: true })}`,
-            //     )
-            //   }
-            //   if (
-            //     util.print_w_quiet_and_filter_opts(options, 'moderate=response')
-            //   ) {
-            //     if (options.heading)
-            //       `console.log`(
-            //         `${chalk.whiteBright('=== Notification Context ===')}\n`,
-            //       )
-            //     console.log(
-            //       `${highlight('# These values are available within notification templates\n' + TOML.stringify(email_event_response.moderation?.context as any), { language: 'toml', ignoreIllegals: true })}`,
-            //     )
-            //   }
-            // }
-            // if (util.print_w_quiet_and_filter_opts(options, 'notify')) {
-            //   if (
-            //     util.print_w_quiet_and_filter_opts(options, 'notify=commenter')
-            //   ) {
-            //     if (options.heading)
-            //       console.log(
-            //         `${chalk.whiteBright('=== Comment Submitted Notification ===')}\n`,
-            //       )
-            //     if (email_event_response.moderation?.commenter_notif)
-            //       console.log(
-            //         `${highlight(email_event_response.moderation?.commenter_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
-            //       )
-            //   }
-            //   if (util.print_w_quiet_and_filter_opts(options, 'notify=site')) {
-            //     if (options.heading)
-            //       console.log(
-            //         `${chalk.whiteBright('=== Comment Received Notification ===')}\n`,
-            //       )
-            //     if (email_event_response.moderation?.moderator_notif)
-            //       console.log(
-            //         `${highlight(email_event_response.moderation?.moderator_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
-            //       )
-            //   }
-            // }
           } else {
-            throw response.unwrapErr()
+            return project.DEFAULT_SITE_DOMAIN
           }
+        })()
+        const site = site_config.site.find((k) => k.domain == site_domain)
+        if (site) {
+          return site
+        } else {
+          return site_config.site[util.random_int(site_config.site.length)]
+        }
+      })(options.to)
+      const email = await generate
+        .email(site.domain, site.r3ply, options)
+        .then((email) => {
+          if (util.print_w_quiet_and_filter_opts(options, 'email')) {
+            // TODO: for some reason highlight.js doesn't support `eml`???
+            if (options.heading)
+              console.log(`${chalk.whiteBright('=== Input Email ===\n')}`)
+            console.log(
+              highlight(email.replace(/\r/g, ''), {
+                language: 'yaml',
+                ignoreIllegals: true,
+              }) + '\n\n',
+            )
+          }
+          return email
         })
-      },
-    )
+      const keys = await project.get_keys(cwd)
+      const r3ply = R3ply(cli_system_config)
+      const email_handler = r3ply.comments.viaEmail(
+        keys.signet_key,
+        keys.encrypt_email_key,
+      )
+      const email_comment_result = await Result.safe(
+        email_handler([site_config, new TextEncoder().encode(email)]),
+      )
+      if (email_comment_result.isErr()) {
+        throw email_comment_result.unwrapErr()
+      }
+      const email_event_response = email_comment_result.unwrap()
+      print_comment_via_email_response(
+        cli_system_config,
+        { site_config_path, site_config },
+        email_event_response,
+        options,
+      )
+    })
   return simulate_cmd
+
+  function print_comment_via_email_response(
+    cli_system_config: R3plySystemConfig,
+    {
+      site_config_path,
+      site_config,
+    }: { site_config_path: string; site_config: R3plySiteConfig },
+    email_event_response: CommentEmailEventResponse,
+    options: SimulateCmdEmailOpts,
+  ) {
+    if (util.print_w_quiet_and_filter_opts(options, 'config')) {
+      if (util.print_w_quiet_and_filter_opts(options, 'config=system')) {
+        if (options.heading)
+          console.log(`${chalk.whiteBright('=== System Config ===\n')}`)
+        console.log(
+          highlight(
+            `# Generated using site config \n${TOML.stringify(cli_system_config)}`,
+            { language: 'toml', ignoreIllegals: true },
+          ) + '\n',
+        )
+      }
+      if (util.print_w_quiet_and_filter_opts(options, 'config=site')) {
+        if (options.heading)
+          console.log(`${chalk.whiteBright('=== Site Config ===\n')}`)
+        console.log(
+          `${highlight(
+            `# From path ${site_config_path} \n${TOML.stringify(site_config as any)}`,
+            { language: 'toml', ignoreIllegals: true },
+          )}`,
+        )
+      }
+    }
+
+    // Prescreen
+    const prescreen_details = email_event_response.prescreening
+    if (prescreen_details) {
+      if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
+        if (options.heading)
+          console.log(chalk.whiteBright('=== Prescreening Results ===') + '\n')
+        if (prescreen_details.isOk()) {
+          console.log(
+            highlight(TOML.stringify(prescreen_details.unwrap() as any), {
+              language: 'toml',
+              ignoreIllegals: true,
+            }),
+          )
+        } else {
+          chalk.redBright(prescreen_details.unwrapErr() + '\n')
+        }
+      }
+    }
+
+    // Receive
+    const receive_details = email_event_response.received
+    if (receive_details) {
+      if (util.print_w_quiet_and_filter_opts(options, 'receive')) {
+        if (options.heading) {
+          console.log(chalk.whiteBright('=== Comment Received ===') + '\n')
+          if (receive_details.isOk()) {
+            console.log(
+              highlight(TOML.stringify(receive_details.unwrap() as any), {
+                language: 'toml',
+                ignoreIllegals: true,
+              }),
+            )
+          } else {
+            console.log(chalk.redBright(receive_details.unwrapErr() + '\n'))
+          }
+        }
+      }
+    }
+
+    // Deliverable
+    const deliverable_details = email_event_response.deliverable
+    if (deliverable_details) {
+      if (util.print_w_quiet_and_filter_opts(options, 'deliverable')) {
+        if (options.heading)
+          console.log(
+            `${chalk.whiteBright('=== Deliverability Details ===')}\n`,
+          )
+        if (deliverable_details.isOk()) {
+          console.log(
+            `${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
+          )
+        } else {
+          console.log(`${chalk.redBright(deliverable_details.unwrapErr())}\n`)
+        }
+      }
+    }
+
+    // Prepare
+    const prepare_details = email_event_response.prepared
+    if (prepare_details) {
+      if (util.print_w_quiet_and_filter_opts(options, 'prepare')) {
+        if (options.heading)
+          console.log(`${chalk.whiteBright('=== Template Context ===')}\n`)
+        if (prepare_details.isOk()) {
+          console.log(
+            `${highlight('# These are the values available to your templates\n' + TOML.stringify(prepare_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
+          )
+        } else {
+          console.log(chalk.redBright(prepare_details.unwrapErr() + '\n'))
+        }
+      }
+    }
+
+    // Process
+    const process_details = email_event_response.comment
+    if (process_details) {
+      if (util.print_w_quiet_and_filter_opts(options, 'comment')) {
+        if (options.heading)
+          console.log(`${chalk.whiteBright('=== Comment ===')}\n`)
+        if (process_details.isOk()) {
+          console.log(highlight(process_details.unwrap()))
+        } else {
+          console.log(chalk.redBright(process_details.unwrapErr() + '\n'))
+        }
+      }
+    }
+
+    // TODO: for now moderation and notifying need to be refactored
+    // if (util.print_w_quiet_and_filter_opts(options, 'moderate')) {
+    //   if (
+    //     util.print_w_quiet_and_filter_opts(options, 'moderate=request')
+    //   ) {
+    //     if (options.heading)
+    //       console.log(
+    //         `${chalk.whiteBright('=== Moderation Args ===')}\n`,
+    //       )
+    //     console.log(
+    //       `${highlight('# These are the arguments used for moderation, alongside the comment\n' + TOML.stringify(email_event_response.moderation?.args as any), { language: 'toml', ignoreIllegals: true })}`,
+    //     )
+    //   }
+    //   if (
+    //     util.print_w_quiet_and_filter_opts(options, 'moderate=response')
+    //   ) {
+    //     if (options.heading)
+    //       `console.log`(
+    //         `${chalk.whiteBright('=== Notification Context ===')}\n`,
+    //       )
+    //     console.log(
+    //       `${highlight('# These values are available within notification templates\n' + TOML.stringify(email_event_response.moderation?.context as any), { language: 'toml', ignoreIllegals: true })}`,
+    //     )
+    //   }
+    // }
+    // if (util.print_w_quiet_and_filter_opts(options, 'notify')) {
+    //   if (
+    //     util.print_w_quiet_and_filter_opts(options, 'notify=commenter')
+    //   ) {
+    //     if (options.heading)
+    //       console.log(
+    //         `${chalk.whiteBright('=== Comment Submitted Notification ===')}\n`,
+    //       )
+    //     if (email_event_response.moderation?.commenter_notif)
+    //       console.log(
+    //         `${highlight(email_event_response.moderation?.commenter_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
+    //       )
+    //   }
+    //   if (util.print_w_quiet_and_filter_opts(options, 'notify=site')) {
+    //     if (options.heading)
+    //       console.log(
+    //         `${chalk.whiteBright('=== Comment Received Notification ===')}\n`,
+    //       )
+    //     if (email_event_response.moderation?.moderator_notif)
+    //       console.log(
+    //         `${highlight(email_event_response.moderation?.moderator_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
+    //       )
+    //   }
+    // }
+  }
 }
