@@ -3,15 +3,27 @@ import { project, generate } from './lib.js'
 import { util } from './util.js'
 import { Result } from 'oxide.ts'
 import chalk from 'chalk'
-import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/schema'
+import {
+  R3plySignetConfig,
+  R3plySiteConfig,
+  R3plySystemConfig,
+} from '@r3ply/schema'
 import path from 'path'
 import { highlight } from 'cli-highlight'
 import TOML from '@iarna/toml'
-import { R3ply, Signet, util as r3ply_util } from '@r3ply/lib'
+import {
+  R3ply,
+  Signet,
+  moderation,
+  util as r3ply_util,
+  comments,
+} from '@r3ply/lib'
 import prompts, { PromptObject } from 'prompts'
 import dayjs from 'dayjs'
 import { mailbox } from 'typescript-mailbox-parser'
-import { CommentEmailEventResponse } from 'packages/lib/src/comments/viaEmail/index.js'
+
+// TODO: remove this and put into library
+import fs from 'fs'
 
 // init ------------------------------------------------------------------------
 export function init_cmd(cwd: string) {
@@ -370,6 +382,7 @@ export function simulate_cmd(cwd: string) {
   )
 
   type SimulateCmdEmailOpts = {
+    moderation: boolean
     from?: string
     to?: string
     date?: string
@@ -383,12 +396,12 @@ export function simulate_cmd(cwd: string) {
   }
   simulate_cmd
     .command('email')
+    .option('--moderation', 'send comment for moderation (local-only)', false)
     .option('--message-id <id>', 'override Message-ID header')
     .option('--date <date>', 'override Date header')
     .option('--from <address>', 'override From header')
     .option('--to <address>', 'override To header')
-    .option('--subject <url>', 'override email subject')
-    .option('--subject-path <path>', 'override just path of subject')
+    .option('--subject <url | path>', 'override email subject')
     .option('--body <text>', 'override email body')
     .option('--no-heading', 'hide headings for each stage of simulation', true)
     .option(
@@ -417,10 +430,10 @@ export function simulate_cmd(cwd: string) {
         site_config_path,
         project.dereference_local_file,
       )
-      const cli_system_config = util.unsafeUnwrap(
+      const cli_system_config: R3plySystemConfig = util.unsafeUnwrap(
         await project.get_cli_system_config(cwd),
       )
-      const site = ((to: string | undefined) => {
+      const signet: R3plySignetConfig = ((to: string | undefined) => {
         let site_domain: string = (() => {
           if (to) {
             const mb = mailbox(to)
@@ -443,7 +456,7 @@ export function simulate_cmd(cwd: string) {
         }
       })(options.to)
       const email = await generate
-        .email(site.domain, site.r3ply, options)
+        .email(signet.domain, signet.r3ply, options)
         .then((email) => {
           if (util.print_w_quiet_and_filter_opts(options, 'email')) {
             // TODO: for some reason highlight.js doesn't support `eml`???
@@ -477,22 +490,123 @@ export function simulate_cmd(cwd: string) {
         email_event_response,
         options,
       )
+      const continue_moderating = can_moderate(email_event_response)
+      if (continue_moderating) {
+        const { prescreening, received, accepted, prepared, comment } =
+          continue_moderating
+        if (options.moderation && site_config.moderation) {
+          if (site_config.moderation.local) {
+            const local_moderators = site_config.moderation.local
+              .map((local_moderation_config) => {
+                return moderation.LocalModeration(
+                  signet,
+                  'email',
+                  local_moderation_config,
+                  async (args) => {
+                    const project_dir = project.find_project_dir(cwd)
+                    return project_dir.then((project_dir_result) => {
+                      const project_dir = util.unsafeUnwrap(project_dir_result)
+                      const proposed_path = path.join(
+                        project_dir,
+                        args.relative_path,
+                      )
+                      const path_relative_to_project = path.relative(
+                        project_dir,
+                        proposed_path,
+                      )
+                      if (path_relative_to_project.startsWith('..'))
+                        throw new Error(
+                          `Can not write comment to '${path_relative_to_project}' because path is outside r3ply project directory!`,
+                        )
+                      else {
+                        // TODO: maybe change the return type to include an optional error?
+                        // try {
+                        const result = fs.writeFileSync(
+                          proposed_path,
+                          args.comment,
+                        )
+                        // } catch (error) {
+                        //   console.log("FOO ERROR")
+                        //   console.log(JSON.stringify(error, null, 2));
+                        // }
+                        return proposed_path
+                      }
+                    })
+                  },
+                )
+              })
+              .filter((local_moderator) => local_moderator != undefined)
+            for (const local of local_moderators) {
+              let count = 0
+              const local_moderation_request = await local.process(
+                comment,
+                prepared,
+              )
+              console.log(`=== Moderation: Local[${count}]: Request ===\n`)
+              console.log(
+                TOML.stringify({
+                  ...local_moderation_request.args,
+                  comment: undefined,
+                } as any) + '\n',
+              )
+              const local_moderation_response = await local.send(
+                local_moderation_request,
+              )
+              console.log(`=== Moderation: Local[${count}]: Response ===\n`)
+              console.log(
+                TOML.stringify(local_moderation_response.result) + '\n',
+              )
+              count++
+            }
+          }
+        }
+      } else {
+        throw new Error(
+          `Can not continue with moderation, status: ${JSON.stringify(continue_moderating, null, 2)}`,
+        )
+      }
     })
   return simulate_cmd
 
+  function can_moderate(
+    email_event_response: comments.email.CommentEmailEventResponse,
+  ) {
+    const { prescreening, received, accepted, prepared, comment } =
+      email_event_response
+    if (prescreening && received && accepted && prepared && comment) {
+      if (
+        (prescreening.isOk(),
+        received.isOk(),
+        accepted.isOk(),
+        prepared.isOk(),
+        comment.isOk())
+      ) {
+        return {
+          prescreening: prescreening.unwrap(),
+          received: received.unwrap(),
+          accepted: accepted.unwrap(),
+          prepared: prepared.unwrap(),
+          comment: comment.unwrap(),
+        }
+      }
+    }
+    return undefined
+  }
   function print_comment_via_email_response(
     cli_system_config: R3plySystemConfig,
     {
       site_config_path,
       site_config,
     }: { site_config_path: string; site_config: R3plySiteConfig },
-    email_event_response: CommentEmailEventResponse,
+    email_event_response: comments.email.CommentEmailEventResponse,
     options: SimulateCmdEmailOpts,
   ) {
     if (util.print_w_quiet_and_filter_opts(options, 'config')) {
       if (util.print_w_quiet_and_filter_opts(options, 'config=system')) {
         if (options.heading)
-          console.log(`${chalk.whiteBright('=== System Config ===\n')}`)
+          console.log(
+            `${chalk.whiteBright('=== Comment: System Config ===\n')}`,
+          )
         console.log(
           highlight(
             `# Generated using site config \n${TOML.stringify(cli_system_config)}`,
@@ -502,7 +616,7 @@ export function simulate_cmd(cwd: string) {
       }
       if (util.print_w_quiet_and_filter_opts(options, 'config=site')) {
         if (options.heading)
-          console.log(`${chalk.whiteBright('=== Site Config ===\n')}`)
+          console.log(`${chalk.whiteBright('=== Comment: Site Config ===\n')}`)
         console.log(
           `${highlight(
             `# From path ${site_config_path} \n${TOML.stringify(site_config as any)}`,
@@ -517,7 +631,9 @@ export function simulate_cmd(cwd: string) {
     if (prescreen_details) {
       if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
         if (options.heading)
-          console.log(chalk.whiteBright('=== Prescreening Results ===') + '\n')
+          console.log(
+            chalk.whiteBright('=== Comment: Prescreening Results ===') + '\n',
+          )
         if (prescreen_details.isOk()) {
           console.log(
             highlight(TOML.stringify(prescreen_details.unwrap() as any), {
@@ -536,7 +652,9 @@ export function simulate_cmd(cwd: string) {
     if (receive_details) {
       if (util.print_w_quiet_and_filter_opts(options, 'receive')) {
         if (options.heading) {
-          console.log(chalk.whiteBright('=== Comment Received ===') + '\n')
+          console.log(
+            chalk.whiteBright('=== Comment: Comment Received ===') + '\n',
+          )
           if (receive_details.isOk()) {
             console.log(
               highlight(TOML.stringify(receive_details.unwrap() as any), {
@@ -557,7 +675,7 @@ export function simulate_cmd(cwd: string) {
       if (util.print_w_quiet_and_filter_opts(options, 'deliverable')) {
         if (options.heading)
           console.log(
-            `${chalk.whiteBright('=== Deliverability Details ===')}\n`,
+            `${chalk.whiteBright('=== Comment: Deliverability Details ===')}\n`,
           )
         if (deliverable_details.isOk()) {
           console.log(
@@ -574,7 +692,9 @@ export function simulate_cmd(cwd: string) {
     if (prepare_details) {
       if (util.print_w_quiet_and_filter_opts(options, 'prepare')) {
         if (options.heading)
-          console.log(`${chalk.whiteBright('=== Template Context ===')}\n`)
+          console.log(
+            `${chalk.whiteBright('=== Comment: Template Context ===')}\n`,
+          )
         if (prepare_details.isOk()) {
           console.log(
             `${highlight('# These are the values available to your templates\n' + TOML.stringify(prepare_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
@@ -590,7 +710,7 @@ export function simulate_cmd(cwd: string) {
     if (process_details) {
       if (util.print_w_quiet_and_filter_opts(options, 'comment')) {
         if (options.heading)
-          console.log(`${chalk.whiteBright('=== Comment ===')}\n`)
+          console.log(`${chalk.whiteBright('=== Comment: Processed ===')}\n`)
         if (process_details.isOk()) {
           console.log(highlight(process_details.unwrap()))
         } else {

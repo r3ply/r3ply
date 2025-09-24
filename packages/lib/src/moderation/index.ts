@@ -8,6 +8,7 @@ import {
 import micromatch from 'micromatch'
 import { Decrypt, DecryptEmail, Encrypt } from '../comments/viaEmail/crypto'
 import { Result } from 'oxide.ts'
+export * from './local'
 
 export interface ModerationRequest<A> {
   args: A
@@ -26,9 +27,8 @@ export interface ModerationResponse<R> {
 export interface ModerationChannel<
   T extends moderation.R3plyModerationChannelType,
   InCtx extends CommentTemplateContext,
-  OutCtx,
   Args,
-  Rep,
+  OutCtx,
 > {
   type: T
   config: moderation.R3plyModerationChannelConfig &
@@ -47,17 +47,14 @@ export interface ModerationChannel<
    * @param context variables that will be available to templating
    * @returns Arguments that will be sent for moderation
    */
-  process: (
-    comment: string,
-    context: InCtx,
-  ) => Promise<ModerationRequest<Args & InCtx>>
+  process: (comment: string, context: InCtx) => Promise<ModerationRequest<Args>>
 
   /**
    * Send a request to the extending moderation channel
    * @param req A moderation request
    * @returns The initial response from that moderation channel
    */
-  send: <R>(req: ModerationRequest<Args>) => Promise<ModerationResponse<Rep>>
+  send: <R>(req: ModerationRequest<Args>) => Promise<ModerationResponse<OutCtx>>
 }
 
 interface ModerationImplementations<InCtx extends CommentTemplateContext> {

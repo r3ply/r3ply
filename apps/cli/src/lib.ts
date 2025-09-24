@@ -401,14 +401,10 @@ export namespace generate {
     return `${crypto.randomUUID()}@${domain}`
   }
 
-  export function subject(url: URL, path_opt?: string) {
-    if (path_opt) {
-      return new URL(path_opt, url).href
-    } else {
-      const site_path = site_paths[util.random_int(0, site_paths.length)]
-      const site_slug = site_slugs[util.random_int(0, site_slugs.length)]
-      return new URL(path.join(site_path, site_slug), url).href
-    }
+  export function subject(url: URL) {
+    const site_path = site_paths[util.random_int(0, site_paths.length)]
+    const site_slug = site_slugs[util.random_int(0, site_slugs.length)]
+    return new URL(path.join(site_path, site_slug), url).href
   }
 
   export function comment_body(seed?: string[]) {
@@ -441,7 +437,6 @@ export namespace generate {
       from?: string
       to?: string
       subject?: string
-      subjectPath?: string
       body?: string
     },
   ) {
@@ -455,9 +450,7 @@ export namespace generate {
     const date = dayjs(options?.date ?? new Date(generate.date()))
     const to = parse_email_addr(options?.to || `${site_domain}@${r3ply_domain}`)
     const subject_url = new URL(`https://${to.local}/`)
-    if (options?.subjectPath) subject_url.pathname = options?.subjectPath
-    const subject =
-      options?.subject || generate.subject(subject_url, options?.subjectPath)
+    const subject = options?.subject || generate.subject(subject_url)
     const body = options?.body || (await generate.comment_body())
     const email = Result.safe(() =>
       build_email(
