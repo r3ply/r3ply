@@ -134,6 +134,16 @@ export type GenerateConfigCmdOpts = {
   moderation: string
 }
 
+export type GenerateEmailCmdOpts = {
+  from?: string
+  to?: string
+  date?: string
+  subject?: string
+  subjectPath?: string
+  body?: string
+  messageId?: string
+}
+
 export function generate_cmd(cwd: string) {
   const generate_cmd = new Command('generate').description(
     'generate useful text',
@@ -371,34 +381,24 @@ export function generate_cmd(cwd: string) {
     .option('--subject <url>', 'override email subject')
     .option('--subject-path <path>', 'override just path of subject')
     .option('--body <text>', 'override email body')
-    .action(
-      async (options: {
-        from?: string
-        to?: string
-        date?: string
-        subject?: string
-        subjectPath?: string
-        body?: string
-        messageId?: string
-      }) => {
-        let site_config: R3plySiteConfig = await project.resolve_config(
-          cwd,
-          generate_cmd.parent?.opts().config,
-        )
-        const site = site_config.site[util.random_int(site_config.site.length)]
+    .action(async (options: GenerateEmailCmdOpts) => {
+      let site_config: R3plySiteConfig = await project.resolve_config(
+        cwd,
+        generate_cmd.parent?.opts().config,
+      )
+      const site = site_config.site[util.random_int(site_config.site.length)]
 
-        const email = Result.safe(
-          generate.email(site.domain, site.r3ply, options),
-        )
-        await email.then(async (email) => {
-          if (email.isOk()) {
-            console.log(highlight(email.unwrap(), { language: 'yaml' }))
-          } else {
-            throw email.unwrapErr()
-          }
-        })
-      },
-    )
+      const email = Result.safe(
+        generate.email(site.domain, site.r3ply, options),
+      )
+      await email.then(async (email) => {
+        if (email.isOk()) {
+          tty.cmds.generate.print_email(email.unwrap())
+        } else {
+          throw email.unwrapErr()
+        }
+      })
+    })
 
   return generate_cmd
 }
