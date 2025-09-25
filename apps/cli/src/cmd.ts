@@ -517,7 +517,7 @@ export function simulate_cmd(cwd: string) {
         throw email_comment_result.unwrapErr()
       }
       const email_event_response = email_comment_result.unwrap()
-      tty.print_comment_via_email_response(
+      tty.cmds.simulate.print_comment_via_email_response(
         cli_system_config,
         { site_config_path, site_config },
         email_event_response,
