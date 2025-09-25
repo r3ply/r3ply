@@ -58,7 +58,7 @@ export function init_cmd(cwd: string) {
             project.DEFAULT_R3PLY_DOMAIN,
             {
               issued_date: options.date,
-              label: 'cli',
+              label: project.DEFAULT_CLI_SIGNET_LABEL,
             },
           )
           const signet_config = {
@@ -118,6 +118,13 @@ export function config_cmd(cwd: string) {
 
 // generate --------------------------------------------------------------------
 
+export type GenerateSignetCmdOpts = {
+  site: string
+  r3ply: string
+  date: string
+  interactive: boolean
+  label: string
+}
 export function generate_cmd(cwd: string) {
   const generate_cmd = new Command('generate').description(
     'generate useful text',
@@ -218,6 +225,7 @@ export function generate_cmd(cwd: string) {
     ]
     return signet_questions
   }
+
   const signet_cmd = generate_cmd
     .command('signet')
     .description('get a signet issued')
@@ -239,46 +247,31 @@ export function generate_cmd(cwd: string) {
     .option(
       '--label <string>',
       'name for this signet, e.g. "production", "test"',
-      'local',
+      project.DEFAULT_CLI_SIGNET_LABEL,
     )
-    .action(
-      async (options: {
-        site: string
-        r3ply: string
-        date: string
-        interactive: boolean
-        label: string
-      }) => {
-        const keys = await project.get_keys(cwd)
-        const cli_system_config = util.unsafeUnwrap(
-          await project.get_cli_system_config(cwd),
-        )
-        const signet = await generate.signet(
-          keys.signet_key,
-          cli_system_config,
-          options.site,
-          options.r3ply,
-          options.date,
-        )
+    .action(async (options: GenerateSignetCmdOpts) => {
+      const keys = await project.get_keys(cwd)
+      const cli_system_config = util.unsafeUnwrap(
+        await project.get_cli_system_config(cwd),
+      )
+      const signet = await generate.signet(keys.signet_key, cli_system_config, {
+        domain: options.site,
+        r3ply: options.r3ply,
+        issued: options.date,
+        label: options.label,
+      })
 
-        // TODO - add back in the interactive version once I've figured out an elegant UX for generating the config
-        if (options.interactive) {
-          const answers = await prompts(
-            signet_questions(options.site, options.r3ply, options.date),
-          )
-          options.site = answers.site
-          options.r3ply = answers.r3ply
-          options.date = answers.date
-        }
-        console.log(
-          highlight(
-            TOML.stringify({
-              site: [{ ...signet, label: options.label }],
-            }),
-          ),
+      // TODO - add back in the interactive version once I've figured out an elegant UX for generating the config
+      if (options.interactive) {
+        const answers = await prompts(
+          signet_questions(options.site, options.r3ply, options.date),
         )
-      },
-    )
+        options.site = answers.site
+        options.r3ply = answers.r3ply
+        options.date = answers.date
+      }
+      tty.cmds.generate.print_signet(signet)
+    })
 
   const config_cmd = generate_cmd
     .command('config')
