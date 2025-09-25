@@ -153,23 +153,37 @@ export function generate_cmd(cwd: string) {
           })
         }
 
+        function parse_email_addr(str: string) {
+          const mb = mailbox(str)
+          if (Array.isArray(mb))
+            throw new Error(
+              `Invalid email '${str}', errors ${JSON.stringify(mb)}`,
+            )
+          else {
+            if (mb.name) {
+              return `${mb.name} <${mb.addr}>`
+            } else return mb.addr
+          }
+        }
         // to, cc, and bcc are arrays and always defined
         const params = {
-          to: to.join(','),
+          to: to.map(parse_email_addr).join(','),
           subject,
-          cc: cc.join(','),
-          bcc: bcc.join(','),
+          cc: cc.map(parse_email_addr).join(','),
+          bcc: bcc.map(parse_email_addr).join(','),
           body: body ? body.replace(/\r?\n/g, '\r\n') : undefined,
         }
 
         // create URL encoded query string
         const query = Object.entries(params)
           .filter(([_, v]) => v !== undefined && v !== '')
-          .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v!)}`)
+          .map(
+            ([k, v]) => `?${encodeURIComponent(k)}=${encodeURIComponent(v!)}`,
+          )
           .join('&')
 
         // output result
-        console.log(`mailto:${query ? `?${query}` : ''}`)
+        tty.cmds.generate.print_mail_to_link(query)
       },
     )
   function signet_questions(site: string, r3ply: string, date: string) {
