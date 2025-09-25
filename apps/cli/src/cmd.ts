@@ -125,6 +125,15 @@ export type GenerateSignetCmdOpts = {
   interactive: boolean
   label: string
 }
+
+export type GenerateConfigCmdOpts = {
+  site: string
+  r3ply: string
+  date: string
+  label: string
+  moderation: string
+}
+
 export function generate_cmd(cwd: string) {
   const generate_cmd = new Command('generate').description(
     'generate useful text',
@@ -294,67 +303,62 @@ export function generate_cmd(cwd: string) {
     .option(
       '--label <string>',
       'name for this signet, e.g. "production", "test"',
-      'local',
+      project.DEFAULT_CLI_SIGNET_LABEL,
     )
     .option(
       '--moderation <github | webhook | local>',
       'moderation method',
       'local',
     )
-    .action(
-      async (options: {
-        site: string
-        r3ply: string
-        date: string
-        label: string
-        moderation: string
-      }) => {
-        const site = await project.get_keys(cwd).then((keys) =>
-          project.get_cli_system_config(cwd).then((system_config) => {
-            return generate.signet(
-              keys.signet_key,
-              util.unsafeUnwrap(system_config),
-              options.site,
-              options.r3ply,
-              options.date,
-            )
-          }),
-        )
-        const minimal_github_config = {
-          owner: '<YOUR_GITHUB_USERNAME>',
-          repo: '<YOUR_PROJECT>',
-          'file_path_{}': '<TODO>',
-        }
-        const minimal_webhook_config = {
-          url: 'https://TODO',
-        }
-        const minimal_local_config = {
-          'file_path_{}': 'TODO',
-        }
-        const parsed = R3plySiteConfig({
-          site: [{ ...site, label: options.label }],
-          moderation: {
-            [options.moderation]: [
-              (() => {
-                if (options.moderation == 'github') {
-                  return minimal_github_config
-                } else if (options.moderation == 'webhook') {
-                  return minimal_webhook_config
-                } else if (options.moderation == 'local') {
-                  return minimal_local_config
-                } else {
-                  throw new Error(
-                    `Unknown moderation type: ${options.moderation}`,
-                  )
-                }
-              })(),
-            ],
-          },
-        })
-        console.log(highlight(TOML.stringify(parsed.value as any)))
-        return
-      },
-    )
+    .action(async (options: GenerateConfigCmdOpts) => {
+      const site = await project.get_keys(cwd).then((keys) =>
+        project.get_cli_system_config(cwd).then((system_config) => {
+          return generate.signet(
+            keys.signet_key,
+            util.unsafeUnwrap(system_config),
+            {
+              domain: options.site,
+              r3ply: options.r3ply,
+              issued: options.date,
+              label: options.label,
+            },
+          )
+        }),
+      )
+      const minimal_github_config = {
+        owner: '<YOUR_GITHUB_USERNAME>',
+        repo: '<YOUR_PROJECT>',
+        'file_path_{}': '<TODO>',
+      }
+      const minimal_webhook_config = {
+        url: 'https://TODO',
+      }
+      const minimal_local_config = {
+        'file_path_{}': 'TODO',
+      }
+      const parsed = R3plySiteConfig({
+        site: [{ ...site, label: options.label }],
+        moderation: {
+          [options.moderation]: [
+            (() => {
+              if (options.moderation == 'github') {
+                return minimal_github_config
+              } else if (options.moderation == 'webhook') {
+                return minimal_webhook_config
+              } else if (options.moderation == 'local') {
+                return minimal_local_config
+              } else {
+                throw new Error(
+                  `Unknown moderation type: ${options.moderation}`,
+                )
+              }
+            })(),
+          ],
+        },
+      })
+      tty.cmds.generate.print_config(parsed.value!)
+      return
+    })
 
   const email_cmd = generate_cmd
     .command('email')
