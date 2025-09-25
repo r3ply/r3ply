@@ -438,15 +438,16 @@ export function simulate_cmd(cwd: string) {
     .option('--no-heading', 'hide headings for each stage of simulation', true)
     .option(
       '-q, --quiet [stage...]',
-      `silence output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderate,notify]. Note: stages themselves can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderate=request,moderate=response,notify=commenter,notify=site]`,
+      `silence output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify]. Note: stages themselves can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderate=request,moderate=response,notify=commenter,notify=site]`,
       util.split_list,
     )
     .option(
       '-f, --filter [stage...]',
-      `filter output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderate,notify]. Note: stages themselves can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderate=request,moderate=response,notify=commenter,notify=site]`,
+      `filter output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify]. Note: stages themselves can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderate=request,moderate=response,notify=commenter,notify=site]`,
       util.split_list,
     )
     .action(async (options: SimulateCmdEmailOpts, cmd) => {
+      // Get site config
       let site_config_path: string = await project.resolve_config_path(
         cwd,
         simulate_cmd.parent?.opts().config,
@@ -460,9 +461,13 @@ export function simulate_cmd(cwd: string) {
         site_config_path,
         project.dereference_local_file,
       )
+
+      // Get system config
       const cli_system_config: R3plySystemConfig = util.unsafeUnwrap(
         await project.get_cli_system_config(cwd),
       )
+
+      // Issue signet
       const signet: R3plySignetConfig = ((to: string | undefined) => {
         let site_domain: string = (() => {
           if (to) {
@@ -485,24 +490,38 @@ export function simulate_cmd(cwd: string) {
           return site_config.site[util.random_int(site_config.site.length)]
         }
       })(options.to)
+
+      // Generate email
       const email = await generate
         .email(signet.domain, signet.r3ply, options)
         .then((email) => {
           tty.cmds.simulate.print_comment_via_email_initial(email, options)
           return email
         })
+
+      // Get keys (for anonymizing/encrypting From header)
       const keys = await project.get_keys(cwd)
+
+      // Make r3ply instance
       const r3ply = R3ply(cli_system_config)
-      const email_handler = r3ply.comments.viaEmail(
+
+      // Make comment via email handler
+      const handle_email_comment = r3ply.comments.viaEmail(
         keys.signet_key,
         keys.encrypt_email_key,
       )
+
+      // Pass generated email to email comment handler
       const email_comment_result = await Result.safe(
-        email_handler([site_config, new TextEncoder().encode(email)]),
+        handle_email_comment([site_config, new TextEncoder().encode(email)]),
       )
+
+      // Check for any unchecked errors
       if (email_comment_result.isErr()) {
         throw email_comment_result.unwrapErr()
       }
+
+      // Print progress of email -> comment pipeline
       const email_event_response = email_comment_result.unwrap()
       tty.cmds.simulate.print_comment_via_email_response(
         cli_system_config,
@@ -510,43 +529,30 @@ export function simulate_cmd(cwd: string) {
         email_event_response,
         options,
       )
+
+      // Perform moderation
       if (
         options.moderation &&
         email_event_response.moderation &&
         email_event_response.moderation.isOk()
       ) {
         const mod = email_event_response.moderation.unwrap()
-        mod.local()
-        if (mod.local) {
-          const local_moderators = mod.local((args) =>
-            moderation.write_comment_locally(cwd, args, options.dryRun),
-          )
-          if (local_moderators) {
-            for (const local of local_moderators) {
-              const result = await local()
-              const { allow, args } = result.request
-              const { relative_path } = args
-              console.log('=== Prototype Moderation ===\n')
-              const result_string = TOML.stringify({
-                ...result,
-                request: { allow, args: { relative_path } },
-              } as any)
-                .replace(
-                  '[request]',
-                  '# `allow` is a request to bypass moderation altogether. For local moderation it has no effect.\n[request]',
-                )
-                .replace(
-                  /^(\s*)\[request\.args\]/m,
-                  (_, spaces) =>
-                    `${spaces}# \`relative_path\` is the templated path from your config.${spaces}[request.args]`,
-                )
-                .replace(
-                  '[response.result]',
-                  '# `absolute_path` is fully resolved path, where the comment was written\n[response.result]',
-                )
-              console.log(highlight(result_string))
-            }
+        const local_moderators = mod.local((args) =>
+          moderation.write_comment_locally(cwd, args, options.dryRun),
+        )
+        for (const [index, local] of local_moderators.entries()) {
+          const result = await local()
+          const { allow, args } = result.request
+          const { relative_path } = args
+          const result_without_comment = {
+            ...result,
+            request: { allow, args: { relative_path } },
           }
+          tty.cmds.simulate.print_local_moderation_req_rep(
+            result_without_comment,
+            index,
+            options,
+          )
         }
       }
     })
