@@ -31,6 +31,18 @@ export namespace tty {
         )
       }
     }
+    export namespace generate {
+      export function print_mail_to_link(query: string) {
+        if (query == '') {
+          console.debug(
+            chalk.yellowBright(
+              `# hint: use options, e.g. '--to', otherwise mailto link will be mostly empty.`,
+            ),
+          )
+        }
+        console.log(chalk.blueBright(`mailto:${query}`))
+      }
+    }
   }
   export function print_comment_via_email_response(
     cli_system_config: R3plySystemConfig,
