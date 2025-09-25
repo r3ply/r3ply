@@ -406,7 +406,7 @@ export function generate_cmd(cwd: string) {
 // simulate --------------------------------------------------------------------
 
 export type SimulateCmdEmailOpts = {
-  moderation: boolean
+  moderate: boolean
   dryRun: boolean
   from?: string
   to?: string
@@ -427,7 +427,7 @@ export function simulate_cmd(cwd: string) {
 
   simulate_cmd
     .command('email')
-    .option('--moderation', 'send comment for moderation (local-only)', false)
+    .option('--moderate', 'send comment for moderation (local-only)', false)
     .option('--dry-run', 'print output but have no side effects', false)
     .option('--message-id <id>', 'override Message-ID header')
     .option('--date <date>', 'override Date header')
@@ -438,12 +438,12 @@ export function simulate_cmd(cwd: string) {
     .option('--no-heading', 'hide headings for each stage of simulation', true)
     .option(
       '-q, --quiet [stage...]',
-      `silence output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify]. Note: stages themselves can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderate=request,moderate=response,notify=commenter,notify=site]`,
+      `silence output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify]. Stages can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderation=local]. If a stage is acted upon as an array, then you can append an underscore to silce a specific element, e.g. moderation=local_0`,
       util.split_list,
     )
     .option(
       '-f, --filter [stage...]',
-      `filter output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify]. Note: stages themselves can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderate=request,moderate=response,notify=commenter,notify=site]`,
+      `filter output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify]. Stages can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderation=local]. If a stage is acted upon as an array, then you can append an underscore to filter a specific element, e.g. moderation=local_0`,
       util.split_list,
     )
     .action(async (options: SimulateCmdEmailOpts, cmd) => {
@@ -532,7 +532,7 @@ export function simulate_cmd(cwd: string) {
 
       // Perform moderation
       if (
-        options.moderation &&
+        options.moderate &&
         email_event_response.moderation &&
         email_event_response.moderation.isOk()
       ) {

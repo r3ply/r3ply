@@ -107,7 +107,6 @@ export namespace util {
               if (condition.includes('=')) {
                 return condition == stage
               } else {
-                console.log('condition does not include = ')
                 return true
               }
             } else {
