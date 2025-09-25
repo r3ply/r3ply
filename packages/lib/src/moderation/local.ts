@@ -32,52 +32,59 @@ export interface LocalModeration<InCtx extends CommentTemplateContext>
     LocalModerationResult
   > {}
 
+export type WriteLocalFile = (
+  args: LocalModerationArgs,
+) => Promise<string | undefined>
+
 export function LocalModeration<InCtx extends CommentTemplateContext>(
   signet: R3plySignetConfig,
   comment_source: comments.R3plyCommentSource,
-  config: moderation.R3plyLocalModerationConfig,
-  write: (args: LocalModerationArgs) => Promise<string | undefined>,
+  write: WriteLocalFile,
   decrypt?: DecryptEmail,
-): LocalModeration<InCtx> | undefined {
-  if (can_moderate(signet, comment_source, config)) {
-    const local_moderation: LocalModeration<InCtx> = {
-      type: 'local',
-      config,
-      process: async function (
-        comment: string,
-        context: InCtx,
-      ): Promise<ModerationRequest<LocalModerationArgs>> {
-        return bypass_moderation(
-          context.author,
-          config['allow*'],
-          decrypt,
-        ).then((bypass_moderation) => {
-          const request: ModerationRequest<LocalModerationArgs> = {
-            args: {
-              relative_path: tera(config['file_path_{}'], context),
-              comment,
-            },
-            allow: bypass_moderation,
-          }
-          return request
-        })
-      },
-      send: async function <R>(
-        req: ModerationRequest<LocalModerationArgs>,
-      ): Promise<ModerationResponse<LocalModerationResult>> {
-        return write(req.args).then((response) => {
-          const result: ModerationResponse<LocalModerationResult> = {
-            result: {
-              absolute_path: response,
-            },
-          }
-          return result
-        })
-      },
+): (
+  config: moderation.R3plyLocalModerationConfig,
+) => LocalModeration<InCtx> | undefined {
+  return function (config: moderation.R3plyLocalModerationConfig) {
+    if (can_moderate(signet, comment_source, config)) {
+      const local_moderation: LocalModeration<InCtx> = {
+        type: 'local',
+        config,
+        process: async function (
+          comment: string,
+          context: InCtx,
+        ): Promise<ModerationRequest<LocalModerationArgs>> {
+          return bypass_moderation(
+            context.author,
+            config['allow*'],
+            decrypt,
+          ).then((bypass_moderation) => {
+            const request: ModerationRequest<LocalModerationArgs> = {
+              args: {
+                relative_path: tera(config['file_path_{}'], context),
+                comment,
+              },
+              allow: bypass_moderation,
+            }
+            return request
+          })
+        },
+        send: async function <R>(
+          req: ModerationRequest<LocalModerationArgs>,
+        ): Promise<ModerationResponse<LocalModerationResult>> {
+          return write(req.args).then((response) => {
+            const result: ModerationResponse<LocalModerationResult> = {
+              result: {
+                absolute_path: response,
+              },
+            }
+            return result
+          })
+        },
+      }
+      return local_moderation
+    } else {
+      return undefined
     }
-    return local_moderation
-  } else {
-    return undefined
   }
 }
 
@@ -98,8 +105,8 @@ if (import.meta.vitest) {
     const write = async (args: LocalModerationArgs) => {
       return '/Users/foo/Developer/website' + args.relative_path
     }
-    expect(LocalModeration(site, 'email', local_config, write)).toBeDefined()
-    const local_mod = LocalModeration(site, 'email', local_config, write)!
+    expect(LocalModeration(site, 'email', write)(local_config)).toBeDefined()
+    const local_mod = LocalModeration(site, 'email', write)(local_config)!
     const key = '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
     const url = new URL('https://example.com/blog/post/1')
     const local_context = {

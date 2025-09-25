@@ -20,8 +20,16 @@ import {
 import { prepare as r3ply_prepare, EmailTemplateContext } from './prepare'
 import { process as r3ply_process, CommentTemplateContext } from '../process'
 import { Anonymize, Signet } from '../../signet'
-import { Encrypt } from './crypto'
-import { Result } from 'oxide.ts'
+import { Decrypt, Encrypt } from './crypto'
+import { Ok, Result } from 'oxide.ts'
+import {
+  LocalModerationArgs,
+  LocalModerationResult,
+  ModerationImplementations,
+  ModerationRequest,
+  ModerationResponse,
+  WriteLocalFile,
+} from '../../moderation'
 
 /**
  * An event represent a comment received via email, packaged as a request.
@@ -51,6 +59,17 @@ export type CommentEmailEventResponse = {
   deliverable?: Result<DeliverableEmail, Error>
   prepared?: Result<CommentTemplateContext & EmailTemplateContext, Error>
   comment?: Result<string, Error>
+  moderation?: Result<
+    {
+      local: (write_local?: WriteLocalFile | undefined) =>
+        | (() => Promise<{
+            request: ModerationRequest<LocalModerationArgs>
+            response: ModerationResponse<LocalModerationResult>
+          }>)[]
+        | undefined
+    },
+    Error
+  >
 }
 
 /**
@@ -243,6 +262,64 @@ async function handle_email_event(
       email_event.config.comments?.email?.['comment_{}'],
     ),
   )
+
+  /**
+   * (Comment moderation)
+   * Step 7. prepare moderation
+   */
+  if (
+    results.received &&
+    results.accepted &&
+    results.deliverable &&
+    results.prepared &&
+    results.comment
+  ) {
+    const results_list = Result.all(
+      results.received,
+      results.accepted,
+      results.deliverable,
+      results.prepared,
+      results.comment,
+    )
+    if (results_list.isOk()) {
+      const [received, accepted, deliverable, context, comment] =
+        results_list.unwrap()
+      const moderation = (write_local?: WriteLocalFile) =>
+        ModerationImplementations<
+          CommentTemplateContext & EmailTemplateContext
+        >(
+          deliverable.site,
+          'email',
+          Decrypt.email(dependencies.encrypt_key),
+          write_local,
+        )
+      const partially_applied_local_moderation = (
+        ...args: Parameters<typeof moderation>
+      ) => {
+        const moderation_impls = moderation(...args)
+        if (moderation_impls.local) {
+          const make_local_moderation = moderation_impls.local
+          return (email_event.config.moderation?.local ?? [])
+            .map((local_config) => make_local_moderation(local_config))
+            .filter((local_moderation) => local_moderation != undefined)
+            .map((local_moderation) => {
+              return () =>
+                local_moderation.process(comment, context).then((request) => {
+                  return local_moderation.send(request).then((response) => {
+                    return {
+                      request,
+                      response,
+                    }
+                  })
+                })
+            })
+        }
+      }
+      results.moderation = Ok({
+        local: partially_applied_local_moderation,
+      })
+    }
+  }
   return results
 }
 

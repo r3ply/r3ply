@@ -11,12 +11,7 @@ export interface DeliverableEmail {
   to: string
   subject: URL
   email: Email
-  site: {
-    r3ply: string
-    domain: string
-    signet: string
-    issued: string
-  }
+  site: R3plySignetConfig
   from: {
     pseudonym: Anonymized<string>
     token: Encrypted<string>
@@ -101,7 +96,7 @@ export async function deliverable(
 function to_field_is_deliverable(
   to: Addr[],
   site_to_r3ply_mappings: R3plySignetConfig[],
-) {
+): R3plySignetConfig & { to: string } {
   const valid_possible_to_headers = site_to_r3ply_mappings.map((site) => {
     return {
       to: `${site.domain}@${site.r3ply}`,
