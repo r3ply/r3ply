@@ -490,47 +490,43 @@ export function simulate_cmd(cwd: string) {
         email_event_response,
         options,
       )
-      const continue_moderating = can_moderate(email_event_response)
-      if (continue_moderating) {
-        const { prescreening, received, accepted, prepared, comment } =
-          continue_moderating
-        if (options.moderation && site_config.moderation) {
-          if (site_config.moderation.local) {
-            const local_moderators = site_config.moderation.local
-              .map((local_moderation_config) => {
-                return mod_todo.LocalModeration(
-                  signet,
-                  'email',
-                  local_moderation_config,
-                  (args) =>
-                    moderation.write_comment_locally(cwd, args, options.dryRun),
-                )
-              })
-              .filter((local_moderator) => local_moderator != undefined)
+      if (
+        email_event_response.moderation &&
+        email_event_response.moderation.isOk()
+      ) {
+        const mod = email_event_response.moderation.unwrap()
+        mod.local()
+        if (mod.local) {
+          const local_moderators = mod.local((args) =>
+            moderation.write_comment_locally(cwd, args, options.dryRun),
+          )
+          if (local_moderators) {
             for (const local of local_moderators) {
-              let count = 0
-              const local_moderation_request = await local.process(
-                comment,
-                prepared,
-              )
-              console.log(`=== Moderation: Local[${count}] ===\n`)
-              const local_moderation_response = await local.send(
-                local_moderation_request,
-              )
-              if (options.dryRun) {
-                console.log('# [DRY RUN] Comment would be written to:')
-              } else {
-                console.log('# Comment written to:')
-              }
-              console.log(local_moderation_response.result.absolute_path, '\n')
-              count++
+              const result = await local()
+              const { allow, args } = result.request
+              const { relative_path } = args
+              console.log('=== Prototype Moderation ===\n')
+              const result_string = TOML.stringify({
+                ...result,
+                request: { allow, args: { relative_path } },
+              } as any)
+                .replace(
+                  '[request]',
+                  '# `allow` is a request to bypass moderation altogether. For local moderation it has no effect.\n[request]',
+                )
+                .replace(
+                  /^(\s*)\[request\.args\]/m,
+                  (_, spaces) =>
+                    `${spaces}# \`relative_path\` is the templated path from your config.${spaces}[request.args]`,
+                )
+                .replace(
+                  '[response.result]',
+                  '# `absolute_path` is fully resolved path, where the comment was written\n[response.result]',
+                )
+              console.log(highlight(result_string))
             }
           }
         }
-      } else {
-        throw new Error(
-          `Can not continue with moderation, status: ${JSON.stringify(continue_moderating, null, 2)}`,
-        )
       }
     })
   return simulate_cmd

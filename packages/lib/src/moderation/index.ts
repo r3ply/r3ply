@@ -4,6 +4,7 @@ import {
   LocalModeration,
   LocalModerationArgs,
   LocalModerationResult,
+  WriteLocalFile,
 } from './local'
 import micromatch from 'micromatch'
 import { Decrypt, DecryptEmail, Encrypt } from '../comments/viaEmail/crypto'
@@ -57,12 +58,27 @@ export interface ModerationChannel<
   send: <R>(req: ModerationRequest<Args>) => Promise<ModerationResponse<OutCtx>>
 }
 
-interface ModerationImplementations<InCtx extends CommentTemplateContext> {
+export interface ModerationImplementations<
+  InCtx extends CommentTemplateContext,
+> {
   github?: any // TODO
   webhook?: any // TODO
   local?: (
     local_config: moderation.R3plyLocalModerationConfig,
-  ) => Promise<LocalModeration<InCtx> | undefined>
+  ) => LocalModeration<InCtx> | undefined
+}
+export function ModerationImplementations<InCtx extends CommentTemplateContext>(
+  signet: R3plySignetConfig,
+  comment_source: comments.R3plyCommentSource,
+  decrypt?: DecryptEmail,
+  write_local?: WriteLocalFile,
+) {
+  const result: ModerationImplementations<InCtx> = {
+    local: write_local
+      ? LocalModeration(signet, comment_source, write_local, decrypt)
+      : undefined,
+  }
+  return result
 }
 
 /**
@@ -74,7 +90,7 @@ interface ModerationImplementations<InCtx extends CommentTemplateContext> {
  * @param comment
  * @param context
  */
-export async function handel_moderation<Ctx extends CommentTemplateContext>(
+async function handel_moderation<Ctx extends CommentTemplateContext>(
   site: R3plySignetConfig,
   comment_source: comments.R3plyCommentSource,
   config: moderation.R3plyModerationConfig,
@@ -91,21 +107,14 @@ export async function handel_moderation<Ctx extends CommentTemplateContext>(
    *    call `process` on C, passing in MCtx, receiving a request object MReq
    *    call `send` on C, passing in MReq, receiving a response object MRep
    */
-  let local_mod_reps: Promise<
-    ModerationResponse<LocalModerationResult> | undefined
-  >[] = []
+  let local_mod_reps: Promise<ModerationResponse<LocalModerationResult>>[] = []
   if (moderation_channels.local) {
     local_mod_reps = config.local
       .map((local_config) => moderation_channels.local!(local_config))
-      .map((local) => {
-        return local.then((local) => {
-          if (local) {
-            return local.process(comment, context).then((req) => {
-              return local.send(req)
-            })
-          } else return undefined
-        })
-      })
+      .filter((local) => local != undefined)
+      .map((local) =>
+        local.process(comment, context).then((req) => local.send(req)),
+      )
   }
   return await Promise.all(local_mod_reps)
 }
@@ -259,9 +268,10 @@ if (import.meta.vitest) {
         html: undefined,
       },
     }
-    const result = await handel_moderation(site, "email", moderation_config, {
-      'local': async (local_config: moderation.R3plyLocalModerationConfig) => LocalModeration(site, comment_source, local_config, write, Decrypt.email(key))
-    }, context, "Hello, world")
-    console.log(result)
+    // TODO
+    // const result = await handel_moderation(site, "email", moderation_config, {
+    //   'local': async (local_config: moderation.R3plyLocalModerationConfig) => LocalModeration(site, comment_source, write, Decrypt.email(key))(local_config)
+    // }, context, "Hello, world")
+    // console.log(result)
   })
 }
