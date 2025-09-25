@@ -4,7 +4,11 @@ import { Result } from 'oxide.ts'
 import { util } from './util.js'
 import fg from 'fast-glob'
 import TOML from '@iarna/toml'
-import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/schema'
+import {
+  R3plySignetConfig,
+  R3plySiteConfig,
+  R3plySystemConfig,
+} from '@r3ply/schema'
 import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
 import { RiMarkov } from 'rita'
@@ -39,6 +43,7 @@ export namespace project {
     '6eFnDQTHov/yKkhLp/HdZDSU/vryNJ4XeNOgX2XBCVI='
   export const DEFAULT_EMAIL_KEY =
     'f+466zchScGV5oiKq4W5hxCct1iXBuwgRUnx8tBSuQQ='
+  export const DEFAULT_CLI_SIGNET_LABEL = 'CLI'
 
   /**
    * Finds the `.r3ply` dir that should be located at the top-level of the user's repository
@@ -505,18 +510,22 @@ export namespace generate {
   export async function signet(
     key: string,
     cli_system: R3plySystemConfig,
-    domain: string,
-    r3ply: string,
-    issued?: string,
-  ): Promise<{
-    domain: string
-    r3ply: string
-    signet: string
-    issued: string
-  }> {
+    {
+      domain,
+      r3ply,
+      issued,
+      label,
+    }: {
+      domain: string
+      r3ply: string
+      issued?: string
+      label?: string
+    },
+  ): Promise<R3plySignetConfig> {
     if (r3ply == project.DEFAULT_R3PLY_DOMAIN) {
       return Signet.issue(key, cli_system)(domain, r3ply, {
         issued_date: issued,
+        label,
       })
     } else {
       return fetch(
@@ -525,15 +534,15 @@ export namespace generate {
         ),
       ).then((response) => {
         if (response.ok)
-          return response.json().then(
-            (json) =>
-              json as {
-                domain: string
-                r3ply: string
-                signet: string
-                issued: string
-              },
-          )
+          return response.json().then((json) => {
+            return { ...json, label } as {
+              domain: string
+              r3ply: string
+              signet: string
+              issued: string
+              label?: string
+            }
+          })
         else
           return response.text().then((text) => {
             throw new Error(text)

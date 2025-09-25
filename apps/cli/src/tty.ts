@@ -42,6 +42,15 @@ export namespace tty {
         }
         console.log(chalk.blueBright(`mailto:${query}`))
       }
+      export function print_signet(signet: R3plySignetConfig) {
+        console.log(
+          highlight(
+            TOML.stringify({
+              site: [{ ...(signet as any) }],
+            }),
+          ),
+        )
+      }
     }
     export namespace simulate {
       export function print_comment_via_email_response(
