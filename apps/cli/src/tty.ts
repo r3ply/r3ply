@@ -75,7 +75,6 @@ export namespace tty {
           )
         }
       }
-
       export function print_comment_via_email_response(
         cli_system_config: R3plySystemConfig,
         {
@@ -259,6 +258,43 @@ export namespace tty {
         //       )
         //   }
         // }
+      }
+      export function print_local_moderation_req_rep(
+        result_without_comment: {
+          request: any
+          response: any
+        },
+        count: number,
+        options: SimulateCmdEmailOpts,
+      ) {
+        if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
+          if (
+            util.print_w_quiet_and_filter_opts(
+              options,
+              `moderation=local_${count}`,
+            )
+          ) {
+            if (options.heading)
+              console.log(
+                chalk.whiteBright(`=== Moderation: Local[${count}] ===\n`),
+              )
+            const result_string = TOML.stringify(result_without_comment)
+              .replace(
+                '[request]',
+                '# `allow` is a request to bypass moderation altogether. For local moderation it has no effect.\n[request]',
+              )
+              .replace(
+                /^(\s*)\[request\.args\]/m,
+                (_, spaces) =>
+                  `${spaces}# \`relative_path\` is the templated path from your config.${spaces}[request.args]`,
+              )
+              .replace(
+                '[response.result]',
+                '# `absolute_path` is fully resolved path, where the comment was written\n[response.result]',
+              )
+            console.log(highlight(result_string))
+          }
+        }
       }
     }
   }
