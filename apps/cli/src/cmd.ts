@@ -488,17 +488,7 @@ export function simulate_cmd(cwd: string) {
       const email = await generate
         .email(signet.domain, signet.r3ply, options)
         .then((email) => {
-          if (util.print_w_quiet_and_filter_opts(options, 'email')) {
-            // TODO: for some reason highlight.js doesn't support `eml`???
-            if (options.heading)
-              console.log(`${chalk.whiteBright('=== Input Email ===\n')}`)
-            console.log(
-              highlight(email.replace(/\r/g, ''), {
-                language: 'yaml',
-                ignoreIllegals: true,
-              }) + '\n\n',
-            )
-          }
+          tty.cmds.simulate.print_comment_via_email_initial(email, options)
           return email
         })
       const keys = await project.get_keys(cwd)
@@ -521,6 +511,7 @@ export function simulate_cmd(cwd: string) {
         options,
       )
       if (
+        options.moderation &&
         email_event_response.moderation &&
         email_event_response.moderation.isOk()
       ) {
