@@ -59,6 +59,23 @@ export namespace tty {
       }
     }
     export namespace simulate {
+      export function print_comment_via_email_initial(
+        email: string,
+        options: SimulateCmdEmailOpts,
+      ) {
+        if (util.print_w_quiet_and_filter_opts(options, 'email')) {
+          // TODO: for some reason highlight.js doesn't support `eml`???
+          if (options.heading)
+            console.log(`${chalk.whiteBright('=== Input Email ===\n')}`)
+          console.log(
+            highlight(email.replace(/\r/g, ''), {
+              language: 'yaml',
+              ignoreIllegals: true,
+            }) + '\n\n',
+          )
+        }
+      }
+
       export function print_comment_via_email_response(
         cli_system_config: R3plySystemConfig,
         {
