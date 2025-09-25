@@ -8,6 +8,7 @@ program
   .version('0.0.1')
   .description('CLI for r3ply')
   .option('--config <path>', 'specify path to config')
+  .option('--format <toml | json>', 'format to use with file output', 'toml')
 
 program.addCommand(init_cmd(process.cwd()))
 program.addCommand(config_cmd(process.cwd()))

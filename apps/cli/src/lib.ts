@@ -19,6 +19,7 @@ import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
 import crypto from 'crypto'
 import { mailbox } from 'typescript-mailbox-parser'
+import { InitCmdOptions } from './cmd.js'
 
 // project stuff ---------------------------------------------------------------
 export namespace project {
@@ -34,11 +35,15 @@ export namespace project {
   const ENCRYPT_EMAIL_KEY_FILENAME = 'encrypt_email.key'
   export const DEFAULT_SITE_DOMAIN = 'site.local.test'
   export const DEFAULT_R3PLY_DOMAIN = 'cli.r3ply.test'
+  export const DEFAULT_SIGNET_KEY =
+    '6eFnDQTHov/yKkhLp/HdZDSU/vryNJ4XeNOgX2XBCVI='
+  export const DEFAULT_EMAIL_KEY =
+    'f+466zchScGV5oiKq4W5hxCct1iXBuwgRUnx8tBSuQQ='
 
   /**
    * Finds the `.r3ply` dir that should be located at the top-level of the user's repository
    * @param cwd
-   * @returns
+   * @returns the path to the `.r3ply` directory
    */
   export async function find_r3ply_dir(
     cwd: string,
@@ -265,9 +270,9 @@ export namespace project {
     return file_resolver
   }
 
-  // TODO:
   export async function init_r3ply_project_at(
     cwd: string,
+    { force, rotateKeys }: InitCmdOptions,
     dir?: string,
   ): Promise<
     Result<
@@ -276,9 +281,14 @@ export namespace project {
     >
   > {
     const new_r3ply_dir = path.join(cwd, dir ?? '', R3PLY_DIR)
-    const parent_project_exists = find_r3ply_dir(new_r3ply_dir)
-    const signet_key = crypto.randomBytes(32).toString('base64')
-    const encrypt_email_key = crypto.randomBytes(32).toString('base64')
+    let parent_project_exists = find_r3ply_dir(new_r3ply_dir)
+    const signet_key = rotateKeys
+      ? crypto.randomBytes(32).toString('base64')
+      : project.DEFAULT_SIGNET_KEY
+    const email_key = rotateKeys
+      ? crypto.randomBytes(32).toString('base64')
+      : project.DEFAULT_EMAIL_KEY
+
     let system_config = R3plySystemConfig({
       domains: [project.DEFAULT_R3PLY_DOMAIN],
       admin: [
@@ -290,8 +300,15 @@ export namespace project {
     }).value!
     const result = parent_project_exists.then((parent_project_exists) => {
       const file_access = Result.safe(fs.promises.access(new_r3ply_dir))
-      return file_access.then((file_access) => {
-        if (file_access.isErr()) {
+      return file_access.then(async (file_access) => {
+        if (file_access.isErr() || force) {
+          if (file_access.isOk() && force) {
+            await fs.promises.rm(new_r3ply_dir, {
+              recursive: true,
+              force: true,
+            })
+            parent_project_exists = await find_r3ply_dir(new_r3ply_dir)
+          }
           if (parent_project_exists.isOk()) {
             throw new Error(
               `Nested r3ply project. There is already a parent directory initialized at ${chalk.blue('`' + parent_project_exists.unwrap() + '`')}.${chalk.yellow('(Nested projects can lead to strange effects)')}`,
@@ -306,7 +323,7 @@ export namespace project {
               .then((_) => {
                 return fs.promises.writeFile(
                   path.resolve(new_r3ply_dir, ENCRYPT_EMAIL_KEY_FILENAME),
-                  encrypt_email_key,
+                  email_key,
                 )
               })
               .then((_) => {
@@ -325,7 +342,7 @@ export namespace project {
                 return {
                   r3ply_dir: new_r3ply_dir,
                   signet_key,
-                  encrypt_email_key,
+                  encrypt_email_key: email_key,
                 }
               })
           })
@@ -498,15 +515,9 @@ export namespace generate {
     issued: string
   }> {
     if (r3ply == project.DEFAULT_R3PLY_DOMAIN) {
-      return Signet.issue(key, cli_system)(domain, r3ply, issued).then(
-        (signet) => {
-          return {
-            domain,
-            r3ply,
-            ...signet,
-          }
-        },
-      )
+      return Signet.issue(key, cli_system)(domain, r3ply, {
+        issued_date: issued,
+      })
     } else {
       return fetch(
         new URL(
