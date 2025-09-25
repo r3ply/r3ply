@@ -54,6 +54,9 @@ export namespace tty {
       export function print_config(site_config: R3plySiteConfig) {
         console.log(highlight(TOML.stringify(site_config as any)))
       }
+      export function print_email(email: string) {
+        console.log(highlight(email, { language: 'yaml' }))
+      }
     }
     export namespace simulate {
       export function print_comment_via_email_response(
