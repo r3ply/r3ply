@@ -1,11 +1,6 @@
 import { comments, moderation, R3plySignetConfig } from '@r3ply/schema'
 import { CommentTemplateContext } from '../comments/process'
-import {
-  LocalModeration,
-  LocalModerationArgs,
-  LocalModerationResult,
-  WriteLocalFile,
-} from './local'
+import { LocalModeration, WriteLocalFile } from './local'
 import micromatch from 'micromatch'
 import { Decrypt, DecryptEmail, Encrypt } from '../comments/viaEmail/crypto'
 import { Result } from 'oxide.ts'
@@ -19,11 +14,11 @@ export interface ModerationResponse<R> {
   result: R
 }
 /**
- * Moderation channels handle what is supposed to happen to a comment after it's been made.
+ * Moderation channels handle what happens after a request has been processed into a comment. It's a hand-off to the site.
  *
  * For example, comments may be sent to a GitHub repo as a pull request, or saved as a file locally.
  *
- * For moderation, templating is often necessary, so there is a separate but similar process to the comment pipeline. Template contexts are formed by a `prepare` command, then templates are bound to those contexts with a `process` command – thus creating the arguments that will be sent to moderation – and finally the results are sent for moderation as arguments, using the `send` command.
+ * For moderation, templating is often necessary, so there is a similar process to the comment pipeline but simpler. Template contexts are formed by a `process` function – thus creating the arguments that will be sent to moderation – and then sent for moderation with the `send` command.
  */
 export interface ModerationChannel<
   T extends moderation.R3plyModerationChannelType,
@@ -34,13 +29,6 @@ export interface ModerationChannel<
   type: T
   config: moderation.R3plyModerationChannelConfig &
     moderation.R3plyModerationConfig[T][number]
-  // /**
-  //  * Produce a new template context that's specific to the moderation channel
-  //  * @param config Any implementation of `ModerationChannel` should know how to handle `R3plyModerationConfig`
-  //  * @param context The initial context, e.g. `CommentTemplateContext & EmailTemplateContext`
-  //  * @returns The context used when binding any templates that will be sent as a part of moderation
-  //  */
-  // prepare: (context: InCtx) => Promise<OutCtx & InCtx>
 
   /**
    * Produce arguments by binding any template contexts with the comment or values from the config
@@ -79,44 +67,6 @@ export function ModerationImplementations<InCtx extends CommentTemplateContext>(
       : undefined,
   }
   return result
-}
-
-/**
- * Perform the tasks of moderation
- * @param site the signet config of a comment recipient, to be filtered by label per `filter*` config
- * @param config
- * @param commenting_channel
- * @param moderation_channels
- * @param comment
- * @param context
- */
-async function handel_moderation<Ctx extends CommentTemplateContext>(
-  site: R3plySignetConfig,
-  comment_source: comments.R3plyCommentSource,
-  config: moderation.R3plyModerationConfig,
-  moderation_channels: ModerationImplementations<Ctx>,
-  context: Ctx,
-  comment: string,
-) {
-  /**
-   * General algorithm will be:
-   * for each implementation I:
-   *  filter each configured channel Cf corresponding to I:
-   *    construct a ModerationChannel C using I + Cf
-   *    call `prepare` on C, passing in comment and upstream comment context, receiving moderation context MCtx
-   *    call `process` on C, passing in MCtx, receiving a request object MReq
-   *    call `send` on C, passing in MReq, receiving a response object MRep
-   */
-  let local_mod_reps: Promise<ModerationResponse<LocalModerationResult>>[] = []
-  if (moderation_channels.local) {
-    local_mod_reps = config.local
-      .map((local_config) => moderation_channels.local!(local_config))
-      .filter((local) => local != undefined)
-      .map((local) =>
-        local.process(comment, context).then((req) => local.send(req)),
-      )
-  }
-  return await Promise.all(local_mod_reps)
 }
 
 export function can_moderate(
@@ -227,51 +177,5 @@ if (import.meta.vitest) {
     expect(await bypass_moderation(author, ['*baz'])).toBe(false)
     // matching glob
     expect(await bypass_moderation(author, ['foo*'])).toBe(true)
-  })
-  // prettier-ignore
-  test('handler moderation', async () => {
-    const site: R3plySignetConfig = {
-      "domain": "example.com",
-      "r3ply": "r3ply.com",
-      "signet": "a".repeat(22),
-      "issued": "2025-09-19"
-    }
-    const comment_source: comments.R3plyCommentSource = 'email'
-    const moderation_config: moderation.R3plyModerationConfig = {
-      github: [],
-      webhook: [],
-      local: [{
-        "file_path_{}": "foo.txt",
-        enabled: true,
-        'allow*': []
-      }]
-    }
-    const write = async (a: LocalModerationArgs) => `/path/${a.relative_path}`
-    const url = new URL('https://example.com/blog/post/1')
-    const context: CommentTemplateContext = {
-      r3ply: {
-        config_version: '0.0.1',
-        server: site.r3ply,
-        site: site.domain,
-        ...site
-      },
-      author: {
-        pseudonym: 'foo bar',
-        token: await Encrypt.email(key)('bob@example.com'),
-      },
-      comment: {
-        id: '123',
-        ts_rcvd: '456',
-        subject: { ...url, url: url.toString(), path: url.pathname },
-        txt: 'Hello, world',
-        md: undefined,
-        html: undefined,
-      },
-    }
-    // TODO
-    // const result = await handel_moderation(site, "email", moderation_config, {
-    //   'local': async (local_config: moderation.R3plyLocalModerationConfig) => LocalModeration(site, comment_source, write, Decrypt.email(key))(local_config)
-    // }, context, "Hello, world")
-    // console.log(result)
   })
 }
