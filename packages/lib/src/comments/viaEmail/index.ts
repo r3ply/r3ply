@@ -61,12 +61,13 @@ export type CommentEmailEventResponse = {
   comment?: Result<string, Error>
   moderation?: Result<
     {
-      local: (write_local?: WriteLocalFile | undefined) =>
+      local: (write_local?: WriteLocalFile | undefined) => (
         | (() => Promise<{
             request: ModerationRequest<LocalModerationArgs>
             response: ModerationResponse<LocalModerationResult>
-          }>)[]
+          }>)
         | undefined
+      )[]
     },
     Error
   >
@@ -284,7 +285,7 @@ async function handle_email_event(
     if (results_list.isOk()) {
       const [received, accepted, deliverable, context, comment] =
         results_list.unwrap()
-      const moderation = (write_local?: WriteLocalFile) =>
+      const mk_moderation_impls = (write_local?: WriteLocalFile) =>
         ModerationImplementations<
           CommentTemplateContext & EmailTemplateContext
         >(
@@ -294,26 +295,30 @@ async function handle_email_event(
           write_local,
         )
       const partially_applied_local_moderation = (
-        ...args: Parameters<typeof moderation>
+        ...args: Parameters<typeof mk_moderation_impls>
       ) => {
-        const moderation_impls = moderation(...args)
+        const moderation_impls = mk_moderation_impls(...args)
         if (moderation_impls.local) {
           const make_local_moderation = moderation_impls.local
-          return (email_event.config.moderation?.local ?? [])
+          const result = (email_event.config.moderation?.local ?? [])
             .map((local_config) => make_local_moderation(local_config))
-            .filter((local_moderation) => local_moderation != undefined)
             .map((local_moderation) => {
-              return () =>
-                local_moderation.process(comment, context).then((request) => {
-                  return local_moderation.send(request).then((response) => {
-                    return {
-                      request,
-                      response,
-                    }
+              if (local_moderation) {
+                return () =>
+                  local_moderation.process(comment, context).then((request) => {
+                    return local_moderation.send(request).then((response) => {
+                      return {
+                        request,
+                        response,
+                      }
+                    })
                   })
-                })
+              } else {
+                return undefined
+              }
             })
-        }
+          return result
+        } else return []
       }
       results.moderation = Ok({
         local: partially_applied_local_moderation,
@@ -345,9 +350,9 @@ if (import.meta.vitest) {
       R3plySiteConfig({
         site: [
           {
-            r3ply: 'r3ply.com',
-            domain: 'spenc.es',
-            ...(await issue_signet('spenc.es', 'r3ply.com', '2025-09-20')),
+            ...(await issue_signet('spenc.es', 'r3ply.com', {
+              issued_date: '2025-09-20',
+            })),
           },
         ],
         comments: {

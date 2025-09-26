@@ -541,45 +541,22 @@ export function simulate_cmd(cwd: string) {
           moderation.write_comment_locally(cwd, args, options.dryRun),
         )
         for (const [index, local] of local_moderators.entries()) {
-          const result = await local()
-          const { allow, args } = result.request
-          const { relative_path } = args
-          const result_without_comment = {
-            ...result,
-            request: { allow, args: { relative_path } },
+          if (local) {
+            const result = await local()
+            const { allow, args } = result.request
+            const { relative_path } = args
+            const result_without_comment = {
+              ...result,
+              request: { allow, args: { relative_path } },
+            }
+            tty.cmds.simulate.print_local_moderation_req_rep(
+              result_without_comment,
+              index,
+              options,
+            )
           }
-          tty.cmds.simulate.print_local_moderation_req_rep(
-            result_without_comment,
-            index,
-            options,
-          )
         }
       }
     })
   return simulate_cmd
-
-  function can_moderate(
-    email_event_response: comments.email.CommentEmailEventResponse,
-  ) {
-    const { prescreening, received, accepted, prepared, comment } =
-      email_event_response
-    if (prescreening && received && accepted && prepared && comment) {
-      if (
-        (prescreening.isOk(),
-        received.isOk(),
-        accepted.isOk(),
-        prepared.isOk(),
-        comment.isOk())
-      ) {
-        return {
-          prescreening: prescreening.unwrap(),
-          received: received.unwrap(),
-          accepted: accepted.unwrap(),
-          prepared: prepared.unwrap(),
-          comment: comment.unwrap(),
-        }
-      }
-    }
-    return undefined
-  }
 }

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { toHex } from './util'
 import crypto from 'crypto' // DON'T REMOVE!
-import { R3plySystemConfig } from '@r3ply/schema'
+import { R3plySystemConfig, R3plySignetConfig } from '@r3ply/schema'
 
 /**
  * Generates a short, user-friendly envelope string, called a `signet` from a binary master key.
@@ -33,12 +33,14 @@ async function make_short_signet(
     site_domain,
     r3ply_domain,
     issued_date,
+    label,
   }: {
     site_domain: string
     r3ply_domain: string
     issued_date?: string
+    label?: string
   },
-) {
+): Promise<R3plySignetConfig> {
   // Service master key stored in environment (32 bytes, base64)
   const master_key_b64 = encryption_key
   const masterKey = Uint8Array.from(atob(master_key_b64), (c) =>
@@ -70,7 +72,7 @@ async function make_short_signet(
   const envelope_bytes = hmac_raw.slice(0, 16)
   const signet = b64url(envelope_bytes) // ~22-char base64url string
 
-  return { signet, issued }
+  return { domain: site_domain, r3ply: r3ply_domain, signet, issued, label }
 }
 
 /**
@@ -203,13 +205,20 @@ export const Signet = {
     return (
       site_domain: string,
       r3ply_domain: string,
-      issued_date?: string,
+      {
+        issued_date,
+        label,
+      }: {
+        issued_date?: string
+        label?: string
+      },
     ) => {
       if (system_config.domains.includes(r3ply_domain)) {
         return make_short_signet(key, {
           site_domain,
           r3ply_domain,
           issued_date,
+          label,
         })
       } else {
         throw new Error(
