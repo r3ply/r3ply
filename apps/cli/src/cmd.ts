@@ -1,22 +1,17 @@
 import { Command } from 'commander'
-import { project, generate, moderation } from './lib.js'
-import { util } from './util.js'
+import { project, generate, moderation } from './lib'
+import { util } from './util'
 import { Result } from 'oxide.ts'
-import chalk from 'chalk'
 import {
   R3plySignetConfig,
   R3plySiteConfig,
   R3plySystemConfig,
 } from '@r3ply/schema'
-import path from 'path'
-import { highlight } from 'cli-highlight'
-import TOML from '@iarna/toml'
 import {
   R3ply,
   Signet,
   moderation as mod_todo,
   util as r3ply_util,
-  comments,
 } from '@r3ply/lib'
 import prompts, { PromptObject } from 'prompts'
 import dayjs from 'dayjs'
@@ -506,9 +501,15 @@ export function simulate_cmd(cwd: string) {
       const r3ply = R3ply(cli_system_config)
 
       // Make comment via email handler
+      const file_writer: mod_todo.WriteLocalFile = (
+        args: mod_todo.LocalModerationArgs,
+      ) => moderation.write_comment_locally(cwd, args, options.dryRun)
+      const local_moderation_channel = mod_todo.LocalModeration(file_writer)
       const handle_email_comment = r3ply.comments.viaEmail(
         keys.signet_key,
         keys.encrypt_email_key,
+        {},
+        [local_moderation_channel],
       )
 
       // Pass generated email to email comment handler
@@ -530,31 +531,31 @@ export function simulate_cmd(cwd: string) {
         options,
       )
 
-      // Perform moderation
-      if (
-        options.moderate &&
-        email_event_response.moderation &&
-        email_event_response.moderation.isOk()
-      ) {
-        const mod = email_event_response.moderation.unwrap()
-        const local_moderators = mod.local((args) =>
-          moderation.write_comment_locally(cwd, args, options.dryRun),
+      // Print moderation
+      if (options.moderate && email_event_response.moderation) {
+        const local_moderation_results = email_event_response.moderation.filter(
+          (r) => r.type == 'local',
         )
-        for (const [index, local] of local_moderators.entries()) {
-          if (local) {
-            const result = await local()
-            const { allow, args } = result.request
-            const { relative_path } = args
-            const result_without_comment = {
-              ...result,
-              request: { allow, args: { relative_path } },
-            }
-            tty.cmds.simulate.print_local_moderation_req_rep(
-              result_without_comment,
-              index,
-              options,
-            )
-          }
+        for (const [index, local_moderation_event] of Object.entries(
+          local_moderation_results,
+        )) {
+          tty.cmds.simulate.print_local_moderation_event(
+            local_moderation_event.result,
+            Number(index),
+            options,
+          )
+        }
+        if (site_config.moderation) {
+          const ignored_moderation_results = Object.keys(
+            site_config.moderation,
+          ).filter((m) => m != 'local')
+          const other_moderation_results =
+            email_event_response.moderation.filter((r) => r.type != 'local')
+          tty.cmds.simulate.print_ignored_moderation_channels(
+            ignored_moderation_results,
+            other_moderation_results,
+            options,
+          )
         }
       }
     })

@@ -1,10 +1,20 @@
-import { match, Result } from 'oxide.ts'
-import { moderation, R3plySiteConfig } from '@r3ply/schema'
+import { Result } from 'oxide.ts'
+import { comments, moderation, R3plySignetConfig } from '@r3ply/schema'
 import { CommentTemplateContext } from '../comments/process'
 import { tera } from '@r3ply/wasm'
-import { ModerationChannel } from '.'
+import {
+  ModerationChannel,
+  ModerationChannelHandler,
+  ModerationRequest,
+  ModerationTicket,
+} from '.'
 
-// Note: this was copy/pasted from the gh-bot code but it should be considered temporary and the code should be properly packaged and imported from there
+/**
+ * The arguments that are sent to the r3ply GitHub bot to create a PR.
+ *
+ * TODO: the args args should probably be left generic so people can use any GitHub bot they like
+ * TODO: this was copy/pasted from the gh-bot code but it should be considered temporary and the code should be properly versioned, packaged, and imported from there
+ */
 export interface CreateCommentInRepoArgs {
   repo_owner: string
   repo_name: string
@@ -22,7 +32,12 @@ export interface CreateCommentInRepoArgs {
       }
 }
 
-export interface GitHubModerationContext {
+/**
+ * The result from a request for moderation via the r3ply github bot.
+ *
+ * This is expected to be mixed-in via the intersection `&` operator, for further template processing, i.e. processing notifications.
+ */
+export type GitHubModerationContext = {
   github: {
     repo: {
       owner: string
@@ -62,203 +77,167 @@ export interface GitHubModerationContext {
   }
 }
 
-export interface R3plyGithubBot<ExtraCtx> {}
+/**
+ * A request for moderation via the r3ply GitHub bot
+ */
+type GitHubModerationRequest = ModerationRequest<
+  'github',
+  CreateCommentInRepoArgs,
+  GitHubModerationContext,
+  Error
+>
 
-// F/fetch stuff because often times the default fetch isn't used, e.g. in the context of a 'bound' service in cloudflare
-export function R3plyGithubBot<ExtraCtx, F extends typeof fetch>(
-  github_pw: string,
-  fetch: F,
-): R3plyGithubBot<ExtraCtx> {
-  async function send(
-    gh_mod_config: moderation.R3plyGithubConfig,
-    mod_args: CreateCommentInRepoArgs,
-    comment: string,
-    context: GitHubModerationContext & CommentTemplateContext & ExtraCtx,
-  ) {
-    // Prepare the arguments supplied to the GitHub bot by resolving any remote template references
-    const gh_args = await (async () => {
-      const base_branch = gh_mod_config['base_branch_{}']
-      const head_branch = gh_mod_config['head_branch_{}']
-      const file_path = gh_mod_config['file_path_{}']
-      let commit_msg = gh_mod_config['commit_msg_{}'] ?? ''
-      const pr_title = gh_mod_config['pr_title_{}']
-      let pr_body = gh_mod_config['pr_body_{}'] ?? ''
-      return create_pr_args(comment, context, gh_mod_config, {
-        base_branch,
-        head_branch,
-        file_path,
-        commit_msg,
-        pr_title,
-        pr_body,
-      })
-    })()
+/**
+ * A function that performs the API call to the r3ply GitHub bot.
+ *
+ * You will have to partially apply in advance a request that has the github_app password.
+ *
+ * @example
+ *
+ *  const api_fetcher: PerformGitHubApiFetch = (args: CreateCommentInRepoArgs) => {
+ *    const request = new Request(
+ *    // the origin of the URL is ignored if the fetch belongs to a bound service.
+ *    'https://r3ply-github-app.spence.workers.dev/comments?strategy=GitHub:repo&open_pr=true',
+ *    {
+ *      method: 'POST',
+ *      headers: {
+ *        'Content-Type': 'application/json',
+ *        Authorization: `Bearer ${github_pw}`,
+ *      },
+ *      body: JSON.stringify(args)
+ *    })
+ *    ...
+ *  }
+ *
+ * Then for example you can fetch the request and further process the response
+ *
+ * @see CreateCommentInRepoArgs
+ * @see GitHubModerationContext
+ */
+export type PerformGitHubApiFetch = (
+  args: CreateCommentInRepoArgs,
+) => Promise<GitHubModerationContext['github']>
 
-    // note: the origin of the URL is ignored if the fetch belongs to a bound service. A default `fetch` though will in fact use this. TODO: deploy the github app somewhere ontop of the r3ply.com domain.
-    const gh_rep = fetch(
-      new Request(
-        'https://r3ply-github-app.spence.workers.dev/comments?strategy=GitHub:repo&open_pr=true',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${github_pw}`,
-          },
-          body: JSON.stringify(gh_args),
-        },
-      ),
-    ).then((gh_rep) => gh_rep.json())
+/**
+ * A GitHub moderation channel
+ *
+ * @see ModerationChannel
+ */
+export interface GitHubModeration<InCtx extends CommentTemplateContext>
+  extends ModerationChannel<
+    'github',
+    InCtx,
+    CreateCommentInRepoArgs,
+    GitHubModerationContext,
+    Error
+  > {}
 
-    const gh_context = await gh_rep.then((gh_rep) => {
-      // these properties come from just the GitHub documentation and don't have actual type safety, although they do have a scheme
-      const gh_context: GitHubModerationContext = {
-        github: {
-          repo: {
-            owner: gh_args.repo_owner,
-            name: gh_args.repo_name,
-            url: gh_args.repo_url,
-          },
-          comment: {
-            path: gh_args.new_comment_filepath,
-          },
-          commit: {
-            message: gh_args.commit_msg,
-          },
-          pr: {
-            branch: {
-              base: gh_args.source_branch,
-              head: gh_args.target_branch,
-            },
-            id: gh_rep.id,
-            url: gh_rep.url,
-            html_url: gh_rep.html_url,
-            diff_url: gh_rep.diff_url,
-            patch_url: gh_rep.patch_url,
-            issue_url: gh_rep.issue_url,
-            commits_url: gh_rep.commits_url,
-            comments_url: gh_rep.comments_url,
-            statuses_url: gh_rep.statuses_url,
-            number: gh_rep.number,
-            state: gh_rep.state,
-            title: gh_rep.title,
-            body: gh_rep.body,
-            created_at: gh_rep.created_at,
-            commits: gh_rep.commits,
-            additions: gh_rep.additions,
-            deletions: gh_rep.deletions,
-            changed_files: gh_rep.changed_files,
-          },
+/**
+ * A GitHub moderation channel handler
+ *
+ * @see ModerationChannelHandler
+ */
+export interface GitHubModerationHandler<InCtx extends CommentTemplateContext>
+  extends ModerationChannelHandler<
+    'github',
+    InCtx,
+    CreateCommentInRepoArgs,
+    GitHubModerationContext,
+    Error
+  > {}
+
+/**
+ * Convenience function to create an instance of a GitHub moderation channel
+ *
+ * @param api_caller a dependency to perform the api call
+ * @returns an instance of GitHubModeration
+ *
+ * @see PerformGitHubApiFetch
+ */
+export function GitHubModeration<InCtx extends CommentTemplateContext>(
+  api_caller: PerformGitHubApiFetch,
+): GitHubModeration<InCtx> {
+  const result: GitHubModeration<InCtx> = {
+    type: 'github',
+    handler: function (
+      signet: R3plySignetConfig,
+      src: comments.R3plyCommentSource,
+      config: moderation.R3plyGithubConfig,
+    ): ModerationChannelHandler<
+      'github',
+      InCtx,
+      CreateCommentInRepoArgs,
+      GitHubModerationContext,
+      Error
+    > {
+      return mk_gh_mod_handler(api_caller, config)
+    },
+  }
+  return result
+}
+
+/**
+ * Internal implementation for creating a GitHubModerationHandler
+ *
+ * @param api_call a dependency to perform the api call
+ * @param config the configuration for how to handle the moderation request
+ * @returns an instance of a GitHubModerationHandler
+ */
+function mk_gh_mod_handler<InCtx extends CommentTemplateContext>(
+  api_call: PerformGitHubApiFetch,
+  config: moderation.R3plyGithubConfig,
+): GitHubModerationHandler<InCtx> {
+  const result: GitHubModerationHandler<InCtx> = {
+    type: 'github',
+    config,
+    prepare: function (
+      comment: string,
+      context: InCtx,
+      bypass: boolean,
+    ): GitHubModerationRequest {
+      const request: GitHubModerationRequest = {
+        type: 'github',
+        args: create_pr_args(comment, context, config),
+        bypass,
+        send: function (): Promise<
+          ModerationTicket<'github', GitHubModerationContext, Error>
+        > {
+          return Result.safe(api_call(this.args))
+            .then((r) => r.map((rep) => ({ github: rep })))
+            .then((details) => ({ type: 'github', details }))
         },
       }
-      return gh_context
-    })
-
-    let commenter_notif: string | undefined
-    let moderator_notif: string | undefined
-    //  TODO
-    // if (notifyConfig) {
-    //   if (notifyConfig.commenter) {
-    //     if (notifyConfig.notify_commenter_upon_submission) {
-    //       let commenter_template = notifyConfig['comment_submitted_notif_{}']
-    //       if (commenter_template) {
-    //         commenter_notif = match(
-    //           Result.safe(() =>
-    //             tera(commenter_template, { ...context, ...gh_context }),
-    //           ),
-    //           {
-    //             Ok: (commenter_notif) => commenter_notif,
-    //             Err: (error) => {
-    //               console.error(
-    //                 `Error binding commenter notification to context, original message:\n\n${error.message}\n\nContext:\n\n\`\`\`TS\n${JSON.stringify(context, null, 2)}\n\`\`\``,
-    //               )
-    //               throw error
-    //             },
-    //           },
-    //         )
-    //       }
-    //     }
-    //   }
-    //   if (notifyConfig.moderator) {
-    //     if (notifyConfig.notify_moderator_upon_receipt) {
-    //       let moderator_template = notifyConfig['comment_received_notif_{}']
-    //       if (moderator_template) {
-    //         moderator_notif = match(
-    //           Result.safe(() =>
-    //             tera(moderator_template, { ...context, ...gh_context }),
-    //           ),
-    //           {
-    //             Ok: (moderator_notif) => moderator_notif,
-    //             Err: (error) => {
-    //               console.error(
-    //                 `Error binding moderator notification to context, original message:\n\n${error.message}\n\nContext:\n\n\`\`\`TS\n${JSON.stringify(context, null, 2)}\n\`\`\``,
-    //               )
-    //               throw error
-    //             },
-    //           },
-    //         )
-    //       }
-    //     }
-    //   }
-    // }
-
-    return {
-      args: gh_args,
-      context: { ...context, ...gh_context },
-      commenter_notif,
-      moderator_notif,
-    }
+      return request
+    },
   }
-  return {
-    send: send,
-  }
+  return result
 }
 
-// separate function so it can be tested
-function parse_repo(repo_url: string) {
-  let repo_as_url = Result.safe(() => new URL(repo_url)).expect(
-    `Unable to parse GitHub repo as URL: ${repo_url}`,
-  )
-  let [owner, repo] = Result.safe(() =>
-    repo_as_url.pathname.match(/^\/(.+?)\/(.+?)\/?$/)!.slice(1, 3),
-  ).expect('Unable to parse GitHub owner/name of repo')
-  return { repo_owner: owner, repo_name: repo }
-}
-
-type R3plySiteConfigWithGithubModeration = R3plySiteConfig & {
-  comments: { email: { moderation: { type: 'github' } } }
-}
-type GithubModerationConfig =
-  R3plySiteConfigWithGithubModeration['comments']['email']['moderation']
-
-// separate function so it can be tested
+/**
+ * Internal implementation for creating PR arguments. Separate so it can more easily be tested.
+ *
+ * @param comment the comment
+ * @param context the template context
+ * @param config the github moderation config
+ * @returns
+ */
 function create_pr_args(
   comment: string,
   context: CommentTemplateContext,
-  github_config: moderation.R3plyGithubConfig,
-  templates: {
-    base_branch: string
-    head_branch: string
-    file_path: string
-    commit_msg: string
-    pr_title: string
-    pr_body: string
-  },
-) {
-  let { repo_owner, repo_name } = parse_repo(github_config.repo)
+  config: moderation.R3plyGithubConfig,
+): CreateCommentInRepoArgs {
   const sanitized_context = JSON.parse(JSON.stringify(context))
-  let base_branch = tera(templates.base_branch, sanitized_context)
-  let head_branch = tera(templates.head_branch, sanitized_context)
-  let new_comment_filepath = tera(
-    github_config['file_path_{}'],
-    sanitized_context,
-  )
-  let commit_msg = tera(templates.commit_msg, sanitized_context)
-  let pr_msg_title = tera(templates.pr_title, sanitized_context)
-  let pr_msg_body = tera(templates.pr_body, sanitized_context)
+  let base_branch = tera(config['base_branch_{}'], sanitized_context)
+  let head_branch = tera(config['head_branch_{}'], sanitized_context)
+  let new_comment_filepath = tera(config['file_path_{}'], sanitized_context)
+  let commit_msg = tera(config['commit_msg_{}'], sanitized_context)
+  let pr_msg_title = tera(config['pr_title_{}'], sanitized_context)
+  let pr_msg_body = tera(config['pr_body_{}'], sanitized_context)
 
-  let gh_args: CreateCommentInRepoArgs = {
-    repo_owner,
-    repo_name,
-    repo_url: github_config.repo,
+  return {
+    repo_owner: config.owner,
+    repo_name: config.repo,
+    repo_url: `https://github.com/${config.owner}/${config.repo}`,
     source_branch: base_branch,
     target_branch: head_branch,
     comment_data: comment,
@@ -269,97 +248,66 @@ function create_pr_args(
       msg_body: pr_msg_body,
     },
   }
-  return gh_args
 }
 
-// TODO
-// if (import.meta.vitest) {
-//   const { test, expect } = import.meta.vitest
-//   test('parse_repo', () => {
-//     expect(parse_repo('https://github.com/asimpletune/spenc.es')).toStrictEqual(
-//       { repo_owner: 'asimpletune', repo_name: 'spenc.es' },
-//     )
-//     expect(() => parse_repo('github.com/asimpletune/spenc.es')).toThrowError(
-//       /Unable to parse GitHub repo as URL/,
-//     )
-//     expect(() => parse_repo('https://github.com/')).toThrowError(
-//       /Unable to parse GitHub owner\/name of repo/,
-//     )
-//     expect(parse_repo('https://github.com/a/b/c/d/e/f')).toStrictEqual({
-//       repo_owner: 'a',
-//       repo_name: 'b/c/d/e/f',
-//     })
-//   })
-//   test('create_pr_args', () => {
-//     const comment = 'This is a comment'
-//     const context: CommentTemplateContext = {
-//       r3ply: {
-//         config_version: '0.0.1',
-//         server: 'r3ply.com',
-//         site: 'example.com',
-//         signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
-//         issued: '2025-08-22',
-//       },
-//       author: {
-//         pseudonym:
-//           '5f1a242e4eeec2fa9cbd67c5fa20b09f1dd5a61263c77ec00b314efbd0556a4d',
-//         token:
-//           'iypUPU0EPutGE2w8-uFPoweAgjfQyvpJuIYS1O741kXmJPStr9ABofrgULrPRIusvQsB9-biIiN3xI1FOO45UGjVb_sHAaYJMCF2e7m9BiDFaDyyoyUhBHGu4Oj3VGA8n4hwKVXLP6D-koflm0X_x_nykXZYGvLXsetA1pO8dvVZf3k7grDZ0dom0nkIyYHyaNhGrFO-xy3iTMO97OXZaTu-tGyGGvAn-fo0oAVjdFIQuTeCp5CYm02eMRDWrFAW1OGT-b-sGGBuU6oZNEtfWcO-YeiFRmVjxRkyYTqBK2MK7PvG4JaKto7SojP6Egg0j-vbRHieFkBw2eM4Eemqar4XhBTM1PKpoaqAFdf7fs9PqgYcITsXXpdqZ1QlsYBmQ7vxKLiX6ad-nbYwbpaOMNrX7b3RGQDArIwgWHzUExmtgjvcJubgEMOF0UQw8MhAOPYgfiXnVs9x0cWr',
-//       },
-//       comment: {
-//         id: '1234567890',
-//         ts_rcvd: Math.floor(Date.now() / 1000).toString(),
-//         subject: {
-//           url: 'https://example.com/blog/post/',
-//           origin: 'https://example.com',
-//           protocol: 'https:',
-//           hostname: 'example.com',
-//           path: '/blog/post',
-//           queryParams: undefined,
-//           fragment: undefined,
-//         },
-//         txt: 'this is a comment',
-//         md: undefined,
-//         html: undefined,
-//       },
-//     }
-//     const github_moderation: GithubModerationConfig = {
-//       enabled: true,
-//       type: 'github',
-//       repo: 'https://github.com/example.com/blog/',
-//       'file_path_{}': 'content/comments/{{ comment.id }}.txt',
-//       allow_list: ['*'],
-//       'base_branch_{}': 'main',
-//       'head_branch_{}':
-//         'comment-{{ author.pseudonym[:7] }}-{{ comment.id[:8] }}',
-//       'commit_msg_{}': 'new comment: \n> {{ comment.txt }}\n',
-//       'pr_title_{}': 'merge comment {{ comment.id[:8] }}',
-//       'pr_body_{}':
-//         'this is a PR to merge comment from user {{ author.pseudonym[:7] }}, with content: \n> {{ comment.txt }}',
-//     }
-//     const result = create_pr_args(comment, context, github_moderation, {
-//       base_branch: github_moderation['base_branch_{}'],
-//       head_branch: github_moderation['head_branch_{}'],
-//       file_path: github_moderation['file_path_{}'],
-//       commit_msg: github_moderation['commit_msg_{}'] ?? '',
-//       pr_title: github_moderation['pr_title_{}'],
-//       pr_body: github_moderation['pr_body_{}'] ?? '',
-//     })
-//     expect(result).toStrictEqual({
-//       repo_owner: 'example.com',
-//       repo_name: 'blog',
-//       repo_url: 'https://github.com/example.com/blog/',
-//       source_branch: 'main',
-//       target_branch: 'comment-5f1a242-12345678',
-//       comment_data: 'This is a comment',
-//       new_comment_filepath: 'content/comments/1234567890.txt',
-//       commit_msg: 'new comment: \n> this is a comment\n',
-//       pr: {
-//         msg_title: 'merge comment 12345678',
-//         msg_body:
-//           'this is a PR to merge comment from user 5f1a242, with content: \n' +
-//           '> this is a comment',
-//       },
-//     })
-//   })
-// }
+if (import.meta.vitest) {
+  const { test, expect } = import.meta.vitest
+  test('create PR args', () => {
+    const context: CommentTemplateContext = {
+      r3ply: {
+        config_version: '0.0.1',
+        server: 'r3ply.com',
+        site: 'spenc.es',
+        signet: 'a'.repeat(22),
+        issued: '2025-10-04',
+      },
+      author: {
+        pseudonym: 'shakesp34r',
+        token: 'abc123',
+      },
+      comment: {
+        id: 'xyz789',
+        ts_rcvd: '123',
+        subject: {
+          url: 'https://example.com/',
+          origin: 'https://example.com',
+          protocol: 'https:',
+          hostname: 'example.com',
+          path: '/',
+          queryParams: undefined,
+          fragment: undefined,
+        },
+        txt: 'test comment',
+        md: undefined,
+        html: undefined,
+      },
+    }
+    const config: moderation.R3plyGithubConfig = {
+      enabled: false,
+      'allow*': [],
+      owner: 'asimpletune',
+      repo: 'spenc.es',
+      'file_path_{}': 'twinkle/twinkle',
+      'base_branch_{}': 'little',
+      'head_branch_{}': 'star',
+      'commit_msg_{}': 'how I',
+      'pr_title_{}': 'wonder',
+      'pr_body_{}': 'what you are',
+      github_host: 'github.com',
+    }
+    const expected = {
+      repo_owner: 'asimpletune',
+      repo_name: 'spenc.es',
+      repo_url: 'https://github.com/asimpletune/spenc.es',
+      source_branch: 'little',
+      target_branch: 'star',
+      comment_data: 'test comment',
+      new_comment_filepath: 'twinkle/twinkle',
+      commit_msg: 'how I',
+      pr: { msg_title: 'wonder', msg_body: 'what you are' },
+    }
+    expect(create_pr_args('test comment', context, config)).toStrictEqual(
+      expected,
+    )
+  })
+}

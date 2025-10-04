@@ -198,6 +198,8 @@ export const Anonymize = {
 
 /**
  *  Convenience object to curry encryption keys
+ *
+ * TODO: make this a function instead of a const with `.issue`, e.g. Signet(key, system_config)
  */
 export const Signet = {
   // This is the one you probably want to use if you provide an implementation (i.e. app) of r3ply somewhere, e.g. the CLI or cloudflare-worker, to help people join your service

@@ -16,6 +16,9 @@ export const local = {
     },
   ],
   properties: {
+    type: {
+      const: 'local',
+    },
     'file_path_{}': {
       title: 'File path template (string)',
       description:

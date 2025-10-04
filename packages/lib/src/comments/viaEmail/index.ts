@@ -7,7 +7,6 @@ export * from './crypto'
 import { R3plySystemConfig, R3plySiteConfig, comments } from '@r3ply/schema'
 import {
   prescreen as r3ply_prescreen,
-  PrescreenResult,
   PrescreenPass,
   PrescreenFail,
 } from './prescreen'
@@ -20,22 +19,21 @@ import {
 import { prepare as r3ply_prepare, EmailTemplateContext } from './prepare'
 import { process as r3ply_process, CommentTemplateContext } from '../process'
 import { Anonymize, Signet } from '../../signet'
-import { Decrypt, Encrypt } from './crypto'
-import { Ok, Result } from 'oxide.ts'
+import { Encrypt } from './crypto'
+import { Err, Ok, Result } from 'oxide.ts'
 import {
-  LocalModerationArgs,
-  LocalModerationResult,
-  ModerationImplementations,
+  AnyModerationChannel,
+  LocalModeration,
+  Moderation,
   ModerationRequest,
-  ModerationResponse,
-  WriteLocalFile,
+  ModerationTicket,
 } from '../../moderation'
+import { GitHubModeration } from '../../moderation/github'
 
 /**
- * An event represent a comment received via email, packaged as a request.
+ * A comment via email request.
  *
  * `recipient` is the config of the site receiving the comment is intended for.
- *
  * `bytes` is the raw email as an array of bytes.
  *
  * @see R3plySiteConfig for details on the config.
@@ -46,11 +44,14 @@ export type CommentEmailEventRequest = [
 ]
 
 /**
- * A response representing from the handling of the request to comment via email.
+ * A response to a comment via email request.
  *
  * The pipeline that processes an email can be aborted (or fail) at any stage except prescreening.
  *
  * @see handle_email_event for implementation details of the actual pipeline.
+ *
+ * TODO: choose a tense for all the fields and stick with it (e.g. prescreening vs received are not the same tense)
+ * TODO: change comment to process
  */
 export type CommentEmailEventResponse = {
   prescreening: Result<PrescreenPass, PrescreenFail>
@@ -59,33 +60,46 @@ export type CommentEmailEventResponse = {
   deliverable?: Result<DeliverableEmail, Error>
   prepared?: Result<CommentTemplateContext & EmailTemplateContext, Error>
   comment?: Result<string, Error>
-  moderation?: Result<
-    {
-      local: (write_local?: WriteLocalFile | undefined) => (
-        | (() => Promise<{
-            request: ModerationRequest<LocalModerationArgs>
-            response: ModerationResponse<LocalModerationResult>
-          }>)
-        | undefined
-      )[]
-    },
-    Error
-  >
+  moderation?: {
+    type: CommentViaEmailSupportedModerationChannels['type']
+    result: Result<
+      {
+        request: ModerationRequest<any, any, any, any>
+        ticket: ModerationTicket<any, any, any>
+      },
+      Error
+    >
+  }[]
 }
 
 /**
- * A function that accepts a request to handle a comment via email and returns a response.
+ * A function that accepts a comment via email request and returns a response.
  */
 export type CommentViaEmailHandler = (
   e: CommentEmailEventRequest,
 ) => Promise<CommentEmailEventResponse>
 
 /**
+ * The templating context that will be made available for all comment via email events.
+ */
+export type CommentViaEmailContext = CommentTemplateContext &
+  EmailTemplateContext
+
+/**
+ * The moderation channels that are supported by the comment via email handler.
+ *
+ * @see ModerationChannel
+ */
+export type CommentViaEmailSupportedModerationChannels =
+  | GitHubModeration<CommentViaEmailContext>
+  | LocalModeration<CommentViaEmailContext>
+
+/**
  * Makes a new function that partially applies the depencies into the actual email comment event handler.
  *
  * @param anonymize_key symmetric key for decrypting an email event's signet.
  * @param encrypt_key symmetric key for encrypting the author's address of an email event
- * @param moderation the moderation implementations supported by this commenting channel
+ * @param moderation_channels the moderation implementations supported by this commenting channel
  * @returns a function that can handler email commenting events
  *
  * @see handle_email_event for details on how the actual email comment event pipeline works.
@@ -102,6 +116,7 @@ function mk_email_handler(
     prepare = r3ply_prepare,
     process = r3ply_process,
   } = {},
+  moderation_channels: CommentViaEmailSupportedModerationChannels[],
 ): CommentViaEmailHandler {
   return async function ([
     site,
@@ -122,6 +137,7 @@ function mk_email_handler(
         prepare,
         process,
       },
+      moderation_channels,
     )
   }
 }
@@ -131,7 +147,15 @@ function mk_email_handler(
  *
  * @param email_event An email event, consisting of the recipient site's config and email bytes.
  * @param dependencies The various bits and pieces that are needed to do r3ply's job.
- * @param stages Implementations for each stage in the email comment pipeline.
+ *
+ * @see prescreen the prescreen stage in the comment pipeline @see r3ply_prescreen
+ * @see receive the receive stage in the comment pipeline @see r3ply_receive
+ * @see accept the accept stage in the comment pipeline @see r3ply_accept
+ * @see deliverable the deliverability stage in the comment pipeline @see r3ply_deliverable
+ * @see prepare the prepare stage in the comment pipeline @see r3ply_prepare
+ * @see process the process tage in the comment pipeline @see r3ply_process
+ *
+ * @param moderation_channels the moderation implementations supported by this commenting channel
  *
  * @returns An object representing each stage of the email comment pipeline.
  */
@@ -157,6 +181,7 @@ async function handle_email_event(
     prepare: typeof r3ply_prepare
     process: typeof r3ply_process
   },
+  moderation_channels: CommentViaEmailSupportedModerationChannels[],
 ): Promise<CommentEmailEventResponse> {
   /**
    * (Prescreen)
@@ -267,6 +292,8 @@ async function handle_email_event(
   /**
    * (Comment moderation)
    * Step 7. prepare moderation
+   *
+   * TODO: just return a Result<moderation handler, Error> so the caller can handle this stuff how they like downstream
    */
   if (
     results.received &&
@@ -285,59 +312,67 @@ async function handle_email_event(
     if (results_list.isOk()) {
       const [received, accepted, deliverable, context, comment] =
         results_list.unwrap()
-      const mk_moderation_impls = (write_local?: WriteLocalFile) =>
-        ModerationImplementations<
-          CommentTemplateContext & EmailTemplateContext
-        >(
-          deliverable.site,
-          'email',
-          Decrypt.email(dependencies.encrypt_key),
-          write_local,
-        )
-      const partially_applied_local_moderation = (
-        ...args: Parameters<typeof mk_moderation_impls>
-      ) => {
-        const moderation_impls = mk_moderation_impls(...args)
-        if (moderation_impls.local) {
-          const make_local_moderation = moderation_impls.local
-          const result = (email_event.config.moderation?.local ?? [])
-            .map((local_config) => make_local_moderation(local_config))
-            .map((local_moderation) => {
-              if (local_moderation) {
-                return () =>
-                  local_moderation.process(comment, context).then((request) => {
-                    return local_moderation.send(request).then((response) => {
-                      return {
-                        request,
-                        response,
+      if (email_event.config.moderation) {
+        const moderation_config = email_event.config.moderation
+        const moderation_results = Promise.all(
+          moderation_channels.flatMap((channel) => {
+            return moderation_config[channel.type].map((config) => {
+              const filter_result = Moderation.filter(
+                channel as AnyModerationChannel<CommentViaEmailContext>,
+                deliverable.site,
+                'email',
+                config,
+              )
+              const result: Promise<Result<any, Error>> = (async () => {
+                if (filter_result.isOk()) {
+                  const handler = filter_result.unwrap()
+                  const bypass = Moderation.bypass(config, context, {
+                    cleartext: accepted.from.value,
+                  })
+                  return bypass.then((bypass) => {
+                    const moderation_request = handler.prepare(
+                      comment,
+                      context,
+                      bypass,
+                    )
+                    return moderation_request.send().then((ticket) => {
+                      const result = {
+                        request: moderation_request,
+                        ticket,
                       }
+                      return Ok(result)
                     })
                   })
-              } else {
-                return undefined
-              }
+                } else {
+                  return Err(filter_result.unwrapErr())
+                }
+              })()
+              return result.then((result) => ({
+                type: channel.type,
+                result,
+              }))
             })
-          return result
-        } else return []
+          }),
+        )
+        results.moderation = await moderation_results
       }
-      results.moderation = Ok({
-        local: partially_applied_local_moderation,
-      })
     }
   }
   return results
 }
 
 if (import.meta.vitest) {
-  const { test, expect } = import.meta.vitest
+  const { test, expect, describe } = import.meta.vitest
   const signet_key = '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs='
   const encrypt_key = '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
   const system = R3plySystemConfig({
     domains: ['r3ply.com', 'test.r3ply.com'],
   }).value!
-  const issue_signet = await Signet.issue(signet_key, system)
-  const handle_email = mk_email_handler(system, signet_key, encrypt_key)
-  test('', async () => {
+  const signet_issuer = Signet.issue(signet_key, system)
+  const handle_email = mk_email_handler(system, signet_key, encrypt_key, {}, [
+    LocalModeration(async (args) => 'test'),
+  ])
+  describe('comment via email handling', async () => {
     const email_bytes = new TextEncoder().encode(
       (
         await import(
@@ -350,7 +385,7 @@ if (import.meta.vitest) {
       R3plySiteConfig({
         site: [
           {
-            ...(await issue_signet('spenc.es', 'r3ply.com', {
+            ...(await signet_issuer('spenc.es', 'r3ply.com', {
               issued_date: '2025-09-20',
             })),
           },
@@ -358,11 +393,36 @@ if (import.meta.vitest) {
         comments: {
           email: {},
         },
+        moderation: {
+          local: [
+            {
+              'file_path_{}': 'example.md',
+            },
+          ],
+        },
       }).value!,
       email_bytes,
     ])
-    console.log('COMMENT VIA EMAIL RESULT')
-    console.log(result)
+    test('prescreen stage', () => expect(result.prescreening.isOk()).toBe(true))
+    test('receive stage', () =>
+      expect(result.received && result.received.isOk()).toBe(true))
+    test('accept stage', () =>
+      expect(result.accepted && result.accepted.isOk()).toBe(true))
+    test('deliverablility stage', () =>
+      expect(result.deliverable && result.deliverable.isOk()).toBe(true))
+    test('prepare stage', () =>
+      expect(result.prepared && result.prepared.isOk()).toBe(true))
+    test('process stage', () =>
+      expect(result.comment && result.comment.isOk()).toBe(true))
+    test('moderation stage', () => {
+      expect(result.moderation).toBeDefined()
+      expect(result.moderation!.length).toBe(1)
+      expect(result.moderation![0].type).toBe('local')
+      expect(result.moderation![0].result.isOk()).toBe(true)
+      expect(result.moderation![0].result.unwrap().ticket.details.isOk()).toBe(
+        true,
+      )
+    })
   })
 }
 

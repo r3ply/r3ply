@@ -1,104 +1,253 @@
 import { comments, moderation, R3plySignetConfig } from '@r3ply/schema'
 import { CommentTemplateContext } from '../comments/process'
-import { LocalModeration, WriteLocalFile } from './local'
 import micromatch from 'micromatch'
 import { Decrypt, DecryptEmail, Encrypt } from '../comments/viaEmail/crypto'
-import { Result } from 'oxide.ts'
-export * from './local'
+import { Err, Ok, Result } from 'oxide.ts'
 
-export interface ModerationRequest<A> {
-  args: A
-  allow: boolean
-}
-export interface ModerationResponse<R> {
-  result: R
-}
+export * from './local'
+export * from './github'
+
+export type ModerationChannelType = moderation.R3plyModerationChannelType
+export type ModerationChannelConfig<T extends ModerationChannelType> =
+  moderation.R3plyModerationConfig[T][number]
+
 /**
- * Moderation channels handle what happens after a request has been processed into a comment. It's a hand-off to the site.
+ * A moderation channel. This interface encapsulates the underlying implementation for a moderation channel.
  *
- * For example, comments may be sent to a GitHub repo as a pull request, or saved as a file locally.
+ * To prepare a moderation request, you will first need a `ModerationChannelHandler` which is a moderation channel + a site's `signet`, a commenting src (e.g. 'email'), and a configuration of that handler.
  *
- * For moderation, templating is often necessary, so there is a similar process to the comment pipeline but simpler. Template contexts are formed by a `process` function – thus creating the arguments that will be sent to moderation – and then sent for moderation with the `send` command.
+ * @see ModerationChannelHandler
+ * @see signet
+ * @see ModerationChannelConfig
  */
 export interface ModerationChannel<
-  T extends moderation.R3plyModerationChannelType,
-  InCtx extends CommentTemplateContext,
+  T extends ModerationChannelType,
+  InCtx,
   Args,
   OutCtx,
+  Fail,
 > {
   type: T
-  config: moderation.R3plyModerationChannelConfig &
-    moderation.R3plyModerationConfig[T][number]
-
-  /**
-   * Produce arguments by binding any template contexts with the comment or values from the config
-   * @param comment the comment as a string
-   * @param context variables that will be available to templating
-   * @returns Arguments that will be sent for moderation
-   */
-  process: (comment: string, context: InCtx) => Promise<ModerationRequest<Args>>
-
-  /**
-   * Send a request to the extending moderation channel
-   * @param req A moderation request
-   * @returns The initial response from that moderation channel
-   */
-  send: <R>(req: ModerationRequest<Args>) => Promise<ModerationResponse<OutCtx>>
+  handler: (
+    signet: R3plySignetConfig,
+    src: comments.R3plyCommentSource,
+    config: ModerationChannelConfig<T>,
+  ) => ModerationChannelHandler<T, InCtx, Args, OutCtx, Fail>
 }
 
-export interface ModerationImplementations<
-  InCtx extends CommentTemplateContext,
+/**
+ * A simple type alias used to represent a generic moderation channel with a known InCtx.
+ */
+export type AnyModerationChannel<InCtx> = {
+  // intentionally no generics on Args/OutCtx/Fail
+  type: ModerationChannelType
+  handler: (
+    signet: R3plySignetConfig,
+    src: comments.R3plyCommentSource,
+    config: ModerationChannelConfig<ModerationChannelType>,
+  ) => ModerationChannelHandler<ModerationChannelType, InCtx, any, any, any>
+}
+
+/**
+ * A handler for preparing moderation requests.
+ */
+export interface ModerationChannelHandler<
+  T extends moderation.R3plyModerationChannelType,
+  InCtx,
+  Args,
+  OutCtx,
+  Fail,
 > {
-  github?: any // TODO
-  webhook?: any // TODO
-  local?: (
-    local_config: moderation.R3plyLocalModerationConfig,
-  ) => LocalModeration<InCtx> | undefined
-}
-export function ModerationImplementations<InCtx extends CommentTemplateContext>(
-  signet: R3plySignetConfig,
-  comment_source: comments.R3plyCommentSource,
-  decrypt?: DecryptEmail,
-  write_local?: WriteLocalFile,
-) {
-  const result: ModerationImplementations<InCtx> = {
-    local: write_local
-      ? LocalModeration(signet, comment_source, write_local, decrypt)
-      : undefined,
-  }
-  return result
+  type: T
+  config: ModerationChannelConfig<T>
+  prepare: (
+    comment: string,
+    context: InCtx,
+    bypass: boolean,
+  ) => ModerationRequest<T, Args, OutCtx, Fail>
 }
 
-export function can_moderate(
+/**
+ * A request for moderation. After preparing a request you may send it for moderation.
+ *
+ * @see ModerationTicket
+ */
+export interface ModerationRequest<
+  T extends ModerationChannelType,
+  A,
+  OutCtx,
+  F,
+> {
+  type: T
+  args: A
+  bypass: boolean
+  send: () => Promise<ModerationTicket<T, OutCtx, F>>
+}
+
+/**
+ * Receipt of a request for moderation along with the relevant details.
+ *
+ * @see ModerationRequest
+ */
+export interface ModerationTicket<T extends ModerationChannelType, Ok, Err> {
+  type: T
+  details: Result<Ok, Err>
+}
+
+/**
+ * A collection of functions that are useful for handling different stages of the moderation pipeline.
+ */
+export namespace Moderation {
+  export async function prepare<
+    T extends ModerationChannelType,
+    InCtx extends CommentTemplateContext,
+    Args,
+    OutCtx,
+    Fail,
+  >(
+    signet: R3plySignetConfig,
+    src: comments.R3plyCommentSource,
+    config: ModerationChannelConfig<T>,
+    bypass_opts: {
+      cleartext?: string
+      decrypt?: DecryptEmail
+    },
+    comment: string,
+    context: InCtx,
+    channel: ModerationChannel<T, InCtx, Args, OutCtx, Fail>,
+  ): Promise<Result<ModerationRequest<T, Args, OutCtx, Fail>, Error>> {
+    const can_moderate_result = can_moderate(signet, src, config)
+    if (can_moderate_result.isOk()) {
+      const channel_handler = channel.handler(signet, src, config)
+      return Result.safe(
+        can_bypass(context.author, config['allow*'], bypass_opts).then(
+          (bypass) => channel_handler.prepare(comment, context, bypass),
+        ),
+      )
+    } else {
+      return Promise.resolve(Err(can_moderate_result.unwrapErr()))
+    }
+  }
+
+  /**
+   * Filters a moderation channel before getting its handler by applying filtration rules specified in the config to the signet and comment src.
+   *
+   * @param signet The signet (i.e. 'site') the comment is addressed to.
+   * @param src The comment source (e.g. 'email').
+   * @param config The site's configuration to be applied for this moderation channel.
+   * @param channel The moderation channel.
+   *
+   * @returns A result object containing either a moderation channel or an error.
+   */
+  export function filter<
+    T extends ModerationChannelType,
+    InCtx extends CommentTemplateContext,
+    Args,
+    OutCtx,
+    Fail,
+  >(
+    channel: ModerationChannel<T, InCtx, Args, OutCtx, Fail>,
+    ...[signet, src, config]: Parameters<
+      ModerationChannel<T, InCtx, Args, OutCtx, Fail>['handler']
+    >
+  ): Result<ModerationChannelHandler<T, InCtx, Args, OutCtx, Fail>, Error> {
+    const can_moderate_result = can_moderate(signet, src, config)
+    if (can_moderate_result.isOk()) {
+      return Ok(channel.handler(signet, src, config))
+    } else {
+      return Err(can_moderate_result.unwrapErr())
+    }
+  }
+
+  /**
+   * Checks if a comment can bypass moderation according to the site's configuration.
+   *
+   * @param config The configuration for this moderation channel.
+   * @param context The comment context. It will contain necessary details such as authorship.
+   * @param bypass_opts Additional options that can be used for filtering, such as a cleartext version of the comment author's email, or a function that can be used to decrypt it.
+   *
+   * @returns A promise of a boolean.
+   */
+  export async function bypass<
+    T extends ModerationChannelType,
+    InCtx extends CommentTemplateContext,
+  >(
+    config: ModerationChannelConfig<T>,
+    context: InCtx,
+    bypass_opts: {
+      cleartext?: string
+      decrypt?: DecryptEmail
+    },
+  ): Promise<boolean> {
+    return can_bypass(context.author, config['allow*'], bypass_opts)
+  }
+}
+
+/**
+ * Internal implementation of the logic to see if a moderation channel can moderate a comment for a particular moderation configuration.
+ *
+ * @param site The site (i.e. signet) the comment is addressed to.
+ * @param comment_source The source of the comment (e.g. 'email').
+ * @param opts The options that are in each moderation config that configure the rules of whether it can perform some moderation or not.
+ *
+ * @returns A return type of void if successful or an error explaining why.
+ */
+function can_moderate(
   site: R3plySignetConfig,
   comment_source: comments.R3plyCommentSource,
   opts: moderation.R3plyModerationOptions,
-): boolean {
-  // Check if moderation is enabled for this moderation channel
-  if (opts.enabled) {
-    // Check if this commenting source is either disabled or accepted by this moderation channel
-    if (!opts.comments || opts.comments.includes(comment_source)) {
-      // Check if filtering by site is either disabled or the site's label matches the filter
-      if (
-        !opts['filter*'] ||
-        (site.label && micromatch([site.label], opts['filter*']).length > 0)
-      ) {
-        return true
+): Result<void, Error> {
+  return Result.safe(() => {
+    // Check if moderation is enabled for this moderation channel
+    if (opts.enabled) {
+      // Check if this commenting source is either disabled or accepted by this moderation channel
+      if (!opts.comments || opts.comments.includes(comment_source)) {
+        // Check if filtering by site is either disabled or the site's label matches the filter
+        if (
+          !opts['filter*'] ||
+          (site.label && micromatch([site.label], opts['filter*']).length > 0)
+        ) {
+          return
+        } else {
+          throw new Error(
+            `site label '${site.label ?? 'undefined'}' did not match moderation channel configuration '${JSON.stringify(opts['filter*'])}'`,
+          )
+        }
+      } else {
+        throw new Error(
+          `comment source '${comment_source}' not accepted by moderation channel configuration '${JSON.stringify(opts.comments)}'`,
+        )
       }
+    } else {
+      throw new Error('moderation disabled for channel')
     }
-  }
-  // If all of the above checks don't happen, then moderation does not occur
-  return false
+  })
 }
 
-export async function bypass_moderation(
+/**
+ * Internal implementation of the logic for whether a comment can bypass moderation or not.
+ *
+ * @param author The authorship details of the comment.
+ * @param allow_glob An array of glob patterns that specify the authors that are allowed to bypass moderation.
+ * @param options Additional options that can be taken into consideration for determining whether to bypass moderation.
+ *
+ * @returns A promise of a boolean.
+ */
+async function can_bypass(
   author: CommentTemplateContext['author'],
   allow_glob: string[],
-  decrypt?: DecryptEmail,
+  options: {
+    cleartext?: string
+    decrypt?: DecryptEmail
+  } = {},
 ): Promise<boolean> {
-  if (decrypt) {
+  if (options.cleartext) {
+    return (
+      micromatch([author.pseudonym, options.cleartext], allow_glob).length > 0
+    )
+  } else if (options.decrypt) {
     const result = Result.safe(
-      decrypt(author.token).then((email) => {
+      options.decrypt(author.token).then((email) => {
         return micromatch([author.pseudonym, email], allow_glob).length > 0
       }),
     )
@@ -120,6 +269,7 @@ export async function bypass_moderation(
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   const key = '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
+
   // prettier-ignore
   test('can moderate', async () => {
     const mod_options: moderation.R3plyModerationOptions = {
@@ -134,25 +284,26 @@ if (import.meta.vitest) {
       label: 'test'
     }
     // disabled always prevents moderation
-    expect(can_moderate(site, 'email', { ...mod_options, enabled: false })).toBe(false)
+    expect(can_moderate(site, 'email', { ...mod_options, enabled: false }).isOk()).toBe(false)
     // enabled, with no comment source or filtering defined
-    expect(can_moderate(site, 'email', mod_options)).toBe(true)
+    expect(can_moderate(site, 'email', mod_options).isOk()).toBe(true)
     // no matching comment sources
-    expect(can_moderate(site, 'email', { ...mod_options, comments: [] })).toBe(false)
+    expect(can_moderate(site, 'email', { ...mod_options, comments: [] }).isOk()).toBe(false)
     // matching comment sources
-    expect(can_moderate(site, 'email', { ...mod_options, comments: ['email'] })).toBe(true)
+    expect(can_moderate(site, 'email', { ...mod_options, comments: ['email'] }).isOk()).toBe(true)
     // no matching site label
-    expect(can_moderate(site, 'email', { ...mod_options, "filter*": [] })).toBe(false)
+    expect(can_moderate(site, 'email', { ...mod_options, "filter*": [] }).isOk()).toBe(false)
     // matching site label
-    expect(can_moderate(site, 'email', { ...mod_options, "filter*": ['test'] })).toBe(true)
+    expect(can_moderate(site, 'email', { ...mod_options, "filter*": ['test'] }).isOk()).toBe(true)
     // match all defined site labels
-    expect(can_moderate(site, 'email', { ...mod_options, "filter*": ['*'] })).toBe(true)
-    expect(can_moderate({ ...site, label: "test2" }, 'email', { ...mod_options, "filter*": ['*'] })).toBe(true)
-    expect(can_moderate({ ...site, label: undefined }, 'email', { ...mod_options, "filter*": ['*'] })).toBe(false)
+    expect(can_moderate(site, 'email', { ...mod_options, "filter*": ['*'] }).isOk()).toBe(true)
+    expect(can_moderate({ ...site, label: "test2" }, 'email', { ...mod_options, "filter*": ['*'] }).isOk()).toBe(true)
+    expect(can_moderate({ ...site, label: undefined }, 'email', { ...mod_options, "filter*": ['*'] }).isOk()).toBe(false)
     // allow any defined site, but filter out one case
-    expect(can_moderate({ ...site, label: "evil" }, 'email', { ...mod_options, "filter*": ['*', '!evil'] })).toBe(false)
-    expect(can_moderate({ ...site, label: "good" }, 'email', { ...mod_options, "filter*": ['*', '!evil'] })).toBe(true)
+    expect(can_moderate({ ...site, label: "evil" }, 'email', { ...mod_options, "filter*": ['*', '!evil'] }).isOk()).toBe(false)
+    expect(can_moderate({ ...site, label: "good" }, 'email', { ...mod_options, "filter*": ['*', '!evil'] }).isOk()).toBe(true)
   })
+
   // prettier-ignore
   test('bypass moderation', async () => {
     const author: CommentTemplateContext['author'] = {
@@ -160,22 +311,26 @@ if (import.meta.vitest) {
       token: await Encrypt.email(key)('bob@example.com')
     }
     // empty allow list
-    expect(await bypass_moderation(author, [], Decrypt.email(key))).toBe(false)
-    // plaintext email + decrypter
-    expect(await bypass_moderation(author, ['bob@example.com'], Decrypt.email(key))).toBe(true)
-    // wrong plaintext email + decrypter
-    expect(await bypass_moderation(author, ['alice@example.com'], Decrypt.email(key))).toBe(false)
-    // plaintext email + no decrypter
-    expect(await bypass_moderation(author, ['bob@example.com'])).toBe(false)
+    expect(await can_bypass(author, [], { decrypt: Decrypt.email(key) })).toBe(false)
+    // cleartext email + decrypt option
+    expect(await can_bypass(author, ['bob@example.com'], { decrypt: Decrypt.email(key) })).toBe(true)
+    // cleartext email + cleartext option
+    expect(await can_bypass(author, ['bob@example.com'], { cleartext: 'bob@example.com' })).toBe(true)
+    // wrong cleartext email + decrypt option
+    expect(await can_bypass(author, ['alice@example.com'], { decrypt: Decrypt.email(key) })).toBe(false)
+    // wrong cleartext email + cleartext option
+    expect(await can_bypass(author, ['alice@example.com'], { cleartext: 'bob@example.com' })).toBe(false)
+    // cleartext email + no decrypt option
+    expect(await can_bypass(author, ['bob@example.com'])).toBe(false)
     // matching pseudonym
-    expect(await bypass_moderation(author, ['foo bar'])).toBe(true)
+    expect(await can_bypass(author, ['foo bar'])).toBe(true)
     // non-matching pseudonym
-    expect(await bypass_moderation(author, ['foo'])).toBe(false)
+    expect(await can_bypass(author, ['foo'])).toBe(false)
     // match any non-empty string
-    expect(await bypass_moderation(author, ['*'])).toBe(true)
+    expect(await can_bypass(author, ['*'])).toBe(true)
     // non-matching glob
-    expect(await bypass_moderation(author, ['*baz'])).toBe(false)
+    expect(await can_bypass(author, ['*baz'])).toBe(false)
     // matching glob
-    expect(await bypass_moderation(author, ['foo*'])).toBe(true)
+    expect(await can_bypass(author, ['foo*'])).toBe(true)
   })
 }
