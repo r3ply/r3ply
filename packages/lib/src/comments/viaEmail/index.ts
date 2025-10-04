@@ -22,11 +22,9 @@ import { Anonymize, Signet } from '../../signet'
 import { Encrypt } from './crypto'
 import { Err, Ok, Result } from 'oxide.ts'
 import {
-  AnyModerationChannel,
   LocalModeration,
   Moderation,
-  ModerationRequest,
-  ModerationTicket,
+  ModerationChannelConfig,
 } from '../../moderation'
 import { GitHubModeration } from '../../moderation/github'
 
@@ -62,11 +60,12 @@ export type CommentEmailEventResponse = {
   comment?: Result<string, Error>
   moderation?: {
     type: CommentViaEmailSupportedModerationChannels['type']
-    result: Result<
-      {
-        request: ModerationRequest<any, any, any, any>
-        ticket: ModerationTicket<any, any, any>
-      },
+    request: Result<
+      ReturnType<
+        ReturnType<
+          CommentViaEmailSupportedModerationChannels['handler']
+        >['prepare']
+      >,
       Error
     >
   }[]
@@ -292,8 +291,6 @@ async function handle_email_event(
   /**
    * (Comment moderation)
    * Step 7. prepare moderation
-   *
-   * TODO: just return a Result<moderation handler, Error> so the caller can handle this stuff how they like downstream
    */
   if (
     results.received &&
@@ -310,51 +307,38 @@ async function handle_email_event(
       results.comment,
     )
     if (results_list.isOk()) {
-      const [received, accepted, deliverable, context, comment] =
-        results_list.unwrap()
+      const [_, accepted, deliverable, context, comment] = results_list.unwrap()
       if (email_event.config.moderation) {
         const moderation_config = email_event.config.moderation
-        const moderation_results = Promise.all(
+        results.moderation = await Promise.all(
           moderation_channels.flatMap((channel) => {
             return moderation_config[channel.type].map((config) => {
-              const filter_result = Moderation.filter(
-                channel as AnyModerationChannel<CommentViaEmailContext>,
-                deliverable.site,
-                'email',
-                config,
-              )
-              const result: Promise<Result<any, Error>> = (async () => {
-                if (filter_result.isOk()) {
-                  const handler = filter_result.unwrap()
-                  const bypass = Moderation.bypass(config, context, {
+              const handler = async (
+                allow_moderation: ReturnType<typeof Moderation.can_moderate>,
+              ) => {
+                if (allow_moderation.isOk()) {
+                  const handler = channel.handler(
+                    deliverable.site,
+                    'email',
+                    config as ModerationChannelConfig<any>,
+                  )
+                  const request = Moderation.bypass(config, context, {
                     cleartext: accepted.from.value,
-                  })
-                  return bypass.then((bypass) => {
-                    const moderation_request = handler.prepare(
-                      comment,
-                      context,
-                      bypass,
-                    )
-                    return moderation_request.send().then((ticket) => {
-                      const result = {
-                        request: moderation_request,
-                        ticket,
-                      }
-                      return Ok(result)
-                    })
-                  })
+                  }).then((bypass) => handler.prepare(comment, context, bypass))
+                  return request.then((request) => Ok(request))
                 } else {
-                  return Err(filter_result.unwrapErr())
+                  return Err(allow_moderation.unwrapErr())
                 }
-              })()
-              return result.then((result) => ({
+              }
+              return handler(
+                Moderation.can_moderate(deliverable.site, 'email', config),
+              ).then((result) => ({
                 type: channel.type,
-                result,
+                request: result,
               }))
             })
           }),
         )
-        results.moderation = await moderation_results
       }
     }
   }
@@ -418,10 +402,7 @@ if (import.meta.vitest) {
       expect(result.moderation).toBeDefined()
       expect(result.moderation!.length).toBe(1)
       expect(result.moderation![0].type).toBe('local')
-      expect(result.moderation![0].result.isOk()).toBe(true)
-      expect(result.moderation![0].result.unwrap().ticket.details.isOk()).toBe(
-        true,
-      )
+      expect(result.moderation![0].request.isOk()).toBe(true)
     })
   })
 }

@@ -1,8 +1,6 @@
 import { R3plySystemConfig } from '@r3ply/schema'
 import { receive, process, email } from './comments'
-import {
-  CommentViaEmailSupportedModerationChannels,
-} from './comments/viaEmail'
+import { CommentViaEmailSupportedModerationChannels } from './comments/viaEmail'
 
 /**
  * The main interface for implementing r3ply.
