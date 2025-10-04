@@ -15,6 +15,9 @@ export const github = {
     },
   ],
   properties: {
+    type: {
+      const: 'github',
+    },
     owner: {
       title: 'Repo owner',
       description: 'This should be the user or org name.',

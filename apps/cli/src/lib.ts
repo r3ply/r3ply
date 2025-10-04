@@ -556,53 +556,6 @@ export namespace generate {
   }
 }
 
-// TODO: I don't think this is needed anymore and can probably be safely removed
-export async function cli_handle_comment_via_email(
-  system_config: R3plySystemConfig,
-  site_config: R3plySiteConfig,
-  email_bytes: Uint8Array,
-  file_resolver: (file_uri?: string) => Promise<string | undefined>,
-  keys: {
-    signet: string
-    encrypt_email: string
-  },
-) {
-  const fetch = async (input: URL | RequestInfo, init?: RequestInit) => {
-    return Response.json({
-      id: 'A temporary ID',
-      url: 'https://example.com/change-me/todo',
-      html_url: 'https://example.com/change-me/todo/html',
-      diff_url: 'https://example.com/change-me/todo/diff',
-      patch_url: 'https://example.com/change-me/todo/patch',
-      issue_url: 'https://example.com/change-me/todo/issue',
-      commits_url: 'https://example.com/change-me/todo/commits',
-      comments_url: 'https://example.com/change-me/todo/comments',
-      statuses_url: 'https://example.com/change-me/todo/statuses',
-      number: 123,
-      state: 'open',
-      title: 'Temporary PR Title (TODO: change me)',
-      body: 'Temporary PR Body (TODO: change me)',
-      created_at: 'Temporary Date (TODO: change me)',
-      commits: 1,
-      additions: 25,
-      deletions: 0,
-      changed_files: 0,
-    })
-  }
-  // TODO: for now no moderation
-  // const github_moderation = R3plyGithubBot('no password', fetch)
-  // const moderation = (type: 'github' | 'webhook') => {
-  //   if (type == 'github') return github_moderation
-  //   else throw 'Not yet implemented'
-  // }
-  const r3ply = R3ply(system_config)
-  const comment_via_email_handler = r3ply.comments.viaEmail(
-    keys.signet,
-    keys.encrypt_email,
-  )
-  return comment_via_email_handler([site_config, email_bytes])
-}
-
 // data generation -------------------------------------------------------------
 const domains = [
   'ghostpirate',
@@ -802,7 +755,7 @@ export namespace moderation {
     cwd: string,
     args: mod_todo.LocalModerationArgs,
     dryrun: boolean = false,
-  ) {
+  ): Promise<string> {
     const project_dir = util.unsafeUnwrap(await project.find_project_dir(cwd))
     const proposed_path = path.join(project_dir, args.relative_path)
     const path_rel_to_proj = path.relative(project_dir, proposed_path)

@@ -259,11 +259,10 @@ export namespace tty {
         //   }
         // }
       }
-      export function print_local_moderation_req_rep(
-        result_without_comment: {
-          request: any
-          response: any
-        },
+      export function print_local_moderation_event(
+        local_moderation_result: NonNullable<
+          comments.email.CommentEmailEventResponse['moderation']
+        >[number]['result'],
         count: number,
         options: SimulateCmdEmailOpts,
       ) {
@@ -278,22 +277,76 @@ export namespace tty {
               console.log(
                 chalk.whiteBright(`=== Moderation: Local[${count}] ===\n`),
               )
-            const result_string = TOML.stringify(result_without_comment)
-              .replace(
-                '[request]',
-                '# `allow` is a request to bypass moderation altogether. For local moderation it has no effect.\n[request]',
+            if (local_moderation_result.isOk()) {
+              const local_moderation_event = local_moderation_result.unwrap()
+              const optional_request: Partial<
+                typeof local_moderation_event.request
+              > = local_moderation_event.request
+              delete optional_request['send']
+              optional_request.args.comment =
+                '[elided... see "Comment: Processed" above]'
+              const result_string = TOML.stringify({
+                request: local_moderation_event.request,
+              } as any)
+                .replace(
+                  '[request]',
+                  '# `bypass` asks to skip moderation altogether. For local moderation it has no effect.\n[request]',
+                )
+                .replace(
+                  /^(\s*)\[request\.args\]/m,
+                  (_, spaces) =>
+                    `${spaces}# \`relative_path\` is relative to project root.${spaces}[request.args]`,
+                )
+              console.log(highlight(result_string))
+              if (local_moderation_event.ticket.details.isOk()) {
+                const ticket_details =
+                  local_moderation_event.ticket.details.unwrap()
+                const ticket_string = TOML.stringify({
+                  ticket: ticket_details,
+                }).replace(
+                  '[ticket.local]',
+                  '# `ticket.local` is the response to a request for local moderation.\n[ticket.local]',
+                )
+                console.log(highlight(ticket_string))
+              } else {
+                const error = local_moderation_event.ticket.details.unwrapErr()
+                console.log(chalk.redBright(`Error: ${error.message}`))
+              }
+            } else {
+              const error = local_moderation_result.unwrapErr()
+              console.log(
+                chalk.redBright(`Moderation skipped: ${error.message}`),
               )
-              .replace(
-                /^(\s*)\[request\.args\]/m,
-                (_, spaces) =>
-                  `${spaces}# \`relative_path\` is the templated path from your config.${spaces}[request.args]`,
-              )
-              .replace(
-                '[response.result]',
-                '# `absolute_path` is fully resolved path, where the comment was written\n[response.result]',
-              )
-            console.log(highlight(result_string))
+            }
+            // Print blank line
+            console.log()
           }
+        }
+      }
+      export function print_ignored_moderation_channels(
+        ignored_moderation_types: string[],
+        not_implemented_moderation_results: NonNullable<
+          comments.email.CommentEmailEventResponse['moderation']
+        >,
+        options: SimulateCmdEmailOpts,
+      ) {
+        if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
+          if (options.heading)
+            console.log(chalk.whiteBright(`=== Moderation: Other ===\n`))
+          const ignored_moderation = TOML.stringify({
+            ignored: ignored_moderation_types,
+          }).replace(
+            'ignored',
+            "# moderation channels in your config that were ignored by the CLI (they're unsupported)\nignored",
+          )
+          console.log(highlight(ignored_moderation))
+          const not_implemented_mod = TOML.stringify({
+            not_implemented: not_implemented_moderation_results as any,
+          }).replace(
+            'not_implemented',
+            "# unexpected moderation results that haven't been fully implemented\nnot_implemented",
+          )
+          console.log(highlight(not_implemented_mod))
         }
       }
     }

@@ -3,6 +3,8 @@ import fs from 'fs'
 import { Result } from 'oxide.ts'
 
 export namespace util {
+  export type OkType<R> = R extends Result<infer O, any> ? O : never
+  export type ErrType<R> = R extends Result<any, infer E> ? E : never
   export async function find_up(
     filename: string,
     cwd: string = process.cwd(),

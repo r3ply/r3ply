@@ -15,6 +15,9 @@ export const webhook = {
     },
   ],
   properties: {
+    type: {
+      const: 'webhook',
+    },
     url: {
       title: 'Webhook URL',
       description:
