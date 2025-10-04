@@ -130,33 +130,44 @@ export namespace Moderation {
   }
 
   /**
-   * Filters a moderation channel before getting its handler by applying filtration rules specified in the config to the signet and comment src.
+   * Ask if a moderation channel can moderate a comment for a particular moderation configuration.
    *
-   * @param signet The signet (i.e. 'site') the comment is addressed to.
-   * @param src The comment source (e.g. 'email').
-   * @param config The site's configuration to be applied for this moderation channel.
-   * @param channel The moderation channel.
+   * @param site The site (i.e. signet) the comment is addressed to.
+   * @param comment_source The source of the comment (e.g. 'email').
+   * @param opts The options that are in each moderation config that configure the rules of whether it can perform some moderation or not.
    *
-   * @returns A result object containing either a moderation channel or an error.
+   * @returns A Result type of void if successful or an error explaining why.
    */
-  export function filter<
-    T extends ModerationChannelType,
-    InCtx extends CommentTemplateContext,
-    Args,
-    OutCtx,
-    Fail,
-  >(
-    channel: ModerationChannel<T, InCtx, Args, OutCtx, Fail>,
-    ...[signet, src, config]: Parameters<
-      ModerationChannel<T, InCtx, Args, OutCtx, Fail>['handler']
-    >
-  ): Result<ModerationChannelHandler<T, InCtx, Args, OutCtx, Fail>, Error> {
-    const can_moderate_result = can_moderate(signet, src, config)
-    if (can_moderate_result.isOk()) {
-      return Ok(channel.handler(signet, src, config))
-    } else {
-      return Err(can_moderate_result.unwrapErr())
-    }
+  export function can_moderate(
+    site: R3plySignetConfig,
+    comment_source: comments.R3plyCommentSource,
+    opts: moderation.R3plyModerationOptions,
+  ): Result<void, Error> {
+    return Result.safe(() => {
+      // Check if moderation is enabled for this moderation channel
+      if (opts.enabled) {
+        // Check if this commenting source is either disabled or accepted by this moderation channel
+        if (!opts.comments || opts.comments.includes(comment_source)) {
+          // Check if filtering by site is either disabled or the site's label matches the filter
+          if (
+            !opts['filter*'] ||
+            (site.label && micromatch([site.label], opts['filter*']).length > 0)
+          ) {
+            return
+          } else {
+            throw new Error(
+              `site label '${site.label ?? 'undefined'}' did not match moderation channel configuration '${JSON.stringify(opts['filter*'])}'`,
+            )
+          }
+        } else {
+          throw new Error(
+            `comment source '${comment_source}' not accepted by moderation channel configuration '${JSON.stringify(opts.comments)}'`,
+          )
+        }
+      } else {
+        throw new Error('moderation disabled for channel')
+      }
+    })
   }
 
   /**
@@ -181,47 +192,6 @@ export namespace Moderation {
   ): Promise<boolean> {
     return can_bypass(context.author, config['allow*'], bypass_opts)
   }
-}
-
-/**
- * Internal implementation of the logic to see if a moderation channel can moderate a comment for a particular moderation configuration.
- *
- * @param site The site (i.e. signet) the comment is addressed to.
- * @param comment_source The source of the comment (e.g. 'email').
- * @param opts The options that are in each moderation config that configure the rules of whether it can perform some moderation or not.
- *
- * @returns A return type of void if successful or an error explaining why.
- */
-function can_moderate(
-  site: R3plySignetConfig,
-  comment_source: comments.R3plyCommentSource,
-  opts: moderation.R3plyModerationOptions,
-): Result<void, Error> {
-  return Result.safe(() => {
-    // Check if moderation is enabled for this moderation channel
-    if (opts.enabled) {
-      // Check if this commenting source is either disabled or accepted by this moderation channel
-      if (!opts.comments || opts.comments.includes(comment_source)) {
-        // Check if filtering by site is either disabled or the site's label matches the filter
-        if (
-          !opts['filter*'] ||
-          (site.label && micromatch([site.label], opts['filter*']).length > 0)
-        ) {
-          return
-        } else {
-          throw new Error(
-            `site label '${site.label ?? 'undefined'}' did not match moderation channel configuration '${JSON.stringify(opts['filter*'])}'`,
-          )
-        }
-      } else {
-        throw new Error(
-          `comment source '${comment_source}' not accepted by moderation channel configuration '${JSON.stringify(opts.comments)}'`,
-        )
-      }
-    } else {
-      throw new Error('moderation disabled for channel')
-    }
-  })
 }
 
 /**
@@ -283,6 +253,7 @@ if (import.meta.vitest) {
       issued: '2025-09-19',
       label: 'test'
     }
+    const can_moderate = Moderation.can_moderate
     // disabled always prevents moderation
     expect(can_moderate(site, 'email', { ...mod_options, enabled: false }).isOk()).toBe(false)
     // enabled, with no comment source or filtering defined

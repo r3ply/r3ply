@@ -10,6 +10,11 @@ import { highlight } from 'cli-highlight'
 import chalk from 'chalk'
 import TOML from '@iarna/toml'
 import path from 'path'
+import {
+  ModerationRequest,
+  ModerationTicket,
+} from 'packages/lib/src/moderation'
+import { Result } from 'oxide.ts'
 
 export namespace tty {
   export namespace cmds {
@@ -260,9 +265,13 @@ export namespace tty {
         // }
       }
       export function print_local_moderation_event(
-        local_moderation_result: NonNullable<
-          comments.email.CommentEmailEventResponse['moderation']
-        >[number]['result'],
+        local_moderation_result: Result<
+          {
+            request: ModerationRequest<any, any, any, any>
+            ticket: ModerationTicket<any, any, any>
+          },
+          Error
+        >,
         count: number,
         options: SimulateCmdEmailOpts,
       ) {
@@ -279,11 +288,11 @@ export namespace tty {
               )
             if (local_moderation_result.isOk()) {
               const local_moderation_event = local_moderation_result.unwrap()
-              const optional_request: Partial<
+              const partial_request: Partial<
                 typeof local_moderation_event.request
               > = local_moderation_event.request
-              delete optional_request['send']
-              optional_request.args.comment =
+              delete partial_request['send']
+              partial_request.args.comment =
                 '[elided... see "Comment: Processed" above]'
               const result_string = TOML.stringify({
                 request: local_moderation_event.request,
@@ -331,22 +340,24 @@ export namespace tty {
         options: SimulateCmdEmailOpts,
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
-          if (options.heading)
-            console.log(chalk.whiteBright(`=== Moderation: Other ===\n`))
-          const ignored_moderation = TOML.stringify({
-            ignored: ignored_moderation_types,
-          }).replace(
-            'ignored',
-            "# moderation channels in your config that were ignored by the CLI (they're unsupported)\nignored",
-          )
-          console.log(highlight(ignored_moderation))
-          const not_implemented_mod = TOML.stringify({
-            not_implemented: not_implemented_moderation_results as any,
-          }).replace(
-            'not_implemented',
-            "# unexpected moderation results that haven't been fully implemented\nnot_implemented",
-          )
-          console.log(highlight(not_implemented_mod))
+          if (util.print_w_quiet_and_filter_opts(options, `moderation=other`)) {
+            if (options.heading)
+              console.log(chalk.whiteBright(`=== Moderation: Other ===\n`))
+            const ignored_moderation = TOML.stringify({
+              ignored: ignored_moderation_types,
+            }).replace(
+              'ignored',
+              "# moderation channels in your config that were ignored by the CLI (they're unsupported)\nignored",
+            )
+            console.log(highlight(ignored_moderation))
+            const not_implemented_mod = TOML.stringify({
+              not_implemented: not_implemented_moderation_results as any,
+            }).replace(
+              'not_implemented',
+              "# unexpected moderation results that haven't been fully implemented\nnot_implemented",
+            )
+            console.log(highlight(not_implemented_mod))
+          }
         }
       }
     }

@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import { project, generate, moderation } from './lib'
 import { util } from './util'
-import { Result } from 'oxide.ts'
+import { Ok, Result } from 'oxide.ts'
 import {
   R3plySignetConfig,
   R3plySiteConfig,
@@ -17,6 +17,11 @@ import prompts, { PromptObject } from 'prompts'
 import dayjs from 'dayjs'
 import { mailbox } from 'typescript-mailbox-parser'
 import { tty } from './tty'
+import {
+  LocalModerationRequest,
+  ModerationRequest,
+  ModerationTicket,
+} from 'packages/lib/src/moderation'
 
 // init ------------------------------------------------------------------------
 export type InitCmdOptions = {
@@ -533,18 +538,42 @@ export function simulate_cmd(cwd: string) {
 
       // Print moderation
       if (options.moderate && email_event_response.moderation) {
-        const local_moderation_results = email_event_response.moderation.filter(
+        const local_moderation_reqs = email_event_response.moderation.filter(
           (r) => r.type == 'local',
         )
-        for (const [index, local_moderation_event] of Object.entries(
-          local_moderation_results,
-        )) {
-          tty.cmds.simulate.print_local_moderation_event(
-            local_moderation_event.result,
-            Number(index),
-            options,
-          )
+
+        for (const [index, local] of local_moderation_reqs.entries()) {
+          const request = local.request as Result<LocalModerationRequest, Error>
+          if (request.isOk()) {
+            const ticket = await request.unwrap().send()
+            ticket.details
+            const event = request.andThen((_) =>
+              Ok({
+                request: request.unwrap(),
+                ticket: ticket,
+              }),
+            )
+            tty.cmds.simulate.print_local_moderation_event(
+              event,
+              index,
+              options,
+            )
+          } else {
+            const event = request as unknown as Result<
+              {
+                request: ModerationRequest<any, any, any, any>
+                ticket: ModerationTicket<any, any, any>
+              },
+              Error
+            >
+            tty.cmds.simulate.print_local_moderation_event(
+              event,
+              index,
+              options,
+            )
+          }
         }
+
         if (site_config.moderation) {
           const ignored_moderation_results = Object.keys(
             site_config.moderation,

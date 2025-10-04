@@ -15,7 +15,6 @@ import { RiMarkov } from 'rita'
 import { fileURLToPath } from 'url'
 import {
   util as r3ply_util,
-  R3ply,
   Signet,
   moderation as mod_todo,
 } from '@r3ply/lib'
