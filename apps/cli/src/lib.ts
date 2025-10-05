@@ -765,4 +765,50 @@ export namespace moderation {
       return proposed_path
     }
   }
+
+  export function mock_github_api_fetcher(): mod_todo.PerformGitHubApiFetch {
+    const result: mod_todo.PerformGitHubApiFetch = async (
+      args: mod_todo.CreateCommentInRepoArgs,
+    ) => {
+      const pr_num = 123
+      const result: mod_todo.GitHubModerationContext['github'] = {
+        repo: {
+          owner: args.repo_owner,
+          name: args.repo_name,
+          url: `https://github.com/${args.repo_owner}/${args.repo_name}`,
+        },
+        comment: {
+          path: args.new_comment_filepath,
+        },
+        commit: {
+          message: args.new_comment_filepath,
+        },
+        pr: {
+          branch: {
+            base: args.target_branch,
+            head: args.source_branch,
+          },
+          url: `https://api.github.com/repos/${args.repo_owner}/${args.repo_name}/pulls/${pr_num}`,
+          html_url: `https://github.com/${args.repo_owner}/${args.repo_name}/pulls/${pr_num}`,
+          diff_url: `https://github.com/${args.repo_owner}/${args.repo_name}/pulls/${pr_num}.diff`,
+          patch_url: `https://github.com/${args.repo_owner}/${args.repo_name}/pulls/${pr_num}.patch`,
+          issue_url: `https://github.com/${args.repo_owner}/${args.repo_name}/issues/${pr_num}`,
+          commits_url: `https://github.com/${args.repo_owner}/${args.repo_name}/pulls/${pr_num}/commits`,
+          comments_url: `https://github.com/${args.repo_owner}/${args.repo_name}/pulls/${pr_num}/comments`,
+          statuses_url: `https://github.com/${args.repo_owner}/${args.repo_name}/pulls/${pr_num}/statuses/6dcb09b5b57875f334f61aebed695e2e4193db5e`,
+          number: pr_num,
+          state: 'open',
+          title: args.pr?.msg_title ?? '',
+          body: args.pr?.msg_body ?? '',
+          created_at: new Date().toISOString(),
+          commits: 1,
+          additions: 1,
+          deletions: 0,
+          changed_files: 1,
+        },
+      }
+      return result
+    }
+    return result
+  }
 }

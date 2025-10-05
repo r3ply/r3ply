@@ -290,7 +290,9 @@ async function handle_email_event(
 
   /**
    * (Comment moderation)
-   * Step 7. prepare moderation
+   * Step 7. filter moderation channel handlers (based on config) and prepare requests for moderation.
+   *
+   * Each moderation channel encapsulates that channel's underlying implementation and input/output types. A moderation channel handler is when a moderation configuration has been added to that. However, part of the moderation configuration is some filtering logic. This is based on the comment source and the site a comment is addressed to.
    */
   if (
     results.received &&

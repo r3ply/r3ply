@@ -18,7 +18,10 @@ import dayjs from 'dayjs'
 import { mailbox } from 'typescript-mailbox-parser'
 import { tty } from './tty'
 import {
+  GitHubModerationRequest,
+  GitHubModerationTicket,
   LocalModerationRequest,
+  LocalModerationTicket,
   ModerationRequest,
   ModerationTicket,
 } from 'packages/lib/src/moderation'
@@ -510,11 +513,14 @@ export function simulate_cmd(cwd: string) {
         args: mod_todo.LocalModerationArgs,
       ) => moderation.write_comment_locally(cwd, args, options.dryRun)
       const local_moderation_channel = mod_todo.LocalModeration(file_writer)
+      const github_moderation_channel = mod_todo.GitHubModeration(
+        moderation.mock_github_api_fetcher(),
+      )
       const handle_email_comment = r3ply.comments.viaEmail(
         keys.signet_key,
         keys.encrypt_email_key,
         {},
-        [local_moderation_channel],
+        [local_moderation_channel, github_moderation_channel],
       )
 
       // Pass generated email to email comment handler
@@ -538,48 +544,76 @@ export function simulate_cmd(cwd: string) {
 
       // Print moderation
       if (options.moderate && email_event_response.moderation) {
-        const local_moderation_reqs = email_event_response.moderation.filter(
-          (r) => r.type == 'local',
-        )
-
-        for (const [index, local] of local_moderation_reqs.entries()) {
-          const request = local.request as Result<LocalModerationRequest, Error>
-          if (request.isOk()) {
-            const ticket = await request.unwrap().send()
-            ticket.details
-            const event = request.andThen((_) =>
-              Ok({
-                request: request.unwrap(),
-                ticket: ticket,
-              }),
-            )
-            tty.cmds.simulate.print_local_moderation_event(
-              event,
-              index,
-              options,
-            )
-          } else {
-            const event = request as unknown as Result<
-              {
-                request: ModerationRequest<any, any, any, any>
-                ticket: ModerationTicket<any, any, any>
-              },
-              Error
-            >
-            tty.cmds.simulate.print_local_moderation_event(
-              event,
-              index,
-              options,
-            )
+        const supported_mod_channels = ['local', 'github']
+        for (const moderation_channel_type of supported_mod_channels) {
+          for (const [
+            index,
+            { type, request },
+          ] of email_event_response.moderation
+            .filter((m) => m.type == moderation_channel_type)
+            .entries()) {
+            switch (type) {
+              case 'local': {
+                const print = tty.cmds.simulate.print_local_moderation_event
+                if (request.isOk()) {
+                  const ticket = (await request
+                    .unwrap()
+                    .send()) as LocalModerationTicket
+                  print(
+                    request as Result<LocalModerationRequest, Error>,
+                    ticket,
+                    index,
+                    options,
+                  )
+                } else {
+                  print(
+                    request as Result<LocalModerationRequest, Error>,
+                    undefined,
+                    index,
+                    options,
+                  )
+                }
+                break
+              }
+              case 'github': {
+                const print = tty.cmds.simulate.print_github_moderation_event
+                if (request.isOk()) {
+                  const ticket = (await request
+                    .unwrap()
+                    .send()) as GitHubModerationTicket
+                  print(
+                    request as Result<GitHubModerationRequest, Error>,
+                    ticket,
+                    index,
+                    options,
+                  )
+                } else {
+                  print(
+                    request as Result<GitHubModerationRequest, Error>,
+                    undefined,
+                    index,
+                    options,
+                  )
+                }
+                break
+              }
+              default:
+                break
+            }
           }
         }
 
         if (site_config.moderation) {
           const ignored_moderation_results = Object.keys(
             site_config.moderation,
-          ).filter((m) => m != 'local')
+          ).filter(
+            (moderation_key) =>
+              !supported_mod_channels.includes(moderation_key),
+          )
           const other_moderation_results =
-            email_event_response.moderation.filter((r) => r.type != 'local')
+            email_event_response.moderation.filter(
+              (r) => !supported_mod_channels.includes(r.type),
+            )
           tty.cmds.simulate.print_ignored_moderation_channels(
             ignored_moderation_results,
             other_moderation_results,
