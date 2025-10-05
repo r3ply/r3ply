@@ -55,7 +55,6 @@ export type GitHubModerationContext = {
         base: string
         head: string
       }
-      id: number
       url: string
       html_url: string
       diff_url: string
@@ -80,9 +79,18 @@ export type GitHubModerationContext = {
 /**
  * A request for moderation via the r3ply GitHub bot
  */
-type GitHubModerationRequest = ModerationRequest<
+export type GitHubModerationRequest = ModerationRequest<
   'github',
   CreateCommentInRepoArgs,
+  GitHubModerationContext,
+  Error
+>
+
+/**
+ * A ticket acknowledging a request for moderation
+ */
+export type GitHubModerationTicket = ModerationTicket<
+  'github',
   GitHubModerationContext,
   Error
 >
@@ -197,9 +205,7 @@ function mk_gh_mod_handler<InCtx extends CommentTemplateContext>(
         type: 'github',
         args: create_pr_args(comment, context, config),
         bypass,
-        send: function (): Promise<
-          ModerationTicket<'github', GitHubModerationContext, Error>
-        > {
+        send: function (): Promise<GitHubModerationTicket> {
           return Result.safe(api_call(this.args))
             .then((r) => r.map((rep) => ({ github: rep })))
             .then((details) => ({ type: 'github', details }))

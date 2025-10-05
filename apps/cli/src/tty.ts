@@ -4,16 +4,12 @@ import {
   R3plySignetConfig,
 } from '@r3ply/schema'
 import { SimulateCmdEmailOpts } from './cmd'
-import { comments } from '@r3ply/lib'
+import { comments, moderation } from '@r3ply/lib'
 import { util } from './util'
 import { highlight } from 'cli-highlight'
 import chalk from 'chalk'
 import TOML from '@iarna/toml'
 import path from 'path'
-import {
-  ModerationRequest,
-  ModerationTicket,
-} from 'packages/lib/src/moderation'
 import { Result } from 'oxide.ts'
 
 export namespace tty {
@@ -265,13 +261,8 @@ export namespace tty {
         // }
       }
       export function print_local_moderation_event(
-        local_moderation_result: Result<
-          {
-            request: ModerationRequest<any, any, any, any>
-            ticket: ModerationTicket<any, any, any>
-          },
-          Error
-        >,
+        request: Result<moderation.LocalModerationRequest, Error>,
+        ticket: moderation.LocalModerationTicket | undefined,
         count: number,
         options: SimulateCmdEmailOpts,
       ) {
@@ -286,16 +277,16 @@ export namespace tty {
               console.log(
                 chalk.whiteBright(`=== Moderation: Local[${count}] ===\n`),
               )
-            if (local_moderation_result.isOk()) {
-              const local_moderation_event = local_moderation_result.unwrap()
+            if (request.isOk()) {
               const partial_request: Partial<
-                typeof local_moderation_event.request
-              > = local_moderation_event.request
+                ReturnType<typeof request.unwrap>
+              > = request.unwrap()
               delete partial_request['send']
+              partial_request.args = request.unwrap().args
               partial_request.args.comment =
                 '[elided... see "Comment: Processed" above]'
               const result_string = TOML.stringify({
-                request: local_moderation_event.request,
+                request: partial_request,
               } as any)
                 .replace(
                   '[request]',
@@ -306,23 +297,110 @@ export namespace tty {
                   (_, spaces) =>
                     `${spaces}# \`relative_path\` is relative to project root.${spaces}[request.args]`,
                 )
-              console.log(highlight(result_string))
-              if (local_moderation_event.ticket.details.isOk()) {
-                const ticket_details =
-                  local_moderation_event.ticket.details.unwrap()
-                const ticket_string = TOML.stringify({
-                  ticket: ticket_details,
-                }).replace(
-                  '[ticket.local]',
-                  '# `ticket.local` is the response to a request for local moderation.\n[ticket.local]',
-                )
-                console.log(highlight(ticket_string))
-              } else {
-                const error = local_moderation_event.ticket.details.unwrapErr()
-                console.log(chalk.redBright(`Error: ${error.message}`))
+              const request_comment = `#################################\n# Request portion of moderation #\n#################################\n`
+              console.log(
+                highlight(request_comment + '\n' + result_string, {
+                  language: 'toml',
+                }),
+              )
+              if (ticket) {
+                if (ticket.details.isOk()) {
+                  const ticket_details = ticket.details.unwrap()
+                  const ticket_string = TOML.stringify({
+                    ticket: ticket_details,
+                  }).replace(
+                    '[ticket.local]',
+                    '# `ticket.local` is the response to a request for local moderation.\n[ticket.local]',
+                  )
+                  const ticket_comment = `################################\n# Ticket portion of moderation #\n################################\n`
+                  console.log(
+                    highlight(ticket_comment + '\n' + ticket_string, {
+                      language: 'toml',
+                    }),
+                  )
+                } else {
+                  const error = ticket.details.unwrapErr()
+                  console.log(chalk.redBright(`Error: ${error.message}`))
+                }
               }
             } else {
-              const error = local_moderation_result.unwrapErr()
+              const error = request.unwrapErr()
+              console.log(
+                chalk.redBright(`Moderation skipped: ${error.message}`),
+              )
+            }
+            // Print blank line
+            console.log()
+          }
+        }
+      }
+      export function print_github_moderation_event(
+        request: Result<moderation.GitHubModerationRequest, Error>,
+        ticket: moderation.GitHubModerationTicket | undefined,
+        count: number,
+        options: SimulateCmdEmailOpts,
+      ) {
+        if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
+          if (
+            util.print_w_quiet_and_filter_opts(
+              options,
+              `moderation=github_${count}`,
+            )
+          ) {
+            if (options.heading)
+              console.log(
+                chalk.whiteBright(
+                  `=== Moderation: GitHub[${count}] (MOCKED) ===\n`,
+                ),
+              )
+            if (request.isOk()) {
+              const partial_request: Partial<
+                ReturnType<typeof request.unwrap>
+              > = request.unwrap()
+              delete partial_request['send']
+              partial_request.args = request.unwrap().args
+              partial_request.args.comment_data =
+                '[elided... see "Comment: Processed" above]'
+              const result_string = TOML.stringify({
+                request: partial_request,
+              } as any)
+                .replace(
+                  '[request]',
+                  '# `bypass` would request to skip moderation altogether.\n[request]',
+                )
+                .replace(
+                  /^(\s*)\[request\.args\]/m,
+                  (_, spaces) =>
+                    `${spaces}# Arguments that would be sent to create a GitHub PR${spaces}[request.args]`,
+                )
+              const request_comment = `#################################\n# Request portion of moderation #\n#################################\n`
+              console.log(
+                highlight(request_comment + '\n' + result_string, {
+                  language: 'toml',
+                }),
+              )
+              if (ticket) {
+                if (ticket.details.isOk()) {
+                  const ticket_details = ticket.details.unwrap()
+                  const ticket_string = TOML.stringify({
+                    ticket: ticket_details as any,
+                  }).replace(
+                    '[ticket.github]',
+                    '# `ticket.local` is the response to a request for local moderation.\n[ticket.local]',
+                  )
+                  const ticket_comment = `################################\n# Ticket portion of moderation #\n################################\n`
+                  console.log(
+                    highlight(ticket_comment + '\n' + ticket_string, {
+                      language: 'toml',
+                    }),
+                  )
+                } else {
+                  const error = ticket.details.unwrapErr()
+                  console.log(chalk.redBright(`Error: ${error.message}`))
+                }
+              }
+            } else {
+              const error = request.unwrapErr()
               console.log(
                 chalk.redBright(`Moderation skipped: ${error.message}`),
               )
@@ -352,11 +430,13 @@ export namespace tty {
             console.log(highlight(ignored_moderation))
             const not_implemented_mod = TOML.stringify({
               not_implemented: not_implemented_moderation_results as any,
-            }).replace(
-              'not_implemented',
-              "# unexpected moderation results that haven't been fully implemented\nnot_implemented",
+            })
+            console.log(
+              highlight(
+                "# unexpected moderation results that haven't been fully implemented\n" +
+                  not_implemented_mod,
+              ),
             )
-            console.log(highlight(not_implemented_mod))
           }
         }
       }

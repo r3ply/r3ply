@@ -7,6 +7,8 @@ import { Err, Ok, Result } from 'oxide.ts'
 export * from './local'
 export * from './github'
 
+// TODO: in the future this work needs to be refactored to lean more on a discriminated union approach to the types, using the `type` field + moderation.R3plyModerationChannelType
+
 export type ModerationChannelType = moderation.R3plyModerationChannelType
 export type ModerationChannelConfig<T extends ModerationChannelType> =
   moderation.R3plyModerationConfig[T][number]
