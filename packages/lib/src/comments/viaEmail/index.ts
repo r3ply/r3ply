@@ -318,8 +318,6 @@ async function handle_email_event(
               ) => {
                 if (allow_moderation.isOk()) {
                   const handler = channel.handler(
-                    deliverable.site,
-                    'email',
                     config as ModerationChannelConfig<any>,
                   )
                   const request = Moderation.bypass(config, context, {

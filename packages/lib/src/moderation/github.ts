@@ -160,8 +160,6 @@ export function GitHubModeration<InCtx extends CommentTemplateContext>(
   const result: GitHubModeration<InCtx> = {
     type: 'github',
     handler: function (
-      signet: R3plySignetConfig,
-      src: comments.R3plyCommentSource,
       config: moderation.R3plyGithubConfig,
     ): ModerationChannelHandler<
       'github',

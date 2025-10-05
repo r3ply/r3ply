@@ -13,11 +13,7 @@ import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
 import { RiMarkov } from 'rita'
 import { fileURLToPath } from 'url'
-import {
-  util as r3ply_util,
-  Signet,
-  moderation as mod_todo,
-} from '@r3ply/lib'
+import { util as r3ply_util, Signet, moderation as mod_todo } from '@r3ply/lib'
 import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
 import crypto from 'crypto'
