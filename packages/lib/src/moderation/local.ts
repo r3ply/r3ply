@@ -97,8 +97,6 @@ export function LocalModeration<InCtx extends CommentTemplateContext>(
   const result: LocalModeration<InCtx> = {
     type: 'local',
     handler: function (
-      signet: R3plySignetConfig,
-      src: comments.R3plyCommentSource,
       config: moderation.R3plyLocalModerationConfig,
     ): ModerationChannelHandler<
       'local',
@@ -172,7 +170,7 @@ if (import.meta.vitest) {
     const local_channel = LocalModeration(async (args: LocalModerationArgs) => {
       return '/Users/foo/Developer/website' + args.relative_path
     })
-    const local_handler = local_channel.handler(site, 'email', local_config)
+    const local_handler = local_channel.handler(local_config)
     const key = '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
     const url = new URL('https://example.com/blog/post/1')
     const local_context = {

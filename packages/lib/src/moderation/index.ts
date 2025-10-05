@@ -29,8 +29,6 @@ export interface ModerationChannel<
 > {
   type: T
   handler: (
-    signet: R3plySignetConfig,
-    src: comments.R3plyCommentSource,
     config: ModerationChannelConfig<T>,
   ) => ModerationChannelHandler<T, InCtx, Args, OutCtx, Fail>
 }
@@ -98,36 +96,37 @@ export interface ModerationTicket<T extends ModerationChannelType, Ok, Err> {
  * A collection of functions that are useful for handling different stages of the moderation pipeline.
  */
 export namespace Moderation {
-  export async function prepare<
-    T extends ModerationChannelType,
-    InCtx extends CommentTemplateContext,
-    Args,
-    OutCtx,
-    Fail,
-  >(
-    signet: R3plySignetConfig,
-    src: comments.R3plyCommentSource,
-    config: ModerationChannelConfig<T>,
-    bypass_opts: {
-      cleartext?: string
-      decrypt?: DecryptEmail
-    },
-    comment: string,
-    context: InCtx,
-    channel: ModerationChannel<T, InCtx, Args, OutCtx, Fail>,
-  ): Promise<Result<ModerationRequest<T, Args, OutCtx, Fail>, Error>> {
-    const can_moderate_result = can_moderate(signet, src, config)
-    if (can_moderate_result.isOk()) {
-      const channel_handler = channel.handler(signet, src, config)
-      return Result.safe(
-        can_bypass(context.author, config['allow*'], bypass_opts).then(
-          (bypass) => channel_handler.prepare(comment, context, bypass),
-        ),
-      )
-    } else {
-      return Promise.resolve(Err(can_moderate_result.unwrapErr()))
-    }
-  }
+  // TODO: this function centralizes the logic for how moderation channels should be filtered and then how the subsequent filtered handlers should prepare requests but there was an issue with the types being erased so I'm just doing the same logic in viaEmail for now.
+  // export async function prepare<
+  //   T extends ModerationChannelType,
+  //   InCtx extends CommentTemplateContext,
+  //   Args,
+  //   OutCtx,
+  //   Fail,
+  // >(
+  //   signet: R3plySignetConfig,
+  //   src: comments.R3plyCommentSource,
+  //   config: ModerationChannelConfig<T>,
+  //   bypass_opts: {
+  //     cleartext?: string
+  //     decrypt?: DecryptEmail
+  //   },
+  //   comment: string,
+  //   context: InCtx,
+  //   channel: ModerationChannel<T, InCtx, Args, OutCtx, Fail>,
+  // ): Promise<Result<ModerationRequest<T, Args, OutCtx, Fail>, Error>> {
+  //   const can_moderate_result = can_moderate(signet, src, config)
+  //   if (can_moderate_result.isOk()) {
+  //     const channel_handler = channel.handler(config)
+  //     return Result.safe(
+  //       can_bypass(context.author, config['allow*'], bypass_opts).then(
+  //         (bypass) => channel_handler.prepare(comment, context, bypass),
+  //       ),
+  //     )
+  //   } else {
+  //     return Promise.resolve(Err(can_moderate_result.unwrapErr()))
+  //   }
+  // }
 
   /**
    * Ask if a moderation channel can moderate a comment for a particular moderation configuration.
