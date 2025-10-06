@@ -21,9 +21,9 @@
   "devDependencies": {
     "prettier": "^3.5.3",
     "prettier-plugin-toml": "^2.0.2",
-    "vitest": "^3.0.8"
+    "vitest": "^3.2.4"
   },
   "volta": {
-    "node": "20.10.0"
+    "node": "22.9.0"
   }
 }

@@ -11,9 +11,9 @@
   ],
   "devDependencies": {
     "@types/micromatch": "^4.0.9",
+    "tsup": "^8.4.0",
     "typescript": "^5.5.4",
-    "vitest": "^3.0.8",
-    "tsup": "^8.4.0"
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -36,7 +36,7 @@
     "static sites"
   ],
   "volta": {
-    "node": "20.10.0"
+    "node": "22.9.0"
   },
   "author": "Spencer Scorcelletti",
   "license": "MIT"

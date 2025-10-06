@@ -1,10 +1,28 @@
 import crypto from 'crypto' // DON'T REMOVE!
 
 export namespace config {
+  /**
+   * A function to perform the actual dereferencing of a file.
+   *
+   * @param base_uri the base_uri
+   * @param file_uri_ref the file reference
+   *
+   * @returns the contents of the file or undefined. If `file_uri_ref` is undefined then it should return undefined.
+   */
   export type DerferenceFile = (
     base_uri: string,
     file_uri_ref?: string,
   ) => Promise<string | undefined>
+
+  /**
+   * A helper function for resolving references in r3ply config keys, relative to the config's URI.
+   *
+   * @param config the underlying config to use.
+   * @param base_uri the base URI relative to the references in the config.
+   * @param dereference a function for performing the dereferencing (this function should ensure references are relative to the config)
+   *
+   * @returns a new config of the same type with all the file references being replaced with underlying referenced file's contents.
+   */
   export async function resolve_references<T>(
     config: T,
     base_uri: string,
@@ -44,6 +62,7 @@ export namespace config {
       config as unknown as Record<string, unknown>,
     )) as T
   }
+
   async function resolve_config_reference(
     base_uri: string,
     dereference: DerferenceFile,
@@ -52,6 +71,7 @@ export namespace config {
     if (template.uri) return dereference(base_uri, template.uri)
     else return template.str
   }
+
   if (import.meta.vitest) {
     const { test, expect } = import.meta.vitest
     test('resolve config references 2', async () => {

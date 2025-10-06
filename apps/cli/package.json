@@ -43,10 +43,10 @@
     "tsup": "^8.4.0",
     "tsx": "^4.19.3",
     "typescript": "^5.5.4",
-    "vitest": "^3.0.8"
+    "vitest": "^3.2.4"
   },
   "volta": {
-    "node": "20.10.0"
+    "node": "22.9.0"
   },
   "author": "Spencer Scorcelletti",
   "license": "MIT"

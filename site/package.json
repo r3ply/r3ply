@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "volta": {
-    "node": "20.10.0"
+    "node": "22.9.0"
   },
   "author": "Spencer Scorcelletti",
   "license": "MIT",

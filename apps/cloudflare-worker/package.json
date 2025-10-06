@@ -31,12 +31,13 @@
     "oxide.ts": "^1.1.0"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.8.0",
+    "@cloudflare/vitest-pool-workers": "^0.9.10",
     "typescript": "^5.5.4",
-    "vitest": "^3.0.8",
-    "wrangler": "^4.28.1"
+    "typescript-mailbox-parser": "^0.0.1",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.42.0"
   },
   "volta": {
-    "node": "20.10.0"
+    "node": "22.9.0"
   }
 }
