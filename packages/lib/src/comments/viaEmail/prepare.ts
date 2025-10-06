@@ -1,7 +1,11 @@
 import { Message as Email } from '@mail-parser/ts-bindings'
 import { get_auth_results, get_body_txt, get_date, get_subject } from './email'
 import { match, Result } from 'oxide.ts'
-import { comments, R3plySiteConfig, R3plySystemConfig } from '@r3ply/schema'
+import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/schema/config'
+import {
+  R3plyCommentsConfig,
+  R3plyEmailCommentsConfig,
+} from '@r3ply/schema/config/comments'
 import { DeliverableEmail } from './deliverable'
 import { CommentTemplateContext } from '../process'
 import { md_to_html, sanitize_html } from '@r3ply/wasm'
@@ -43,8 +47,8 @@ export function prepare(
   deliverable: DeliverableEmail,
   metadata: CommentMetadata,
   config: R3plySiteConfig,
-  comments_config: comments.R3plyCommentsConfig,
-  email_comments_config: comments.R3plyEmailCommentsConfig,
+  comments_config: R3plyCommentsConfig,
+  email_comments_config: R3plyEmailCommentsConfig,
   system: R3plySystemConfig,
 ): CommentTemplateContext & EmailTemplateContext {
   // get values from receive

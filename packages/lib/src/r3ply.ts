@@ -1,4 +1,4 @@
-import { R3plySystemConfig } from '@r3ply/schema'
+import { R3plySystemConfig } from '@r3ply/schema/config'
 import { receive, process, email } from './comments'
 import { CommentViaEmailSupportedModerationChannels } from './comments/viaEmail'
 

@@ -29,7 +29,7 @@ for (const s of schemas as { $id: string }[]) {
   const joined = path.join(cwd, dist_dir, url.pathname)
   fs.mkdirSync(path.dirname(joined), { recursive: true })
   fs.writeFileSync(joined, JSON.stringify(s, null, 2))
-  console.log(`Wrote ${joined}`)
+  console.log(`  - Wrote ${joined}`)
 }
 
-console.log('\nFinished writing schemas.')
+console.log('\nFinished writing schemas!')

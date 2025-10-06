@@ -1,4 +1,10 @@
-import { comments, moderation, R3plySignetConfig } from '@r3ply/schema'
+import { R3plySignetConfig } from '@r3ply/schema/config'
+import { R3plyCommentSource } from '@r3ply/schema/config/comments'
+import {
+  R3plyModerationChannelType,
+  R3plyModerationConfig,
+  R3plyModerationOptions,
+} from '@r3ply/schema/config/moderation'
 import { CommentTemplateContext } from '../comments/process'
 import micromatch from 'micromatch'
 import { Decrypt, DecryptEmail, Encrypt } from '../comments/viaEmail/crypto'
@@ -9,9 +15,9 @@ export * from './github'
 
 // TODO: in the future this work needs to be refactored to lean more on a discriminated union approach to the types, using the `type` field + moderation.R3plyModerationChannelType
 
-export type ModerationChannelType = moderation.R3plyModerationChannelType
+export type ModerationChannelType = R3plyModerationChannelType
 export type ModerationChannelConfig<T extends ModerationChannelType> =
-  moderation.R3plyModerationConfig[T][number]
+  R3plyModerationConfig[T][number]
 
 /**
  * A moderation channel. This interface encapsulates the underlying implementation for a moderation channel.
@@ -43,7 +49,7 @@ export type AnyModerationChannel<InCtx> = {
   type: ModerationChannelType
   handler: (
     signet: R3plySignetConfig,
-    src: comments.R3plyCommentSource,
+    src: R3plyCommentSource,
     config: ModerationChannelConfig<ModerationChannelType>,
   ) => ModerationChannelHandler<ModerationChannelType, InCtx, any, any, any>
 }
@@ -52,7 +58,7 @@ export type AnyModerationChannel<InCtx> = {
  * A handler for preparing moderation requests.
  */
 export interface ModerationChannelHandler<
-  T extends moderation.R3plyModerationChannelType,
+  T extends R3plyModerationChannelType,
   InCtx,
   Args,
   OutCtx,
@@ -141,8 +147,8 @@ export namespace Moderation {
    */
   export function can_moderate(
     site: R3plySignetConfig,
-    comment_source: comments.R3plyCommentSource,
-    opts: moderation.R3plyModerationOptions,
+    comment_source: R3plyCommentSource,
+    opts: R3plyModerationOptions,
   ): Result<void, Error> {
     return Result.safe(() => {
       // Check if moderation is enabled for this moderation channel
@@ -243,7 +249,7 @@ if (import.meta.vitest) {
 
   // prettier-ignore
   test('can moderate', async () => {
-    const mod_options: moderation.R3plyModerationOptions = {
+    const mod_options: R3plyModerationOptions = {
       enabled: true,
       'allow*': [],
     }
