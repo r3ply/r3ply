@@ -3,7 +3,6 @@ import { extra } from './extra'
 import { signet } from './signet'
 import { comments, email } from './comments'
 import { moderation, github, webhook, local } from './moderation'
-import { notify } from './notify'
 import { make_config_parser, make_typed_parser, ConfigParser } from '../util'
 import { mk_site_singleton } from '../codegen/site'
 import { parser, Schema } from '@exodus/schemasafe'
@@ -55,17 +54,7 @@ export const raw_site_parser = parser(site, {
   useDefaults: true,
   includeErrors: true,
   allErrors: true,
-  schemas: [
-    extra,
-    signet,
-    comments,
-    email,
-    moderation,
-    github,
-    webhook,
-    local,
-    notify,
-  ],
+  schemas: [extra, signet, comments, email, moderation, github, webhook, local],
 })
 export const site_schema = raw_site_parser.toJSON()
 const site_parser: ConfigParser<R3plySiteConfig> = make_config_parser(
@@ -84,7 +73,6 @@ export type R3plySiteConfig = FromSchema<
       typeof github,
       typeof webhook,
       typeof local,
-      typeof notify,
     ]
   }
 >
@@ -101,7 +89,6 @@ export type MinimalR3plySiteConfig = FromSchema<
       typeof github,
       typeof webhook,
       typeof local,
-      typeof notify,
     ]
   }
 >
