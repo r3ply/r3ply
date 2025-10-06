@@ -19,8 +19,8 @@
   "scripts": {
     "build:generate": "tsx src/codegen/generate.ts",
     "build:compile": "tsup src/generated/index.ts --dts --clean --format esm,cjs --external @iarna/toml",
-    "build:copy": "cp src/generated/*.json dist",
-    "build": "npm run build:generate && npm run build:compile && npm run build:copy",
+    "build:schemas": "tsx src/codegen/copy_schemas.ts",
+    "build": "npm run build:generate && npm run build:compile && npm run build:schemas",
     "test": "npx vitest run",
     "test:watch": "npx vitest"
   },
