@@ -5,6 +5,7 @@ export default defineWorkersConfig({
     preserveSymlinks: false,
   },
   test: {
+    includeSource: ['src/**/*.{js,ts}'],
     deps: {
       optimizer: {
         ssr: {
@@ -17,7 +18,7 @@ export default defineWorkersConfig({
       workers: {
         wrangler: { configPath: './wrangler.toml' },
         miniflare: {
-          d1Databases: ['TEST_DB'],
+          d1Databases: { TEST_DB: { id: 'TEST_DB' } },
         },
       },
     },

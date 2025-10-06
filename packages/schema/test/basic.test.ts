@@ -2,11 +2,11 @@ import { describe, expect, test } from 'vitest'
 import {
   R3plySiteConfig as imported_r3ply_site_config_parser,
   R3plySystemConfig as imported_r3ply_system_config_parser,
-} from '@r3ply/schema'
+} from '@r3ply/schema/config'
 import {
   R3plySiteConfig as compiled_r3ply_site_config_parser,
   R3plySystemConfig as compiled_r3ply_system_config_parser,
-} from '../dist'
+} from '../dist/generated'
 // A list of implementations of the parser that are to be tested under the same conditions
 const site_implementations: [
   string,
