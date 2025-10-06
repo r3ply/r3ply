@@ -1,6 +1,5 @@
 import { Schema } from '@exodus/schemasafe'
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
-import { notify } from '../notify'
 
 export const email = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/comments/email.v0.0.1.json',
@@ -116,20 +115,6 @@ export const email = {
       default: 'text/plain',
       $comment: 'Can be useful if mime type of comment needs to be specified.',
     },
-    notify: {
-      $ref: 'https://r3ply.com/schemas/v0.0.1/config/notify.v0.0.1.json',
-      default: {
-        commenter: false,
-        notify_commenter_upon_submission: false,
-        moderator: false,
-        notify_moderator_upon_receipt: 'none',
-      },
-    },
   },
 } as const satisfies JSONSchema & Schema
-export type R3plyEmailCommentsConfig = FromSchema<
-  typeof email,
-  {
-    references: [typeof notify]
-  }
->
+export type R3plyEmailCommentsConfig = FromSchema<typeof email>

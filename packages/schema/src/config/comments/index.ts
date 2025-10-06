@@ -1,6 +1,5 @@
 import { Schema } from '@exodus/schemasafe'
 import { FromSchema, JSONSchema } from 'json-schema-to-ts'
-import { notify } from '../notify'
 import { email } from './email'
 import { moderation, github, webhook, local } from '../moderation'
 export * from './email'
@@ -84,7 +83,6 @@ export type R3plyCommentsConfig = FromSchema<
       typeof github,
       typeof webhook,
       typeof local,
-      typeof notify,
     ]
   }
 >

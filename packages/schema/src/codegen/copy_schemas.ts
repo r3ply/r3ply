@@ -1,7 +1,6 @@
 import { extra, signet, site } from '../config'
 import { comments, email } from '../config/comments'
 import { moderation, github, local, webhook } from '../config/moderation'
-import { notify } from '../config/notify'
 import path from 'path'
 import fs from 'fs'
 
@@ -23,7 +22,6 @@ const schemas = [
   github,
   webhook,
   local,
-  notify,
 ]
 
 for (const s of schemas as { $id: string }[]) {
