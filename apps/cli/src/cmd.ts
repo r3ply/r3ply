@@ -6,7 +6,7 @@ import {
   R3plySignetConfig,
   R3plySiteConfig,
   R3plySystemConfig,
-} from '@r3ply/schema'
+} from '@r3ply/schema/config'
 import {
   R3ply,
   Signet,

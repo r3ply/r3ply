@@ -8,7 +8,7 @@ import {
   R3plySignetConfig,
   R3plySiteConfig,
   R3plySystemConfig,
-} from '@r3ply/schema'
+} from '@r3ply/schema/config'
 import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
 import { RiMarkov } from 'rita'

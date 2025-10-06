@@ -4,7 +4,11 @@ export * from './prepare'
 export * from './prescreen'
 export * from '../../signet'
 export * from './crypto'
-import { R3plySystemConfig, R3plySiteConfig, comments } from '@r3ply/schema'
+import { R3plySystemConfig, R3plySiteConfig } from '@r3ply/schema/config'
+import {
+  R3plyCommentsConfig,
+  R3plyEmailCommentsConfig,
+} from '@r3ply/schema/config/comments'
 import {
   prescreen as r3ply_prescreen,
   PrescreenPass,
@@ -199,9 +203,9 @@ async function handle_email_event(
     prescreening: prescreen_results,
   }
   if (prescreen_results.isErr()) return results
-  const comments_config: comments.R3plyCommentsConfig =
+  const comments_config: R3plyCommentsConfig =
     prescreen_results.unwrap().comments_configured.general_comments
-  const email_comments_config: comments.R3plyEmailCommentsConfig =
+  const email_comments_config: R3plyEmailCommentsConfig =
     prescreen_results.unwrap().comments_configured.email_comments
 
   /**

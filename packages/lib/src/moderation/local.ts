@@ -6,12 +6,8 @@ import {
   ModerationTicket,
 } from '.'
 import { CommentTemplateContext } from '../comments/process'
-import {
-  comments,
-  moderation,
-  R3plySignetConfig,
-  R3plySiteConfig,
-} from '@r3ply/schema'
+import { R3plySiteConfig } from '@r3ply/schema/config'
+import { R3plyLocalModerationConfig } from '@r3ply/schema/config/moderation'
 import { Result } from 'oxide.ts'
 import { Encrypt } from '../comments/viaEmail'
 
@@ -97,7 +93,7 @@ export function LocalModeration<InCtx extends CommentTemplateContext>(
   const result: LocalModeration<InCtx> = {
     type: 'local',
     handler: function (
-      config: moderation.R3plyLocalModerationConfig,
+      config: R3plyLocalModerationConfig,
     ): ModerationChannelHandler<
       'local',
       InCtx,
@@ -121,7 +117,7 @@ export function LocalModeration<InCtx extends CommentTemplateContext>(
  */
 function mk_local_mod_handler<InCtx extends CommentTemplateContext>(
   file_writer: WriteLocalFile,
-  config: moderation.R3plyLocalModerationConfig,
+  config: R3plyLocalModerationConfig,
 ): LocalModerationHandler<InCtx> {
   const result: LocalModerationHandler<InCtx> = {
     type: 'local',

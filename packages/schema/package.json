@@ -7,9 +7,17 @@
   "module": "./dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": {
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
+    "./config": {
+      "require": "./dist/generated/index.cjs",
+      "import": "./dist/generated/index.js"
+    },
+    "./config/comments": {
+      "require": "./dist/config/comments/index.cjs",
+      "import": "./dist/config/comments/index.js"
+    },
+    "./config/moderation": {
+      "require": "./dist/config/moderation/index.cjs",
+      "import": "./dist/config/moderation/index.js"
     }
   },
   "files": [
@@ -18,7 +26,7 @@
   ],
   "scripts": {
     "build:generate": "tsx src/codegen/generate.ts",
-    "build:compile": "tsup src/generated/index.ts --dts --clean --format esm,cjs --external @iarna/toml",
+    "build:compile": "tsup src/generated/index.ts src/config/comments/index.ts src/config/moderation/index.ts --dts --clean --format esm,cjs --external @iarna/toml",
     "build:schemas": "tsx src/codegen/copy_schemas.ts",
     "build": "npm run build:generate && npm run build:compile && npm run build:schemas",
     "test": "npx vitest run",

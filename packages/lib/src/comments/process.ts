@@ -1,12 +1,9 @@
 import { match, Result } from 'oxide.ts'
-import { R3plySiteConfig } from '@r3ply/schema'
+import { R3plySiteConfig } from '@r3ply/schema/config'
 import { tera } from '@r3ply/wasm'
-import { EmailTemplateContext } from './viaEmail/prepare' // DON'T REMOVE! - it's for `@see` reference in doc commment string
 
 /**
  * The basic context that can always be expected to be available when rendering a template.
- *
- * @see EmailTemplateContext for more
  */
 export interface CommentTemplateContext {
   r3ply: {

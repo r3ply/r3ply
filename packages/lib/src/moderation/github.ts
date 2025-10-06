@@ -1,5 +1,5 @@
 import { Result } from 'oxide.ts'
-import { comments, moderation, R3plySignetConfig } from '@r3ply/schema'
+import { R3plyGithubConfig } from '@r3ply/schema/config/moderation'
 import { CommentTemplateContext } from '../comments/process'
 import { tera } from '@r3ply/wasm'
 import {
@@ -168,7 +168,7 @@ export function GitHubModeration<InCtx extends CommentTemplateContext>(
   const result: GitHubModeration<InCtx> = {
     type: 'github',
     handler: function (
-      config: moderation.R3plyGithubConfig,
+      config: R3plyGithubConfig,
     ): ModerationChannelHandler<
       'github',
       InCtx,
@@ -191,7 +191,7 @@ export function GitHubModeration<InCtx extends CommentTemplateContext>(
  */
 function mk_gh_mod_handler<InCtx extends CommentTemplateContext>(
   api_call: PerformGitHubApiFetch,
-  config: moderation.R3plyGithubConfig,
+  config: R3plyGithubConfig,
 ): GitHubModerationHandler<InCtx> {
   const result: GitHubModerationHandler<InCtx> = {
     type: 'github',
@@ -228,7 +228,7 @@ function mk_gh_mod_handler<InCtx extends CommentTemplateContext>(
 function create_pr_args(
   comment: string,
   context: CommentTemplateContext,
-  config: moderation.R3plyGithubConfig,
+  config: R3plyGithubConfig,
 ): CreateCommentInRepoArgs {
   const sanitized_context = JSON.parse(JSON.stringify(context))
   let base_branch = tera(config['base_branch_{}'], sanitized_context)
@@ -286,7 +286,7 @@ if (import.meta.vitest) {
         html: undefined,
       },
     }
-    const config: moderation.R3plyGithubConfig = {
+    const config: R3plyGithubConfig = {
       enabled: false,
       'allow*': [],
       owner: 'asimpletune',

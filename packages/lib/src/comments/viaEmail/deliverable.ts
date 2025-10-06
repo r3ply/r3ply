@@ -1,6 +1,10 @@
 import { Option, Result } from 'oxide.ts'
 import { Encrypted, Redacted as Anonymized, Secret } from './types'
-import { R3plySignetConfig, comments } from '@r3ply/schema'
+import { R3plySignetConfig } from '@r3ply/schema/config'
+import {
+  R3plyCommentsConfig,
+  R3plyEmailCommentsConfig,
+} from '@r3ply/schema/config/comments'
 import micromatch from 'micromatch'
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
 import { AcceptedEmail } from './accept'
@@ -28,8 +32,8 @@ export async function deliverable(
     encrypt,
   }: {
     sites: R3plySignetConfig[]
-    comments_config: comments.R3plyCommentsConfig
-    email_comments_config: comments.R3plyEmailCommentsConfig
+    comments_config: R3plyCommentsConfig
+    email_comments_config: R3plyEmailCommentsConfig
     anonymize: AnonymizeEmail
     encrypt: EncryptEmail
   },

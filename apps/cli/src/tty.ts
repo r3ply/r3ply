@@ -2,7 +2,7 @@ import {
   R3plySystemConfig,
   R3plySiteConfig,
   R3plySignetConfig,
-} from '@r3ply/schema'
+} from '@r3ply/schema/config'
 import { SimulateCmdEmailOpts } from './cmd'
 import { comments, moderation } from '@r3ply/lib'
 import { util } from './util'
