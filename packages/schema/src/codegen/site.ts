@@ -10,10 +10,10 @@ import {
   R3plySiteConfig as R3plySiteConfigLib,
 } from '../config'
 
-export const raw_parser_module = '<RAW_SITE_PARSER_MODULE>'
+const site_raw_parser_module = '<RAW_SITE_PARSER_MODULE>'
 
 /** PARSER */
-const raw_site_parser: Parse = raw_parser_module as any as Parse
+export const raw_site_parser: Parse = site_raw_parser_module as any as Parse
 export const site_parser: ConfigParser<R3plySiteConfig> = make_config_parser(
   make_typed_parser<R3plySiteConfig>(raw_site_parser),
 )

@@ -144,10 +144,8 @@ export const raw_system_parser = parser(r3ply, {
   includeErrors: true,
   allErrors: true,
 })
-export const system_schema = raw_system_parser.toJSON()
-const system_parser: ConfigParser<R3plySystemConfig> = make_config_parser(
-  make_typed_parser<R3plySystemConfig>(raw_system_parser),
-)
+export const system_parser: ConfigParser<R3plySystemConfig> =
+  make_config_parser(make_typed_parser<R3plySystemConfig>(raw_system_parser))
 export const R3plySystemConfig = mk_r3ply_singleton(system_parser)
 export type R3plySystemConfig = FromSchema<typeof r3ply>
 export type MinimalR3plySystemConfig = FromSchema<
