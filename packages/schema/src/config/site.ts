@@ -56,8 +56,7 @@ export const raw_site_parser = parser(site, {
   allErrors: true,
   schemas: [extra, signet, comments, email, moderation, github, webhook, local],
 })
-export const site_schema = raw_site_parser.toJSON()
-const site_parser: ConfigParser<R3plySiteConfig> = make_config_parser(
+export const site_parser: ConfigParser<R3plySiteConfig> = make_config_parser(
   make_typed_parser<R3plySiteConfig>(raw_site_parser),
 )
 export const R3plySiteConfig = mk_site_singleton(site_parser)
