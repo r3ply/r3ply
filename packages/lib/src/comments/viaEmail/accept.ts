@@ -3,6 +3,7 @@ import { Secret } from './types'
 import { get_from, get_message_id, get_subject, get_to } from './email'
 
 import { parse_email_bytes } from '@r3ply/wasm'
+import { CommentMetadata } from '../receive'
 
 export interface AcceptedEmail {
   messageId: string
@@ -12,7 +13,11 @@ export interface AcceptedEmail {
   email: Email
 }
 
-export function accept(email_bytes: Uint8Array): AcceptedEmail {
+// Accepts metadata in case other implementations need to use it, e.g. write a row to a database that matches the `comment_id`
+export async function accept(
+  email_bytes: Uint8Array,
+  _: CommentMetadata,
+): Promise<AcceptedEmail> {
   const email = parse_email_bytes(email_bytes)
   const message_id = get_message_id(email)
   const from = () => Secret(get_from(email).address)

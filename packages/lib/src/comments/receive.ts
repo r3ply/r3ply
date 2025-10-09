@@ -2,7 +2,7 @@ import crypto from 'crypto' // DON'T REMOVE!
 
 export type CommentMetadata = { comment_id: string; ts_rcvd: string }
 
-export function receive(): CommentMetadata {
+export async function receive(): Promise<CommentMetadata> {
   // get ts of now in unix format
   const ts_rcvd = Math.floor(Date.now() / 1000).toString()
 

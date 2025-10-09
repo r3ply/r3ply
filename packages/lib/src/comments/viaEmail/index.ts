@@ -214,7 +214,7 @@ async function handle_email_event(
    *
    * Receiving really just means attaching metadata to the comment, like giving it a comment ID and a timestamp. It should be thought of as dropping a letter in an official postal service mailbox, in the sense that your letter will be "postmarked" – i.e. timestamped – for the day it was dropped off, even if it isn't taken into custody – i.e. 'accepted' – the same day.
    */
-  const metadata_result = Result.safe(() => receive())
+  const metadata_result = await Result.safe(receive())
   results.received = metadata_result
   if (metadata_result.isErr()) return results
   const metadata = metadata_result.unwrap()
@@ -227,7 +227,7 @@ async function handle_email_event(
    *
    * When an email is accepted what's returned is the main metadata of the email, e.g. MessageID, etc...
    */
-  const accepted_result = Result.safe(() => accept(email_event.bytes))
+  const accepted_result = await Result.safe(accept(email_event.bytes, metadata))
   results.accepted = accepted_result
   if (accepted_result.isErr()) return results
   const accepted_email = accepted_result.unwrap()
