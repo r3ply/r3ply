@@ -27,7 +27,7 @@ preview_database_id = "R3PLY_DB"                     # Required for Pages local 
 
 [[d1_databases]]
 binding = "R3PLY_STAGING_DB"
-database_name = ""
+database_name = "r3ply staging db"
 database_id = "7ee88e89-bd64-41b8-bd03-a537ee600b4b"
 preview_database_id = "R3PLY_STAGING_DB"
 

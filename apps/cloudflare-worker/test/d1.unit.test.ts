@@ -2,6 +2,21 @@ import { beforeAll, describe, expect, test } from 'vitest'
 import { env } from 'cloudflare:test'
 import { CommentCache, CommentState } from '../src/state/d1'
 
+describe('comments', () => {
+  beforeAll(async () => {
+    // drops the table between each test (it is created automatically upon receiving a new comment)
+    await env.TEST_DB.prepare(`DROP TABLE IF EXISTS comments;`).run()
+  })
+  const state = CommentState(env.TEST_DB)
+  test('receive comment', async () => {
+    const receive_result = await state.receive_comment('email')
+    expect(receive_result.error).toBeUndefined()
+    const metadata = receive_result.results[0]
+    expect(metadata.comment_id).toBeDefined()
+    expect(metadata.ts_rcvd).toBeDefined()
+  })
+})
+
 describe('comments_via_email', () => {
   beforeAll(async () => {
     // drops the table between each test (it is created automatically upon receiving a new comment)
@@ -9,8 +24,10 @@ describe('comments_via_email', () => {
   })
   const state = CommentState(env.TEST_DB)
   test('accept comment', async () => {
-    const accept_result = (await state.viaEmail.accept('MESSAGE 123'))
-      .results[0]
+    const receive_result = (await state.receive_comment('email')).results[0]
+    const accept_result = (
+      await state.viaEmail.accept(receive_result.comment_id, 'MESSAGE 123')
+    ).results[0]
     const select_result = (
       await env.TEST_DB.prepare(
         'select created_utc from comments_via_email where message_id = ?',
@@ -18,77 +35,77 @@ describe('comments_via_email', () => {
         .bind('MESSAGE 123')
         .run<{ created_utc: string }>()
     ).results[0]
-    expect(accept_result.ts_rcvd).toBe(
-      String(Date.parse(select_result.created_utc + 'Z') / 1000),
-    )
-    expect(accept_result.gist_id).toBeNull()
-    expect(accept_result.gist_url).toBeNull()
+    expect(accept_result.files_id).toBeNull()
+    expect(accept_result.files_url).toBeNull()
   })
   test('update deliverability', async () => {
-    const accept_result = (await state.viaEmail.accept('MESSAGE 123'))
-      .results[0]
-    await state.viaEmail.deliverable(accept_result.comment_id, 'deliverable')
+    const receive_result = (await state.receive_comment('email')).results[0]
+    await state.viaEmail.accept(receive_result.comment_id, 'MESSAGE 123')
+    await state.viaEmail.deliverable(receive_result.comment_id, 'deliverable')
     const select_deliverable = await env.TEST_DB.prepare(
-      'SELECT state, id FROM comments_via_email',
+      'SELECT state, comment_id FROM comments_via_email',
     ).run()
     expect(select_deliverable.results.length).toBe(1)
     expect(select_deliverable.results[0]).toStrictEqual({
-      id: accept_result.comment_id,
+      comment_id: receive_result.comment_id,
       state: 'deliverable',
     })
-    await state.viaEmail.deliverable(accept_result.comment_id, 'undeliverable')
+    await state.viaEmail.deliverable(receive_result.comment_id, 'undeliverable')
     const select_undeliverable = await env.TEST_DB.prepare(
-      'SELECT state, id FROM comments_via_email',
+      'SELECT state, comment_id FROM comments_via_email',
     ).run()
     expect(select_undeliverable.results.length).toBe(1)
     expect(select_undeliverable.results[0]).toStrictEqual({
-      id: accept_result.comment_id,
+      comment_id: receive_result.comment_id,
       state: 'undeliverable',
     })
   })
   test('update preparedness', async () => {
-    const accept_result = (await state.viaEmail.accept('MESSAGE 123'))
-      .results[0]
-    await state.viaEmail.prepared(accept_result.comment_id, 'prepared')
+    const receive_result = (await state.receive_comment('email')).results[0]
+    await state.viaEmail.accept(receive_result.comment_id, 'MESSAGE 123')
+    await state.viaEmail.prepared(receive_result.comment_id, 'prepared')
     const select_prepared = await env.TEST_DB.prepare(
-      'SELECT state, id FROM comments_via_email',
+      'SELECT state, comment_id FROM comments_via_email',
     ).run()
     expect(select_prepared.results.length).toBe(1)
     expect(select_prepared.results[0]).toStrictEqual({
-      id: accept_result.comment_id,
+      comment_id: receive_result.comment_id,
       state: 'prepared',
     })
-    await state.viaEmail.prepared(accept_result.comment_id, 'unpreparable')
+    await state.viaEmail.prepared(receive_result.comment_id, 'unpreparable')
     const select_unpreparable = await env.TEST_DB.prepare(
-      'SELECT state, id FROM comments_via_email',
+      'SELECT state, comment_id FROM comments_via_email',
     ).run()
     expect(select_unpreparable.results.length).toBe(1)
     expect(select_unpreparable.results[0]).toStrictEqual({
-      id: accept_result.comment_id,
+      comment_id: receive_result.comment_id,
       state: 'unpreparable',
     })
   })
   test('update processability', async () => {
-    const accept_result = (await state.viaEmail.accept('MESSAGE 123'))
-      .results[0]
-    await state.viaEmail.processed(accept_result.comment_id, 'processed')
+    const receive_result = (await state.receive_comment('email')).results[0]
+    await state.viaEmail.accept(receive_result.comment_id, 'MESSAGE 123')
+    await state.viaEmail.processed(receive_result.comment_id, 'processed')
     const select_prepared = await env.TEST_DB.prepare(
-      'SELECT state, id FROM comments_via_email',
+      'SELECT state, comment_id FROM comments_via_email',
     ).run()
     expect(select_prepared.results.length).toBe(1)
     expect(select_prepared.results[0]).toStrictEqual({
-      id: accept_result.comment_id,
+      comment_id: receive_result.comment_id,
       state: 'processed',
     })
-    await state.viaEmail.processed(accept_result.comment_id, 'unprocessable')
+    await state.viaEmail.processed(receive_result.comment_id, 'unprocessable')
     const select_unpreparable = await env.TEST_DB.prepare(
-      'SELECT state, id FROM comments_via_email',
+      'SELECT state, comment_id FROM comments_via_email',
     ).run()
     expect(select_unpreparable.results.length).toBe(1)
     expect(select_unpreparable.results[0]).toStrictEqual({
-      id: accept_result.comment_id,
+      comment_id: receive_result.comment_id,
       state: 'unprocessable',
     })
+    const select_prepared2 = await env.TEST_DB.prepare(
+      'SELECT rowid FROM comments_via_email',
+    ).run()
   })
 })
 

@@ -1,4 +1,4 @@
-import { CommentMetadata } from '@r3ply/lib'
+import { comments } from '@r3ply/lib'
 import { OmitFirstParameter } from '../util'
 
 type CommentViaEmailStates =
@@ -13,6 +13,7 @@ type CommentViaEmailStates =
 type PartialCommentViaEmailStates<T extends CommentViaEmailStates> = T
 
 export interface CommentState {
+  receive_comment: OmitFirstParameter<typeof receive_comment>
   viaEmail: {
     accept: OmitFirstParameter<typeof accept_new_comment_via_email>
     deliverable: (
@@ -33,9 +34,13 @@ export interface CommentState {
 
 export function CommentState(d1: D1Database): CommentState {
   return {
+    receive_comment: (source: 'email') => receive_comment(d1, source),
     viaEmail: {
-      accept: (message_id: string, gist?: { id: string; url: string }) =>
-        accept_new_comment_via_email(d1, message_id, gist),
+      accept: (
+        comment_id,
+        message_id: string,
+        gist?: { id: string; url: string },
+      ) => accept_new_comment_via_email(d1, comment_id, message_id, gist),
       deliverable: (
         comment_id: string,
         deliverability: 'deliverable' | 'undeliverable',
@@ -54,15 +59,43 @@ export function CommentState(d1: D1Database): CommentState {
 }
 
 ////////////////////////////////////
+////// BEGIN GENERAL COMMENTS //////
+////////////////////////////////////
+async function receive_comment(d1: D1Database, source: 'email') {
+  // there is automatically a `rowid` in sqlite
+  const create_table = `CREATE TABLE IF NOT EXISTS comments (
+    id TEXT PRIMARY KEY, -- UUID stored as TEXT without formatting
+    created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- Auto-generated timestamp for when the record was created
+    source TEXT NOT NULL CHECK(source IN ('email'))
+  );`
+  return d1
+    .prepare(
+      `
+    ${create_table}
+    INSERT INTO comments (id, source)
+    VALUES (?1, ?2)
+    RETURNING id AS comment_id, strftime('%s', created_utc) AS ts_rcvd
+    `,
+    )
+    .bind(crypto.randomUUID().replace(/-/g, ''), source)
+    .run<comments.CommentMetadata>()
+}
+////////////////////////////////////
+/////// END GENERAL COMMENTS ///////
+////////////////////////////////////
+
+////////////////////////////////////
 ///// BEGIN COMMENTS VIA EMAIL /////
 ////////////////////////////////////
 async function accept_new_comment_via_email(
   d1: D1Database,
+  comment_id: string,
   message_id: string,
-  gist?: { id: string; url: string },
+  file_reference?: { id: string; url: string },
 ) {
+  // there is automatically a `rowid` in sqlite
   const create_table = `CREATE TABLE IF NOT EXISTS comments_via_email (
-      id TEXT PRIMARY KEY NOT NULL, -- UUID stored as TEXT
+      comment_id TEXT PRIMARY KEY REFERENCES comments(id), -- UUID stored as TEXT without formatting
       message_id TEXT UNIQUE NOT NULL, -- Email Message-ID must be globally unique
       created_utc DATETIME DEFAULT CURRENT_TIMESTAMP, -- Auto-generated timestamp for when the record was created
       state TEXT NOT NULL CHECK(state IN ('accepted', 'deliverable', 'undeliverable', 'prepared', 'unpreparable', 'processed', 'unprocessable', 'delivered')), -- comment state, note: comments are always in exactly one state
@@ -73,21 +106,20 @@ async function accept_new_comment_via_email(
   return d1
     .prepare(
       `
-    ${create_table}
-		INSERT INTO comments_via_email (id, message_id, state, files_id, files_url)
-		VALUES (?1, ?2, ?3, ?4, ?5)
-		RETURNING id as comment_id, strftime('%s', created_utc) AS ts_rcvd, files_id as gist_id, files_url as gist_url;`,
+      ${create_table}
+      INSERT INTO comments_via_email (comment_id, message_id, state, files_id, files_url)
+      VALUES (?1, ?2, ?3, ?4, ?5)
+      RETURNING files_id, files_url;
+      `,
     )
     .bind(
-      crypto.randomUUID(),
+      comment_id,
       message_id,
       comment_state,
-      gist?.id ?? null,
-      gist?.url ?? null,
+      file_reference?.id ?? null,
+      file_reference?.url ?? null,
     )
-    .run<
-      CommentMetadata & { gist_id: string | null; gist_url: string | null }
-    >()
+    .run<{ files_id: string | null; files_url: string | null }>()
 }
 
 async function update_comment_via_email_state(
@@ -103,7 +135,7 @@ async function update_comment_via_email_state(
   >,
 ) {
   return d1
-    .prepare(`UPDATE comments_via_email SET state = ? WHERE id = ?`)
+    .prepare(`UPDATE comments_via_email SET state = ? WHERE comment_id = ?`)
     .bind(state, comment_id)
     .run()
     .then((_) => Promise.resolve())
