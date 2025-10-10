@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { toHex } from './util'
+import { toHex } from '../../util'
 import crypto from 'crypto' // DON'T REMOVE!
 import { R3plySystemConfig, R3plySignetConfig } from '@r3ply/schema/config'
 

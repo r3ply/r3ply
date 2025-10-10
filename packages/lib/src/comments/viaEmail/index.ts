@@ -2,7 +2,7 @@ export * from './accept'
 export * from './deliverable'
 export * from './prepare'
 export * from './prescreen'
-export * from '../../signet'
+export * from './signet'
 export * from './crypto'
 import { R3plySystemConfig, R3plySiteConfig } from '@r3ply/schema/config'
 import {
@@ -22,7 +22,7 @@ import {
 } from './deliverable'
 import { prepare as r3ply_prepare, EmailTemplateContext } from './prepare'
 import { process as r3ply_process, CommentTemplateContext } from '../process'
-import { Anonymize, Signet } from '../../signet'
+import { Anonymize, Signet } from './signet'
 import { Encrypt } from './crypto'
 import { Err, Ok, Result } from 'oxide.ts'
 import {
@@ -241,13 +241,17 @@ async function handle_email_event(
    * When the deliverability of an email is determined it will return all the parts that are needed to begin processing it, and by this point the author of the email will have their email encrypted and pseudo-anonymized.
    */
   const deliverable_result = await Result.safe(
-    deliverable(accepted_email, {
-      comments_config,
-      email_comments_config,
-      sites: email_event.config.site,
-      anonymize: Anonymize.hmac(dependencies.anonymize_key),
-      encrypt: Encrypt.email(dependencies.encrypt_key),
-    }),
+    deliverable(
+      accepted_email,
+      {
+        comments_config,
+        email_comments_config,
+        sites: email_event.config.site,
+        anonymize: Anonymize.hmac(dependencies.anonymize_key),
+        encrypt: Encrypt.email(dependencies.encrypt_key),
+      },
+      metadata,
+    ),
   )
   results.deliverable = deliverable_result
   if (deliverable_result.isErr()) return results
@@ -264,7 +268,7 @@ async function handle_email_event(
   const template_result: Result<
     CommentTemplateContext & EmailTemplateContext,
     Error
-  > = Result.safe(() =>
+  > = await Result.safe(
     prepare(
       deliverable_email,
       metadata,
@@ -284,10 +288,11 @@ async function handle_email_event(
    *
    * It is here that an actual comment is formed by binding the template context from the prior step with the templates provided by the site's configuration. If no template is provided then the full template context is stringified and written from its JSON object representation.
    */
-  results.comment = Result.safe(() =>
+  results.comment = await Result.safe(
     process(
       template_context,
       email_event.config,
+      metadata,
       email_event.config.comments?.email?.['comment_{}'],
     ),
   )

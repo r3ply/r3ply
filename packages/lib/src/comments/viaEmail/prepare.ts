@@ -43,14 +43,14 @@ export interface EmailTemplateContext {
  * @param config the site config the email is addressed to
  * @returns comment data
  */
-export function prepare(
+export async function prepare(
   deliverable: DeliverableEmail,
   metadata: CommentMetadata,
   config: R3plySiteConfig,
   comments_config: R3plyCommentsConfig,
   email_comments_config: R3plyEmailCommentsConfig,
   system: R3plySystemConfig,
-): CommentTemplateContext & EmailTemplateContext {
+): Promise<CommentTemplateContext & EmailTemplateContext> {
   // get values from receive
   let { comment_id, ts_rcvd } = metadata
 
