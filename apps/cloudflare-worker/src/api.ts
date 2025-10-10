@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { CommentCache } from './state/d1'
 import { Signet } from '@r3ply/lib'
-import { R3plySystemConfig } from '@r3ply/config'
+import { R3plySystemConfig } from '@r3ply/schema/config'
 
 function api(r3ply: R3plySystemConfig) {
   const api = new Hono<{ Bindings: Env }>()
@@ -16,21 +16,20 @@ function api(r3ply: R3plySystemConfig) {
     }
     const { domain, issued } = c.req.param()
     const new_site_url = new URL(`https://${domain}`)
-    const result = Signet.issue(c.env.SIGNET_KEY, r3ply)(
-      new_site_url.hostname,
-      req_url.hostname,
-      issued,
-    )
+    const signet_issuer = Signet.issue(c.env.SIGNET_KEY, r3ply)
+    const result = signet_issuer(new_site_url.hostname, req_url.hostname, {
+      issued_date: issued,
+    })
     return result.then((result) => {
       const format = c.req.query('format')
-      if (format == 'toml') {
+      if (format == 'json') {
+        return c.json({ ...result, domain, r3ply: req_url.hostname })
+      } else {
         return c.text(`[[site]]
 domain = "${domain}"
 r3ply = "${req_url.hostname}"
 signet = "${result.signet}"
 issued = ${result.issued}\n`)
-      } else {
-        return c.json({ ...result, domain, r3ply: req_url.hostname })
       }
     })
   })

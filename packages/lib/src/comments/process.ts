@@ -1,6 +1,7 @@
 import { match, Result } from 'oxide.ts'
 import { R3plySiteConfig } from '@r3ply/schema/config'
 import { tera } from '@r3ply/wasm'
+import { CommentMetadata } from './receive'
 
 /**
  * The basic context that can always be expected to be available when rendering a template.
@@ -41,9 +42,10 @@ export interface CommentTemplateContext {
  * @param site the configuration of the intended recipient (a website) of the comment
  * @returns either a comment rendered as a string, from the configured template and context, or just the raw context itself
  */
-export function process(
+export async function process(
   context: CommentTemplateContext,
   site: R3plySiteConfig,
+  metadata: CommentMetadata,
   comment_template?: string,
 ) {
   let comment: string

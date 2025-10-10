@@ -8,8 +8,9 @@ import {
 import micromatch from 'micromatch'
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
 import { AcceptedEmail } from './accept'
-import { AnonymizeEmail } from '../../signet'
+import { AnonymizeEmail } from './signet'
 import { EncryptEmail } from './crypto'
+import { CommentMetadata } from '../receive'
 
 export interface DeliverableEmail {
   to: string
@@ -37,6 +38,7 @@ export async function deliverable(
     anonymize: AnonymizeEmail
     encrypt: EncryptEmail
   },
+  metadata: CommentMetadata,
 ): Promise<DeliverableEmail> {
   // check `To` has address, and is addressed properly (to this site + r3ply pair, i.e. <YOUR_SITE>@<R3PLY>)
   const site = to_field_is_deliverable(accepted.to, sites)
