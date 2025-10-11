@@ -433,18 +433,30 @@ namespace email_size_exceeds_max {
       throw new Error(`Email exceeded max of: ${max_allowed} bytes`)
   }
   if (import.meta.vitest) {
-    const { test, expect } = import.meta.vitest
-    test('email_size_exceeds_max', () => {
-      expect(() => email_size_exceeds_max(-1, 123)).toThrowError(
-        /Email input .*? must be non-negative/,
-      )
-      expect(() => email_size_exceeds_max(456, -1)).toThrowError(
-        /Max allowed .*? must be non-negative/,
-      )
-      expect(() => email_size_exceeds_max(456, 123)).toThrowError(
-        /Email exceeded max .*? bytes/,
-      )
-      expect(() => email_size_exceeds_max(123, 456)).not.toThrowError()
+    const { describe, test, expect } = import.meta.vitest
+    describe('email_size_exceeds_max', () => {
+      test('Email input size (bytes) must be non-negative', () => {
+        const [failed] = email_size_exceeds_max(-1, 123).intoTuple()
+        expect(failed?.errors).toStrictEqual([
+          'Email input size (bytes) must be non-negative',
+        ])
+      })
+      test('Max allowed email size (bytes) must be non-negative', () => {
+        const [failed] = email_size_exceeds_max(456, -1).intoTuple()
+        expect(failed?.errors).toStrictEqual([
+          'Max allowed email size (bytes) must be non-negative',
+        ])
+      })
+      test('Email exceeded max bytes', () => {
+        const [failed] = email_size_exceeds_max(456, 123).intoTuple()
+        expect(failed?.errors).toStrictEqual([
+          `Email exceeded max of: 123 bytes`,
+        ])
+      })
+      test('Email size allowed', () => {
+        const [, success] = email_size_exceeds_max(123, 456).intoTuple()
+        expect(success?.result).toBe('pass')
+      })
     })
   }
 }
