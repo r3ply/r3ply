@@ -455,9 +455,11 @@ export function simulate_cmd(cwd: string) {
         cwd,
         simulate_cmd.parent?.opts().config,
       )
-      let site_config: R3plySiteConfig = await project.resolve_config(
-        cwd,
-        simulate_cmd.parent?.opts().config,
+      let site_config_result = await Result.safe(
+        project.resolve_config(cwd, simulate_cmd.parent?.opts().config),
+      )
+      let site_config: R3plySiteConfig = site_config_result.expect(
+        'Error while opening config (hint: run `re config validate` to debug)',
       )
       site_config = await r3ply_util.config.resolve_references(
         site_config,

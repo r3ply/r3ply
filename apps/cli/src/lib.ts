@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { Result } from 'oxide.ts'
+import { Result, Option } from 'oxide.ts'
 import { util } from './util.js'
 import fg from 'fast-glob'
 import TOML from '@iarna/toml'
@@ -168,7 +168,11 @@ export namespace project {
   ): Promise<Result<R3plySiteConfig, Error>> {
     const site_config = parse_site_config(cwd, config_path)
       .then((parsed_site_config) => util.unsafeUnwrap(parsed_site_config))
-      .then((parsed_site_config) => parsed_site_config.value!)
+      .then((parsed_site_config) =>
+        Option(parsed_site_config.value).expect(
+          JSON.stringify(parsed_site_config.errors, null, 2),
+        ),
+      )
     return Result.safe(site_config)
   }
 
