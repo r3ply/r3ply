@@ -2,6 +2,7 @@ import micromatch from 'micromatch'
 import { R3plySiteConfig, R3plySystemConfig } from '@r3ply/schema/config'
 import {
   R3plyCommentsConfig,
+  R3plyCommentSource,
   R3plyEmailCommentsConfig,
 } from '@r3ply/schema/config/comments'
 import { Err, Ok, Result } from 'oxide.ts'
@@ -113,7 +114,7 @@ export function prescreen(
   // Check if comments are accepted
   const comments_accepted_check = comments_accepted(system, config)
   // Check if comments are configured for site (both generally and for email)
-  const comments_configured_check = comments_configured(config)
+  const comments_configured_check = comments_configured_and_enabled(config)
   // Check if incoming email exceeds min of system or site configurations
   const email_size_bytes_check = email_size_exceeds_max(
     email.size_bytes,
@@ -477,33 +478,59 @@ namespace comments_accepted {
   }
 }
 
-// Check if comments are configured (both generally and for emails)
-function comments_configured(
+// Check if comments are configured and enabled (both generally and for emails)
+function comments_configured_and_enabled(
   config: R3plySiteConfig,
+  comment_source?: R3plyCommentSource,
 ): Result<
   PrescreenChecks.comments_configured.pass,
   PrescreenChecks.comments_configured.fail
 > {
   // Check that comments are configured for the site (if no comments config, then no email comments config either)
-  const comments_result = Result.safe(() =>
-    comments_configured.comments_config_exists(config),
+  const comments_config_exists = Result.safe(() =>
+    comments_configured_and_enabled.comments_config_exists(config),
   )
-  if (comments_result.isErr()) {
+  if (comments_config_exists.isErr()) {
     return Err({
       result: 'fail',
-      errors: [comments_result.unwrapErr().message],
+      errors: [comments_config_exists.unwrapErr().message],
       general_comments: undefined,
     })
   }
-  const comments_config = comments_result.unwrap()
-  // Check that email comments are configured for the site
-  const email_result = Result.safe(() =>
-    comments_configured.email_comments_config_exists(comments_config),
+  const comments_config = comments_config_exists.unwrap()
+  const comments_enabled = Result.safe(() =>
+    comments_configured_and_enabled.comments_config_enabled(comments_config),
   )
-  if (email_result.isErr()) {
+  if (comments_enabled.isErr()) {
     return Err({
       result: 'fail',
-      errors: [email_result.unwrapErr().message],
+      errors: [comments_enabled.unwrapErr().message],
+      general_comments: undefined,
+    })
+  }
+  // Check that comments are configured for the comment source
+  const email_comments_config_exists = Result.safe(() =>
+    comments_configured_and_enabled.email_comments_config_exists(
+      comments_config,
+    ),
+  )
+  if (email_comments_config_exists.isErr()) {
+    return Err({
+      result: 'fail',
+      errors: [email_comments_config_exists.unwrapErr().message],
+      general_comments: comments_config,
+    })
+  }
+  const email_comments_config = email_comments_config_exists.unwrap()
+  const email_comments_enabled = Result.safe(() =>
+    comments_configured_and_enabled.email_comments_config_enabled(
+      email_comments_config,
+    ),
+  )
+  if (email_comments_enabled.isErr()) {
+    return Err({
+      result: 'fail',
+      errors: [email_comments_enabled.unwrapErr().message],
       general_comments: comments_config,
     })
   }
@@ -511,24 +538,72 @@ function comments_configured(
   return Ok({
     result: 'pass',
     general_comments: comments_config,
-    email_comments: email_result.unwrap(),
+    email_comments: email_comments_config,
   })
 }
-namespace comments_configured {
+namespace comments_configured_and_enabled {
   export function comments_config_exists(config: R3plySiteConfig) {
     const comments_config = config.comments
     if (comments_config) return comments_config
     else throw new Error('No comments configuration found')
   }
-
+  export function comments_config_enabled(config: R3plyCommentsConfig) {
+    if (config.enabled) return true
+    else throw new Error('Comments disabled')
+  }
   export function email_comments_config_exists(comments: R3plyCommentsConfig) {
     const email_comments_config = comments.email
     if (email_comments_config) return email_comments_config
     else throw new Error('No configuration found for email comments')
   }
+  export function email_comments_config_enabled(
+    config: R3plyEmailCommentsConfig,
+  ) {
+    if (config.enabled) return true
+    else throw new Error('Email comments disabled')
+  }
   if (import.meta.vitest) {
-    const { test, expect } = import.meta.vitest
-    // TODO
+    const { describe, test, expect } = import.meta.vitest
+    describe('comments_configured', () => {
+      test('comments are not configured by default', () => {
+        const [failure] = comments_configured_and_enabled(
+          R3plySiteConfig({}).value!,
+        ).intoTuple()
+        expect(failure?.errors).toStrictEqual([
+          'No comments configuration found',
+        ])
+      })
+      test('comments are not configured for email by default', () => {
+        const [failure] = comments_configured_and_enabled(
+          R3plySiteConfig({ comments: {} }).value!,
+        ).intoTuple()
+        expect(failure?.errors).toStrictEqual([
+          'No configuration found for email comments',
+        ])
+      })
+      test('comments are enabled generally and for email by default', () => {
+        const [, success] = comments_configured_and_enabled(
+          R3plySiteConfig({ comments: { email: {} } }).value!,
+        ).intoTuple()
+        expect(success?.result).toBe('pass')
+      })
+      test('comments can generally be disabled', () => {
+        const [failure] = comments_configured_and_enabled(
+          R3plySiteConfig({
+            comments: { enabled: false, email: { enabled: false } },
+          }).value!,
+        ).intoTuple()
+        expect(failure?.errors).toStrictEqual(['Comments disabled'])
+      })
+      test('Email comments can be disabled', () => {
+        const [failure] = comments_configured_and_enabled(
+          R3plySiteConfig({
+            comments: { enabled: true, email: { enabled: false } },
+          }).value!,
+        ).intoTuple()
+        expect(failure?.errors).toStrictEqual(['Email comments disabled'])
+      })
+    })
   }
 }
 
