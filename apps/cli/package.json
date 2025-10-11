@@ -15,8 +15,8 @@
   "scripts": {
     "build": "tsup",
     "build:watch": "tsup --watch",
-    "pretrain": "tsx src/comments/prepare.js",
-    "train": "tsx src/comments/train.js",
+    "pretrain": "tsx src/comment_generation/prepare.js",
+    "train": "tsx src/comment_generation/train.js",
     "test": "npx vitest run",
     "test:watch": "npx vitest"
   },

@@ -473,7 +473,14 @@ export namespace generate {
     const to = parse_email_addr(options?.to || `${site_domain}@${r3ply_domain}`)
     const subject_url = new URL(`https://${to.local}/`)
     const subject = options?.subject || generate.subject(subject_url)
-    const body = options?.body || (await generate.comment_body())
+    // retry generating text 2x times before giving up
+    const body =
+      options?.body ||
+      (await generate
+        .comment_body()
+        .catch(() =>
+          generate.comment_body().catch(() => generate.comment_body()),
+        ))
     const email = Result.safe(() =>
       build_email(
         message_id,
