@@ -113,23 +113,70 @@ export namespace tty {
         }
 
         // Prescreen
-        const prescreen_details = email_event_response.prescreening
-        if (prescreen_details) {
-          if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
-            if (options.heading)
-              console.log(
-                chalk.whiteBright('=== Comment: Prescreening Results ===') +
-                  '\n',
-              )
-            if (prescreen_details.isOk()) {
-              console.log(
-                highlight(TOML.stringify(prescreen_details.unwrap() as any), {
+        if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
+          if (options.heading)
+            console.log(
+              chalk.whiteBright('=== Comment: Prescreening Results ===') + '\n',
+            )
+          if (email_event_response.prescreening.isOk()) {
+            console.log(
+              highlight(
+                TOML.stringify(
+                  email_event_response.prescreening.unwrap() as any,
+                ),
+                {
                   language: 'toml',
                   ignoreIllegals: true,
-                }),
+                },
+              ),
+            )
+          } else {
+            console.log(chalk.redBright('Prescreening failed checks:\n'))
+            const prescreen_failures =
+              email_event_response.prescreening.unwrapErr()
+            if (prescreen_failures.r3ply_is_disabled.result == 'fail') {
+              // console.log(chalk.redBright("- check: r3ply is disabled"))
+              console.log(
+                highlight(
+                  TOML.stringify({
+                    r3ply_is_disabled:
+                      prescreen_failures.r3ply_is_disabled.errors,
+                  }),
+                ),
               )
-            } else {
-              chalk.redBright(prescreen_details.unwrapErr() + '\n')
+            }
+            if (prescreen_failures.comments_accepted.result == 'fail') {
+              // console.log(chalk.redBright("- check: comments accepted"))
+              console.log(
+                highlight(
+                  TOML.stringify({
+                    comments_accepted:
+                      prescreen_failures.comments_accepted.errors,
+                  }),
+                ),
+              )
+            }
+            if (prescreen_failures.comments_configured.result == 'fail') {
+              // console.log(chalk.redBright("- check: comments configured and enabled"))
+              console.log(
+                highlight(
+                  TOML.stringify({
+                    comments_configured:
+                      prescreen_failures.comments_configured.errors,
+                  }),
+                ),
+              )
+            }
+            if (prescreen_failures.email_size_bytes.result == 'fail') {
+              // console.log(chalk.redBright("- check: email size (bytes)"))
+              console.log(
+                highlight(
+                  TOML.stringify({
+                    email_size_bytes:
+                      prescreen_failures.email_size_bytes.errors,
+                  }),
+                ),
+              )
             }
           }
         }
