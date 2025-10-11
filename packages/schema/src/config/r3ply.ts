@@ -43,13 +43,15 @@ export const r3ply = {
       default: true,
     },
     'sites*': {
+      title: 'Allowed sites',
+      description:
+        'Glob patterns specifying what sites to accepts comments on behalf of (default is undefined, which allows any).',
       type: 'array',
       items: {
         type: 'string',
         pattern: '^[\\S]*$',
         maxLength: 128,
       },
-      default: ['**'],
     },
     admin: {
       type: 'array',

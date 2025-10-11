@@ -310,15 +310,23 @@ function comments_accepted(
 > {
   let errors: string[] = []
   // Check if system accepts comments on behalf of site
-  const system_check = Result.safe(() =>
-    comments_accepted.system_accepts_comments_for_site(
-      config.site.map((site) => site.domain),
-      system['sites*'],
-    ),
-  )
-  if (system_check.isErr()) {
-    errors = errors.concat(system_check.unwrapErr().message)
+  let system_pass = false
+  if (system['sites*']) {
+    const system_check = Result.safe(() =>
+      comments_accepted.system_accepts_comments_for_site(
+        config.site.map((site) => site.domain),
+        system['sites*']!,
+      ),
+    )
+    if (system_check.isErr()) {
+      errors = errors.concat(system_check.unwrapErr().message)
+    } else {
+      system_pass = true
+    }
+  } else {
+    system_pass = true
   }
+
   // Check if site accepts comments from system
   const site_check = Result.safe(() =>
     comments_accepted.site_accepts_comments_from_system(
@@ -330,7 +338,7 @@ function comments_accepted(
     errors = errors.concat(site_check.unwrapErr().message)
   }
   // Return either a pass or fail result object
-  if (system_check.isOk() && site_check.isOk()) {
+  if (system_pass && site_check.isOk() && errors.length == 0) {
     return Ok({
       result: 'pass',
       system_for_site: true,
@@ -340,8 +348,8 @@ function comments_accepted(
     return Err({
       result: 'fail',
       errors: errors as [string, ...string[]],
-      system_for_site: system_check.isOk(),
-      site_from_system: system_check.isOk(),
+      system_for_site: system_pass,
+      site_from_system: site_check.isOk(),
     })
   }
 }
@@ -363,12 +371,109 @@ namespace comments_accepted {
     const matches = micromatch(system_domains, site_r3ply_list)
     if (matches.length == 0)
       throw new Error(
-        `Site's configured r3ply list ${JSON.stringify(site_r3ply_list)} does not accept comments from any of these of these configured r3ply domains: '${system_domains}'`,
+        `Site's configured r3ply list ${JSON.stringify(site_r3ply_list)} does not accept comments from any of these of these configured r3ply domains: ${JSON.stringify(system_domains, null, 2)}`,
       )
   }
   if (import.meta.vitest) {
-    const { test, expect } = import.meta.vitest
-    // TODO
+    const { describe, test, expect } = import.meta.vitest
+    describe('comments_accepted', () => {
+      test('comments not accepted by system on behalf of site', () => {
+        const system = R3plySystemConfig({
+          domains: ['r3ply.com'],
+          'sites*': [],
+        }).value!
+        const site = R3plySiteConfig({
+          site: [
+            {
+              domain: 'example.com',
+              r3ply: 'r3ply.com',
+              signet: 'a'.repeat(22),
+              issued: '2025-10-11',
+            },
+          ],
+        }).value!
+        const [failed] = comments_accepted(system, site).intoTuple()
+        const [error, ...others] = failed?.errors!
+        expect(error).toMatch(
+          /does not accept comments on behalf of .* "example.com"/s,
+        )
+        expect(others).toStrictEqual([])
+      })
+      test('comments not accepted by site from system', () => {
+        const system = R3plySystemConfig({
+          domains: ['r3ply.com'],
+          'sites*': ['example.com'],
+        }).value!
+        const site = R3plySiteConfig({
+          site: [
+            {
+              domain: 'example.com',
+              r3ply: 'other.com',
+              signet: 'a'.repeat(22),
+              issued: '2025-10-11',
+            },
+          ],
+        }).value!
+        const [failed] = comments_accepted(system, site).intoTuple()
+        const [error, ...others] = failed?.errors!
+        expect(error).toMatch(/does not accept comments from .* "r3ply.com"/s)
+        expect(others).toStrictEqual([])
+      })
+      test('comments not accepted by/from either system or site', () => {
+        const system = R3plySystemConfig({
+          domains: ['r3ply.com'],
+          'sites*': ['pets.com'],
+        }).value!
+        const site = R3plySiteConfig({
+          site: [
+            {
+              domain: 'example.com',
+              r3ply: 'other.com',
+              signet: 'a'.repeat(22),
+              issued: '2025-10-11',
+            },
+          ],
+        }).value!
+        const [failed] = comments_accepted(system, site).intoTuple()
+        const [system_error, site_error, ...others] = failed?.errors!
+        expect(system_error).toMatch(
+          /does not accept comments on behalf of .* "example.com"/s,
+        )
+        expect(site_error).toMatch(
+          /does not accept comments from .* "r3ply.com"/s,
+        )
+        expect(others).toStrictEqual([])
+      })
+      test('default is comments should be accepted by system on behalf of any site', () => {
+        const system = R3plySystemConfig({
+          domains: ['r3ply.com'],
+        }).value!
+        const site = R3plySiteConfig({
+          site: [
+            {
+              domain: 'example.com',
+              r3ply: 'r3ply.com',
+              signet: 'a'.repeat(22),
+              issued: '2025-10-11',
+            },
+          ],
+        }).value!
+        const [, success] = comments_accepted(system, site).intoTuple()
+        expect(success?.result).toBe('pass')
+      })
+      test('default is no site accepts comments from a r3ply system, without explicitly saying so', () => {
+        const system = R3plySystemConfig({
+          domains: ['r3ply.com'],
+        }).value!
+        const site = R3plySiteConfig({}).value!
+        const [failure] = comments_accepted(system, site).intoTuple()
+        const [error, ...others] = failure?.errors!
+        expect(error).toMatch(
+          /Site's configured r3ply list \[\] does not accept comments from .* "r3ply.com"/s,
+        )
+        expect(others).toStrictEqual([])
+      })
+    })
   }
 }
 
