@@ -263,9 +263,39 @@ function r3ply_is_disabled(
 }
 namespace r3ply_is_disabled {
   if (import.meta.vitest) {
-    const { test, expect } = import.meta.vitest
-    test('r3ply_is_disabled', () => {
-      // TODO
+    const { describe, test, expect } = import.meta.vitest
+    describe('r3ply_is_disabled', () => {
+      test('r3ply disabled at system-level', () => {
+        const [failed] = r3ply_is_disabled(false, ['r3ply.com'], true, [
+          'example.com',
+        ]).intoTuple()
+        expect(failed?.errors).toStrictEqual([
+          'r3ply has been disabled at the system-level config for domains: r3ply.com',
+        ])
+      })
+      test('r3ply disabled at site-level', () => {
+        const [failed] = r3ply_is_disabled(true, ['r3ply.com'], false, [
+          'example.com',
+        ]).intoTuple()
+        expect(failed?.errors).toStrictEqual([
+          'r3ply has been disabled at the site-level config for domains: example.com',
+        ])
+      })
+      test('r3ply disabled at both system and site levels', () => {
+        const [failed] = r3ply_is_disabled(false, ['r3ply.com'], false, [
+          'example.com',
+        ]).intoTuple()
+        expect(failed?.errors).toStrictEqual([
+          'r3ply has been disabled at the system-level config for domains: r3ply.com',
+          'r3ply has been disabled at the site-level config for domains: example.com',
+        ])
+      })
+      test('r3ply is enabled at both system and site levels', () => {
+        const [, success] = r3ply_is_disabled(true, ['r3ply.com'], true, [
+          'example.com',
+        ]).intoTuple()
+        expect(success?.result).toBe('pass')
+      })
     })
   }
 }
