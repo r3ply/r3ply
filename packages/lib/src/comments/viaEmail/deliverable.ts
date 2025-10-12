@@ -44,34 +44,10 @@ export async function deliverable(
   const site = to_field_is_deliverable(accepted.to, sites)
 
   // check `Subject` header of comment is deliverable (note: if future subject types b are added, here is where to integrate that logic)
-  let subject: URL
-  switch (email_comments_config.subject) {
-    case 'url':
-      subject = url_subject_field_is_deliverable(
-        Option(accepted.subject).expect(
-          `config.comments.email.subject == "url" requires subject`,
-        ),
-        site.domain,
-        comments_config['paths*'],
-      )
-      break
-    case 'path':
-      subject = path_subject_field_is_deliverable(
-        Option(accepted.subject).expect(
-          `config.comments.email.subject == "path" requires subject`,
-        ),
-        site.domain,
-        comments_config['paths*'],
-      )
-      break
-    default:
-      throw new Error(
-        `Not implemented for config.comments.email.subject == ${email_comments_config.subject}`,
-      )
-  }
-
-  // check `Subject` header's domain is the same as local portion of to `To` address
-  subject_domain_matches_site_domain(subject, site.domain)
+  const subject = subject_resolves_to_valid_url(
+    Option(accepted.subject).expect('Subject is required for email comments'),
+    new URL('https://' + site.domain),
+  )
 
   // check `From` is not on site's `block_list`
   const redact = (email_address: string) =>
@@ -125,6 +101,85 @@ function to_field_is_deliverable(
     const [m] = matches
     const result = valid_possible_to_headers.find((h) => h.to == m.address)!
     return result
+  }
+}
+namespace to_field_is_deliverable {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    describe('to_field_is_deliverable', () => {
+      const prod_domain = 'example.com'
+      const test_domain = 'test.example.com'
+      const prod_r3ply = 'r3ply.com'
+      const test_r3ply = 'test.r3ply.com'
+      const signet_list = [
+        {
+          domain: prod_domain,
+          r3ply: prod_r3ply,
+          signet: 'a'.repeat(22),
+          issued: '2025-08-22',
+        },
+        {
+          domain: test_domain,
+          r3ply: test_r3ply,
+          signet: 'b'.repeat(22),
+          issued: '2025-08-22',
+        },
+      ]
+      const c: Addr = { address: `c.com@r3ply.com`, name: null }
+      test('Empty to address list is undeliverable', () => {
+        expect(() => to_field_is_deliverable([], signet_list)).throws(
+          /Comment is undeliverable/,
+        )
+      })
+      test('To address that matches what is configured is deliverable', () => {
+        const actual = to_field_is_deliverable(
+          [{ address: `${prod_domain}@${prod_r3ply}`, name: null }],
+          signet_list,
+        )
+        expect(actual.domain).toBe(prod_domain)
+        expect(actual.r3ply).toBe(prod_r3ply)
+      })
+      test('To address that does not match what is configured is undeliverable', () => {
+        const actual = () =>
+          to_field_is_deliverable(
+            [{ address: `${prod_domain}@${test_r3ply}`, name: null }],
+            signet_list,
+          )
+        expect(actual).throws(/Comment is undeliverable/)
+      })
+      test('To address list with at least one matching configuration is deliverable', () => {
+        const actual = to_field_is_deliverable(
+          [`${test_domain}@${test_r3ply}`, 'unrelated.com@ignore.com'].map(
+            (address) => ({ address, name: null }),
+          ),
+          signet_list,
+        )
+        expect(actual.domain).toBe(test_domain)
+        expect(actual.r3ply).toBe(test_r3ply)
+      })
+      test('To address list with no matching configuration is undeliverable', () => {
+        const actual = () =>
+          to_field_is_deliverable(
+            [`a.com@b.com`, 'unrelated.com@ignore.com'].map((address) => ({
+              address,
+              name: null,
+            })),
+            signet_list,
+          )
+        expect(actual).throws(/Comment is undeliverable/)
+      })
+      test('To address list matching multiple configured domains is undeliverable', () => {
+        const actual = () =>
+          to_field_is_deliverable(
+            [
+              `${prod_domain}@${prod_r3ply}`,
+              `${test_domain}@${test_r3ply}`,
+            ].map((address) => ({ address, name: null })),
+            signet_list,
+          )
+        expect(actual).throws(/Comment is undeliverable/)
+      })
+    })
   }
 }
 
@@ -181,6 +236,96 @@ function path_subject_field_is_deliverable(
   )
 }
 
+function subject_resolves_to_valid_url(subject: string, site_domain: URL) {
+  const subject_is_complete_url = Result.safe(() => new URL(subject))
+  if (subject_is_complete_url.isOk()) {
+    const subject_url = subject_is_complete_url.unwrap()
+    if (subject_url.hostname != site_domain.hostname)
+      throw new Error(
+        `URL in subject "${subject_url.toString()}" did not match site's hostname "${site_domain.hostname}"`,
+      )
+    else return subject_url
+  } else {
+    return new URL(subject, site_domain)
+  }
+}
+namespace subject_resolves_to_valid_url {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    describe('subject_resolves_to_valid_url', () => {
+      test('Subject line as URL must match site domain to be deliverable', () => {
+        const actual = () =>
+          subject_resolves_to_valid_url(
+            'https://a.com/blog/post123',
+            new URL('https://example.com'),
+          )
+        expect(actual).throws(/URL in subject .* did not match site's hostname/)
+      })
+      test('Subject line as URL that matches site domain is deliverable', () => {
+        const actual = subject_resolves_to_valid_url(
+          'https://example.com/blog/post123',
+          new URL('https://example.com'),
+        )
+        expect(actual).toStrictEqual(
+          new URL('https://example.com/blog/post123'),
+        )
+      })
+      test('Subject line as path is deliverable to site domain', () => {
+        const actual = subject_resolves_to_valid_url(
+          'blog/post123',
+          new URL('https://example.com'),
+        )
+        expect(actual).toStrictEqual(
+          new URL('https://example.com/blog/post123'),
+        )
+      })
+      test('Subject line as URL without protocol is treated as path', () => {
+        const actual = subject_resolves_to_valid_url(
+          'a.com/blog/post123',
+          new URL('https://example.com'),
+        )
+        expect(actual).toStrictEqual(
+          new URL('https://example.com/a.com/blog/post123'),
+        )
+      })
+      test('Subject line is URL encoded', () => {
+        const actual = subject_resolves_to_valid_url(
+          'a b c',
+          new URL('https://example.com'),
+        )
+        expect(actual).toStrictEqual(new URL('https://example.com/a%20b%20c'))
+      })
+      test('Subject line accepts relative paths', () => {
+        const actual = subject_resolves_to_valid_url(
+          '/a/b/../b2/c/../../b3',
+          new URL('https://example.com'),
+        )
+        expect(actual).toStrictEqual(new URL('https://example.com/a/b3'))
+      })
+      test('Subject line accepts fragments (anchor links)', () => {
+        const actual = subject_resolves_to_valid_url(
+          '/a/b#comment123',
+          new URL('https://example.com'),
+        )
+        expect(actual).toStrictEqual(
+          new URL('https://example.com/a/b#comment123'),
+        )
+      })
+      test('Subject line accepts text fragments', () => {
+        const actual = subject_resolves_to_valid_url(
+          '/a/#:~:text=Hey%2C-,thank%20you,-so%20much',
+          new URL('https://example.com'),
+        )
+        expect(actual).toStrictEqual(
+          new URL(
+            'https://example.com/a/#:~:text=Hey%2C-,thank%20you,-so%20much',
+          ),
+        )
+      })
+    })
+  }
+}
+
 /**
  * The subject's domain must match the site's domain
  * @param subject the URL object of the subject
@@ -232,80 +377,6 @@ async function from_field_is_deliverable(
 
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
-  test('to_field_is_deliverable', () => {
-    const site_domains = ['a.com', 'test.a.com']
-    const system_domains = ['r3ply.com', 'test.r3ply.com']
-    const site_to_r3ply_mappings = [
-      {
-        domain: 'a.com',
-        r3ply: 'r3ply.com',
-        signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
-        issued: '2025-08-22',
-      },
-      {
-        domain: 'test.a.com',
-        r3ply: 'test.r3ply.com',
-        signet: 'qhQ6YSUvQNLb1lCdw3kDRg',
-        issued: '2025-08-22',
-      },
-    ]
-    const a_at_r3ply: Addr = { address: `a.com@r3ply.com`, name: null }
-    const a_at_test_r3ply: Addr = {
-      address: `a.com@test.r3ply.com`,
-      name: null,
-    }
-    const test_a_at_r3ply: Addr = {
-      address: `test.a.com@r3ply.com`,
-      name: null,
-    }
-    const test_a_at_test_r3ply: Addr = {
-      address: `test.a.com@test.r3ply.com`,
-      name: null,
-    }
-    const c: Addr = { address: `c.com@r3ply.com`, name: null }
-    expect(
-      to_field_is_deliverable(
-        [a_at_r3ply, { address: 'unrelated.com', name: null }],
-        site_to_r3ply_mappings,
-      ).to,
-    ).toBe('a.com@r3ply.com')
-    expect(() =>
-      to_field_is_deliverable(
-        [a_at_test_r3ply, { address: 'unrelated.com', name: null }],
-        site_to_r3ply_mappings,
-      ),
-    ).throws(/Comment is undeliverable/)
-    expect(() =>
-      to_field_is_deliverable(
-        [test_a_at_r3ply, { address: 'unrelated.com', name: null }],
-        site_to_r3ply_mappings,
-      ),
-    ).throws(/Comment is undeliverable/)
-    expect(
-      to_field_is_deliverable(
-        [test_a_at_test_r3ply, { address: 'unrelated.com', name: null }],
-        site_to_r3ply_mappings,
-      ).to,
-    ).toBe('test.a.com@test.r3ply.com')
-    expect(
-      to_field_is_deliverable(
-        [test_a_at_r3ply, test_a_at_test_r3ply],
-        site_to_r3ply_mappings,
-      ).to,
-    ).toBe(test_a_at_test_r3ply.address)
-    expect(() =>
-      to_field_is_deliverable(
-        [test_a_at_r3ply, test_a_at_r3ply],
-        site_to_r3ply_mappings,
-      ),
-    ).toThrowError(/Comment is undeliverable/)
-    expect(() =>
-      to_field_is_deliverable([c], site_to_r3ply_mappings),
-    ).toThrowError(/Comment is undeliverable/)
-    expect(
-      to_field_is_deliverable([a_at_r3ply], site_to_r3ply_mappings).to,
-    ).toBe(a_at_r3ply.address)
-  })
   test('subject_is_a_url', () => {
     expect(
       url_subject_field_is_deliverable('https://a.com', 'a.com', ['/']),

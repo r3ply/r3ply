@@ -25,21 +25,6 @@ export const email = {
       default: ['**'],
       examples: ['test*', '!local'],
     },
-    subject: {
-      title: 'Subject line handling',
-      description:
-        'The subject line is used to indicate to what the comment is referring to. Use "url" to require the full URL and "path" for only the path portion. The resolved URL will always match the local part of the email\'s `TO` header. Default is "path".',
-      type: 'string',
-      enum: ['url', 'path'],
-      default: 'path',
-      $comment:
-        'if subject is configured as URL then it must match the domain of the site referenced in the local part of the email, i.e. <local>@<example.com>',
-      examples: [
-        'https://blog.example.com/posts/my-italian-vacation',
-        '/posts/my-italian-vacation',
-        'my-italian-vacation',
-      ],
-    },
     email_signature_separator: {
       title: 'Email signature separator',
       description:
