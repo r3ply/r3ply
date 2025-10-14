@@ -184,58 +184,11 @@ namespace to_field_is_deliverable {
 }
 
 /**
- * subject as url is deliverable
- *
- * @description for the `Subject` field to be deliverable it must be a URL, whose hostname is the same as one of the site's configured domains, with a path the site accepts comments at
- *
- * @param subject_str the email's subject field
- * @param site_domains the domains the site config accepts emails at
- * @param site_comment_paths the paths the site config accepts comments at
- * @returns
+ * @description If the subject parses as a fully qualified URL then its hostname MUST match the site's configured hostname. Otherwise, it will interpreted as a path.
+ * @param subject The email comment's "subject" which must be either a URL or URL path
+ * @param site_domain The site's configured domain
+ * @returns a new URL resolving the subject as a path or URL, and the site's configured domain
  */
-function url_subject_field_is_deliverable(
-  subject_str: string,
-  site_domain: string,
-  site_comment_paths: string[],
-) {
-  const subject = Result.safe(() => new URL(subject_str)).expect(
-    `config.comments.email.subject == "url" requires subject parses as a URL`,
-  )
-
-  // check subject has same hostname is inclued in `site.domains`, as well as pathname as `site.comments.paths`
-  if (site_domain != subject.hostname)
-    throw new Error(
-      `Site domain '${site_domain}' differs from intended recipient '${subject.hostname}'. The local portion of the email must match the configured domain.`,
-    )
-  const subject_matches_configured_paths = micromatch(
-    [subject.pathname],
-    site_comment_paths,
-  )
-  if (subject_matches_configured_paths.length == 0)
-    throw new Error(
-      `Site is not configured to accept comments at path '${subject.pathname}'`,
-    )
-
-  return subject
-}
-
-function path_subject_field_is_deliverable(
-  subject_str: string,
-  site_domain: string,
-  site_comment_paths: string[],
-) {
-  const base_url = new URL('https://example.com')
-  base_url.hostname = site_domain
-  const url = new URL(subject_str, base_url)
-  if (url.hostname != site_domain)
-    throw new Error(`${site_domain} could not be assigned as a hostname`)
-  return url_subject_field_is_deliverable(
-    url.toString(),
-    site_domain,
-    site_comment_paths,
-  )
-}
-
 function subject_resolves_to_valid_url(subject: string, site_domain: URL) {
   const subject_is_complete_url = Result.safe(() => new URL(subject))
   if (subject_is_complete_url.isOk()) {
@@ -327,20 +280,6 @@ namespace subject_resolves_to_valid_url {
 }
 
 /**
- * The subject's domain must match the site's domain
- * @param subject the URL object of the subject
- * @param site_domain the URL object of the site's domain (i.e. local part of `To` email header)
- */
-function subject_domain_matches_site_domain(subject: URL, site_domain: string) {
-  const url = new URL('https://example.com')
-  url.host = site_domain
-  if (subject.host != url.host)
-    throw new Error(
-      `Local part of \`To\` header must be same domain as \`Subject\` header (${subject.host} doesn't match ${url.host})`,
-    )
-}
-
-/**
  * @description for the `From` field to be deliverable it must not match with the site's configured block_list
  * @param from_secret the from field, wrapped in a `Secret` type
  * @param anonymize a function that's used to obscure the secret, e.g. a hash function or an hmac
@@ -369,80 +308,102 @@ async function from_field_is_deliverable(
   )
   if (author_on_site_block_list.length > 0)
     throw new Error(
-      `Comment author was on block_list, matches: ${author_on_site_block_list}`,
+      `Comment author was on block_list, matches: ${JSON.stringify(author_on_site_block_list, null, 2)}`,
     )
   const token = Encrypted(await encrypt(from_secret.value))
   return { pseudonym, token }
 }
-
-if (import.meta.vitest) {
-  const { test, expect } = import.meta.vitest
-  test('subject_is_a_url', () => {
-    expect(
-      url_subject_field_is_deliverable('https://a.com', 'a.com', ['/']),
-    ).toStrictEqual(new URL('https://a.com'))
-    expect(() =>
-      url_subject_field_is_deliverable('https://a.com', 'b.com', ['/']),
-    ).toThrowError(/differs from intended recipient/)
-    expect(() =>
-      url_subject_field_is_deliverable('https://a.com', 'a.com', ['/blog']),
-    ).toThrowError(/not configured to accept comments at path/)
-  })
-  test('subject_is_a_path', () => {
-    expect(
-      path_subject_field_is_deliverable('/example/blog', 'example.com', ['**']),
-    ).toStrictEqual(new URL('https://example.com/example/blog'))
-    expect(
-      path_subject_field_is_deliverable('../example/blog', 'example.com', [
-        '**',
-      ]),
-    ).toStrictEqual(new URL('https://example.com/example/blog'))
-    expect(
-      path_subject_field_is_deliverable(
-        'https://evil.com/example/blog',
-        'example.com',
-        ['**'],
-      ),
-    ).toStrictEqual(
-      new URL('https://example.com/https://evil.com/example/blog'),
-    )
-    expect(
-      path_subject_field_is_deliverable('hello world', 'example.com', ['**']),
-    ).toStrictEqual(new URL('https://example.com/hello%20world'))
-  })
-  test('subject_domain_matches_site_domain', () => {
-    expect(() =>
-      subject_domain_matches_site_domain(new URL('https://a.com'), 'b.com'),
-    ).toThrow(/a.com doesn't match b.com/)
-    expect(
-      subject_domain_matches_site_domain(new URL('https://a.com'), 'a.com'),
-    )
-  })
-  test('from_field_is_deliverable', async () => {
-    const from: Secret<string> = Secret('bob@example.com')
-    await expect(
-      from_field_is_deliverable(
-        from,
-        (input: string) => Promise.resolve(input),
-        [],
-        (input: string) => Promise.resolve(input),
-      ),
-    ).resolves.not.toThrowError()
-    await expect(
-      from_field_is_deliverable(
-        from,
-        (input: string) => Promise.resolve(input),
-        ['alice@example.com'],
-        (input: string) => Promise.resolve(input),
-      ),
-    ).resolves.not.toThrowError()
-    await expect(
-      from_field_is_deliverable(
-        from,
-        (input: string) => Promise.resolve(input),
-        ['bob@example.com'],
-        (input: string) => Promise.resolve(input),
-      ),
-    ).rejects.toThrowError(/Comment author was on block_list/)
-  })
+namespace from_field_is_deliverable {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    describe('from_field_is_deliverable', () => {
+      test('Empty block list is always deliverable', async () => {
+        await expect(
+          from_field_is_deliverable(
+            Secret('bob@example.com'),
+            (input: string) => Promise.resolve(input),
+            [],
+            (input: string) => Promise.resolve(input),
+          ),
+        ).resolves.toStrictEqual({
+          pseudonym: {
+            value: 'bob@example.com',
+          },
+          token: {
+            value: 'bob@example.com',
+          },
+        })
+      })
+      test('Non-empty block list is still deliverable if "From" doesn\'t match', async () => {
+        await expect(
+          from_field_is_deliverable(
+            Secret('bob@example.com'),
+            (input: string) => Promise.resolve(input),
+            ['alice@example.com'],
+            (input: string) => Promise.resolve(input),
+          ),
+        ).resolves.toStrictEqual({
+          pseudonym: {
+            value: 'bob@example.com',
+          },
+          token: {
+            value: 'bob@example.com',
+          },
+        })
+      })
+      test('Clear text email is checked against blocklist', async () => {
+        await expect(
+          from_field_is_deliverable(
+            Secret('bob@example.com'),
+            (input: string) => Promise.resolve(input),
+            ['bob@example.com'],
+            (input: string) => Promise.resolve(input),
+          ),
+        ).rejects.toThrowError(
+          /Comment author was on block_list, matches: \[\s*"bob@example.com"\s*\]/,
+        )
+      })
+      test('Anonymized email is checked against blocklist', async () => {
+        await expect(
+          from_field_is_deliverable(
+            Secret('bob@example.com'),
+            (input: string) => Promise.resolve('ABC123DEF456XYZ789'),
+            ['ABC123DEF456XYZ789'],
+            (input: string) => Promise.resolve(input),
+          ),
+        ).rejects.toThrowError(
+          /Comment author was on block_list, matches: \[\s*"ABC123DEF456XYZ789"\s*\]/,
+        )
+      })
+      test('Blocklist utilizes glob patterns', async () => {
+        await expect(
+          from_field_is_deliverable(
+            Secret('mallory@evil.com'),
+            (input: string) => Promise.resolve('ABC123DEF456XYZ789'),
+            ['*@evil.com'],
+            (input: string) => Promise.resolve(input),
+          ),
+        ).rejects.toThrowError(
+          /Comment author was on block_list, matches: \[\s*"mallory@evil.com"\s*\]/,
+        )
+      })
+      test('Anonymized and encrypted versions of cleartext email are returned', async () => {
+        await expect(
+          from_field_is_deliverable(
+            Secret('bob@example.com'),
+            (input: string) => Promise.resolve('ABC123DEF456XYZ789'),
+            ['*@evil.com'],
+            (input: string) => Promise.resolve('bob@example.com^abc'),
+          ),
+        ).resolves.toStrictEqual({
+          pseudonym: {
+            value: 'ABC123DEF456XYZ789',
+          },
+          token: {
+            value: 'bob@example.com^abc',
+          },
+        })
+      })
+    })
+  }
 }
