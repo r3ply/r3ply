@@ -241,17 +241,13 @@ async function handle_email_event(
    * When the deliverability of an email is determined it will return all the parts that are needed to begin processing it, and by this point the author of the email will have their email encrypted and pseudo-anonymized.
    */
   const deliverable_result = await Result.safe(
-    deliverable(
-      accepted_email,
-      {
-        comments_config,
-        email_comments_config,
-        sites: email_event.config.site,
-        anonymize: Anonymize.hmac(dependencies.anonymize_key),
-        encrypt: Encrypt.email(dependencies.encrypt_key),
-      },
+    deliverable(accepted_email, {
       metadata,
-    ),
+      email_comments_config,
+      sites: email_event.config.site,
+      anonymize: Anonymize.hmac(dependencies.anonymize_key),
+      encrypt: Encrypt.email(dependencies.encrypt_key),
+    }),
   )
   results.deliverable = deliverable_result
   if (deliverable_result.isErr()) return results

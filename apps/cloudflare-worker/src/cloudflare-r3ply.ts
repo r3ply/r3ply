@@ -48,7 +48,7 @@ export function mk_cf_deliverable(comment_state: Option<CommentState>) {
   const deliverable: typeof comments.email.deliverable = async (
     ...params: Parameters<typeof deliverable>
   ) => {
-    const [, , metadata] = params
+    const [, { metadata }] = params
     const deliverable = comments.email.deliverable(...params)
     return Result.safe(deliverable).then((deliverable_result) => {
       const db_result = comment_state.map((comment_state) => {

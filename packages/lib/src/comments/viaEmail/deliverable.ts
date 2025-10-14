@@ -27,18 +27,18 @@ export async function deliverable(
   accepted: AcceptedEmail,
   {
     sites,
-    comments_config,
     email_comments_config,
     anonymize,
     encrypt,
+    // metadata isn't used in the library but is exposed at the API level for consuming applications to use
+    metadata,
   }: {
     sites: R3plySignetConfig[]
-    comments_config: R3plyCommentsConfig
     email_comments_config: R3plyEmailCommentsConfig
     anonymize: AnonymizeEmail
     encrypt: EncryptEmail
+    metadata: CommentMetadata
   },
-  metadata: CommentMetadata,
 ): Promise<DeliverableEmail> {
   // check `To` has address, and is addressed properly (to this site + r3ply pair, i.e. <YOUR_SITE>@<R3PLY>)
   const site = to_field_is_deliverable(accepted.to, sites)
