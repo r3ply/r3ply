@@ -28,6 +28,13 @@ async function make_short_signet(
     label?: string
   },
 ): Promise<R3plySignetConfig> {
+  // normalize inputs
+  const site_url = new URL('https://' + site_domain)
+  const r3ply_url = new URL('https://' + r3ply_domain)
+  // Generate a key ID based on the date for future rotations
+  const date = dayjs(issued_date ?? new Date())
+  if (!date.isValid()) throw new Error('issued must be a valid date')
+  const issued = date.format('YYYY-MM-DD')
   // Import master key (32 bytes)
   const master_key_bytes = Uint8Array.from(
     Buffer.from(encryption_key_b64, 'base64'),
@@ -39,42 +46,132 @@ async function make_short_signet(
     false,
     ['sign'],
   )
-  // Generate a key ID based on the date for future rotations
-  const date = dayjs(issued_date ?? new Date())
-  if (!date.isValid()) throw new Error('issued must be a valid date')
-  const issued = date.format('YYYY-MM-DD')
   // Derive a per-site HMAC key
   const hmac_bytes = new Uint8Array(
     await crypto.subtle.sign(
       'HMAC',
       crypto_key,
-      new TextEncoder().encode(`${r3ply_domain}:${issued}:${site_domain}`),
+      new TextEncoder().encode(
+        `${r3ply_url.hostname}:${issued}:${site_url.hostname}`,
+      ),
     ),
   )
   // Take first 16 bytes for a short envelope
   const envelope_bytes = hmac_bytes.slice(0, 16)
   const signet = base64UrlEncode(envelope_bytes) // ~22-char base64url string
-  return { domain: site_domain, r3ply: r3ply_domain, signet, issued, label }
+  return {
+    domain: site_url.hostname,
+    r3ply: r3ply_url.hostname,
+    signet,
+    issued,
+    label,
+  }
 }
 namespace make_short_signet {
   if (import.meta.vitest) {
-    const { test, expect } = import.meta.vitest
-    test('make_short_signet', async () => {
-      await expect(
-        make_short_signet(
-          '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs=', // openssl rand -base64 32
-          {
+    const { describe, test, expect } = import.meta.vitest
+    describe('make_short_signet', async () => {
+      // openssl rand -base64 32
+      const test_key = '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs='
+      test('Generates a signet from a site + r3ply domain, plus optional issued date', async () => {
+        await expect(
+          make_short_signet(test_key, {
             r3ply_domain: 'r3ply.com',
             site_domain: 'example.com',
             issued_date: '2025-08-25',
-          },
-        ),
-      ).resolves.toStrictEqual({
-        domain: 'example.com',
-        issued: '2025-08-25',
-        label: undefined,
-        r3ply: 'r3ply.com',
-        signet: 'IvDnuNdK51pGP4H6t1EfUQ',
+          }),
+        ).resolves.toStrictEqual({
+          domain: 'example.com',
+          issued: '2025-08-25',
+          label: undefined,
+          r3ply: 'r3ply.com',
+          signet: 'IvDnuNdK51pGP4H6t1EfUQ',
+        })
+      })
+      test('Issued date must parse to a valid date', async () => {
+        await expect(
+          make_short_signet(
+            test_key, // openssl rand -base64 32
+            {
+              r3ply_domain: 'r3ply.com',
+              site_domain: 'example.com',
+              issued_date: 'abc',
+            },
+          ),
+        ).rejects.toThrow(/issued must be a valid date/)
+      })
+      describe('Different details produce different signets', () => {
+        const site_domain = 'example.com'
+        const r3ply_domain = 'r3ply.com'
+        const issued_date = '2025-08-25'
+        test('r3ply domains', async () => {
+          const test_r3ply_domain = 'test.r3ply.com'
+          expect(test_r3ply_domain).not.toBe(r3ply_domain)
+          await expect(
+            make_short_signet(test_key, {
+              r3ply_domain,
+              site_domain,
+              issued_date,
+            }),
+          ).resolves.not.toStrictEqual(
+            await make_short_signet(test_key, {
+              r3ply_domain: test_r3ply_domain,
+              site_domain,
+              issued_date,
+            }),
+          )
+        })
+        test('Site domains', async () => {
+          const test_site_domain = 'foo.com'
+          expect(test_site_domain).not.toBe(site_domain)
+          await expect(
+            make_short_signet(test_key, {
+              r3ply_domain,
+              site_domain,
+              issued_date,
+            }),
+          ).resolves.not.toStrictEqual(
+            await make_short_signet(test_key, {
+              r3ply_domain,
+              site_domain: test_site_domain,
+              issued_date,
+            }),
+          )
+        })
+        test('Issued dates', async () => {
+          const test_issued_date = '2025-10-14'
+          expect(test_issued_date).not.toBe(issued_date)
+          await expect(
+            make_short_signet(test_key, {
+              r3ply_domain,
+              site_domain,
+              issued_date,
+            }),
+          ).resolves.not.toStrictEqual(
+            await make_short_signet(test_key, {
+              r3ply_domain,
+              site_domain,
+              issued_date: test_issued_date,
+            }),
+          )
+        })
+        test('Domains are normalized (e.g. case insensitive)', async () => {
+          expect(r3ply_domain.toUpperCase()).not.toBe(r3ply_domain)
+          expect(site_domain.toUpperCase()).not.toBe(r3ply_domain)
+          await expect(
+            make_short_signet(test_key, {
+              r3ply_domain,
+              site_domain,
+              issued_date,
+            }),
+          ).resolves.toStrictEqual(
+            await make_short_signet(test_key, {
+              r3ply_domain: r3ply_domain.toUpperCase(),
+              site_domain: site_domain.toUpperCase(),
+              issued_date,
+            }),
+          )
+        })
       })
     })
   }
@@ -88,7 +185,7 @@ namespace make_short_signet {
  * @param encryption_key_b64 Master key as base64 string
  * @returns Uint8Array containing the HMAC digest of email
  */
-async function hmac(
+async function hmac_email(
   email: string,
   {
     encryption_key_b64,
@@ -140,21 +237,42 @@ async function hmac(
   )
   return toHex(hmac_email)
 }
-namespace hmac {
+namespace hmac_email {
   if (import.meta.vitest) {
     const { describe, test, expect } = import.meta.vitest
-    test('hmac', async () => {
-      await expect(
-        hmac('bob@foo.com', {
-          encryption_key_b64: '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs=', // openssl rand -base64 32
+    describe('hmac_email', async () => {
+      // openssl rand -base64 32
+      const test_key = '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs='
+      test("Email address is anonymized with an hmac computed using the site's signet", async () => {
+        await expect(
+          hmac_email('bob@foo.com', {
+            encryption_key_b64: test_key, // openssl rand -base64 32
+            site_domain: 'example.com',
+            r3ply_domain: 'r3ply.com',
+            signet: 'IvDnuNdK51pGP4H6t1EfUQ',
+            issued_date: '2025-08-25',
+          }),
+        ).resolves.toBe(
+          '0075389005c7dd5eedd31aff1ad5d76c64e50fd5cb6535045acf35936849891f',
+        )
+      })
+      test('Different signets produce different pseudonyms', async () => {
+        const email_address = 'bob@foo.com'
+        const pseudonym1 = hmac_email(email_address, {
+          encryption_key_b64: test_key,
           site_domain: 'example.com',
           r3ply_domain: 'r3ply.com',
           signet: 'IvDnuNdK51pGP4H6t1EfUQ',
           issued_date: '2025-08-25',
-        }),
-      ).resolves.toBe(
-        '0075389005c7dd5eedd31aff1ad5d76c64e50fd5cb6535045acf35936849891f',
-      )
+        })
+        const pseudonym2 = hmac_email(email_address, {
+          encryption_key_b64: test_key,
+          site_domain: 'example.com',
+          r3ply_domain: 'r3ply.com',
+          signet: 'IvDnuNdK51pGP4H6t1EfUQ',
+          issued_date: '2025-08-25',
+        })
+      })
     })
   }
 }
@@ -184,7 +302,7 @@ export const Anonymize = {
       signet: string,
       issued_date: string,
     ) =>
-      hmac(email_address, {
+      hmac_email(email_address, {
         encryption_key_b64: encryption_key,
         site_domain,
         r3ply_domain,
