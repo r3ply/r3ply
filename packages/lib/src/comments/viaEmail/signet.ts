@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { toHex } from '../../util'
+import { base64UrlEncode, toHex } from '../../util'
 import crypto from 'crypto' // DON'T REMOVE!
 import { R3plySystemConfig, R3plySignetConfig } from '@r3ply/schema/config'
 
@@ -70,7 +70,7 @@ async function make_short_signet(
 
   // Take first 16 bytes for a short envelope
   const envelope_bytes = hmac_raw.slice(0, 16)
-  const signet = b64url(envelope_bytes) // ~22-char base64url string
+  const signet = base64UrlEncode(envelope_bytes) // ~22-char base64url string
 
   return { domain: site_domain, r3ply: r3ply_domain, signet, issued, label }
 }
@@ -135,7 +135,7 @@ export async function hmac(
   const hmacRaw = new Uint8Array(
     await crypto.subtle.sign('HMAC', cryptoKey, siteData),
   )
-  const expectedEnvelope = b64url(hmacRaw.slice(0, 16))
+  const expectedEnvelope = base64UrlEncode(hmacRaw.slice(0, 16))
 
   if (expectedEnvelope !== signet) {
     throw new Error('Envelope mismatch — possible tampered config')
@@ -229,15 +229,6 @@ export const Signet = {
       }
     }
   },
-}
-
-function b64url(bytes: ArrayBuffer | Uint8Array): string {
-  const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)
-  let str = ''
-  for (let i = 0; i < arr.length; i++) {
-    str += String.fromCharCode(arr[i])
-  }
-  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') // strip padding
 }
 
 if (import.meta.vitest) {
