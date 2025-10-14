@@ -1,34 +1,21 @@
 import dayjs from 'dayjs'
 import { base64UrlEncode, toHex } from '../../util'
-import crypto from 'crypto' // DON'T REMOVE!
+import crypto from 'crypto'
 import { R3plySystemConfig, R3plySignetConfig } from '@r3ply/schema/config'
 
 /**
- * Generates a short, user-friendly envelope string, called a `signet` from a binary master key.
+ * @description
+ * Generates a short, user-friendly envelope string, called a `signet` from a master key.
  *
- * This envelope can be used in site configuration to represent secret key material
- * without exposing the actual master key.
- *
- * Process:
- * 1. Takes a Uint8Array (the raw master key or derived key material)
- * 2. Encodes it in Base64URL
- * 3. Optionally truncates or shortens it to produce a compact, readable token
- *
- * Security:
- * - The envelope is not the actual encryption key; it is meant to be used as
- *   a reference or wrapped key in configurations.
- * - The underlying key material should remain secret and stored securely.
- *
- * Usage:
- * - Include the generated envelope in public site config
- * - The service can decrypt or derive the underlying key using its own secrets
- *
- * @param encryption_key - Raw key material as Uint8Array
- * @param site_domain - The domain this signet is being issued to
+ * @param encryption_key_b64 Encryption key as base64 string
+ * @param site_domain The domain this signet is being issued to
+ * @param r3ply_domain The domain of the r3ply service that issued the signet
+ * @param issued_date Date the signet was issued, usually as YYYY-MM-DD
+ * @param label A name for this signet
  * @returns Short Base64URL string representing the signet (i.e. envelope) and its issue date (i.e. key id)
  */
 async function make_short_signet(
-  encryption_key: string,
+  encryption_key_b64: string,
   {
     site_domain,
     r3ply_domain,
@@ -41,124 +28,135 @@ async function make_short_signet(
     label?: string
   },
 ): Promise<R3plySignetConfig> {
-  // Service master key stored in environment (32 bytes, base64)
-  const master_key_b64 = encryption_key
-  const masterKey = Uint8Array.from(atob(master_key_b64), (c) =>
-    c.charCodeAt(0),
-  )
-
-  // Generate a key ID based on the date for future roations
-  const day = dayjs(issued_date ?? new Date())
-  if (!day.isValid()) throw new Error('issued must be a valid date')
-  const issued = day.format('YYYY-MM-DD')
-
-  // Derive a per-site HMAC key
-  const site_entry = new TextEncoder().encode(
-    `${r3ply_domain}:${issued}:${site_domain}`,
+  // Import master key (32 bytes)
+  const master_key_bytes = Uint8Array.from(
+    Buffer.from(encryption_key_b64, 'base64'),
   )
   const crypto_key = await crypto.subtle.importKey(
     'raw',
-    masterKey,
+    master_key_bytes,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign'],
   )
-
-  const hmac_raw = new Uint8Array(
-    await crypto.subtle.sign('HMAC', crypto_key, site_entry),
+  // Generate a key ID based on the date for future rotations
+  const date = dayjs(issued_date ?? new Date())
+  if (!date.isValid()) throw new Error('issued must be a valid date')
+  const issued = date.format('YYYY-MM-DD')
+  // Derive a per-site HMAC key
+  const hmac_bytes = new Uint8Array(
+    await crypto.subtle.sign(
+      'HMAC',
+      crypto_key,
+      new TextEncoder().encode(`${r3ply_domain}:${issued}:${site_domain}`),
+    ),
   )
-
   // Take first 16 bytes for a short envelope
-  const envelope_bytes = hmac_raw.slice(0, 16)
+  const envelope_bytes = hmac_bytes.slice(0, 16)
   const signet = base64UrlEncode(envelope_bytes) // ~22-char base64url string
-
   return { domain: site_domain, r3ply: r3ply_domain, signet, issued, label }
+}
+namespace make_short_signet {
+  if (import.meta.vitest) {
+    const { test, expect } = import.meta.vitest
+    test('make_short_signet', async () => {
+      await expect(
+        make_short_signet(
+          '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs=', // openssl rand -base64 32
+          {
+            r3ply_domain: 'r3ply.com',
+            site_domain: 'example.com',
+            issued_date: '2025-08-25',
+          },
+        ),
+      ).resolves.toStrictEqual({
+        domain: 'example.com',
+        issued: '2025-08-25',
+        label: undefined,
+        r3ply: 'r3ply.com',
+        signet: 'IvDnuNdK51pGP4H6t1EfUQ',
+      })
+    })
+  }
 }
 
 /**
- * Computes a deterministic HMAC of an email using a r3ply service's secret key + a domain's `signet` and `issued` config values
+ * @description
+ * Used to anonymize email addresses, by computing a deterministic HMAC of an email using a r3ply service's secret key + a domain's `signet` and `issued` config values.
  *
- * HMAC is used to create stable pseudonyms for moderation or identity purposes
- * without revealing the original message (e.g., email address).
- *
- * Process:
- * 1. Takes a secret key (Uint8Array) and a message string
- * 2. Uses HMAC-SHA256 to compute a digest of the message under the key
- * 3. Returns the digest as a Uint8Array, or optionally encoded in Base64/hex
- *
- * Security:
- * - The HMAC is deterministic: the same message and key always produce the same output
- * - Without access to the secret key, it is computationally infeasible to reverse
- *   the HMAC to recover the original message
- *
- * Usage:
- * - Generate commenter pseudonyms (`identity`) for moderation
- * - Verify message authenticity in future checks
- *
- * @param encryption_key - Secret key for HMAC as Uint8Array
- * @param message - Input message string to hash
- * @returns Uint8Array containing the HMAC digest
+ * @param email Email address to hmac
+ * @param encryption_key_b64 Master key as base64 string
+ * @returns Uint8Array containing the HMAC digest of email
  */
-export async function hmac(
+async function hmac(
   email: string,
   {
-    encryption_key,
+    encryption_key_b64,
     site_domain,
     r3ply_domain,
     signet,
     issued_date,
   }: {
-    encryption_key: string
+    encryption_key_b64: string
     site_domain: string
     r3ply_domain: string
     signet: string
     issued_date: string
   },
 ): Promise<string> {
-  // Decode service master key (same one used to generate envelopes)
-  const masterKeyBase64 = encryption_key
-  const masterKey = Uint8Array.from(atob(masterKeyBase64), (c) =>
-    c.charCodeAt(0),
+  // Import master key (same one used to originally generate envelope, i.e. signet)
+  const master_key = await crypto.subtle.importKey(
+    'raw',
+    Uint8Array.from(Buffer.from(encryption_key_b64, 'base64')),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
   )
-
   // Recompute expected envelope (sanity check)
-  const siteData = new TextEncoder().encode(
+  const site_data_envelope = new TextEncoder().encode(
     `${r3ply_domain}:${issued_date}:${site_domain}`,
   )
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    masterKey,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
+  const hmac_bytes = new Uint8Array(
+    await crypto.subtle.sign('HMAC', master_key, site_data_envelope),
   )
-  const hmacRaw = new Uint8Array(
-    await crypto.subtle.sign('HMAC', cryptoKey, siteData),
-  )
-  const expectedEnvelope = base64UrlEncode(hmacRaw.slice(0, 16))
-
-  if (expectedEnvelope !== signet) {
+  const expected_envelope = base64UrlEncode(hmac_bytes.slice(0, 16))
+  if (expected_envelope !== signet) {
     throw new Error('Envelope mismatch — possible tampered config')
   }
-
-  // Derive actual per-site key (full 32 bytes from SHA-256 HMAC, not just truncated part)
-  const perSiteKey = hmacRaw
-
-  // Use per-site key to HMAC the email
-  const perSiteCryptoKey = await crypto.subtle.importKey(
+  // Derive actual per-site key (full 32 bytes from SHA-256 HMAC, not just truncated part) to HMAC the email
+  const site_key = await crypto.subtle.importKey(
     'raw',
-    perSiteKey,
+    hmac_bytes,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign'],
   )
-
-  const emailBytes = new TextEncoder().encode(email.toLowerCase().trim())
-  const emailHmac = new Uint8Array(
-    await crypto.subtle.sign('HMAC', perSiteCryptoKey, emailBytes),
+  const hmac_email = new Uint8Array(
+    await crypto.subtle.sign(
+      'HMAC',
+      site_key,
+      new TextEncoder().encode(email.toLowerCase().trim()),
+    ),
   )
-
-  return toHex(emailHmac)
+  return toHex(hmac_email)
+}
+namespace hmac {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    test('hmac', async () => {
+      await expect(
+        hmac('bob@foo.com', {
+          encryption_key_b64: '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs=', // openssl rand -base64 32
+          site_domain: 'example.com',
+          r3ply_domain: 'r3ply.com',
+          signet: 'IvDnuNdK51pGP4H6t1EfUQ',
+          issued_date: '2025-08-25',
+        }),
+      ).resolves.toBe(
+        '0075389005c7dd5eedd31aff1ad5d76c64e50fd5cb6535045acf35936849891f',
+      )
+    })
+  }
 }
 
 /**
@@ -187,7 +185,7 @@ export const Anonymize = {
       issued_date: string,
     ) =>
       hmac(email_address, {
-        encryption_key,
+        encryption_key_b64: encryption_key,
         site_domain,
         r3ply_domain,
         signet,
@@ -229,31 +227,4 @@ export const Signet = {
       }
     }
   },
-}
-
-if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
-
-  // openssl rand -base64 32
-  const test_key = '0lR0WsHxbNYTMGMXYnGFPbDwTNbZJw3IF1gh/BPmeDs='
-  it('generates a key id and envelope, and can use that to make an hmac', async () => {
-    const result = await make_short_signet(test_key, {
-      r3ply_domain: 'r3ply.com',
-      site_domain: 'example.com',
-      issued_date: '2025-08-25',
-    })
-    expect(result.signet).toBe('IvDnuNdK51pGP4H6t1EfUQ')
-
-    const result2 = await hmac('bob@foo.com', {
-      encryption_key: test_key,
-      site_domain: 'example.com',
-      r3ply_domain: 'r3ply.com',
-      signet: result.signet,
-      issued_date: result.issued,
-    })
-
-    expect(result2).toBe(
-      '0075389005c7dd5eedd31aff1ad5d76c64e50fd5cb6535045acf35936849891f',
-    )
-  })
 }
