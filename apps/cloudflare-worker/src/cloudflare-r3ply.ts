@@ -86,7 +86,7 @@ export function mk_cf_process(comment_state: Option<CommentState>) {
   const process: typeof comments.process = async (
     ...params: Parameters<typeof process>
   ) => {
-    const [, , metadata] = params
+    const [, { metadata }] = params
     const proccessed = comments.process(...params)
 
     return Result.safe(proccessed).then((processed_result) => {

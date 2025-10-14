@@ -44,9 +44,15 @@ export interface CommentTemplateContext {
  */
 export async function process(
   context: CommentTemplateContext,
-  site: R3plySiteConfig,
-  metadata: CommentMetadata,
-  comment_template?: string,
+  {
+    comment_template,
+    site,
+    metadata,
+  }: {
+    comment_template?: string
+    site: R3plySiteConfig
+    metadata: CommentMetadata
+  },
 ) {
   let comment: string
   if (comment_template) {

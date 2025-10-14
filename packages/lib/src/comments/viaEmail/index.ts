@@ -286,12 +286,11 @@ async function handle_email_event(
    * It is here that an actual comment is formed by binding the template context from the prior step with the templates provided by the site's configuration. If no template is provided then the full template context is stringified and written from its JSON object representation.
    */
   results.comment = await Result.safe(
-    process(
-      template_context,
-      email_event.config,
+    process(template_context, {
+      comment_template: email_event.config.comments?.email?.['comment_{}'],
       metadata,
-      email_event.config.comments?.email?.['comment_{}'],
-    ),
+      site: email_event.config,
+    }),
   )
 
   /**
