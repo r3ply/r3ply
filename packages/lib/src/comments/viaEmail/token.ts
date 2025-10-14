@@ -5,6 +5,7 @@ import crypto from 'crypto' // DON'T REMOVE!
 const EMAIL_PAD_LEN = 320
 
 /**
+ * @description
  * Encrypts an email address into a fixed-length, opaque token suitable for storage.
  *
  * The token is constructed as: Base64URL([nonce || ciphertext || tag]), where:
@@ -32,75 +33,48 @@ const EMAIL_PAD_LEN = 320
  * - This token is opaque and should NOT be used for moderation; use a deterministic HMAC instead
  * - Master key rotation is supported by storing a token_version and re-encrypting with a new key
  *
- * @param masterKey - 32-byte AES-256 symmetric key (Uint8Array) stored securely
+ * @param symmetric_encryption_key_b64 - 32-byte AES-256 symmetric key as base64 string
  * @param email - Email address to encrypt
  * @returns Base64URL string containing nonce, ciphertext, and authentication tag
  */
-export async function encrypt_email(
-  symmetric_encryption_master_key: string,
+async function encrypt_email(
+  symmetric_encryption_key_b64: string,
   email: string,
 ): Promise<string> {
-  // Convert base64 stored key to an array
-  const masterKeyBase64 = symmetric_encryption_master_key
-  const masterKey = Uint8Array.from(atob(masterKeyBase64), (c) =>
-    c.charCodeAt(0),
-  )
-
   // Import key for AES-GCM
-  const key = await crypto.subtle.importKey(
+  const symmetric_encryption_key = await crypto.subtle.importKey(
     'raw',
-    Buffer.from(masterKey),
+    Buffer.from(symmetric_encryption_key_b64, 'base64'),
     { name: 'AES-GCM' },
     false,
     ['encrypt'],
   )
-
   // Generate 12-byte nonce
   const nonce = crypto.getRandomValues(new Uint8Array(12))
-
   // Encode email to bytes
-  const encoder = new TextEncoder()
-  const email_bytes = encoder.encode(email)
+  const email_bytes = new TextEncoder().encode(email)
   if (email_bytes.length > EMAIL_PAD_LEN)
     throw new Error('Email too long for padding')
   const padded = new Uint8Array(EMAIL_PAD_LEN)
   padded.set(email_bytes)
-
   // Encrypt
   const ciphertext = new Uint8Array(
-    await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, key, padded),
+    await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: nonce },
+      symmetric_encryption_key,
+      padded,
+    ),
   )
-
   // Concatenate nonce + ciphertext
   const token_bytes = new Uint8Array(nonce.length + ciphertext.length)
   token_bytes.set(nonce, 0)
   token_bytes.set(ciphertext, nonce.length)
-
   // Base64URL encode
   return base64UrlEncode(token_bytes)
 }
 
 /**
- *  Type used to represent a function that accepts an email address and returns a future opaque, encrypted token
- *  note: the encryption key is expected to be curried
- */
-export type EncryptEmail = (email_address: string) => Promise<string>
-export const Encrypt = {
-  email:
-    (encryption_key: string): EncryptEmail =>
-    (email_address: string) =>
-      encrypt_email(encryption_key, email_address),
-}
-
-export type DecryptEmail = (token: string) => Promise<string>
-export const Decrypt = {
-  email:
-    (decryption_key: string): DecryptEmail =>
-    (token: string) =>
-      decrypt_email(decryption_key, token),
-}
-
-/**
+ * @description
  * Decrypts a token produced by `encryptEmail` to recover the original email address.
  *
  * The token is expected to be Base64URL([nonce || ciphertext || tag]):
@@ -115,11 +89,6 @@ export const Decrypt = {
  * 4. Decrypt ciphertext using AES-GCM with the nonce
  * 5. Remove padding (trailing null bytes) to recover the original email
  *
- * Security:
- * - AES-GCM ensures confidentiality and integrity; tampering with the token will cause decryption to fail
- * - Nonce included in the token ensures that repeated encryptions of the same email are unique
- * - Padding prevents leaking the original email length
- *
  * Notes:
  * - The token must have been generated using the same master key (or corresponding key version)
  * - Throws an error if decryption fails, e.g., due to wrong key, corrupted token, or tampering
@@ -128,32 +97,23 @@ export const Decrypt = {
  * @param token - Base64URL string produced by `encryptEmail`
  * @returns The original email address as a string
  */
-export async function decrypt_email(
-  symmetric_decryption_master_key: string,
+async function decrypt_email(
+  symmetric_decryption_key_b64: string,
   token: string,
 ): Promise<string> {
-  // Convert base64 stored key to an array
-  const masterKeyBase64 = symmetric_decryption_master_key
-  const masterKey = Uint8Array.from(atob(masterKeyBase64), (c) =>
-    c.charCodeAt(0),
-  )
-
-  // Convert base64 token to bytes
-  const tokenBytes = base64UrlDecode(token)
-
-  // Split nonce and ciphertext+tag
-  const nonce = tokenBytes.slice(0, 12)
-  const ciphertext = tokenBytes.slice(12)
-
   // Import key
   const key = await crypto.subtle.importKey(
     'raw',
-    Buffer.from(masterKey),
+    Buffer.from(symmetric_decryption_key_b64, 'base64'),
     { name: 'AES-GCM' },
     false,
     ['decrypt'],
   )
-
+  // Convert base64 token to bytes
+  const token_bytes = base64UrlDecode(token)
+  // Split nonce and ciphertext+tag
+  const nonce = token_bytes.slice(0, 12)
+  const ciphertext = token_bytes.slice(12)
   // Decrypt
   const padded = new Uint8Array(
     await crypto.subtle.decrypt(
@@ -162,51 +122,60 @@ export async function decrypt_email(
       ciphertext,
     ),
   )
-
   // Remove trailing null bytes
   let end = padded.length
-  while (end > 0 && padded[end - 1] === 0) {
-    end--
-  }
+  while (end > 0 && padded[end - 1] === 0) end--
   const email_bytes = padded.slice(0, end)
-
   return new TextDecoder().decode(email_bytes)
 }
 
 if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
+  const { it, test, expect } = import.meta.vitest
 
   // openssl rand -base64 32
   const test_key = '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
-  it('encrypts/decrypts an email/token', async () => {
-    const encrypted_token = await encrypt_email(test_key, 'bob@example.com')
-    const email = await decrypt_email(test_key, encrypted_token)
-    expect(email).toBe('bob@example.com')
+  test('encrypts/decrypts an email/token', async () => {
+    await expect(
+      encrypt_email(test_key, 'bob@example.com').then((encrypted_token) =>
+        decrypt_email(test_key, encrypted_token),
+      ),
+    ).resolves.toBe('bob@example.com')
   })
-
-  it('curries the encrypt/decrypt keys', async () => {
-    const encrypt = Encrypt.email(test_key)
-    const decrypt = Decrypt.email(test_key)
-    const encrypted_token = await encrypt('bob@example.com')
-    const email = await decrypt(encrypted_token)
-    expect(email).toBe('bob@example.com')
-  })
-
-  it('should encrypt to a fixed length', async () => {
-    const token1 = await encrypt_email(test_key, 'a@b.com')
-    const token2 = await encrypt_email(test_key, 'bob@example.com')
-    const token3 = await encrypt_email(
+  test('encrypts to a fixed length', async () => {
+    const expected_token_length = 464
+    await expect(encrypt_email(test_key, 'a@b.com')).resolves.toHaveLength(expected_token_length)
+    await expect(encrypt_email(test_key, 'bob@example.com')).resolves.toHaveLength(expected_token_length)
+    await expect(encrypt_email(
       test_key,
       'fourscoureandsevenyearsagotoday@example.com',
-    )
-    const token4 = await encrypt_email(
+    )).resolves.toHaveLength(expected_token_length)
+    await expect(encrypt_email(
       test_key,
       'ipledgeallegiencetotheflagoftheunitedstatesofamericaandtotherepublicforwhichitstands@example.com',
-    )
-    const expected_token_length = 464
-    expect(token1.length).toBe(expected_token_length)
-    expect(token2.length).toBe(expected_token_length)
-    expect(token3.length).toBe(expected_token_length)
-    expect(token4.length).toBe(expected_token_length)
+    )).resolves.toHaveLength(expected_token_length)
   })
+  test(`throws an error if an email exceeds the limit of ${EMAIL_PAD_LEN}`, async () => {
+    const max_repeat = EMAIL_PAD_LEN - "@b.com".length
+    await expect(encrypt_email(test_key, `${'a'.repeat(max_repeat)}@b.com`)).resolves.not.toThrowError()
+    await expect(encrypt_email(test_key, `${'a'.repeat(max_repeat + 1)}@b.com`)).rejects.toThrowError(/Email too long/)
+  })
+}
+
+/**
+ *  Type used to represent a function that accepts an email address and returns a future opaque, encrypted token
+ *  note: the encryption key is expected to be curried
+ */
+export type EncryptEmail = (email_address: string) => Promise<string>
+export const Encrypt = {
+  email:
+    (encryption_key: string): EncryptEmail =>
+    (email_address: string) =>
+      encrypt_email(encryption_key, email_address),
+}
+export type DecryptEmail = (token: string) => Promise<string>
+export const Decrypt = {
+  email:
+    (decryption_key: string): DecryptEmail =>
+    (token: string) =>
+      decrypt_email(decryption_key, token),
 }

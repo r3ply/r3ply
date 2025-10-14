@@ -9,7 +9,7 @@ import micromatch from 'micromatch'
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
 import { AcceptedEmail } from './accept'
 import { AnonymizeEmail } from './signet'
-import { EncryptEmail } from './crypto'
+import { EncryptEmail } from './token'
 import { CommentMetadata } from '../receive'
 
 export interface DeliverableEmail {

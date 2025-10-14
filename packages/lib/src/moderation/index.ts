@@ -7,7 +7,7 @@ import {
 } from '@r3ply/schema/config/moderation'
 import { CommentTemplateContext } from '../comments/process'
 import micromatch from 'micromatch'
-import { Decrypt, DecryptEmail, Encrypt } from '../comments/viaEmail/crypto'
+import { Decrypt, DecryptEmail, Encrypt } from '../comments/viaEmail/token'
 import { Err, Ok, Result } from 'oxide.ts'
 
 export * from './local'

@@ -3,7 +3,7 @@ export * from './deliverable'
 export * from './prepare'
 export * from './prescreen'
 export * from './signet'
-export * from './crypto'
+export * from './token'
 import { R3plySystemConfig, R3plySiteConfig } from '@r3ply/schema/config'
 import {
   R3plyCommentsConfig,
@@ -23,7 +23,7 @@ import {
 import { prepare as r3ply_prepare, EmailTemplateContext } from './prepare'
 import { process as r3ply_process, CommentTemplateContext } from '../process'
 import { Anonymize, SignetIssuer } from './signet'
-import { Encrypt } from './crypto'
+import { Encrypt } from './token'
 import { Err, Ok, Result } from 'oxide.ts'
 import {
   LocalModeration,
