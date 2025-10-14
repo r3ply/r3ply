@@ -1,9 +1,18 @@
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
-import { Secret } from './types'
 import { get_from, get_message_id, get_subject, get_to } from './email'
 
 import { parse_email_bytes } from '@r3ply/wasm'
 import { CommentMetadata } from '../receive'
+
+/**
+ * Just a simple wrapper used to indicated that something is secret
+ */
+export interface Secret<T> {
+  value: T
+}
+export function Secret<T>(value: T): Secret<T> {
+  return { value }
+}
 
 export interface AcceptedEmail {
   messageId: string

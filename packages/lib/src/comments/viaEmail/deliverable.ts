@@ -1,16 +1,32 @@
 import { Option, Result } from 'oxide.ts'
-import { Encrypted, Redacted as Anonymized, Secret } from './types'
 import { R3plySignetConfig } from '@r3ply/schema/config'
-import {
-  R3plyCommentsConfig,
-  R3plyEmailCommentsConfig,
-} from '@r3ply/schema/config/comments'
+import { R3plyEmailCommentsConfig } from '@r3ply/schema/config/comments'
 import micromatch from 'micromatch'
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
-import { AcceptedEmail } from './accept'
+import { AcceptedEmail, Secret } from './accept'
 import { AnonymizeEmail } from './signet'
 import { EncryptEmail } from './token'
 import { CommentMetadata } from '../receive'
+
+/**
+ * Just a simple wrapper used to indicate that something has been encrypted
+ */
+export interface Encrypted<T> {
+  value: T
+}
+export function Encrypted<T>(value: T): Encrypted<T> {
+  return { value }
+}
+
+/**
+ * Just a simple wrapper used to indicate that something has been redacted
+ */
+export interface Anonymized<T> {
+  value: T
+}
+export function Anonymized<T>(value: T): Anonymized<T> {
+  return { value }
+}
 
 export interface DeliverableEmail {
   to: string
