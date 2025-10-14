@@ -13,7 +13,11 @@ import { ParseResult } from '@exodus/schemasafe'
 import chalk from 'chalk'
 import { RiMarkov } from 'rita'
 import { fileURLToPath } from 'url'
-import { util as r3ply_util, Signet, moderation as mod_todo } from '@r3ply/lib'
+import {
+  util as r3ply_util,
+  SignetIssuer,
+  moderation as mod_todo,
+} from '@r3ply/lib'
 import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
 import crypto from 'crypto'
@@ -529,7 +533,7 @@ export namespace generate {
     },
   ): Promise<R3plySignetConfig> {
     if (r3ply == project.DEFAULT_R3PLY_DOMAIN) {
-      return Signet.issue(key, cli_system)(domain, r3ply, {
+      return SignetIssuer(key, cli_system)(domain, r3ply, {
         issued_date: issued,
         label,
       })

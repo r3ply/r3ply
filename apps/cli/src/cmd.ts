@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import { project, generate, moderation } from './lib'
 import { util } from './util'
-import { Ok, Result } from 'oxide.ts'
+import { Result } from 'oxide.ts'
 import {
   R3plySignetConfig,
   R3plySiteConfig,
@@ -9,7 +9,7 @@ import {
 } from '@r3ply/schema/config'
 import {
   R3ply,
-  Signet,
+  SignetIssuer,
   moderation as mod_todo,
   util as r3ply_util,
 } from '@r3ply/lib'
@@ -22,8 +22,6 @@ import {
   GitHubModerationTicket,
   LocalModerationRequest,
   LocalModerationTicket,
-  ModerationRequest,
-  ModerationTicket,
 } from 'packages/lib/src/moderation'
 
 // init ------------------------------------------------------------------------
@@ -56,7 +54,7 @@ export function init_cmd(cwd: string) {
             await project.get_cli_system_config(cwd),
           )
           const { r3ply_dir, signet_key } = util.unsafeUnwrap(result)
-          const signet = await Signet.issue(signet_key, system_config)(
+          const signet = await SignetIssuer(signet_key, system_config)(
             project.DEFAULT_SITE_DOMAIN,
             project.DEFAULT_R3PLY_DOMAIN,
             {
