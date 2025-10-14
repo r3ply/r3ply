@@ -267,14 +267,13 @@ async function handle_email_event(
     CommentTemplateContext & EmailTemplateContext,
     Error
   > = await Result.safe(
-    prepare(
-      deliverable_email,
+    prepare(deliverable_email, {
       metadata,
-      email_event.config,
+      config: email_event.config,
       comments_config,
       email_comments_config,
-      dependencies.system_config,
-    ),
+      system: dependencies.system_config,
+    }),
   )
   results.prepared = template_result
   if (template_result.isErr()) return results

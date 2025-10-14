@@ -67,7 +67,7 @@ export function mk_cf_prepare(comment_state: Option<CommentState>) {
   const prepare: typeof comments.email.prepare = async (
     ...params: Parameters<typeof prepare>
   ) => {
-    const [, metadata] = params
+    const [, { metadata }] = params
     const prepared = comments.email.prepare(...params)
     return Result.safe(prepared).then((prepared_result) => {
       const db_result = comment_state.map((comment_state) => {

@@ -45,11 +45,19 @@ export interface EmailTemplateContext {
  */
 export async function prepare(
   deliverable: DeliverableEmail,
-  metadata: CommentMetadata,
-  config: R3plySiteConfig,
-  comments_config: R3plyCommentsConfig,
-  email_comments_config: R3plyEmailCommentsConfig,
-  system: R3plySystemConfig,
+  {
+    metadata,
+    config,
+    comments_config,
+    email_comments_config,
+    system,
+  }: {
+    metadata: CommentMetadata
+    config: R3plySiteConfig
+    comments_config: R3plyCommentsConfig
+    email_comments_config: R3plyEmailCommentsConfig
+    system: R3plySystemConfig
+  },
 ): Promise<CommentTemplateContext & EmailTemplateContext> {
   // get values from receive
   let { comment_id, ts_rcvd } = metadata
