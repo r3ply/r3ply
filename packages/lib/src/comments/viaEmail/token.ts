@@ -143,21 +143,30 @@ if (import.meta.vitest) {
   })
   test('encrypts to a fixed length', async () => {
     const expected_token_length = 464
-    await expect(encrypt_email(test_key, 'a@b.com')).resolves.toHaveLength(expected_token_length)
-    await expect(encrypt_email(test_key, 'bob@example.com')).resolves.toHaveLength(expected_token_length)
-    await expect(encrypt_email(
-      test_key,
-      'fourscoureandsevenyearsagotoday@example.com',
-    )).resolves.toHaveLength(expected_token_length)
-    await expect(encrypt_email(
-      test_key,
-      'ipledgeallegiencetotheflagoftheunitedstatesofamericaandtotherepublicforwhichitstands@example.com',
-    )).resolves.toHaveLength(expected_token_length)
+    await expect(encrypt_email(test_key, 'a@b.com')).resolves.toHaveLength(
+      expected_token_length,
+    )
+    await expect(
+      encrypt_email(test_key, 'bob@example.com'),
+    ).resolves.toHaveLength(expected_token_length)
+    await expect(
+      encrypt_email(test_key, 'fourscoureandsevenyearsagotoday@example.com'),
+    ).resolves.toHaveLength(expected_token_length)
+    await expect(
+      encrypt_email(
+        test_key,
+        'ipledgeallegiencetotheflagoftheunitedstatesofamericaandtotherepublicforwhichitstands@example.com',
+      ),
+    ).resolves.toHaveLength(expected_token_length)
   })
   test(`throws an error if an email exceeds the limit of ${EMAIL_PAD_LEN}`, async () => {
-    const max_repeat = EMAIL_PAD_LEN - "@b.com".length
-    await expect(encrypt_email(test_key, `${'a'.repeat(max_repeat)}@b.com`)).resolves.not.toThrowError()
-    await expect(encrypt_email(test_key, `${'a'.repeat(max_repeat + 1)}@b.com`)).rejects.toThrowError(/Email too long/)
+    const max_repeat = EMAIL_PAD_LEN - '@b.com'.length
+    await expect(
+      encrypt_email(test_key, `${'a'.repeat(max_repeat)}@b.com`),
+    ).resolves.not.toThrowError()
+    await expect(
+      encrypt_email(test_key, `${'a'.repeat(max_repeat + 1)}@b.com`),
+    ).rejects.toThrowError(/Email too long/)
   })
 }
 

@@ -23,6 +23,44 @@ export function get_message_id(email: Email) {
     throw new Error('`Message_Id` must not be missing from email')
   return [...values][0]
 }
+export namespace get_message_id {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    // prettier-ignore
+    describe('get_message_id', async () => {
+      // @ts-ignore
+      const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
+      // @ts-ignore
+      const mal2_000 = await import('../../test-data/eml/malformed2/000.eml?raw')
+      // @ts-ignore
+      const real_000 = await import('../../test-data/eml/real/000.eml?raw')
+      test('Message-ID must not be missing', () => {
+        const message = parse_email_bytes(
+          new TextEncoder().encode(mal1_001.default),
+        )
+        expect(() => get_message_id(message)).toThrowError(
+          /`Message_Id` must not be missing/,
+        )
+      })
+      test("There must not be multiple Message-ID's", () => {
+        const message = parse_email_bytes(
+          new TextEncoder().encode(mal2_000.default),
+        )
+        expect(() => get_message_id(message)).toThrowError(
+          /more than one Message_Id/,
+        )
+      })
+      test('Parses Message-ID', () => {
+        const message = parse_email_bytes(
+          new TextEncoder().encode(real_000.default),
+        )
+        expect(get_message_id(message)).toBe(
+          'FE97A840-9401-4B26-902E-61EB5D6CD285@example.com',
+        )
+      })
+    })
+  }
+}
 
 /**
  * @description Gets the From header from an email
@@ -55,6 +93,36 @@ export function get_from(email: Email) {
   if (values.size == 0) throw new Error('`From` must not be missing from email')
   return [...values][0]
 }
+export namespace get_from {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    // prettier-ignore
+    describe('get_from', async () => {
+      // @ts-ignore
+      const real_000 = await import('../../test-data/eml/real/000.eml?raw')
+      // @ts-ignore
+      const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
+      // @ts-ignore
+      const mal2_005 = await import('../../test-data/eml/malformed2/005.eml?raw')
+      test('Gets an address', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(real_000.default))
+        expect(get_from(message).address).toBe('test@example.com')
+      })
+      test('Gets a name', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(real_000.default))
+        expect(get_from(message).name).toBe('Guybrush Threepwood')
+      })
+      test('From must not be missing', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
+        expect(() => get_from(message)).toThrowError(/`From` must not be missing/)
+      })
+      test('There must not be more than one From', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal2_005.default))
+        expect(() => get_from(message)).toThrowError(/more than one `From`/)
+      })
+    })
+  }
+}
 
 /**
  * @description Gets all To header values from an Email
@@ -81,6 +149,37 @@ export function get_to(email: Email) {
   if (values.size == 0) throw new Error('`To` must not be missing from email')
   return [...values]
 }
+export namespace get_to {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    // prettier-ignore
+    describe('get_to', async () => {
+      // @ts-ignore
+      const real_000 = await import('../../test-data/eml/real/000.eml?raw')
+      // @ts-ignore
+      const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
+      // @ts-ignore
+      const mal2_005 = await import('../../test-data/eml/malformed2/005.eml?raw')
+      test('Get To fields', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(real_000.default))
+        expect(get_to(message)).toStrictEqual([
+          {
+            "address": "bob@example.com",
+            "name": null,
+          },
+          {
+            "address": "alice@example.com",
+            "name": "Alice",
+          }
+        ])
+      })
+      test('To field must not be missing', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
+        expect(() => get_to(message)).toThrowError(/`To` must not be missing/)
+      })
+    })
+  }
+}
 
 /**
  * @description Get the Date header of an email.
@@ -99,10 +198,42 @@ export function get_date(email: Email) {
     throw new Error('Emails must not have more than one Date')
   if (values.size == 0) throw new Error('Date must not be missing from email')
   let result = [...values][0]
-  let rfc3339 = Util.dt_to_rfc3339(result)
+  let rfc3339 = util.dt_to_rfc3339(result)
   let parsed_date = dayjs(rfc3339)
   if (!parsed_date.isValid()) throw new Error(`Date is invalid: ${rfc3339}`)
-  return { dt: result, rfc3339: Util.dt_to_rfc3339(result) }
+  return { dt: result, rfc3339: util.dt_to_rfc3339(result) }
+}
+export namespace get_date {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    // prettier-ignore
+    describe('get_date', async () => {
+      // @ts-ignore
+      const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
+      // @ts-ignore
+      const mal2_002 = await import('../../test-data/eml/malformed2/002.eml?raw')
+      // @ts-ignore
+      const mal2_003 = await import('../../test-data/eml/malformed2/003.eml?raw')
+      // @ts-ignore
+      const real_000 = await import('../../test-data/eml/real/000.eml?raw')
+      test('Date must not be missing', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
+        expect(() => get_date(message)).toThrowError(/Date must not be missing/)
+      })
+      test('There must not be more than one date', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal2_002.default))
+        expect(() => get_date(message)).toThrowError(/more than one Date/)
+      })
+      test('Date must be valid', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal2_003.default))
+        expect(() => get_date(message)).toThrowError(/Date is invalid/)
+      })
+      test('Get\'s an email\'s Date header', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(real_000.default))
+        expect(get_date(message).rfc3339).toBe('2023-06-20T20:28:11+02:00')
+      })
+    })
+  }
 }
 
 /**
@@ -159,6 +290,50 @@ export function get_auth_results(email: Email) {
   }
   return [...values][0]
 }
+export namespace get_auth_results {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    // prettier-ignore
+    describe('get_auth_results', async () => {
+      // @ts-ignore
+      const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
+      // @ts-ignore
+      const mal2_004 = await import('../../test-data/eml/malformed2/004.eml?raw')
+      // @ts-ignore
+      const real_001 = await import('../../test-data/eml/real/001.eml?raw')
+      // @ts-ignore
+      const real_002 = await import('../../test-data/eml/real/002.eml?raw')
+      test('Get failed authentication results', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
+        expect(get_auth_results(message)).toStrictEqual({
+          dkim_pass: false,
+          dmarc_pass: false,
+          spf_pass: false,
+        })
+      })
+      test('Get passing authentication results', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(real_001.default))
+        expect(get_auth_results(message)).toStrictEqual({
+          dkim_pass: true,
+          dmarc_pass: true,
+          spf_pass: true,
+        })
+      })
+      test('Get spf failing authentication results', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(real_002.default))
+        expect(get_auth_results(message)).toStrictEqual({
+          dkim_pass: true,
+          dmarc_pass: true,
+          spf_pass: false,
+        })
+      })
+      test('There must not be more than one authentication results', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal2_004.default))
+        expect(() => get_auth_results(message)).toThrowError(/multiple Authentication-Results/)
+      })
+    })
+  }
+}
 
 /**
  * @description Gets the subject line of an email.
@@ -176,6 +351,32 @@ export function get_subject(email: Email) {
   if (values.size == 1) return [...values][0]
   return undefined
 }
+export namespace get_subject {
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+    // prettier-ignore
+    describe('get_subject', async () => {
+      // @ts-ignore
+      const mal2_001 = await import('../../test-data/eml/malformed2/001.eml?raw')
+      // @ts-ignore
+      const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
+      // @ts-ignore
+      const real_000 = await import('../../test-data/eml/real/000.eml?raw')
+      test('Must not have multiple subjects', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal2_001.default))
+        expect(() => get_subject(message)).toThrowError(/must not have multiple subjects/)
+      })
+      test('Subject header can be missing from email', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
+        expect(get_subject(message)).toBe(undefined)
+      })
+      test('Gets subject header from email', () => {
+        const message = parse_email_bytes(new TextEncoder().encode(real_000.default))
+        expect(get_subject(message)).toBe('This is a test email')
+      })
+    })
+  }
+}
 
 /**
  * @description This returns all the text parts of the email body.
@@ -189,8 +390,46 @@ export function get_body_txt(email: Email) {
     .map((part_type_w_text) => part_type_w_text.Text)
     .join('')
 }
+export namespace get_body_txt {
+  if (import.meta.vitest) {
+    const { test, expect } = import.meta.vitest
+    // prettier-ignore
+    test('get_body_txt', async () => {
+      // @ts-ignore
+      const rfc_000 = await import('../../test-data/eml/rfc/000.eml?raw')
+      // @ts-ignore
+      const rfc_000_json = await import('../../test-data/eml/rfc/000.json')
+      // @ts-ignore
+      const mal_014 = await import('../../test-data/eml/malformed/014.eml?raw')
+      // @ts-ignore
+      const mal_014_json = await import('../../test-data/eml/malformed/014.json')
+      // @ts-ignore
+      const mal_000 = await import('../../test-data/eml/malformed/000.eml?raw')
+      // @ts-ignore
+      const mal_000_json = await import('../../test-data/eml/malformed/000.json')
+      // @ts-ignore
+      const mal_016 = await import('../../test-data/eml/malformed/016.eml?raw')
+      // @ts-ignore
+      const mal_016_json = await import('../../test-data/eml/malformed/016.json')
+      let message = parse_email_bytes(new TextEncoder().encode(rfc_000.default))
+      expect(get_body_txt(message)).toBe(
+        [1, 2].map((i) => rfc_000_json.parts[i].body.Text).join(''),
+      )
+      message = parse_email_bytes(new TextEncoder().encode(mal_014.default))
+      expect(get_body_txt(message)).toBe(
+        [1].map((i) => mal_014_json.parts[i].body.Text).join(''),
+      )
+      message = parse_email_bytes(new TextEncoder().encode(mal_000.default))
+      expect(get_body_txt(message)).toBe('')
+      message = parse_email_bytes(new TextEncoder().encode(mal_016.default))
+      expect(get_body_txt(message)).toBe(
+        [3, 4, 5].map((i) => mal_016_json.parts[i].body.Text).join(''),
+      )
+    })
+  }
+}
 
-export namespace Util {
+namespace util {
   /**
    * @description filter an array of address using a glob pattern
    * @param addrs an array of Addr objects
@@ -216,7 +455,39 @@ export namespace Util {
     if (values.size == 0) throw new Error('Glob pattern was too unique')
     return [...values][0]
   }
-
+  export namespace unique_addr {
+    if (import.meta.vitest) {
+      const { describe, test, expect } = import.meta.vitest
+      // prettier-ignore
+      describe('unique_addr', () => {
+        const addresses: Addr[] = [
+          { name: 'foo', address: 'bar@a.com' },
+          { name: 'baz', address: 'biz@b.com' },
+          { name: 'italian foo', address: 'bar@a.com.it' },
+        ]
+        test('Must not be empty', () => {
+          expect(() => util.unique_addr([], ['*'])).toThrowError(/can not be empty/)
+        })
+        test('Must not return multiple addresses', () => {
+          expect(() => util.unique_addr(addresses, ['*.com']).address)
+            .toThrowError(/pattern was not unique enough/)
+        })
+        test('Must return an address', () => {
+          expect(() => util.unique_addr(addresses, ['asddasdas']).address)
+            .toThrowError(/pattern was too unique/)
+        })
+        test('Returns a unique address', () => {
+          expect(util.unique_addr(addresses, ['*@a.com']).address).toBe('bar@a.com')
+        })
+      })
+    }
+  }
+  /**
+   * @description takes a DateTime object from a parsed email and returns a string formatted as rfc 3339
+   * @param dt the DateTime object
+   * @returns a rfc 3339 formatted string
+   * @see DateTime
+   */
   export function dt_to_rfc3339(dt: DateTime) {
     return `${dt.year}-${dt.month.toString().padStart(2, '0')}-${dt.day.toString().padStart(2, '0')}T${dt.hour
       .toString()
@@ -227,176 +498,29 @@ export namespace Util {
       dt.tz_before_gmt ? '-' : '+'
     }${dt.tz_hour.toString().padStart(2, '0')}:${dt.tz_minute.toString().padStart(2, '0')}`
   }
-}
-
-// TODO: for some reason this is breaking my cloudflare build
-if (import.meta.vitest) {
-  const { test, expect } = import.meta.vitest
-  // @ts-ignore
-  const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
-  // @ts-ignore
-  const mal2_000 = await import('../../test-data/eml/malformed2/000.eml?raw')
-  // @ts-ignore
-  const real_000 = await import('../../test-data/eml/real/000.eml?raw')
-  test('get_message_id', () => {
-    let message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
-    expect(() => get_message_id(message)).toThrowError(
-      /`Message_Id` must not be missing/,
-    )
-    message = parse_email_bytes(new TextEncoder().encode(mal2_000.default))
-    expect(() => get_message_id(message)).toThrowError(
-      /more than one Message_Id/,
-    )
-    message = parse_email_bytes(new TextEncoder().encode(real_000.default))
-    expect(get_message_id(message)).toBe(
-      'FE97A840-9401-4B26-902E-61EB5D6CD285@example.com',
-    )
-  })
-  test('get_from', async () => {
-    // @ts-ignore
-    const real_000 = await import('../../test-data/eml/real/000.eml?raw')
-    // @ts-ignore
-    const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
-    // @ts-ignore
-    const mal2_005 = await import('../../test-data/eml/malformed2/005.eml?raw')
-    // @ts-ignore
-    const mal2_006 = await import('../../test-data/eml/malformed2/006.eml?raw')
-    let message = parse_email_bytes(new TextEncoder().encode(real_000.default))
-    expect(get_from(message).address).toBe('test@example.com')
-    expect(get_from(message).name).toBe('Guybrush Threepwood')
-    message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
-    expect(() => get_from(message)).toThrowError(/`From` must not be missing/)
-    message = parse_email_bytes(new TextEncoder().encode(mal2_005.default))
-    expect(() => get_from(message)).toThrowError(/more than one `From`/)
-    message = parse_email_bytes(new TextEncoder().encode(mal2_006.default))
-    expect(() => get_from(message)).toThrowError(/`From` must not be missing/)
-  })
-  test('get_to', async () => {
-    // @ts-ignore
-    const real_000 = await import('../../test-data/eml/real/000.eml?raw')
-    // @ts-ignore
-    const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
-    // @ts-ignore
-    const mal2_005 = await import('../../test-data/eml/malformed2/005.eml?raw')
-    let message = parse_email_bytes(new TextEncoder().encode(real_000.default))
-    expect(get_to(message).map((addr) => addr.address)).toStrictEqual([
-      'bob@example.com',
-      'alice@example.com',
-    ])
-    message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
-    expect(() => get_to(message)).toThrowError(/`To` must not be missing/)
-  })
-  test('unique_addr', () => {
-    expect(() => Util.unique_addr([], ['*'])).toThrowError(/can not be empty/)
-    let addresses: Addr[] = [
-      { name: 'foo', address: 'bar@a.com' },
-      { name: 'baz', address: 'biz@b.com' },
-      { name: 'italian foo', address: 'bar@a.com.it' },
-    ]
-    expect(Util.unique_addr(addresses, ['*@a.com']).address).toBe('bar@a.com')
-    expect(() => Util.unique_addr(addresses, ['*.com']).address).toThrowError(
-      /pattern was not unique enough/,
-    )
-    expect(
-      () => Util.unique_addr(addresses, ['asddasdas']).address,
-    ).toThrowError(/pattern was too unique/)
-  })
-  test('get_date', async () => {
-    // @ts-ignore
-    const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
-    // @ts-ignore
-    const mal2_002 = await import('../../test-data/eml/malformed2/002.eml?raw')
-    // @ts-ignore
-    const mal2_003 = await import('../../test-data/eml/malformed2/003.eml?raw')
-    // @ts-ignore
-    const real_000 = await import('../../test-data/eml/real/000.eml?raw')
-    let message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
-    expect(() => get_date(message)).toThrowError(/Date must not be missing/)
-    message = parse_email_bytes(new TextEncoder().encode(mal2_002.default))
-    expect(() => get_date(message)).toThrowError(/more than one Date/)
-    message = parse_email_bytes(new TextEncoder().encode(mal2_003.default))
-    expect(() => get_date(message)).toThrowError(/Date is invalid/)
-    message = parse_email_bytes(new TextEncoder().encode(real_000.default))
-    expect(get_date(message).rfc3339).toBe('2023-06-20T20:28:11+02:00')
-  })
-  test('get_auth_results', async () => {
-    // @ts-ignore
-    const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
-    // @ts-ignore
-    const mal2_004 = await import('../../test-data/eml/malformed2/004.eml?raw')
-    // @ts-ignore
-    const real_001 = await import('../../test-data/eml/real/001.eml?raw')
-    // @ts-ignore
-    const real_002 = await import('../../test-data/eml/real/002.eml?raw')
-    let message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
-    expect(get_auth_results(message)).toStrictEqual({
-      dkim_pass: false,
-      dmarc_pass: false,
-      spf_pass: false,
-    })
-    message = parse_email_bytes(new TextEncoder().encode(mal2_004.default))
-    expect(() => get_auth_results(message)).toThrowError(
-      /multiple Authentication-Results/,
-    )
-    message = parse_email_bytes(new TextEncoder().encode(real_001.default))
-    expect(get_auth_results(message)).toStrictEqual({
-      dkim_pass: true,
-      dmarc_pass: true,
-      spf_pass: true,
-    })
-    message = parse_email_bytes(new TextEncoder().encode(real_002.default))
-    expect(get_auth_results(message)).toStrictEqual({
-      dkim_pass: true,
-      dmarc_pass: true,
-      spf_pass: false,
-    })
-  })
-  test('get_subject', async () => {
-    // @ts-ignore
-    const mal2_001 = await import('../../test-data/eml/malformed2/001.eml?raw')
-    // @ts-ignore
-    const mal1_001 = await import('../../test-data/eml/malformed/001.eml?raw')
-    // @ts-ignore
-    const real_000 = await import('../../test-data/eml/real/000.eml?raw')
-    let message = parse_email_bytes(new TextEncoder().encode(mal2_001.default))
-    expect(() => get_subject(message)).toThrowError(
-      /must not have multiple subjects/,
-    )
-    message = parse_email_bytes(new TextEncoder().encode(mal1_001.default))
-    expect(get_subject(message)).toBe(undefined)
-    message = parse_email_bytes(new TextEncoder().encode(real_000.default))
-    expect(get_subject(message)).toBe('This is a test email')
-  })
-  test('get_body_txt', async () => {
-    // @ts-ignore
-    const rfc_000 = await import('../../test-data/eml/rfc/000.eml?raw')
-    // @ts-ignore
-    const rfc_000_json = await import('../../test-data/eml/rfc/000.json')
-    // @ts-ignore
-    const mal_014 = await import('../../test-data/eml/malformed/014.eml?raw')
-    // @ts-ignore
-    const mal_014_json = await import('../../test-data/eml/malformed/014.json')
-    // @ts-ignore
-    const mal_000 = await import('../../test-data/eml/malformed/000.eml?raw')
-    // @ts-ignore
-    const mal_000_json = await import('../../test-data/eml/malformed/000.json')
-    // @ts-ignore
-    const mal_016 = await import('../../test-data/eml/malformed/016.eml?raw')
-    // @ts-ignore
-    const mal_016_json = await import('../../test-data/eml/malformed/016.json')
-    let message = parse_email_bytes(new TextEncoder().encode(rfc_000.default))
-    expect(get_body_txt(message)).toBe(
-      [1, 2].map((i) => rfc_000_json.parts[i].body.Text).join(''),
-    )
-    message = parse_email_bytes(new TextEncoder().encode(mal_014.default))
-    expect(get_body_txt(message)).toBe(
-      [1].map((i) => mal_014_json.parts[i].body.Text).join(''),
-    )
-    message = parse_email_bytes(new TextEncoder().encode(mal_000.default))
-    expect(get_body_txt(message)).toBe('')
-    message = parse_email_bytes(new TextEncoder().encode(mal_016.default))
-    expect(get_body_txt(message)).toBe(
-      [3, 4, 5].map((i) => mal_016_json.parts[i].body.Text).join(''),
-    )
-  })
+  export namespace dt_to_rfc3339 {
+    if (import.meta.vitest) {
+      const { test, expect } = import.meta.vitest
+      // prettier-ignore
+      test('dt_to_rfc3339', async () => {
+        // @ts-ignore
+        const rfc_000 = await import('../../test-data/eml/rfc/000.eml?raw')
+        let email: Email = parse_email_bytes(new TextEncoder().encode(rfc_000.default))
+        let values: Set<DateTime> = new Set([])
+        for (const part of email.parts) {
+          let h = part.headers.find((h) => h.name == 'date')
+          if (h && h.value != 'Empty' && 'DateTime' in h.value)
+            values.add(h.value.DateTime)
+        }
+        if (values.size > 1)
+          throw new Error('Emails must not have more than one Date')
+        if (values.size == 0)
+          throw new Error('Date must not be missing from email')
+        let result = [...values][0]
+        const rfc_3339 = dayjs(dt_to_rfc3339(result))
+        const parsed_date = dayjs('Fri, 07 Oct 1994 16:15:05 -0700')
+        expect(parsed_date.isSame(rfc_3339)).toBe(true)
+      })
+    }
+  }
 }
