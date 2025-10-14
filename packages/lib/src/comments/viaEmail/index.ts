@@ -227,7 +227,9 @@ async function handle_email_event(
    *
    * When an email is accepted what's returned is the main metadata of the email, e.g. MessageID, etc...
    */
-  const accepted_result = await Result.safe(accept(email_event.bytes, metadata))
+  const accepted_result = await Result.safe(
+    accept(email_event.bytes, { metadata }),
+  )
   results.accepted = accepted_result
   if (accepted_result.isErr()) return results
   const accepted_email = accepted_result.unwrap()

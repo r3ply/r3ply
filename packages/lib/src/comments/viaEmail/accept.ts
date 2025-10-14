@@ -13,10 +13,14 @@ export interface AcceptedEmail {
   email: Email
 }
 
-// Accepts metadata in case other implementations need to use it, e.g. write a row to a database that matches the `comment_id`
 export async function accept(
   email_bytes: Uint8Array,
-  metadata: CommentMetadata,
+  {
+    // metadata isn't used in the library but is exposed at the API level for consuming applications to use
+    metadata,
+  }: {
+    metadata: CommentMetadata
+  },
 ): Promise<AcceptedEmail> {
   const email = parse_email_bytes(email_bytes)
   const message_id = get_message_id(email)

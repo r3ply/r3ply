@@ -28,7 +28,7 @@ export function mk_cf_accept(
   comment_state: Option<CommentState>,
 ) {
   const accept: typeof comments.email.accept = async (...params) => {
-    const [, metadata] = params
+    const [, { metadata }] = params
     const accepted_email = comments.email.accept(...params)
     return Result.safe(accepted_email).then((accepted_email_result) => {
       const db_result = comment_state.map((comment_state) => {
