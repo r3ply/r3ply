@@ -195,36 +195,37 @@ export const Anonymize = {
 }
 
 /**
- *  Convenience object to curry encryption keys
- *
- * TODO: make this a function instead of a const with `.issue`, e.g. Signet(key, system_config)
+ * @description Partially applies crypto keys in order to get a function that can issue signets.
+ * @param key_b64 Master crypto key as a base64 string
+ * @param system_config r3ply system config of the issuing service
+ * @returns A function that can issue signets
  */
-export const Signet = {
-  // This is the one you probably want to use if you provide an implementation (i.e. app) of r3ply somewhere, e.g. the CLI or cloudflare-worker, to help people join your service
-  issue: (key: string, system_config: R3plySystemConfig) => {
-    return (
-      site_domain: string,
-      r3ply_domain: string,
-      {
+export const SignetIssuer = (
+  key_b64: string,
+  system_config: R3plySystemConfig,
+) => {
+  return (
+    site_domain: string,
+    r3ply_domain: string,
+    {
+      issued_date,
+      label,
+    }: {
+      issued_date?: string
+      label?: string
+    },
+  ) => {
+    if (system_config.domains.includes(r3ply_domain)) {
+      return make_short_signet(key_b64, {
+        site_domain,
+        r3ply_domain,
         issued_date,
         label,
-      }: {
-        issued_date?: string
-        label?: string
-      },
-    ) => {
-      if (system_config.domains.includes(r3ply_domain)) {
-        return make_short_signet(key, {
-          site_domain,
-          r3ply_domain,
-          issued_date,
-          label,
-        })
-      } else {
-        throw new Error(
-          'A r3ply service can only issue signets from its own domain.',
-        )
-      }
+      })
+    } else {
+      throw new Error(
+        'A r3ply service can only issue signets from its own domain.',
+      )
     }
-  },
+  }
 }

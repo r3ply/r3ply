@@ -22,7 +22,7 @@ import {
 } from './deliverable'
 import { prepare as r3ply_prepare, EmailTemplateContext } from './prepare'
 import { process as r3ply_process, CommentTemplateContext } from '../process'
-import { Anonymize, Signet } from './signet'
+import { Anonymize, SignetIssuer } from './signet'
 import { Encrypt } from './crypto'
 import { Err, Ok, Result } from 'oxide.ts'
 import {
@@ -357,7 +357,7 @@ if (import.meta.vitest) {
   const system = R3plySystemConfig({
     domains: ['r3ply.com', 'test.r3ply.com'],
   }).value!
-  const signet_issuer = Signet.issue(signet_key, system)
+  const signet_issuer = SignetIssuer(signet_key, system)
   const handle_email = mk_email_handler(system, signet_key, encrypt_key, {}, [
     LocalModeration(async (args) => 'test'),
   ])

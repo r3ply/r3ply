@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { CommentCache } from './state/d1'
-import { Signet } from '@r3ply/lib'
+import { SignetIssuer } from '@r3ply/lib'
 import { R3plySystemConfig } from '@r3ply/schema/config'
 
 function api(r3ply: R3plySystemConfig) {
@@ -16,7 +16,7 @@ function api(r3ply: R3plySystemConfig) {
     }
     const { domain, issued } = c.req.param()
     const new_site_url = new URL(`https://${domain}`)
-    const signet_issuer = Signet.issue(c.env.SIGNET_KEY, r3ply)
+    const signet_issuer = SignetIssuer(c.env.SIGNET_KEY, r3ply)
     const result = signet_issuer(new_site_url.hostname, req_url.hostname, {
       issued_date: issued,
     })
