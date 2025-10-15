@@ -119,6 +119,13 @@ const backup_email: EmailExportedHandler<Env> = async (...params) => {
 
 const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
   const [msg, env] = params
+  const { success } = await env.COMMENT_VIA_EMAIL_RATE_LIMITER.limit({
+    key: msg.from,
+  })
+  if (!success) {
+    msg.setReject('Rate limit exceeded.')
+    return Promise.resolve()
+  }
   const message_id = Option(msg.headers.get('Message-ID')).expect(
     'Message-ID is required',
   )
