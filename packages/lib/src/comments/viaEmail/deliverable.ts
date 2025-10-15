@@ -58,13 +58,11 @@ export async function deliverable(
 ): Promise<DeliverableEmail> {
   // check `To` has address, and is addressed properly (to this site + r3ply pair, i.e. <YOUR_SITE>@<R3PLY>)
   const site = to_field_is_deliverable(accepted.to, sites)
-
-  // check `Subject` header of comment is deliverable (note: if future subject types b are added, here is where to integrate that logic)
+  // check `Subject` header of comment is deliverable
   const subject = subject_resolves_to_valid_url(
     Option(accepted.subject).expect('Subject is required for email comments'),
     new URL('https://' + site.domain),
   )
-
   // check `From` is not on site's `block_list`
   const redact = (email_address: string) =>
     anonymize(email_address, site.domain, site.r3ply, site.signet, site.issued)

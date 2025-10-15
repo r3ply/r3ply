@@ -46,7 +46,7 @@ export default {
       return Promise.resolve()
     }
 
-    switch (to_mb) {
+    switch (to_mb.local) {
       // Currently all emails are treated as comments (TODO: a sort of email interface could be built in the future)
       default: {
         // Guard against emails that are too big
