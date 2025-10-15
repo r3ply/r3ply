@@ -17,6 +17,21 @@ enabled = true
 [vars]
 EMAIL_MAX_BYTES_DEFAULT = 26214400 # Cloudflare limits emails to 25MB
 
+[[ratelimits]]
+name = "API_RATE_LIMITER_UNAUTHENTICATED"
+# An identifier you define, that is unique to your Cloudflare account.
+# Must be an integer.
+namespace_id = "1001"
+# Limit: the number of tokens allowed within a given period in a single
+# Cloudflare location
+# Period: the duration of the period, in seconds. Must be either 10 or 60
+simple = { limit = 12, period = 60 }
+
+[[ratelimits]]
+name = "COMMENT_VIA_EMAIL_RATE_LIMITER"
+namespace_id = "1002"
+simple = { limit = 5, period = 60 }
+
 # The following is needed for CF pages + D1 local development
 # [Cloudflare Docs](https://developers.cloudflare.com/d1/learning/local-development/)
 [[d1_databases]]
@@ -39,19 +54,6 @@ preview_database_id = "R3PLY_STAGING_DB"
 [[send_email]]
 name = "MODERATOR_EMAIL"
 destination_address = "moderator@spenc.es"
-
-# Bind a Durable Object. Durable objects are a scale-to-zero compute primitive based on the actor model.
-# Durable Objects can live for as long as needed. Use these when you need a long-running "server", such as in realtime apps.
-# Docs: https://developers.cloudflare.com/workers/runtime-apis/durable-objects
-# [[durable_objects.bindings]]
-# name = "MY_DURABLE_OBJECT"
-# class_name = "MyDurableObject"
-
-# Durable Object migrations.
-# Docs: https://developers.cloudflare.com/workers/learning/using-durable-objects#configure-durable-object-classes-with-migrations
-# [[migrations]]
-# tag = "v1"
-# new_classes = ["MyDurableObject"]
 
 [[rules]]
 type = "Text"

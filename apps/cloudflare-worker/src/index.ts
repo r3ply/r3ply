@@ -30,7 +30,6 @@ app.route('/', api(r3ply_system_config))
 let promised_email_bytes: Promise<Uint8Array<ArrayBufferLike>>
 
 export default {
-  // E.g. curl -X POST --data-binary @003.eml  localhost:8787
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     return app.fetch(request, env, ctx)
   },

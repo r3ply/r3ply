@@ -5,7 +5,16 @@ import { R3plySystemConfig } from '@r3ply/schema/config'
 
 function api(r3ply: R3plySystemConfig) {
   const api = new Hono<{ Bindings: Env }>()
-
+  api.use(async (c, next) => {
+    const { success } = await c.env.API_RATE_LIMITER_UNAUTHENTICATED.limit({
+      key: c.req.header('CF-Connecting-IP') ?? 'NO_IP',
+    })
+    if (success) {
+      return next()
+    } else {
+      return new Response('Rate limit exceeded', { status: 429 })
+    }
+  })
   api.get('/signet/:domain/:issued?', async (c) => {
     const req_url = new URL(c.req.url)
     c.res.headers.set('Access-Control-Allow-Origin', '*')
