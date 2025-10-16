@@ -1,6 +1,5 @@
+domains = [ "cli.r3ply.test" ]
 version = "0.0.1"
-domains = ["cli.r3ply.test"]
-sites = ["site.local.test"]
 enabled = true
 
 [[admin]]
@@ -10,6 +9,6 @@ email = "guybrush@example.com"
 [email]
 enabled = true
 moderation = false
-attachments = true
+attachments = false
 max_size_bytes = 5_242_880
-block_list = []
+"block*" = [ ]

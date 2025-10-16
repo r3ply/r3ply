@@ -1,0 +1,3 @@
+[submodule "site/content/comments"]
+	path = site/content/comments
+	url = https://github.com/asimpletune/r3ply-site-comments.git
