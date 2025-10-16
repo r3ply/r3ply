@@ -73,6 +73,7 @@ export const moderation = {
       items: {
         $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/github.v0.0.1.json',
       },
+      maxItems: 2,
       default: [],
     },
     webhook: {
@@ -80,6 +81,7 @@ export const moderation = {
       items: {
         $ref: 'https://r3ply.com/schemas/v0.0.1/config/moderation/webhook.v0.0.1.json',
       },
+      maxItems: 5,
       default: [],
     },
     local: {

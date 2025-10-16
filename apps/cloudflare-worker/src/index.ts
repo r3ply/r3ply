@@ -143,9 +143,7 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
   )
   const comment_statefulness = CommentState(env.R3PLY_STAGING_DB)
   const moderation_channel_implementations: comments.email.CommentViaEmailSupportedModerationChannels[] =
-    [
-      moderation.GitHubModeration(github_api_fetcher(env.GITHUB_APP_PW)),
-    ]
+    [moderation.GitHubModeration(github_api_fetcher(env.GITHUB_APP_PW))]
   const email_handler = r3ply.comments.viaEmail(
     env.SIGNET_KEY,
     env.EMAIL_ENCRYPT_KEY,
@@ -171,7 +169,6 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
   )
   if (comment_via_email_result.isOk()) {
     if ((await site_config).comments?.cache) {
-      console.log('cache enabled')
       const comment_ctx_result = comment_via_email_result.unwrap().prepared
       if (comment_ctx_result && comment_ctx_result.isOk()) {
         const comment_ctx = comment_ctx_result.unwrap()
@@ -185,12 +182,8 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
           console.error(
             `Error caching comment via email!\n\n${JSON.stringify(cache_result.error, null, 2)}`,
           )
-        } else {
-          console.log('Cached comment!')
         }
       }
-    } else {
-      console.log('cache disabled')
     }
     comment_via_email_result.unwrap().prepared?.unwrap().comment.subject.path
     const moderation = comment_via_email_result.unwrap().moderation
@@ -202,7 +195,7 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
           await request.unwrap().send()
         } else {
           console.log(
-            `Request was not valid, reason: ${JSON.stringify(request.unwrapErr())}`,
+            `Request was not valid, reason: ${JSON.stringify(request.unwrapErr().message)}`,
           )
         }
       }
