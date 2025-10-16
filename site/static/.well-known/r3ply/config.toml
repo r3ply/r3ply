@@ -9,8 +9,7 @@ issued = "2025-10-16"
 label = "CLI"
 
 [comments.email]
+# "&comment_{}" = "templates/comment.md"
 
 [[moderation.local]]
-"file_path_{}" = "TODO"
-enabled = true
-"allow*" = [ ]
+"file_path_{}" = "content/comments/{{ comment.id[:8] }}.json"
