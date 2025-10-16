@@ -16,6 +16,7 @@ import {
   mk_cf_process,
   mk_cf_receive,
 } from './cloudflare-r3ply'
+import { EmailMessage } from 'cloudflare:email'
 
 // initialization for email handler
 const r3ply_system_config = R3plySystemConfig.parse(
@@ -189,20 +190,21 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
     const moderation = comment_via_email_result.unwrap().moderation
     if (moderation) {
       for (const { type, request } of moderation) {
-        console.log(`=== moderation type: ${type} ===`)
         if (request.isOk()) {
-          console.log(`Request was valid, now sending...`)
           await request.unwrap().send()
-        } else {
-          console.log(
-            `Request was not valid, reason: ${JSON.stringify(request.unwrapErr().message)}`,
-          )
         }
       }
     }
   } else {
     throw comment_via_email_result.unwrapErr()
   }
+  msg.reply(
+    new EmailMessage(
+      msg.to,
+      msg.from,
+      'Your comment was successfully submitted for moderation.',
+    ),
+  )
   return Promise.resolve()
 }
 /**
