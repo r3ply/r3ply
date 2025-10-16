@@ -1,0 +1,44 @@
+{
+  "$id": "https://r3ply.com/schemas/v0.0.1/config/site.v0.0.1.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "r3ply config",
+  "description": "Describe a configuration for use with the r3ply commenting system. See https://r3ply.com/docs for more info.",
+  "type": "object",
+  "required": [],
+  "unevaluatedProperties": false,
+  "properties": {
+    "version": {
+      "title": "r3ply version",
+      "description": "Declares what version of r3ply this config conforms to.",
+      "type": "string",
+      "enum": [
+        "0.0.1"
+      ],
+      "default": "0.0.1"
+    },
+    "enabled": {
+      "title": "Toggle on/off",
+      "description": "Turn off r3ply altogether. Default is true.",
+      "type": "boolean",
+      "default": true
+    },
+    "site": {
+      "title": "New site configuration",
+      "description": "Declares a new site this config applies to, consisting of domain x r3ply service, and signet. See docs for more info.",
+      "type": "array",
+      "items": {
+        "$ref": "https://r3ply.com/schemas/v0.0.1/config/signet.v0.0.1.json"
+      },
+      "default": []
+    },
+    "comments": {
+      "$ref": "https://r3ply.com/schemas/v0.0.1/config/comments.v0.0.1.json"
+    },
+    "moderation": {
+      "$ref": "https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json"
+    },
+    "extra": {
+      "$ref": "https://r3ply.com/schemas/v0.0.1/config/extra.v0.0.1.json"
+    }
+  }
+}

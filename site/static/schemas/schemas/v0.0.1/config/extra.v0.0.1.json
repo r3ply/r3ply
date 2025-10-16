@@ -1,0 +1,20 @@
+{
+  "$id": "https://r3ply.com/schemas/v0.0.1/config/extra.v0.0.1.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Extra config",
+  "description": "An area for user's to define extra configuration.",
+  "type": "object",
+  "required": [],
+  "additionalProperties": {
+    "type": [
+      "string",
+      "number",
+      "boolean",
+      "null"
+    ],
+    "pattern": "^[\\s\\S]*$"
+  },
+  "propertyNames": {
+    "pattern": "^[\\s\\S]*$"
+  }
+}
