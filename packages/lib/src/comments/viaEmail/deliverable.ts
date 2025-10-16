@@ -1,6 +1,9 @@
 import { Option, Result } from 'oxide.ts'
 import { R3plySignetConfig } from '@r3ply/schema/config'
-import { R3plyEmailCommentsConfig } from '@r3ply/schema/config/comments'
+import {
+  R3plyCommentsConfig,
+  R3plyEmailCommentsConfig,
+} from '@r3ply/schema/config/comments'
 import micromatch from 'micromatch'
 import { Addr, Message as Email } from '@mail-parser/ts-bindings'
 import { AcceptedEmail, Secret } from './accept'
@@ -43,6 +46,7 @@ export async function deliverable(
   accepted: AcceptedEmail,
   {
     sites,
+    comments_config,
     email_comments_config,
     anonymize,
     encrypt,
@@ -50,6 +54,7 @@ export async function deliverable(
     metadata,
   }: {
     sites: R3plySignetConfig[]
+    comments_config: R3plyCommentsConfig
     email_comments_config: R3plyEmailCommentsConfig
     anonymize: AnonymizeEmail
     encrypt: EncryptEmail
@@ -63,6 +68,7 @@ export async function deliverable(
     Option(accepted.subject).expect('Subject is required for email comments'),
     new URL('https://' + site.domain),
   )
+  comment_path_is_allowed_by_config(subject, comments_config['paths*'])
   // check `From` is not on site's `block_list`
   const redact = (email_address: string) =>
     anonymize(email_address, site.domain, site.r3ply, site.signet, site.issued)
@@ -291,6 +297,65 @@ namespace subject_resolves_to_valid_url {
       })
     })
   }
+}
+
+function comment_path_is_allowed_by_config(
+  subject: URL,
+  path_globs?: string[],
+) {
+  if (path_globs) {
+    const matches = micromatch([subject.pathname], path_globs)
+    if (matches.length == 0)
+      throw new Error(
+        `Comment at path "${subject.pathname}" forbidden by configured path globs "${JSON.stringify(path_globs, null, 2)}"`,
+      )
+  }
+}
+if (import.meta.vitest) {
+  const { describe, test, expect } = import.meta.vitest
+  describe('comment_path_is_allowed_by_config', () => {
+    test("No 'path*' configured should allow comments at any path", () => {
+      const actual = () =>
+        comment_path_is_allowed_by_config(
+          new URL('https://example.com/blog/post123'),
+        )
+      expect(actual).not.toThrow()
+    })
+    test('Empty path should forbid comments at any path', () => {
+      const actual = () =>
+        comment_path_is_allowed_by_config(
+          new URL('https://example.com/blog/post123'),
+          [],
+        )
+      expect(actual).toThrowError(
+        /Comment at path .* forbidden by configured path globs \"\[\]\"/,
+      )
+    })
+    test('No error should be thrown for comments at matching configured paths', () => {
+      const actual = () =>
+        comment_path_is_allowed_by_config(
+          new URL('https://example.com/blog/post123'),
+          ['/blog/*'],
+        )
+      expect(actual).not.toThrow()
+    })
+    test('Path globs should be able to exclude a single path', () => {
+      const ok = () =>
+        comment_path_is_allowed_by_config(
+          new URL('https://example.com/blog/post123'),
+          ['**', '!/'],
+        )
+      expect(ok).not.toThrow()
+      const bad = () =>
+        comment_path_is_allowed_by_config(new URL('https://example.com/'), [
+          '**',
+          '!/',
+        ])
+      expect(bad).toThrow(
+        /Comment at path .* forbidden by configured path globs .* \"!\/\"/s,
+      )
+    })
+  })
 }
 
 /**

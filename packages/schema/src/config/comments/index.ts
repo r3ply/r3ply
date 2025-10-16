@@ -26,7 +26,6 @@ export const comments = {
       description:
         'Specifies which path to allow comments on. The "paths*" name means glob patterns can be used.',
       items: { type: 'string', pattern: '^[\\s\\S]*$' },
-      default: ['/**'],
       examples: ['/**', '!/private'],
       $comment: 'glob patterns can be used',
     },

@@ -250,6 +250,7 @@ async function handle_email_event(
   const deliverable_result = await Result.safe(
     deliverable(accepted_email, {
       metadata,
+      comments_config,
       email_comments_config,
       sites: email_event.config.site,
       anonymize: Anonymize.hmac(dependencies.anonymize_key),
