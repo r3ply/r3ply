@@ -64,6 +64,10 @@ export const moderation = {
   required: [],
   unevaluatedProperties: false,
   properties: {
+    enabled: {
+      type: 'boolean',
+      default: true,
+    },
     github: {
       type: 'array',
       items: {
@@ -100,6 +104,11 @@ export type R3plyModerationOptions = FromSchema<
 export type R3plyGithubConfig = R3plyModerationConfig['github'][number]
 export type R3plyWebhookConfig = R3plyModerationConfig['webhook'][number]
 export type R3plyLocalModerationConfig = R3plyModerationConfig['local'][number]
-export type R3plyModerationChannelType = keyof R3plyModerationConfig
-export type R3plyModerationChannelConfig =
-  R3plyModerationConfig[keyof R3plyModerationConfig][number]
+export type R3plyModerationChannelType = Exclude<
+  keyof R3plyModerationConfig,
+  'enabled'
+>
+export type R3plyModerationChannelConfig = R3plyModerationConfig[Exclude<
+  keyof R3plyModerationConfig,
+  'enabled'
+>][number]

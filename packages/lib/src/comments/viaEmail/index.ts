@@ -320,7 +320,10 @@ async function handle_email_event(
     )
     if (results_list.isOk()) {
       const [_, accepted, deliverable, context, comment] = results_list.unwrap()
-      if (email_event.config.moderation) {
+      if (
+        email_event.config.moderation &&
+        email_event.config.moderation.enabled
+      ) {
         const moderation_config = email_event.config.moderation
         results.moderation = await Promise.all(
           moderation_channels.flatMap((channel) => {

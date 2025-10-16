@@ -8,7 +8,7 @@ import {
 import { CommentTemplateContext } from '../comments/process'
 import micromatch from 'micromatch'
 import { Decrypt, DecryptEmail, Encrypt } from '../comments/viaEmail/token'
-import { Err, Ok, Result } from 'oxide.ts'
+import { Result } from 'oxide.ts'
 
 export * from './local'
 export * from './github'
@@ -176,6 +176,60 @@ export namespace Moderation {
       }
     })
   }
+  if (import.meta.vitest) {
+    const { describe, test, expect } = import.meta.vitest
+
+    // prettier-ignore
+    describe('can_moderate', async () => {
+    const mod_options: R3plyModerationOptions = {
+      enabled: true,
+      'allow*': [],
+    }
+    const site: R3plySignetConfig = {
+      domain: 'example.com',
+      r3ply: 'r3ply.com',
+      signet: 'a'.repeat(22),
+      issued: '2025-09-19',
+      label: 'test'
+    }
+    const can_moderate = Moderation.can_moderate
+    can_moderate(site, 'email', mod_options).orElse(err => {
+      console.assert(false, "Tests can not run without correct default options.")
+      throw err
+    })
+    test("A moderation config that's disabled can never be moderated", () => {
+      const [err] = can_moderate(site, 'email', { ...mod_options, enabled: false }).intoTuple()
+      expect(err?.message).toMatch(/moderation disabled for channel/)
+    })
+    test("A moderation config that's enabled, with no comment source or filtering defined, can be moderated", () => {
+      expect(can_moderate(site, 'email', mod_options).isOk()).toBe(true)
+    })
+    test("A moderation config with non-matching comment sources can not be moderated", () => {
+      const [err] = can_moderate(site, 'email', { ...mod_options, comments: [] }).intoTuple()
+      expect(err?.message).toMatch(/comment source 'email' not accepted by moderation channel configuration '\[\]'/)
+    })
+    test("A moderation config with matching sources can be moderated", () => {
+      expect(can_moderate(site, 'email', { ...mod_options, comments: ['email'] }).isOk()).toBe(true)
+    })
+    test("A moderation config with no matching site label can not be moderated", () => {
+      const [err] = can_moderate(site, 'email', { ...mod_options, "filter*": [] }).intoTuple()
+      expect(err?.message).toMatch(/site label 'test' did not match moderation channel configuration '\[\]'/)
+    })
+    test("A moderation config matching any labels can be moderated", () => {
+      expect(can_moderate(site, 'email', { ...mod_options, "filter*": ['*'] }).isOk()).toBe(true)
+      expect(can_moderate({ ...site, label: "test2" }, 'email', { ...mod_options, "filter*": ['*'] }).isOk()).toBe(true)
+    })
+    test("A moderation config matching any labels must not be moderated if the label is undefined", () => {
+      const [err] = can_moderate({ ...site, label: undefined }, 'email', { ...mod_options, "filter*": ['*'] }).intoTuple()
+      expect(err?.message).toMatch(/site label 'undefined' did not match moderation channel configuration '\[\"\*\"\]'/)
+    })
+    test("A moderation config may allow any site by label except one", () => {
+      expect(can_moderate({ ...site, label: "good" }, 'email', { ...mod_options, "filter*": ['*', '!evil'] }).isOk()).toBe(true)
+      const [err] = can_moderate({ ...site, label: "evil" }, 'email', { ...mod_options, "filter*": ['*', '!evil'] }).intoTuple()
+      expect(err?.message).toMatch(/site label 'evil' did not match moderation channel configuration '\[\"\*\",\"!evil\"\]'/)
+    })
+  })
+  }
 
   /**
    * Checks if a comment can bypass moderation according to the site's configuration.
@@ -246,41 +300,6 @@ async function can_bypass(
 if (import.meta.vitest) {
   const { test, expect } = import.meta.vitest
   const key = '09tCJoUT+hOsdzHXLfi4gE5JE1frS0qwNA0K7wIh9KM='
-
-  // prettier-ignore
-  test('can moderate', async () => {
-    const mod_options: R3plyModerationOptions = {
-      enabled: true,
-      'allow*': [],
-    }
-    const site: R3plySignetConfig = {
-      domain: 'example.com',
-      r3ply: 'r3ply.com',
-      signet: 'a'.repeat(22),
-      issued: '2025-09-19',
-      label: 'test'
-    }
-    const can_moderate = Moderation.can_moderate
-    // disabled always prevents moderation
-    expect(can_moderate(site, 'email', { ...mod_options, enabled: false }).isOk()).toBe(false)
-    // enabled, with no comment source or filtering defined
-    expect(can_moderate(site, 'email', mod_options).isOk()).toBe(true)
-    // no matching comment sources
-    expect(can_moderate(site, 'email', { ...mod_options, comments: [] }).isOk()).toBe(false)
-    // matching comment sources
-    expect(can_moderate(site, 'email', { ...mod_options, comments: ['email'] }).isOk()).toBe(true)
-    // no matching site label
-    expect(can_moderate(site, 'email', { ...mod_options, "filter*": [] }).isOk()).toBe(false)
-    // matching site label
-    expect(can_moderate(site, 'email', { ...mod_options, "filter*": ['test'] }).isOk()).toBe(true)
-    // match all defined site labels
-    expect(can_moderate(site, 'email', { ...mod_options, "filter*": ['*'] }).isOk()).toBe(true)
-    expect(can_moderate({ ...site, label: "test2" }, 'email', { ...mod_options, "filter*": ['*'] }).isOk()).toBe(true)
-    expect(can_moderate({ ...site, label: undefined }, 'email', { ...mod_options, "filter*": ['*'] }).isOk()).toBe(false)
-    // allow any defined site, but filter out one case
-    expect(can_moderate({ ...site, label: "evil" }, 'email', { ...mod_options, "filter*": ['*', '!evil'] }).isOk()).toBe(false)
-    expect(can_moderate({ ...site, label: "good" }, 'email', { ...mod_options, "filter*": ['*', '!evil'] }).isOk()).toBe(true)
-  })
 
   // prettier-ignore
   test('bypass moderation', async () => {
