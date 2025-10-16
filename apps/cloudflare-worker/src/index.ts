@@ -81,14 +81,22 @@ export default {
     return Promise.resolve()
   },
 } satisfies ExportedHandler<Env>
-
+/**
+ * @description email handler to log comments received via email
+ * @param params standard Cloudflare email params (i.e. request, env, ctx)
+ * @returns Promise<void>
+ */
 const log_email: EmailExportedHandler<Env> = async () => {
   const email_bytes = await promised_email_bytes
   console.error(
     `An error occurred! Logging email as a final fail safe!\n${new TextDecoder('utf-8').decode(email_bytes)}`,
   )
 }
-
+/**
+ * @description email handler to backup comments received via email
+ * @param params standard Cloudflare email params (i.e. request, env, ctx)
+ * @returns Promise<void>
+ */
 const backup_email: EmailExportedHandler<Env> = async (...params) => {
   const [, env] = params
   const gist_client = GistClient(env.R3PLY_GIST_TOKEN)
@@ -116,7 +124,11 @@ const backup_email: EmailExportedHandler<Env> = async (...params) => {
     }
   })
 }
-
+/**
+ * @description email handler to handle comments received via email
+ * @param params standard Cloudflare email params (i.e. request, env, ctx)
+ * @returns Promise<void>
+ */
 const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
   const [msg, env] = params
   const { success } = await env.COMMENT_VIA_EMAIL_RATE_LIMITER.limit({
@@ -200,7 +212,6 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
   }
   return Promise.resolve()
 }
-
 /**
  * Partially applies password to GitHub bot dependency to perform API call
  *
