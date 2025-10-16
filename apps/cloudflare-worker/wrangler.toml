@@ -1,4 +1,4 @@
-#:schema https://unpkg.com/wrangler@4.28.1/config-schema.json
+#:schema https://unpkg.com/wrangler@4.42.0/config-schema.json
 
 name = "r3ply-cloudflare-worker"
 main = "src/index.ts"

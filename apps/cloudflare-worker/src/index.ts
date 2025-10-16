@@ -6,7 +6,7 @@ import r3ply_system_config_toml from '../r3ply.config.toml'
 import { GistClient, GistFiles } from './state/gist'
 import { CommentState } from './state/d1'
 import { R3plySystemConfig, R3plySiteConfig } from '@r3ply/schema/config'
-import { util, R3ply, moderation } from '@r3ply/lib'
+import { util, R3ply, moderation, comments } from '@r3ply/lib'
 import { mailbox } from 'typescript-mailbox-parser'
 import { DereferenceFileAtURL } from './util'
 import {
@@ -130,9 +130,10 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
     'Message-ID is required',
   )
   const comment_statefulness = CommentState(env.R3PLY_STAGING_DB)
-  const moderation_channel_implementations = [
-    moderation.GitHubModeration(github_api_fetcher(env.GITHUB_APP_PW)),
-  ]
+  const moderation_channel_implementations: comments.email.CommentViaEmailSupportedModerationChannels[] =
+    [
+      moderation.GitHubModeration(github_api_fetcher(env.GITHUB_APP_PW)),
+    ]
   const email_handler = r3ply.comments.viaEmail(
     env.SIGNET_KEY,
     env.EMAIL_ENCRYPT_KEY,
@@ -157,6 +158,29 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
     Promise.all([site_config, email_bytes]).then(email_handler),
   )
   if (comment_via_email_result.isOk()) {
+    if ((await site_config).comments?.cache) {
+      console.log('cache enabled')
+      const comment_ctx_result = comment_via_email_result.unwrap().prepared
+      if (comment_ctx_result && comment_ctx_result.isOk()) {
+        const comment_ctx = comment_ctx_result.unwrap()
+        const cache_result = await comment_statefulness.cache.set(
+          comment_ctx.r3ply.site,
+          comment_ctx.comment.subject.path,
+          comment_ctx.comment.id,
+          comment_ctx,
+        )
+        if (cache_result.error) {
+          console.error(
+            `Error caching comment via email!\n\n${JSON.stringify(cache_result.error, null, 2)}`,
+          )
+        } else {
+          console.log('Cached comment!')
+        }
+      }
+    } else {
+      console.log('cache disabled')
+    }
+    comment_via_email_result.unwrap().prepared?.unwrap().comment.subject.path
     const moderation = comment_via_email_result.unwrap().moderation
     if (moderation) {
       for (const { type, request } of moderation) {

@@ -177,7 +177,7 @@ export interface CommentCache {
     path: string,
     comment_id: string,
     comment: any,
-  ): Promise<void>
+  ): Promise<D1Result<void>>
   clear(): Promise<void>
 }
 
@@ -196,7 +196,7 @@ export function CommentCache(d1: D1Database): CommentCache {
       path: string,
       comment_id: string,
       comment: any,
-    ): Promise<void> {
+    ): Promise<D1Result<void>> {
       const url = new URL('https://example.com')
       url.host = domain
       url.pathname = path
@@ -208,9 +208,7 @@ export function CommentCache(d1: D1Database): CommentCache {
         `,
         )
         .bind(url.host, url.pathname, comment_id, JSON.stringify(comment))
-        .run()
-        .then((_) => Promise.resolve())
-      throw new Error('Function not implemented.')
+        .run<void>()
     },
     get: async function (
       domain: string,
