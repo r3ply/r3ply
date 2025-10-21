@@ -6,13 +6,16 @@
   <title>{{ section.title | default(value=config.title) }}</title>
   <link rel="stylesheet" href="/style.css">
 </head>
-<body>
+<body class="bg-green-50 dark:bg-slate-950 bg-[url(/patterns/bank-note.svg)] dark:bg-[url(/patterns/bank-note_dark.svg)]">
+
   {% include "includes/top-nav.html" %}
-  <main class="flex">
+
+  <main class="flex group">
     <aside>
       {% include "includes/side-nav.html" %}
     </aside>
-    <article id="content" class="py-10 mx-auto prose prose-li:marker:text-black prose-pink prose-hr:border-black">
+    <article id="content" class="px-2 py-10 mx-auto prose prose-li:marker:text-black prose-pink prose-hr:border-black dark:prose-invert">
+      {% include "includes/side-nav-toggle.html" %}
       {% set content = section.content | default(value=page.content) %}
       {{ content | safe }}
     </article>

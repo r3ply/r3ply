@@ -1,117 +1,126 @@
 {% set shared_nav_styles = "hover:underline decoration-black" %}
-<nav id="secondary-nav" class=" w-72 sticky top-0 h-screen overflow-y-scroll">
+{% set top_level_nav_styles = "dark:text-teal-200" %}
+{% set second_level_nav_styles = "dark:text-orange-200" %}
+{% set ternary_level_nav_styles = "dark:text-pink-200" %}
+
+{# See includes/side-nav-toggle.html #}
+<input type="checkbox" name="open-menu" id="open-menu" class="peer hidden" />
+<nav id="secondary-nav" class="bg-amber-200 bg-[url(/patterns/wiggle.svg)]
+  dark:bg-slate-900 dark:bg-[url(/patterns/wiggle_dark.svg)]
+  w-72 sticky top-0 h-screen overflow-y-scroll
+  hidden md:block peer-checked:block">
   <ul id="toc" class="py-4 px-4 list-disc list-inside font-medium">
-    <li class="list-none"><a href="/docs" class="font-extrabold text-lg {{ shared_nav_styles }}">Table of Contents:</a></li>
+    <li class="list-none"><a href="/docs" class="font-extrabold text-lg {{ shared_nav_styles }} text-blue-300">Table of Contents:</a></li>
     <li>
-      <a href="/docs#getting-started" class="{{ shared_nav_styles }}">Getting Started</a>
-      <ul class="px-4 list-disc list-inside font-light text-gray-700">
+      <a href="/docs#getting-started" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Getting Started</a>
+      <ul class="px-4 list-disc list-inside font-light text-gray-700 dark:text-red-100">
           <li>
-              <a href="/docs#generate-a-config-signet" class="{{ shared_nav_styles }}">Generating a Config/Signet</a>
+              <a href="/docs#generate-a-config-signet" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Generating a Config/Signet</a>
           </li>
           <li>
-              <a href="/docs#install-r3ply-cli-tool" class="{{ shared_nav_styles }}">Install r3ply CLI tool</a>
+              <a href="/docs#install-r3ply-cli-tool" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Install r3ply CLI tool</a>
           </li>
           <li>
-              <a href="/docs#putting-it-all-together" class="{{ shared_nav_styles }}">Putting it All Together</a>
+              <a href="/docs#putting-it-all-together" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Putting it All Together</a>
           </li>
       </ul>
     </li>
     <li>
-      <a href="/docs/overview" class="{{ shared_nav_styles }}">Overview</a>
+      <a href="/docs/overview" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Overview</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700">
           <li>
-              <a href="/docs/overview#hello-world" class="{{ shared_nav_styles }}">Hello, World!</a>
+              <a href="/docs/overview#hello-world" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Hello, World!</a>
           </li>
           <li>
-            <a href="/docs/overview#tracing-a-comment" class="{{ shared_nav_styles }}">Tracing a Comment</a>
+            <a href="/docs/overview#tracing-a-comment" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Tracing a Comment</a>
             <ol class="px-4 list-decimal list-inside font-light">
               <li>
-                <a href="/docs/overview#initial-email" class="{{ shared_nav_styles }}">Initial Email</a>
+                <a href="/docs/overview#initial-email" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Initial Email</a>
               </li>
               <li>
-                <a href="/docs/overview#configs-gathered" class="{{ shared_nav_styles }}">Configs Gathered</a>
+                <a href="/docs/overview#configs-gathered" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Configs Gathered</a>
               </li>
               <li>
-                <a href="/docs/overview#checks-performed" class="{{ shared_nav_styles }}">Checks Performed</a>
+                <a href="/docs/overview#checks-performed" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Checks Performed</a>
               </li>
               <li>
-                <a href="/docs/overview#template-prepared" class="{{ shared_nav_styles }}">Template Prepared</a>
+                <a href="/docs/overview#template-prepared" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Template Prepared</a>
               </li>
               <li>
-                <a href="/docs/overview#comment-processed" class="{{ shared_nav_styles }}">Comment Processed</a>
+                <a href="/docs/overview#comment-processed" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Comment Processed</a>
               </li>
             </ol>
           </li>
           <li>
-              <a href="/docs/overview#iterating-on-this" class="{{ shared_nav_styles }}">Iterating on This</a>
+              <a href="/docs/overview#iterating-on-this" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Iterating on This</a>
           </li>
       </ul>
     </li>
     <li>
-      <a href="/docs/config" class="{{ shared_nav_styles }}">Config</a>
+      <a href="/docs/config" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Config</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700">
           <li>
-              <a href="/docs/config#basics" class="{{ shared_nav_styles }}">Basics</a>
+              <a href="/docs/config#basics" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Basics</a>
               <ul class="px-4 list-disc list-inside font-light">
                   <li>
-                      <a href="/docs/config#versioning-of-r3ply" class="{{ shared_nav_styles }}">Versioning of r3ply</a>
+                      <a href="/docs/config#versioning-of-r3ply" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Versioning of r3ply</a>
                   </li>
                   <li>
-                      <a href="/docs/config#toml-or-json" class="{{ shared_nav_styles }}">Toml or JSON Files</a>
+                      <a href="/docs/config#toml-or-json" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Toml or JSON Files</a>
                   </li>
                   <li>
-                      <a href="/docs/config#json-schema" class="{{ shared_nav_styles }}">JSON Schema</a>
+                      <a href="/docs/config#json-schema" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">JSON Schema</a>
                   </li>
                   <li>
-                      <a href="/docs/config#template-variables" class="{{ shared_nav_styles }}">Template Variables</a>
+                      <a href="/docs/config#template-variables" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Template Variables</a>
                   </li>
               </ul>
           </li>
           <li>
-              <a href="/docs/config#config-keys-values" class="{{ shared_nav_styles }}">Config Keys/Values</a>
+              <a href="/docs/config#config-keys-values" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Config Keys/Values</a>
               <ul class="px-4 list-disc list-inside font-light">
                   <li>
-                      <a href="/docs/config#site" class="{{ shared_nav_styles }}">Site</a>
+                      <a href="/docs/config#site" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Site</a>
                   </li>
                   <li>
-                      <a href="/docs/config#comments" class="{{ shared_nav_styles }}">Comments</a>
+                      <a href="/docs/config#comments" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Comments</a>
                   </li>
                   <li>
-                      <a href="/docs/config#email" class="{{ shared_nav_styles }}">Email</a>
+                      <a href="/docs/config#email" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Email</a>
                   </li>
                   <li>
-                      <a href="/docs/config#moderation" class="{{ shared_nav_styles }}">Moderation</a>
+                      <a href="/docs/config#moderation" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Moderation</a>
                   </li>
                   <li>
-                      <a href="/docs/config#notifications" class="{{ shared_nav_styles }}">Notifications</a>
+                      <a href="/docs/config#notifications" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Notifications</a>
                   </li>
               </ul>
           </li>
           <li>
-              <a href="/docs/config#complete-config" class="{{ shared_nav_styles }}">Complete Config</a>
+              <a href="/docs/config#complete-config" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Complete Config</a>
           </li>
       </ul>
     </li>
     <li>
-      <a href="/docs/cli" class="{{ shared_nav_styles }}">`re` the r3ply CLI</a>
+      <a href="/docs/cli" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">`re` the r3ply CLI</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700">
           <li>
-              <a href="/docs/cli#install" class="{{ shared_nav_styles }}">Install `re`</a>
+              <a href="/docs/cli#install" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Install `re`</a>
           </li>
           <li>
-              <a href="/docs/cli#init" class="{{ shared_nav_styles }}">Initialize Project</a>
+              <a href="/docs/cli#init" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Initialize Project</a>
           </li>
           <li>
-              <a href="/docs/cli#config-validate" class="{{ shared_nav_styles }}">Validating Configs</a>
+              <a href="/docs/cli#config-validate" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Validating Configs</a>
           </li>
           <li>
-              <a href="/docs/cli#simulate" class="{{ shared_nav_styles }}">Simulating Comments</a>
+              <a href="/docs/cli#simulate" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Simulating Comments</a>
               <ul class="px-4 list-disc list-inside font-light">
                   <li>
-                      <a href="/docs/cli#simulate-filter" class="{{ shared_nav_styles }}">Filtering Output</a>
+                      <a href="/docs/cli#simulate-filter" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Filtering Output</a>
                   </li>
                   <li>
-                      <a href="/docs/cli#write-simulation-output" class="{{ shared_nav_styles }}">Writing Output</a>
+                      <a href="/docs/cli#write-simulation-output" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Writing Output</a>
                   </li>
               </ul>
           </li>

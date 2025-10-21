@@ -1,0 +1,10 @@
+{# These toggles have to be in the same "group" (i.e child of an element with that tailwind class) to be able to toggle correctly #}
+{% set shared_styles = "md:hidden ml-auto cursor-pointer bg-slate-900 p-2 float-right self-center rounded-full border-2 py-2 px-3 sticky top-0 right-2 text-white font-mono text-lg" %}
+<label
+  for="open-menu"
+  class="group-has-[:checked]:hidden border-emerald-300 {{ shared_styles }}"
+>menu</label>
+<label
+  for="open-menu"
+  class="group-has-[:checked]:block hidden border-red-400 {{ shared_styles }}"
+>close</label>
