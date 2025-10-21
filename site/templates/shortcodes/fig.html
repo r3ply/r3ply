@@ -1,0 +1,13 @@
+<figure>
+  <picture>
+    {% if dark %}
+    {# Dark variant #}
+    <source srcset="{{ dark }}" media="(prefers-color-scheme: dark)">
+    {% endif %}
+    {# Light variant (also remove <p>...</p> that is automatically added) #}
+    {{ body | markdown | regex_replace(pattern=`<p>(?P<img>.*)</p>`, rep=`$img`) | safe }}
+  </picture>
+  {% if caption %}
+  <figcaption class="mt-2 text-sm text-center">{{ caption }}</figcaption>
+  {% endif %}
+</figure>

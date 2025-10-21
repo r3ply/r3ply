@@ -1,4 +1,4 @@
-domains = [ "cli.r3ply.test" ]
+domains = ["cli.r3ply.test"]
 version = "0.0.1"
 enabled = true
 
@@ -11,4 +11,4 @@ enabled = true
 moderation = false
 attachments = false
 max_size_bytes = 5_242_880
-"block*" = [ ]
+"block*" = []

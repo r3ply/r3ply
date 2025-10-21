@@ -1,13 +1,22 @@
-  <nav id="primary-nav">
-    <ul class="flex items-center gap-2">
-      <li class="mr-auto ml-4 py-4"><a class="text-3xl font-black" href="/">r3ply</a><span class="ml-4 text-xl font-mono">v0.0.1</span></li>
+  <nav id="primary-nav"
+    class="
+      bg-violet-200 bg-[url(/patterns/random-shapes.svg)]
+        border-b-2 border-gray-400
+        dark:border-b-2 dark:border-b-slate-600
+      dark:bg-slate-950 dark:bg-[url(/patterns/random-shapes_dark.svg)]
+  ">
+    <ul class="flex items-center gap-2 text-slate-800 dark:text-yellow-50">
+      <li class="flex-1 ml-2 md:ml-4 py-4">
+        <a class="font-black text-xl md:text-3xl mr-1" href="/">r3ply</a>
+        <span class="text-xs font-mono md:ml-4 md:text-md text-neutral-700 dark:text-cyan-200">v0.0.1</span>
+      </li>
       <!-- TODO - Search
       <li class="ml-auto"><input placeholder="🔍 ⌘k" type="search" name="TODO" id="search-input" autocomplete="off" class="rounded-3xl w-24 m-0 focus:w-full"></li> -->
-      <li><a class="text-xl font-medium hover:underline decoration-black" href="/">About</a></li>
-      <li><a class="text-xl font-medium hover:underline decoration-black" href="/docs">Docs</a></li>
-      <li><a class="text-xl font-medium hover:underline decoration-black" href="<!-- TODO -->">Contact</a></li>
+      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="/">About</a></li>
+      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="/docs">Docs</a></li>
+      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="<!-- TODO -->">Contact</a></li>
       <li>|</li>
-      <li class="mr-4"><a class="text-xl font-light after:content-['_↗']" href="<!-- TODO -->">GitHub</a></li>
+      <li class="mr-2 md:mr-4 shrink"><a class="md:text-xl font-light after:content-['_↗']" href="<!-- TODO -->">GitHub</a></li>
     </ul>
     {# <!--  TODO - Search
     <div id="search-results" class="absolute w-96 h-96 -left-48 ml-[50%] mt-8 bg-white border overflow-auto z-50 rounded-lg">

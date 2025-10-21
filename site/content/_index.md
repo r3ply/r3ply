@@ -3,101 +3,107 @@ title = "r3ply home"
 template="index.html"
 +++
 
-# r3ply - Comments, simple as email.
-
-r3ply is an <!-- TODO -->[open source project](/) that allows websites to receive comments via email. Host a [r3ply config](#getting-started) and then receive comments at `<domain>@r3ply.com`.
-
-View the [demo site](https://spenc.es/writing/email-as-a-commenting-system/#comments) to try it out, or [get started](/#getting-started) to add comments to your site.
-
-## Getting Started
-
-r3ply is simple to add to your site, with just a few steps:
-
-{% make_config() %}
-
-1. Enter your website's domain and press 'generate' to produce a `signet`. Then host the config at `/.well-known/r3ply/config.toml` from the same domain.
-
+{% fig(dark="/illustrations/r3ply-landing_dark@0.5x.webp" caption="r3ply, born from the inferno of the internet") %}
+![volcano erupting a comment bubble containing an email icon](/illustrations/r3ply-landing_light@0.5x.webp)
 {% end %}
 
-**Now you're ready to start receiving comments. But how do your visitors know where to send them?**
+# r3ply - Comments simple as email.
 
-2. On your website, generate `mailto:` links on the pages where you'd like to receive comments, by pre-populating the `to` and `subject` fields.
-
-**Put `<your-site>@r3ply.com` in the `To` header of the email. In the `Subject` line just leave a link to the page or other comment the email is responding to.**
-
-3. Comments addressed to [\<your-site\>@r3ply.com](mailto:CHANGE_ME@r3ply.com) and referencing the subject (a URL) will arrive per the `moderation` section of the config, e.g. GitHub.
-
-**You can learn more about how to fine tune the configuration in the <!-- TODO -->[config docs](/docs).**
-
-There is also a r3ply CLI tool called `re` that is useful for local development. Use it to simulate a comment arriving to your site, and iterate on your config with confidence.
-
-```sh
-npm install -g @r3ply/cli
-re config validate
-```
+r3ply is an [open source project](/todo) that allows websites to receive comments via email. View the [demo](/todo) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.
 
 ---
 
-Next read the [docs](/docs) or scroll down to learn more about r3ply.
+**Table of Contents:**
 
-## Why Email as a Commenting System?
+- [About](#about)
+- [Features](#features)
+- [Why Email?](#why-email)
+- [FAQ](#faq)
+- [Demo](#demo)
 
-While there are a ton of additional benefits to using email for comments, the most important two reasons come down to the fact that:
+---
 
-1. Everybody person in the world **_already_** has email
+## About
+
+r3ply will receive emails on your website's behalf and package them up as a comment in a way that you can configure and [protects the privacy](/todo) of the sender. **There's no sign-up.** Instead you just host a [r3ply config](/todo) from your `<domain>`, and then email comments can be addressed to `<domain>@r3ply.com`.
+
+_The email's `subject` field is a link (or path) to what is being commented on. It must be on the same domain that hosted the config._
+
+Upon receiving an email comment, r3ply will look for a config at the domain specified in the local part of the email's address, **for example: `foo.com`@r3ply.com**, and then begin processing the email as a comment according to that site's configuration. Below is an example of a r3ply site config with comments.
+
+```toml
+version = "0.0.1"
+
+# one of these per site x r3ply pair
+[[site]]
+domain = "spenc.es"
+r3ply = "r3ply.com"
+signet = "KnFbG9466E-dZcSM-tXFCA"
+issued = 2025-08-26
+
+# pending comments available instantly
+[comments]
+cache = true
+
+[comments.email]
+# block list uses glob patterns
+"block*" = ["*@evil*", "1ee44e372c*"]
+
+[[moderation.github]]
+owner = "asimpletune"
+repo = "spenc.es"
+# templating can be used within config
+"file_path_{}" = "content/comments/{{ comment.id[:8] }}.json"
+```
+
+To make a good experience for your site's visitors, you should generate `mailto` [↗](https://en.wikipedia.org/wiki/Mailto) links with the `to`, `subject`, and `body` fields pre-populated. This allows a draft comment to be started with just the click of a button. Below is the anatomy of an email comment.
+
+![illustration showing the anatomy of an email comment](/illustrations/anatomy-of-an-email-comment@0.5x.webp)
+
+_note: r3ply has a **CLI tool** called `re` that can help you generate mailto links (as well as validate configs, simulate email comments, etc..._)
+
+---
+
+**About hosting!** r3ply is an open source project and can therefore be self-hosted. In addition to this, there is a canonical, community instance of it available to all, for free, at [r3ply.com](https://r3ply.com).
+
+## Features
+
+**For people who want to receive email comments:**
+
+- Commenter email addresses are automatically anonymized with HMAC-256 ([See how](/todo)).
+- A templating system for processing emails (as [template contexts](/todo)) into comments.
+- You can choose multiple different [moderation channels](/todo) (e.g. GitHub PR, webhook).
+- Configure `allow` or `block` lists for commenters you trust/banned.
+- Designed to work perfectly with static sites, but also compatible with any backend.
+- A [pending comments](/todo) cache allows you to serve comments immediately, for 24 hours.
+
+**r3ply also has a CLI tool** called `re` that is a local implementation of a r3ply app. This allows for easy debugging and development of your r3ply config, and to iterate on how comments are to integrate with your website.
+
+_E.g. you can just `re simulate email` and see [the entire pipeline](/todo) in the terminal._
+
+---
+
+**For those who want to run a r3ply service** - r3ply in its most basic form is completely stateless. It therefore [can be run](/todo), comfortably within most free-tiers.
+
+## Why Email?
+
+Emailed comments crucially allow for content moderation, but there are also three additional reasons why email makes a great commenting system:
+
+1. Everybody in the world **_already has_** email
 2. **_Nobody_** wants to create accounts for things
+3. Email gives us **_a lot of nice things_** for free
 
-However, in addition to those points, email clients are purpose-built for writing! They allow visitors to do things like **scroll side-by-side**, next to the content they're responding to, or to provide rich features like **comment drafts** and **commenting history** automatically — because **_email already works that way_**.
+The appeal is simple. Not only is email the most popular and ubiquitous platform in the world, but it also gives us features like a native text editor, draft comments, and comment history without having to write a line of code. It even allows user's to bring their own tools.
 
-These features would be difficult to replicate, and that's just for the editor alone. But let's get back to the real challenge r3ply solves which is accounts and moderation.
+**In fact, emailed comments means there isn't even vender lock-in!** Just swap out `<your-site>@r3ply.com` with whatever you want and you're back in business.
 
-## How r3ply Solves Accounts & Moderation
-
-As mentioned [above](#why-email-as-a-commenting-system), everyone already has email and nobody wants to sign up for things. And they shouldn't have to!
-
-Imagine if you sent an email to the owner of a website responding to their article (maybe it stinks!). The website owner would then have the power to copy and paste your comment at the bottom of the article, to share with the rest of the world, or to ignore your email altogether.
-
-In that scenario, the website owner had full moderation, but the commenter only had to send an email — no sign ups were required.
-
----
-
-**r3ply does the same thing but automated and with some key differences:**
-
-1. commenter's email addresses are pseudo-anonymized to a stable hash
-2. instead of using a personal email address, the site has a special email address just for receiving comments
-3. moderating comments and publishing them just uses the site's normal build pipeline, rather than being copy and pasted
-
----
-
-With r3ply then, users never have to sign up for anything, therefore there's no account friction preventing users from leave comments on r3ply enabled websites, and site owners can still moderate content that goes to their website.
-
-## How Visitors Send Comments to Your Site
-
-Once you're hosting a [r3ply config](#getting-started) from your site, you can begin receiving comments at `<your-site's-domain>@r3ply.com`. r3ply expects the subject line of the email to be the URL of what the comment is in response to.
-
-For this reason it's recommended for your website to pre-populate [`mailto:`](https://en.wikipedia.org/wiki/Mailto) links with the `To` and `Subject` headers pre-populated. Additionally, an email body can be pre-populated with instructions to the user.
-
-![A screenshot of how pre-filled mailto links can look](mailto-comment-intake.png)
-
-_Note: by pre-filling the mailto link, you can help r3ply strip out the email signature, by configuring a `comment_separator` value_
-
----
-
-The r3ply CLI tool, `re`, can be useful for generating one-off mailto links:
-
-```sh
-cat body.txt | re generate mailto --to "spenc.es@r3ply.com" --subject https://spenc.es/writing/email-as-a-commenting-system/ | pbcopy
-```
-
-The above command generates a similar mailto link as the screenshot above ([demo](<mailto:?to=spenc.es%40r3ply.com&subject=https%3A%2F%2Fspenc.es%2Fwriting%2Femail-as-a-commenting-system%2F&body=%0D%0A%0D%0A%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%EF%B9%8D%0D%0A1.%20Write%20you%20comment%20above%20this%20%E2%98%9D%EF%B8%8F%20line%0D%0A2.%20When%20you're%20ready%20just%20hit%20send%20%F0%9F%93%A4%0D%0A3.%20Do%20NOT%20edit%20the%20email%20subject%20%E2%9A%A0%EF%B8%8F%0D%0A%0D%0ANOTE%3A%20Your%20email%20address%20will%20remain%20private%0D%0A%0D%0A%0D%0AA%20subset%20of%20markdown%20can%20be%20used%0D%0A(no%20images%2C%20headings%2C%20or%20script%20tags)%0D%0A%0D%0A(Email%20signatures%20below%20%F0%9F%91%87%20will%20be%20ignored)%0D%0A%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%EF%B9%89%0D%0A%0D%0A>))
+To this point, [the idea](https://spenc.es/writing/email-as-a-commenting-system/#email-as-a-commenting-system-is-not-new) of email comments has been done manually [for a while now](https://web.archive.org/web/20240430052558/https://www.dam.brown.edu/people/mumford/blog/2019/conscious.html#:~:text=SOME%20EMAIL%20RESPONSES). r3ply is just software (the first?) for automating this process, and therefore we hope improves upon that design.
 
 ---
 
 **Overall the user experience is actually very nice!**
 
-<div class=" overflow-hidden h-[370px] rounded-lg shadow-xl shadow-gray-800">
-  <img src="screenrecording_md.webp" alt="A screen recording of what using r3ply looks like, end to end." class="scale-[1.085] -translate-y-[35px]">
-</div>
+<img class="rounded-lg dark:border border-grey-400" alt='Screen recording of clicking a "comment" button in r3ply and sending' src="/animations/r3ply-screen-recording-demo.webp"/>
 
 ## FAQ
 
@@ -107,25 +113,26 @@ Below are answers to common questions. Check the [docs](/docs) for more details.
 
 - [How Does r3ply Work?](#how-does-r3ply-work)
 - [How Do I Integrate r3ply Comments with My Website?](#how-do-i-integrate-r3ply-comments-with-my-website)
-- [What is the Difference between r3ply.com and r3ply?](#what-is-the-difference-between-r3ply-com-and-r3ply)
-- [How Are Email Addresses Anonymized?](#how-are-email-addresses-anonymized)
-- [What Commenting Channels (Sources) Are There?](#what-commenting-channels-sources-are-there)
-- [What Moderation Channels (Sinks) Are There?](#what-moderation-channels-sinks-are-there)
+- [How Are Email Addresses Anonymized?](#how-are-emails-anonymized)
+- [What Comment Sources Are Supported?](#what-comment-sources-are-supported)
+- [What Moderation Channels Are Supported?](#what-moderation-channels-are-supported)
 - [Can Commenters Receive an Email Notification?](#can-commenters-receive-an-email-notification)
 - [Can Site Moderators Receive an Email Notification?](#can-site-moderators-receive-an-email-notification)
+- [What is the Difference between r3ply.com and r3ply?](#what-is-the-difference-between-r3ply-com-and-r3ply)
 
 ### How Does r3ply Work?
 
 Here's an overview of the flow of data:
 
-1. the site owner [generates a config](#getting-started) and then host it from their domain
+1. the site owner hosts a [r3ply config](/todo) from their domain
 2. then they pre-populate mailto links for the parts of their website where they want to receive comments
 3. a user then clicks the mailto link, writes their comment, and submits it
 4. the email arrives at the r3ply server, which then checks the site the email is addressed to and fetches that site's config
 5. r3ply then uses the site's configuration to process the email into a format the site expects, e.g. html, json, toml, markdown, etc...
 6. along the way a number of checks are performed, allowing malicious comments to be ignored
-7. finally the processed comment is ready for the owner to moderate and is forwarded to the moderation channel in their config
+7. finally the processed comment is ready for the owner to moderate and is forwarded to the moderation channel(s) in their config
 8. (optional) comments that are pending moderation can be cached by r3ply and available immediately via front-end JS
+9. The user receives a simply confirmation email letting them know their comment was successfully submitted
 
 ### How Do I Integrate r3ply Comments with My Website?
 
@@ -133,33 +140,25 @@ Comments from r3ply arrive for moderation as files. From there you just build yo
 
 For this purpose there's also a r3ply CLI tool called `re`, which is designed to help with a number of local tasks, such as simulating receiving comments. Using `re` you can test changes to your website, and make sure that everything is still working as expected.
 
-### What is the Difference between [r3ply.com](https://r3ply.com) and r3ply?
-
-r3ply is open source software, and [r3ply.com](https://r3ply.com) is just one, canonical, deployment of that software. For people who just want to start receiving comments right away, [r3ply.com](https://r3ply.com) should be all they need. However, since r3ply is open source anyone can host their own instance and serve themselves and others with it.
-
-For example, if someone deployed r3ply at `https://r4ply.com`, then websites could add that to their config and receive comments at `<site>@r4ply.com`.
-
-### How Are Email Addresses Anonymized?
+### How Are Emails Anonymized?
 
 r3ply uses the concept of a _signet_ to pseudo-anonymize the email addresses of commenters. This has the benefit of privacy, but is also deterministic, which allows site owners to moderate comments.
 
-Specifically a _signet_ is just a encrypted envelope that is issued by a r3ply service, to a website's domain. The envelop carries key material that's decrypted by the r3ply service, and then mixed with the senders email address, before performing an [HMAC](https://en.wikipedia.org/wiki/HMAC).
+Specifically a _signet_ is just a encrypted envelope that is issued by a r3ply service, to a website's domain. The envelop carries key material that's decrypted by the r3ply service, and then mixed with the senders email address, before performing an [HMAC ↗](https://en.wikipedia.org/wiki/HMAC).
 
-_signet's_ can not be used by other websites, nor can they be used with other r3ply services. There is a strict 1:1 relationship.
+_Signet's_ can not be used by other websites, nor can they be used with other r3ply services. The signet represents a strict 1:1 relationship between the site domain and the r3ply service that issued the signet.
 
-### What Commenting Channels (Sources) Are There?
+### What Comment Sources Are Supported?
 
-Currently there's just email. However, r3ply was designed from the beginning to allow for additional commenting sources. If you're interested in adding more, then please checkout r3ply's <!-- TODO -->[GitHub repo](/) and the <!-- TODO -->[contributing](/) docs.
+Currently there's just email. However, r3ply was designed from the beginning to allow for additional commenting sources. If you're interested in adding more, then please checkout r3ply's [GitHub repo](/todo) and the [contributing](/todo) docs.
 
-### What Moderation Channels (Sinks) Are There?
+### What Moderation Channels Are Supported?
 
-Currently there's just `GitHub` and `webhook`. If you're interested in adding more, then please checkout r3ply's <!-- TODO -->[GitHub repo](/) and the <!-- TODO -->[contributing](/) docs.
+Currently there's just `GitHub`, `webhook`, and `local` (which is used by the CLI). If you're interested in adding more, then please checkout r3ply's [GitHub repo](/todo) and the [contributing](/todo) docs.
 
 ### Can Commenters Receive an Email Notification?
 
-r3ply allows site owners to configure if and how they'd like r3ply to respond on their behalf to the commenters. By default there's no response, but on the other end of the spectrum one can template a response a fully branded HTML email in the config, complete with a preview URL to their comment. It just depends on how you want to do it.
-
-Most users only care about knowing that their comment arrived and otherwise want to be left alone.
+Commenters do receive a simple email notification letting them know their comment was received successfully. In the future we plan to support allowing site owners to template that email to their liking.
 
 ### Can Site Moderators Receive an Email Notification?
 
@@ -168,3 +167,13 @@ As of right now, there are some limitations around this. If you're a moderator w
 The reason for this limitation is that r3ply's email provider only allows responding to emails. At the moment sending _new_ emails (or forwarding emails) — which would be required for notifying a site moderator by email - is restricted to only a pre-approved list of emails.
 
 In the future a different, outbound service could be used or r3ply could host its own email server. More generally, there are plans to add altogether new notification channels in the future.
+
+### What is the Difference between [r3ply.com](https://r3ply.com) and **_r3ply_**?
+
+r3ply is open source software, and [r3ply.com](https://r3ply.com) is just one, canonical deployment of that software. For people who just want to start receiving comments right away, [r3ply.com](https://r3ply.com) should be all they need. However, since r3ply is open source anyone can host their own instance and serve themselves and others with it.
+
+For example, if someone deployed r3ply at `https://r4ply.com`, then websites could add that to their config and receive comments at `<site>@r4ply.com`.
+
+## Demo
+
+TODO

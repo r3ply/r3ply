@@ -7,3 +7,4 @@ crates/r3ply-wasm/pkg/**
 **/Cargo.lock
 **/pnpm-lock.yaml
 **/worker-configuration.d.ts
+**/schemas/**/*.json
