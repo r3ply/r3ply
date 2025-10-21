@@ -14,7 +14,7 @@
     <aside>
       {% include "includes/side-nav.html" %}
     </aside>
-    <article id="content" class="px-2 py-10 mx-auto prose prose-li:marker:text-black prose-pink prose-hr:border-black dark:prose-invert overflow-x-clip text-nowrap">
+    <article id="content" class="px-2 py-10 mx-auto prose prose-li:marker:text-black prose-pink prose-hr:border-black dark:prose-invert overflow-x-clip group-has-[:checked]:text-nowrap">
       {% include "includes/side-nav-toggle.html" %}
       {% set content = section.content | default(value=page.content) %}
       {{ content | safe }}
