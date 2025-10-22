@@ -1,21 +1,12 @@
 {% set config = '
 
 ```toml
-# r3ply configuration - see /docs/config for more
-version = "0.0.1"
-
 # each site x r3ply combo has an entry
 [[site]]
 domain = "example.com"
 r3ply = "r3ply.com"
 signet = "iSQIIBcF7ka2UURJpFDkYw"
 issued = 2025-08-26
-
-# more moderation options, e.g. `type = "webhook"`, available
-[comments.email.moderation]
-type = "github"
-repo = "https://github.com/you/<YOUR_REPO>"
-"file_path_{}" = "content/comments/{{ comment.id[:8] }}.md"
 ```
 ' %}
 
@@ -23,25 +14,30 @@ repo = "https://github.com/you/<YOUR_REPO>"
   {{ config | markdown | safe }}
 </div>
 
-{{ body | markdown | safe }}
+{% if body %}
+ {{ body | markdown | safe }}
+{% endif %}
 
 <div class="flex gap-2 mb-4">
   <input
     type="text"
     id="domain-input"
     title="Enter a valid domain name, e.g., example.com"
-    placeholder="example.com"
+    placeholder="{{ placeholder }}"
     pattern="^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,6}$"
     required
     autocomplete="off"
-    class="flex-1 p-2 border-2 border-black focus:outline-none focus:ring-2 focus:ring-yellow-300 rounded-lg"
+    class="flex-1 p-2 border-2 rounded-lg
+      focus:outline-none focus:ring-2
+      border-black focus:ring-amber-200 placeholder-gray-600 text-gray-950 bg-gray-50
+      dark:border-gray-300 dark:focus:ring-pink-400 dark:placeholder-gray-300 dark:text-gray-50 dark:bg-gray-500"
   />
   <button
     id="submit-btn"
     class=" border-2 border-black bg-blue-400 text-white px-4 py-2 hover:bg-blue-600 rounded-lg cursor-pointer"
   >
-  Generate Config!
-</button>
+  Issue Signet!
+  </button>
 </div>
 
 <script>
@@ -58,7 +54,7 @@ repo = "https://github.com/you/<YOUR_REPO>"
     const base_url = new URL("https://example.com")
     let custom_url;
     try {
-      custom_url = new URL(`https:${domain}`)
+      custom_url = new URL(`https://${domain}`)
       custom_url = new URL(custom_url, base_url)
     } catch (error) {
       console.error(error)
@@ -67,7 +63,7 @@ repo = "https://github.com/you/<YOUR_REPO>"
     }
 
     try {
-      const response = await fetch(`http://localhost:8787/signet/${custom_url.hostname}`);
+      const response = await fetch(`https://test.r3ply.com/signet/${custom_url.hostname}?format=json`);
       if (!response.ok) throw new Error('API request failed');
       const data = await response.json();
 

@@ -339,13 +339,13 @@ export function generate_cmd(cwd: string) {
       const minimal_github_config = {
         owner: '<YOUR_GITHUB_USERNAME>',
         repo: '<YOUR_PROJECT>',
-        'file_path_{}': '<TODO>',
+        'file_path_{}': 'comment_{{ comment.id[:8] }}.json',
       }
       const minimal_webhook_config = {
         url: 'https://TODO',
       }
       const minimal_local_config = {
-        'file_path_{}': 'TODO',
+        'file_path_{}': 'comment_{{ comment.id[:8] }}.json',
       }
       const parsed = R3plySiteConfig({
         site: [{ ...site, label: options.label }],
