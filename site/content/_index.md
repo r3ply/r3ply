@@ -68,14 +68,16 @@ _note: r3ply has a **CLI tool** called `re` that can help you generate mailto li
 
 **For people who want to receive email comments:**
 
-- Commenter email addresses are automatically anonymized with HMAC-256 ([See how](/todo)).
-- A templating system for processing emails (as [template contexts](/todo)) into comments.
-- You can choose multiple different [moderation channels](/todo) (e.g. GitHub PR, webhook).
-- Configure `allow` or `block` lists for commenters you trust/banned.
-- Designed to work perfectly with static sites, but also compatible with any backend.
-- A [pending comments](/todo) cache allows you to serve comments immediately, for 24 hours.
+- Commenter **email addresses are anonymized** with HMAC-256 ([docs](/todo))
+- A **templating system** for processing comments ([docs](/todo))
+- "Fan-out" to **multiple moderation channels** (e.g. GitHub PR, webhook) ([docs](/todo))
+- **Restrict comments** to certain paths, _e.g._ `["**", "!/private/**"]` ([docs](/todo))
+- Configurable `allow` or `block` lists with **glob pattern syntax** ([docs](/todo))
+- Designed to **work perfectly with static sites** and traditional web servers
+- **Signet key rotation** for best security practices ([docs](/todo))
+- A cache to serve **pending comments immediately** (for 24 hours) ([docs](/todo))
 
-**r3ply also has a CLI tool** called `re` that is a local implementation of a r3ply app. This allows for easy debugging and development of your r3ply config, and to iterate on how comments are to integrate with your website.
+**r3ply also has a CLI tool** called `re` that is a local implementation of a r3ply app. It allows for easy debugging and development of your r3ply config, and to iterate on how you integrate comments with your website.
 
 _E.g. you can just `re simulate email` and see [the entire pipeline](/todo) in the terminal._
 

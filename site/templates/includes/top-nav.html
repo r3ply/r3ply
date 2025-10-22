@@ -12,101 +12,10 @@
       </li>
       <!-- TODO - Search
       <li class="ml-auto"><input placeholder="🔍 ⌘k" type="search" name="TODO" id="search-input" autocomplete="off" class="rounded-3xl w-24 m-0 focus:w-full"></li> -->
-      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="/">About</a></li>
+      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="/">Home</a></li>
       <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="/docs">Docs</a></li>
       <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="<!-- TODO -->">Contact</a></li>
       <li>|</li>
       <li class="mr-2 md:mr-4 shrink"><a class="md:text-xl font-light after:content-['_↗']" href="<!-- TODO -->">GitHub</a></li>
     </ul>
-    {# <!--  TODO - Search
-    <div id="search-results" class="absolute w-96 h-96 -left-48 ml-[50%] mt-8 bg-white border overflow-auto z-50 rounded-lg">
-      Example
-    </div>
-    --> #}
-      <!-- TODO - Search
-  <script src="/fuse.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-    const searchData = await fetch('/search_index.en.json').then(r => r.json())
-
-    // console.log(searchData)
-
-    // Initialize Fuse
-    const fuse = new Fuse(searchData, {
-      keys: ["url", "title", "description", "body", "path"],    // searchable fields
-      threshold: 0.4,     // adjust fuzzy match sensitivity
-      includeMatches: true,                     // <-- this adds detailed match info
-      minMatchCharLength: 2                     // optional: ignore very short matches
-    });
-
-    const input = document.getElementById("search-input");
-    const resultsContainer = document.getElementById("search-results");
-
-    // Function to render search results
-    function showResults(items) {
-      if (!items.length) {
-        resultsContainer.innerHTML = "<div class='p-2 text-gray-500'>No results</div>";
-        resultsContainer.classList.remove("hidden");
-        return;
-      }
-
-      resultsContainer.innerHTML = items
-        .map(
-          (search_result) => {
-            const { item, matches } = search_result
-            // console.log(JSON.stringify(matches, null, 2))
-            console.log(highlightMatches(search_result))
-            return `<a href="${item.url}" class="block px-2 py-1 hover:bg-gray-100">${item.title} - ${highlightMatches(search_result)}</a>`
-          }
-        )
-        .join("");
-      resultsContainer.classList.remove("hidden");
-    }
-
-    function highlightMatches(search_result) {
-      if (!search_result.matches) return search_result.item.body || "";
-
-      return search_result.matches.map(match => {
-        let text = match.value;
-        // loop through indices backwards so offsets don't shift
-        match.indices.reverse().forEach(([start, end]) => {
-          text =
-            text.slice(Math.max(0, start - 30), start) +
-            "<mark>" +
-            text.slice(start, end + 1) +
-            "</mark>" +
-            text.slice(end + 1, Math.min(text.length, end + 31));
-        });
-        return text;
-      }).join(" ... "); // join snippets if multiple fields matched
-    }
-
-    // Hide results
-    function hideResults() {
-      //resultsContainer.classList.add("hidden");
-    }
-
-    // Search on input
-    input.addEventListener("input", (e) => {
-      const query = e.target.value.trim();
-      //console.log(`query: ${query}`)
-      if (!query) return hideResults();
-      const results = fuse.search(query, { limit: 10 });
-      //console.log(`results: ${JSON.stringify(results, null, 2)}`)
-      showResults(results);
-    });
-
-    // Hide on blur (optional: delay so click works)
-    input.addEventListener("blur", () => setTimeout(hideResults, 200));
-
-    // Keyboard shortcut: Command+K / Ctrl+K
-    document.addEventListener("keydown", (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        input.focus();
-      }
-    });
-  });
-  </script>
-  -->
   </nav>
