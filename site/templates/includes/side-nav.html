@@ -1,7 +1,7 @@
 {% set shared_nav_styles = "hover:underline decoration-black" %}
-{% set top_level_nav_styles = "dark:text-teal-200" %}
-{% set second_level_nav_styles = "dark:text-orange-200" %}
-{% set ternary_level_nav_styles = "dark:text-pink-200" %}
+{% set top_level_nav_styles = "text-gray-800 dark:text-teal-200" %}
+{% set second_level_nav_styles = "text-gray-900 dark:text-orange-200 text-sm" %}
+{% set ternary_level_nav_styles = "text-gray-950 dark:text-pink-200 text-xs" %}
 
 {# See includes/side-nav-toggle.html #}
 <input type="checkbox" name="open-menu" id="open-menu" class="peer hidden" />
@@ -10,8 +10,8 @@
   w-64 overflow-y-scroll h-full
   hidden md:block peer-checked:block">
   <ul id="toc" class="py-4 px-4 list-disc list-inside font-medium dark:marker:text-neutral-50">
-    <li class="list-none text-center mb-4"><a href="/docs" class="text-green-500 text-2xl font-black underline">r3ply Docs</a></li>
-    <li class="list-none"><a href="/docs#table-of-contents" class="font-extrabold text-lg {{ shared_nav_styles }} text-blue-300">Table of Contents:</a></li>
+    <li class="list-none text-center mb-4"><a href="/docs" class="text-slate-900 dark:text-green-500 text-2xl font-black underline hover:decoration-2">r3ply Docs</a></li>
+    <li class="list-none"><a href="/docs#table-of-contents" class="font-extrabold text-lg text-slate-800 dark:text-blue-300 {{ shared_nav_styles }}">Table of Contents:</a></li>
     <li>
       <a href="/docs#getting-started" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Getting Started</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700 dark:text-red-100">
