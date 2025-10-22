@@ -11,9 +11,7 @@ template="index.html"
 
 r3ply is an [open source project](/todo) that allows websites to receive comments via email. View the [demo](/todo) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.
 
----
-
-**Table of Contents:**
+## Table of Contents { .text-right .border-b .border-dashed }
 
 - [About](#about)
 - [Features](#features)
@@ -21,7 +19,7 @@ r3ply is an [open source project](/todo) that allows websites to receive comment
 - [FAQ](#faq)
 - [Demo](#demo)
 
----
+<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-green-200">{{ fleuron_fish() }}</div>
 
 ## About
 
@@ -173,6 +171,8 @@ In the future a different, outbound service could be used or r3ply could host it
 r3ply is open source software, and [r3ply.com](https://r3ply.com) is just one, canonical deployment of that software. For people who just want to start receiving comments right away, [r3ply.com](https://r3ply.com) should be all they need. However, since r3ply is open source anyone can host their own instance and serve themselves and others with it.
 
 For example, if someone deployed r3ply at `https://r4ply.com`, then websites could add that to their config and receive comments at `<site>@r4ply.com`.
+
+<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-pink-300">{{ fleuron_fish() }}</div>
 
 ## Demo
 
