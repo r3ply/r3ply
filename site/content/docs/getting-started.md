@@ -12,7 +12,8 @@ In this tutorial we're going to walkthrough using r3ply from start to finish wit
 - [Installation/Setup](#installation-setup)
 - [Generating a Config](#generating-a-config)
 - [Simulating a Comment](#simulating-a-comment)
-- [Next Steps](#next-steps)
+- [What's Inside a Comment](#what-s-inside-a-comment)
+- [Summary & Next Steps](#next-steps)
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-amber-200">{{ fleuron_fish() }}</div>
 
@@ -128,6 +129,8 @@ This means that we will have to add a comment and email section to our config. O
 [comments.email]
 ```
 
+Here we added an empty `comments` object, with a nested `email` object. This is because r3ply provides defaults for most configuration items, but only if their top-level objects exist.
+
 Now re-run the `re simulate email` from earlier. You should see a bunch of text representing the each stage of the comment processing pipeline. You can [see the docs](/todo) for more info about how to read and understand this output, as well as how to silence and filter it. But for now we have one last thing to do: writing our comment as a file.
 
 To actually have simulated email be written as a file we will need to add the `--moderate` flag to the same command. What this tells `re` to do is to simulate and email _and_ to moderate it. So go ahead and run the updated command:
@@ -164,30 +167,147 @@ bypass = false
 absolute_path = "/Users/spence/Developer/r3ply/site/content/comments/b69922e4.json"
 ```
 
-At the bottom we see the path the comment was written to! You can change this path by editing your config.
+At the bottom we see the `absolute_path` the comment was written to! You can change this path by editing your config. In the next step we'll take a closer look at that comment.
 
-You are now able to simulate comments via email. You can now develop your site to incorporate these comments throughout its pages. When you make changes to your website, you can check that new comments will continue to work by testing your changes with this tool.
+## What's Inside a Comment
 
-There's a lot more that you can do in r3ply than what was shown here in this tutorial. Go to the next section to get some suggestions on what things to read about next.
+Now that we can simulate the receiving comments based on a real configuration, we need to understand what's inside a comment object. Open the file that was at the `absolute_path` from the last step. You can also expand the one that was used during the making of this tutorial.
+
+<details class="group">
+  <summary class="bg-violet-300 border-2 border-black dark:border-blue-400 rounded-lg py-3 px-2 w-48 hover:cursor-pointer font-extrabold text-gray-800 ml-auto">
+    <span class="group-open:hidden">Expand to See File</span>
+    <span class="hidden group-open:inline">Close File Details</span>
+  </summary>
+
+```json
+{
+  "r3ply": {
+    "config_version": "0.0.1",
+    "server": "cli.r3ply.test",
+    "site": "site.local.test",
+    "signet": "wWM5hk4DKr1xVRhVq-7aog",
+    "issued": "2025-10-16"
+  },
+  "author": {
+    "pseudonym": "2ec68974e2f82e9bd891a351eefe4bbeefe2670b745c861df31c975e54c207c1",
+    "token": "kktE_W_Nlh95kjQpAbbcDkpOPtTjh8SRJNAdulGWav5Nv0zJNUABG91PMIeTo8K6PyMXkHp8iJsxuR-Qg0rFwKLk3LmZt0NTJ1SNUOLL8-0k0Ik-bNSBWCnH_lRCkWFc7LRpTfPNurZ7ncifRVFGbqgKrFoLhvwGSujQivorr9tNKq_r7C2aTyb-ECmTWJdgWVHaD4lwetqv0tU-tueGkBlbTHWlAR6JUX2UwOrQrTSgzx6Ft3-hb4Q9esLhlN1ffUK43Ov0E8dhGReH-Uy1fj2k_EzyOwLLfZ771mkfC4dMsjPl0jMZTSjDQqP-tK3hiA5xJsC6Aa00S04ZFVXBIZVNHEgds4AbcfUhpZqwOfBLfCXey4scQBW5DZFGkF3Km3_gaBJUYKTaYoYLN71Xd5rjELcpahwzvxUurUoNYQn-D6zt_U-Fbt4SeoA9370ivV1U0HeY6w-5YWrk"
+  },
+  "comment": {
+    "id": "b69922e4da6e45cf9cd75cc3b878fc5c",
+    "ts_rcvd": "1761144137",
+    "subject": {
+      "url": "https://site.local.test/reviews/toughest-fights-in-monkey-island",
+      "origin": "https://site.local.test",
+      "protocol": "https:",
+      "hostname": "site.local.test",
+      "path": "/reviews/toughest-fights-in-monkey-island"
+    },
+    "txt": "Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?",
+    "md": "<p>Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?</p>\n",
+    "html": "<p>Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?</p>\n"
+  },
+  "email": {
+    "to": "site.local.test@cli.r3ply.test",
+    "subject": "https://site.local.test/reviews/toughest-fights-in-monkey-island",
+    "date": "2018-08-26T07:24:01+00:00",
+    "text": "Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?",
+    "auth": {
+      "dkim": false,
+      "spf": false,
+      "dmarc": false,
+      "pass": false
+    },
+    "from": {
+      "pseudonym": "2ec68974e2f82e9bd891a351eefe4bbeefe2670b745c861df31c975e54c207c1",
+      "signet": "wWM5hk4DKr1xVRhVq-7aog",
+      "issued": "2025-10-16",
+      "token": "kktE_W_Nlh95kjQpAbbcDkpOPtTjh8SRJNAdulGWav5Nv0zJNUABG91PMIeTo8K6PyMXkHp8iJsxuR-Qg0rFwKLk3LmZt0NTJ1SNUOLL8-0k0Ik-bNSBWCnH_lRCkWFc7LRpTfPNurZ7ncifRVFGbqgKrFoLhvwGSujQivorr9tNKq_r7C2aTyb-ECmTWJdgWVHaD4lwetqv0tU-tueGkBlbTHWlAR6JUX2UwOrQrTSgzx6Ft3-hb4Q9esLhlN1ffUK43Ov0E8dhGReH-Uy1fj2k_EzyOwLLfZ771mkfC4dMsjPl0jMZTSjDQqP-tK3hiA5xJsC6Aa00S04ZFVXBIZVNHEgds4AbcfUhpZqwOfBLfCXey4scQBW5DZFGkF3Km3_gaBJUYKTaYoYLN71Xd5rjELcpahwzvxUurUoNYQn-D6zt_U-Fbt4SeoA9370ivV1U0HeY6w-5YWrk"
+    }
+  }
+}
+```
+
+</details>
+
+That was a lot! Let's look more closely at individual items to get a better understanding.
+
+```json
+  ...
+  "r3ply": {
+    "config_version": "0.0.1",
+    "server": "cli.r3ply.test",
+    "site": "site.local.test",
+    "signet": "wWM5hk4DKr1xVRhVq-7aog",
+    "issued": "2025-10-16"
+  },
+  ...
+```
+
+This is just metadata about concerning the site, r3ply server, etc... that serviced this comment. Next let's look at `author`:
+
+```json
+  ...
+  "author": {
+    "pseudonym": "2ec68974e2f82...",
+    "token": "..."
+  },
+  ...
+```
+
+Here we see details about the comment's author. Their email address has been anonymized to a stable `pseudonym` that can be used like an ID. There's also a long `token` which is an opaque, encrypted token of their real email address. Only the original r3ply server can decrypt it. It's there for future-proofing r3ply so that if changes need to be made, the original, cleartext email address won't be lost.
+
+```json
+  ...
+  "comment": {
+    "id": "b69922e4da6e45cf9cd75cc3b878fc5c",
+    "ts_rcvd": "1761144137",
+    "subject": {
+      "url": "https://site.local.test/reviews/toughest-fights-in-monkey-island",
+      "origin": "https://site.local.test",
+      "protocol": "https:",
+      "hostname": "site.local.test",
+      "path": "/reviews/toughest-fights-in-monkey-island"
+    },
+    "txt": "Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?",
+    "md": "<p>Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?</p>\n",
+    "html": "<p>Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?</p>\n"
+  },
+  ...
+```
+
+Here's the actual `comment` object. There're three nearly identical versions of the comment body: `txt`, `md`, and `html`. This is because r3ply supports text written as markdown, as well as converting that markdown to HTML, but it will also strip out malicious html tags. You can configure this further within the `[comment]` object ([docs](/todo)).
+
+There's also the `subject` field of the `comment` object, which tells us the URL of what the comment was in response to. Using this you should be able to identify the page the comment belongs on.
+
+## Summary & Next Steps { #next-steps }
+
+Great, you are now able to simulate comments via email with `re simulate email`, which should work exactly the same as real email comments when your changes go online. You can now use these test comments to develop your site to incorporate comments throughout its pages:
+
+- Using the `subject` field you can identify where a comment belongs.
+- Then the `author` field allows you to attach a stable identifier to the comment's authorship.
+- Finally the `html` field gives you a sanitized output that is safe to display on your website.
+
+In the future, when you make changes to your website, you can check that new comments will continue to work by testing your changes with this tool.
 
 ---
 
-## Next Steps
+There's a lot more that you can do in r3ply than what was shown here in this tutorial. Tweaking your config can make r3ply an incredibly powerful tool.
 
 Add a new site entry for your site's public domain ([docs](/todo)):
 
 {{ make_signet(placeholder="Enter your website's domain") }}
 
-Add another moderation channel to your config ([docs](/todo))
+Next, add another moderation channel to your r3ply config ([docs](/todo)).
 
 ```toml
+# E.g. add moderation by GitHub PR
 [[moderation.github]]
 owner = "<ACCOUNT>"
 repo = "<REPO>"
 "file_path_{}" = "content/comments/{{ comment.id[:8] }}.md"
 ```
 
-Read the [config docs](/todo) to take full advantage of r3ply.
+Finally, read the [config](/todo) and [CLI](/todo) docs to take full advantage of r3ply.
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-emerald-400">{{ fleuron_fish() }}</div>
 
