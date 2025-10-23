@@ -1,29 +1,25 @@
-{% set config = '
+{% set config = body | default(value='
 
 ```toml
-# each site x r3ply combo has an entry
+# each (site x r3ply) pair has an entry
 [[site]]
 domain = "example.com"
 r3ply = "r3ply.com"
 signet = "iSQIIBcF7ka2UURJpFDkYw"
 issued = 2025-08-26
 ```
-' %}
+') %}
 
 <div id="quick-start-config" class="select-all">
   {{ config | markdown | safe }}
 </div>
-
-{% if body %}
- {{ body | markdown | safe }}
-{% endif %}
 
 <div class="flex gap-2 mb-4">
   <input
     type="text"
     id="domain-input"
     title="Enter a valid domain name, e.g., example.com"
-    placeholder="{{ placeholder }}"
+    placeholder="{{ placeholder | default(value=`Your website's domain`) | safe }}"
     pattern="^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,6}$"
     required
     autocomplete="off"

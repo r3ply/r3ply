@@ -9,7 +9,35 @@ template="index.html"
 
 # r3ply - Comments simple as email.
 
-r3ply is an [open source project](/todo) that allows websites to receive comments via email. View the [demo](/todo) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.
+r3ply is an [open source project](/todo) that allows websites to receive comments via email. It receives emailed comments on your behalf and packages them for your site to use.
+
+There's no sign up – simply serve a [r3ply config](/todo) from your domain:
+
+{% make_signet() %}
+
+```toml
+# each (site x r3ply) pair has an entry
+[[site]]
+domain = "example.com"
+r3ply = "r3ply.com"
+signet = "m1ByUVAzHfjDctYztNCHWQ"
+issued = 2025-10-23
+
+# pending comments available instantly
+[comments]
+cache = true
+
+[comments.email]
+# block list uses glob patterns
+"block*" = ["*@evil*", "1ee44e372c*"]
+
+# See https://r3ply.com/docs/moderation
+# For how to add a moderation channel
+```
+
+{% end %}
+
+View the [demo](/todo) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.
 
 ## Table of Contents { .text-right .border-b .border-dashed }
 
@@ -47,6 +75,8 @@ cache = true
 # block list uses glob patterns
 "block*" = ["*@evil*", "1ee44e372c*"]
 
+# See https://r3ply.com/docs/moderation
+# For more on moderation channels
 [[moderation.github]]
 owner = "asimpletune"
 repo = "spenc.es"

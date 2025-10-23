@@ -295,7 +295,7 @@ There's a lot more that you can do in r3ply than what was shown here in this tut
 
 Add a new site entry for your site's public domain ([docs](/todo)):
 
-{{ make_signet(placeholder="Enter your website's domain") }}
+{{ make_signet() }}
 
 Next, add another moderation channel to your r3ply config ([docs](/todo)).
 
