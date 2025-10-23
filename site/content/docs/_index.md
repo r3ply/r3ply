@@ -10,7 +10,7 @@ The r3ply docs are arranged as a mixture of pure documentation, concepts, and tu
 ## Table of Contents { .text-right .border-b .border-dashed }
 
 - [Getting Started](/docs/getting-started) <span class="font-extralight dark:text-emerald-200 ">(Tutorial/Walkthrough)</span>
-- [Overview](/todo) <span class="font-extralight dark:text-blue-200">(Concepts/High-level)</span>
+- [Overview](/docs/overview) <span class="font-extralight dark:text-blue-200">(Concepts/High-level)</span>
 - [Configuration](/todo) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
 - [The r3ply CLI](/todo) - `re` <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
 - [Commenting Advice](/todo) <span class="font-extralight dark:text-blue-200 ">(Concepts/High-level)</span>
