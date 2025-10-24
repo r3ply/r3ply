@@ -5,7 +5,13 @@ template = "doc.html"
 
 # Overview
 
-In this page we'll discuss concepts and terminology of r3ply. The goal is to give the reader a big picture understanding of r3ply, as well as to provide a space for documentation that have its own page. It is meant to be useful to both future contributors to the codebase, as well as site owners who are using r3ply to receive comments.
+In this page we'll discuss concepts and terminology of r3ply. The goal is to give the reader a big picture understanding of r3ply (_Also, documentation that doesn't have a dedicated page should go here_).
+
+{% fig(dark="/illustrations/r3ply-email-comment-swim-lanes_dark@0.5x.webp" caption="Swim lanes detailing the flow of data in r3ply") %}
+![Swim lane architectural diagram depicting the flow of data when receiving an email comment](/illustrations/r3ply-email-comment-swim-lanes@0.5x.webp)
+{% end %}
+
+This page is meant to be useful to both future contributors to the codebase, as well as site owners who are using r3ply to receive comments.
 
 ## Table of Contents { .text-right .border-b .border-dashed }
 
@@ -16,7 +22,6 @@ In this page we'll discuss concepts and terminology of r3ply. The goal is to giv
   - [Anonymization](#encryption)
   - [Encryption](#encryption)
   - [Moderation](#moderation)
-- [Architectural Diagram](/todo)
 - [Tracing a Comment](/todo)
 - [Why Comments as Files?](/todo)
 
@@ -28,14 +33,18 @@ Here's a discussion of some of terminology and concepts of r3ply.
 
 ### r3ply
 
-r3ply **in essence** is just a [library](/todo). To make a r3ply _app_ you just handle IO and make function to the r3ply library. In that sense **every r3ply provider is just a wrapper** around the r3ply library. Two examples of r3ply _apps_ are:
+r3ply **in essence** is just a [library](/todo). To make a r3ply _app_ you just handle IO, delegating the main logic to the r3ply library. In that sense **every r3ply app is just a wrapper** around the r3ply library. Two examples of _r3ply apps_ are:
 
-- The [r3ply Cloudflare Worker](/todo): accessed via the public internet
-- The [r3ply CLI](/todo) - `re`: accessed via your local file system
+- The [r3ply Cloudflare Worker](/todo): accessed publicly, via the internet
+- The [r3ply CLI](/todo) - `re`: accessed privately, via the local file system
 
-As you can see, the main difference between the two is how they're accessed and therefore their main responsibilities are handling the particulars of IO in their domains. For example, the cloudflare worker can be accessed from the public internet, and has a way of receiving emails, via Cloudflare's [email handler](/todo). It currently powers the public [r3ply.com](https://r3ply.com) service. On the other hand, the CLI tool – `re` – just receives text from the command line and parses them into arguments.
+As you can see, the main difference between the two is how they're accessed. Therefore their main responsibilities are handling the particulars of IO specific to their domains.
 
-In both cases the main work they're responsible for is specific to their IO, while the main work of actually processing comments is handled by the underlying r3ply library. Since r3ply app are just IO wrappers around the r3ply library, it's quite easy to [build your own](/todo) r3ply app and extend others.
+For example, the cloudflare worker can be accessed from the public internet, and has a way of receiving emails. It currently powers the public [r3ply.com](https://r3ply.com) service.
+
+On the other hand, the CLI app – `re` – just receives text from the command line and parses them into arguments.
+
+In both cases the main work they're responsible for is specific to their IO, while the actual logic of processing comments is handled by the underlying r3ply library. Since r3ply app are just IO wrappers around the r3ply library, **it's quite easy to [build your own](/todo) r3ply app** and extend others.
 
 ### Sites & Signets
 
@@ -81,13 +90,17 @@ From [above](#sites-signets):
 
 In this context _cryptographically signing_ means to produce some kind of verifiable signature of something without revealing its contents.
 
-Crucially, once something has been signed with a signet **it can never be read again**, but the same thing signed multiple times will **always produce the same signature**. In this sense, Signets **perform a one-way function** that is both _pseudo-random_ and _deterministic_. This is why r3ply uses the term `pseudonym` [for authors](/todo), since something truly anonymous would be indistinguishable from randomness, but the same author's email will always produce the same `pseudonym`.
+Crucially, once something has been signed with a signet **it can never be read again**, but the same thing signed multiple times will **always produce the same signature**. In this sense, signets **perform a one-way function** that is both _pseudo-random_ and _deterministic_.
+
+(_This is why r3ply uses the term `pseudonym` [for authors](/todo), since something truly anonymous would be indistinguishable from randomness, but the same author's email will always produce the same `pseudonym`._)
 
 Importantly, **emails signed with signets are still completely secure** and practically indistinguishable from total randomness.
 
-Now let's talk more details regarding the specifics of **how the r3ply anonymization works**. Signets are 22 character strings that are actually [_key envelopes_ ↗](https://en.wikipedia.org/wiki/Hybrid_cryptosystem#Envelope_encryption), storing **a private key** that was symmetrically encrypted by **a master key** held by the issuing r3ply app. To form this key envelope, the site's `domain` and the signet's `issued` date are both concatenated, along with the issuing app's `r3ply` domain.
+Now let's talk more about the specifics of **how r3ply's anonymization works**. Signets are 22 character strings that are actually [_key envelopes_ ↗](https://en.wikipedia.org/wiki/Hybrid_cryptosystem#Envelope_encryption), storing part of **a private key** that was produced by a **a master key**, held by the issuing r3ply app.
 
-When something needs to be signed **this is all re-computed** and any deviations from the original signet **will be proof the envelope was tampered with**. You can see the process in this example code:
+To form this key envelope, the site's `domain` and the signet's `issued` date are both concatenated, along with the issuing app's `r3ply` domain, and then signed with the r3ply server's private key.
+
+When a signet is trying to be used **this is envelope is re-computed** and any deviations from the original signet **will be proof the envelope was tampered with**. You can see the process in this example code:
 
 ```TS
 // Recompute expected envelope (sanity check)
@@ -105,27 +118,27 @@ if (expected_envelope !== signet) {
 
 In other words, **a signet can only be used by the site it was issued to, along with the server that issued it**.
 
-If the key envelope can successfully recomputed, however, then the key is recovered from the remaining 16 bytes and then used sign the underlying data with [HMAC-SHA256 ↗](https://en.wikipedia.org/wiki/HMAC). This is how the emails of commenters of are _pseudo-anonymized_.
+If the key envelope can successfully be recomputed, however, then the key is recovered from the remaining 16 bytes and used to sign the underlying data with [HMAC-SHA256 ↗](https://en.wikipedia.org/wiki/HMAC). This is how the emails of commenters of are _anonymized_, i.e. how their `pseuodonym` is generated.
 
 ### Encryption
 
-r3ply also does some encryption. In addition to signing emails for anonymization, they are also encrypted. This produces an opaque `token` comes with every email comment. Email addresses are padded with null bytes to conceal the length of the original email. For example:
+r3ply also does some encryption. In addition to signing email addresses for anonymization, they are also encrypted. This produces an opaque `token` that comes with every email comment. Email addresses are padded with null bytes to conceal the length of the original email. For example:
 
 ```
 "token": "kktE_W_Nlh95kjQpAbbcDkpOPtTjh8SRJNAdulGWav5Nv0zJNUABG91PMIeTo8K6PyMXkHp8iJsxuR-Qg0rFwKLk3LmZt0NTJ1SNUOLL8-0k0Ik-bNSBWCnH_lRCkWFc7LRpTfPNurZ7ncifRVFGbqgKrFoLhvwGSujQivorr9tNKq_r7C2aTyb-ECmTWJdgWVHaD4lwetqv0tU-tueGkBlbTHWlAR6JUX2UwOrQrTSgzx6Ft3-hb4Q9esLhlN1ffUK43Ov0E8dhGReH-Uy1fj2k_EzyOwLLfZ771mkfC4dMsjPl0jMZTSjDQqP-tK3hiA5xJsC6Aa00S04ZFVXBIZVNHEgds4AbcfUhpZqwOfBLfCXey4scQBW5DZFGkF3Km3_gaBJUYKTaYoYLN71Xd5rjELcpahwzvxUurUoNYQn-D6zt_U-Fbt4SeoA9370ivV1U0HeY6w-5YWrk"
 ```
 
-Currently encryption is done mostly for the purpose of future proofing. It will allow things like key rotations to be done more easily. For this reason, it's advised to store the `token` alongside the comment even if you don't use it. Otherwise the data would be lost forever, which might be fine for some people.
+Currently encryption is done mostly for the purpose of future proofing. It will allow things like key rotations to be done more easily. **For this reason, it's advised to store the author `token` alongside the comment even if you don't use it**. Otherwise the data would be lost forever, which might be fine for some people.
 
 A 32-byte AES-256 symmetric key is used for encryption.
 
-(_In the future encryption may be used more to allow sites to store secrets in public that r3ply can use_)
+(_In the future encryption may be used more to allow sites to store secrets in public that r3ply can use._)
 
 ### Moderation
 
 r3ply handles _receiving_ and _transforming_ comments according to site configs, however moderation channels are responsible for ultimately getting the comments to the sites. They can effectively be thought of as a handoff. There is a [section](/todo) in the config documentation where moderation channels are discussed more thoroughly.
 
-Conceptually though moderation channels can be thought of as destinations for comments. For the purpose of flexibility r3ply allows you to [_fan-out_](<https://en.wikipedia.org/wiki/Fan-out_(software)>) a comment to multiple moderation channels. This could be useful for example to open a pull request with the [GitHub Moderation Channel](/todo) and then to send the comment to a [Webhook Moderation Channel](/todo) for delivering a slack notification.
+Conceptually though moderation channels can be thought of as destinations for comments. For the purpose of flexibility r3ply allows you to [_fan-out_](<https://en.wikipedia.org/wiki/Fan-out_(software)>) a comment to multiple moderation channels. This could be used, for example, to open a pull request with the [GitHub Moderation Channel](/todo) and then to send the comment to a [Webhook Moderation Channel](/todo) for delivering a slack notification.
 
 Each moderation channel allows you to specify an [allow list](/todo), granting certain senders to bypass moderation. [Block lists](/todo) are also possible but they are handled further upstream the comment pipeline, in the `[comments.email]` config section.
 
