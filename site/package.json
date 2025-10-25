@@ -4,7 +4,7 @@
   "description": "r3ply site and documentation",
   "private": true,
   "scripts": {
-    "copy:schemas": "cp -r ../packages/schema/dist/schemas static/schemas/",
+    "copy:schemas": "cp -r ../packages/schema/dist/schemas static/",
     "build": "zola build $BUILD_OPTS && npx @tailwindcss/cli -i ./css/input.css -o ./public/style.css -m",
     "serve": "zola serve $SERVE_OPTS & npx @tailwindcss/cli  -i ./css/input.css -o ./public/style.css --watch && wait",
     "test": "echo \"Error: no test specified\" && exit 1"

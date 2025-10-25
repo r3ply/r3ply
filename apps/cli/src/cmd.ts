@@ -133,6 +133,7 @@ export type GenerateConfigCmdOpts = {
   date: string
   label: string
   moderation: string
+  full: boolean
 }
 
 export type GenerateEmailCmdOpts = {
@@ -321,6 +322,7 @@ export function generate_cmd(cwd: string) {
       'moderation method',
       'local',
     )
+    .option('--full', 'Generate config with defaults set for all values', false)
     .action(async (options: GenerateConfigCmdOpts) => {
       const site = await project.get_keys(cwd).then((keys) =>
         project.get_cli_system_config(cwd).then((system_config) => {
@@ -349,6 +351,7 @@ export function generate_cmd(cwd: string) {
       }
       const parsed = R3plySiteConfig({
         site: [{ ...site, label: options.label }],
+        comments: options.full ? { email: {} } : undefined,
         moderation: {
           [options.moderation]: [
             (() => {

@@ -1,0 +1,48 @@
+{#- prettier-ignore-start -#}
+{#- NOTE: you have to be very careful about whitespace in this file. -#}
+{#-
+  `key` is the key path in the object, e.g. "person.name.first". If it's undefined then the root object will be used.
+  `version` is the schema version, e.g. "v0.0.1". If it's undefined then the value set in the zola config.toml will be used.
+  `schema` is the path of the schema, e.g. "config/site"
+  `skip` let's you skip specific properties, e.g. ["examples"].
+  `def` let's you reference a subschema within an object, e.g. "definitions.options". You should still use the `key` here.
+  `desc` let's you override the description (this is because some descriptions can be redundant and can't be skipped because of Zola whitespace issues, see TODO)
+-#}
+{#- TODO: file an issue w/ tera (or tera2?) about whitespace issues. If you have variables one, two, three, and four, each maybe existing, there's no way to print all the combinations of:
+1
+2
+3
+4
+In the sense of a for variables that exist a line is printed, but otherwise no line is taken up, for example:
+1
+3
+4
+-#}
+{% set skip = skip | default(value=[]) %}
+{%- set schema_obj = load_data(path="static/schemas/" ~ version ~ "/" ~ schema ~ "." ~ version ~ ".json") -%}
+{%- if def -%}
+  {#- This should always have a path of two keys, e.g. "$def.foo" -#}
+  {%- set def_path = def | split(pat=".") -%}
+  {%- set schema_obj = schema_obj[def_path[0]][def_path[1]] -%}
+{%- endif -%}
+{%- if key -%}
+  {%- set key_path = key | split(pat=".") -%}
+  {%- set properties = schema_obj.properties -%}
+  {%- for property_name in key_path -%}
+    {%- set_global property = properties[property_name] -%}
+    {# If there are more properties to explore then we update the properties object here #}
+    {%- if not loop.last %}{%- set properties = property.properties %}{% endif -%}
+  {%- endfor -%}
+{%- else -%}
+  {%- set property = schema_obj -%}
+{%- endif -%}
+{%- if property.description is defined and skip is not containing("description") -%}
+# {{ property.description | safe }}
+{%- endif -%}
+{%- if property.default is defined and skip is not containing("default")  %}
+# Default: {{ property.default | json_encode() | safe }}
+{%- endif -%}
+{%- if property.examples is defined and skip is not containing("examples") %}
+# Examples: {{ property.examples | json_encode() | safe }}
+{%- endif -%}
+{#- prettier-ignore-end -#}

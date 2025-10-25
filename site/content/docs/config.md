@@ -5,9 +5,23 @@ template = "doc.html"
 
 # Configuration
 
-Configuration is a big topic, so we'll cover the broad ideas that always apply first, before shifting gears to the the in's and out's of the various config values themselves.
+Configuration is an important topic in r3ply, as it's the primary way most people would interact with the system. This page will first cover fundamentals of r3ply configuration, before specifying the configuration options for site configs and, later, r3ply app configs.
 
-## Basics
+## Table of Contents { .text-right .border-b .border-dashed }
+
+- [Config Fundamentals](#fundamentals)
+  - [Versioning of r3ply](/todo)
+  - [TOML or JSON Files](/todo)
+  - [JSON Schemas](/todo)
+  - [Variables & Types](/todo)
+- [Site Config](/todo)
+  - [`Sites`](/todo)
+  - [`Comments`](/todo)
+  - [`Moderation`](/todo)
+
+<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-amber-200">{{ fleuron_fish() }}</div>
+
+## Fundamentals
 
 Your website's config is how you will control most of r3ply's behavior. Here are some details that will help you understand how r3ply expects configs to work in general.
 
@@ -38,15 +52,15 @@ r3ply configs can be written in either TOML or JSON. The r3ply servers will choo
 8. https://<DOMAIN>/r3ply.json
 ```
 
-### JSON Schema
+### JSON Schemas
 
-The config code itself is written as a [JSON Schema](https://json-schema.org/). One of the benefits of this is you can put a 'schema directive' in your configuration, which will enable editor support, like validation, hints/examples, and auto-complete.
+The config code itself is written as a [JSON Schema](https://json-schema.org/). One of the benefits of this is you can put a _schema directive_ in your configuration, which will enable editor support, like validation, hints/examples, and auto-complete.
 
 Here's how you do it in JSON:
 
 ```JSON
 {
-  "$schema": "http://r3ply.com/schema/v0.0.x/site.config.json",
+  "$schema": "http://r3ply.com/schemas/v0.0.x/config/site.v0.0.1.json",
   "version": "0.0.1",
   "site": [{
     "domain": "spenc.es",
@@ -102,6 +116,131 @@ To summarize with an example:
 ---
 
 Below we will discuss more in-depth the config keys themselves now.
+
+## Site Config
+
+Below is a site config with comments and all the defaults. For convenience there are also separate sections for [`sites`](/todo), [`comments`](/todo), and [`moderation`](/todo).
+
+<!-- prettier-ignore-start -->
+```toml
+{{ schema_comment(key="version" version="v0.0.1", schema="config/site") }}
+version = "0.0.1"
+{{ schema_comment(key="enabled" version="v0.0.1", schema="config/site") }}
+enabled = true
+
+# site entry for CLI (these are reserved domains)
+[[site]]
+{{ schema_comment(key="domain" version="v0.0.1", schema="config/signet") }}
+domain = "site.local.test"
+{{ schema_comment(key="r3ply" version="v0.0.1", schema="config/signet") }}
+r3ply = "cli.r3ply.test"
+{{ schema_comment(key="signet" version="v0.0.1", schema="config/signet") }}
+signet = "cmq0jqG3c2JxKKzDJ6qpXQ"
+{{ schema_comment(key="issued" version="v0.0.1", schema="config/signet") }}
+issued = "2025-10-24"
+{{ schema_comment(key="label" version="v0.0.1", schema="config/signet") }}
+label = "CLI"
+
+# "production" example
+[[site]]
+domain = "spenc.es"
+r3ply = "r3ply.com"
+signet = "wXyyym86v0pKerq41HiSCA"
+issued = 2025-10-24
+label = "prod"
+
+# "test" example
+[[site]]
+domain = "test.spenc.es"
+r3ply = "test.r3ply.com"
+signet = "mwXjhb543US3KrSkYtHfnQ"
+issued = 2025-10-24
+
+{{ schema_comment(version="v0.0.1", schema="config/comments") }}
+[comments]
+{{ schema_comment(key="enabled" version="v0.0.1", schema="config/comments") }}
+enabled = true
+{{ schema_comment(key="cache" version="v0.0.1", schema="config/comments") }}
+# TODO: some kind of basic, automatic moderation to flag for spam
+cache = false
+{{ schema_comment(key="md_to_html" version="v0.0.1", schema="config/comments") }}
+# TODO: remove this. People can just not use HTML if they don't want it.
+md_to_html = true
+{{ schema_comment(key="sanitize_html" version="v0.0.1", schema="config/comments") }}
+sanitize_html = true
+{{ schema_comment(key="allow_tags" version="v0.0.1", schema="config/comments", skip=["default", "examples"]) }}
+# Default: (same as what's shown below)
+allow_tags = [ "a", "br", "p", "span", "strong", "s", "del", "em", "u", "ul", "ol", "li", "blockquote", "hr", "code", "pre", "table", "tr", "td", "th", "caption", "thead", "tbody", "tfoot", "kbd", "mark", "sub", "small"]
+# TODO: remove this. There are better ways to derive this.
+"$comment_sources" = [ "email" ]
+
+# comment options that aply to email comments
+[comments.email]
+{{ schema_comment(key="enabled" version="v0.0.1", schema="config/comments/email") }}
+enabled = true
+{{ schema_comment(key="filter*" version="v0.0.1", schema="config/comments/email") }}
+"filter*" = [ "**" ]
+{{ schema_comment(key="email_signature_separator" version="v0.0.1", schema="config/comments/email") }}
+email_signature_separator = """
+
+"""
+{{ schema_comment(key="attachments" version="v0.0.1", schema="config/comments/email") }}
+attachments = false
+{{ schema_comment(key="max_size_bytes" version="v0.0.1", schema="config/comments/email") }}
+max_size_bytes = 1_048_576
+{{ schema_comment(key="block*" version="v0.0.1", schema="config/comments/email") }}
+"block*" = [ ]
+{{ schema_comment(key="comment_mime" version="v0.0.1", schema="config/comments/email") }}
+comment_mime = "text/plain"
+
+[moderation]
+{{ schema_comment(key="enabled" version="v0.0.1", schema="config/moderation") }}
+enabled = true
+
+[[moderation.local]]
+{{ schema_comment(key="file_path_{}" version="v0.0.1", schema="config/moderation/local") }}
+"file_path_{}" = "comment_{{ comment.id[:8] }}.json"
+enabled = true
+"allow*" = [ ]
+
+[[moderation.github]]
+{{ schema_comment(key="owner" version="v0.0.1", schema="config/moderation/github") }}
+owner = "<YOUR_GITHUB_USERNAME>"
+{{ schema_comment(key="repo" version="v0.0.1", schema="config/moderation/github") }}
+repo = "<YOUR_PROJECT>"
+{{ schema_comment(key="file_path_{}" version="v0.0.1", schema="config/moderation/github") }}
+"file_path_{}" = "comment_{{ comment.id[:8] }}.json"
+{{ schema_comment(key="base_branch_{}" version="v0.0.1", schema="config/moderation/github") }}
+"base_branch_{}" = "main"
+{{ schema_comment(key="head_branch_{}" version="v0.0.1", schema="config/moderation/github") }}
+"head_branch_{}" = "comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md"
+{{ schema_comment(key="commit_msg_{}" version="v0.0.1", schema="config/moderation/github") }}
+"commit_msg_{}" = """
+Comment submitted:
+Sender: {{ author.pseudonym }}
+Timestamp: {{ comment.ts_rcvd }}
+Subject: {{ comment.subject.url }}
+Comment: > {{ comment.txt | split(pat="
+") | join(sep="> ") }}"""
+{{ schema_comment(key="pr_title_{}" version="v0.0.1", schema="config/moderation/github") }}
+"pr_title_{}" = "New comment ({{ comment.id[:8] }}) on {{ comment.subject.url }} by author `{{ author.pseudonym[:7] }}`"
+{{ schema_comment(key="pr_body_{}" version="v0.0.1", schema="config/moderation/github") }}
+"pr_body_{}" = ""
+{{ schema_comment(key="github_host" version="v0.0.1", schema="config/moderation/github") }}
+github_host = "github.com"
+enabled = true
+"allow*" = [ ]
+
+[[moderation.webhook]]
+{{ schema_comment(key="url" version="v0.0.1", schema="config/moderation/webhook") }}
+url = "https://TODO"
+{{ schema_comment(key="method" version="v0.0.1", schema="config/moderation/webhook") }}
+method = "POST"
+enabled = true
+{{ schema_comment(key="allow*" version="v0.0.1", schema="config/moderation", def="definitions.options", skip=["default"]) }}
+"allow*" = [ ]
+```
+<!-- prettier-ignore-end -->
 
 ## Config Keys/Values
 
