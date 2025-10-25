@@ -5,7 +5,7 @@ template = "doc.html"
 
 # Configuration
 
-Configuration is an important topic in r3ply, as it's the primary way most people would interact with the system. This page will first cover fundamentals of r3ply configuration, before specifying the configuration options for site configs and, later, r3ply app configs.
+Configuration is an important topic in r3ply, as it's the primary way most people would interact with the system. **This page will first cover fundamentals of r3ply configuration**, before specifying the configuration options for _site configs_ and _r3ply app configs_.
 
 ## Table of Contents { .text-right .border-b .border-dashed }
 
@@ -33,9 +33,15 @@ r3ply uses semantic versioning and this is enforced by the `version` config key,
 - New features that are backwards compatible change the minor version number, i.e. 0.X.0
 - Breaking changes update the major version and, i.e. X.0.0
 
+(_Your version of r3ply can be specified at the top-level of your site config, e.g. `version = "0.0.1"`_.)
+
+In other words, if you're using a config at version 1.0.1, and a r3ply server is using 1.0.5 or 1.6.2, your config **SHOULD** _still_ work. The same also applies for the CLI tool.
+
 ---
 
-In other words, if you're using a config at version 0.0.1, and a r3ply server is using 0.0.5 or 0.6.2, your config **SHOULD** _still_ work. The same also applies for the CLI tool.
+{% warning() %}
+However, while r3ply is in version `0.x.y` semantic versioning _can_ be broken (_although we will try not to do it too much_). This is so we can get to a stable version as quickly as possible.
+{% end %}
 
 ### TOML/JSON Files at Well Known Locations { #toml-or-json }
 
