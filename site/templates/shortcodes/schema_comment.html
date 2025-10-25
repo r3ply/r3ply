@@ -36,8 +36,11 @@ In the sense of a for variables that exist a line is printed, but otherwise no l
 {%- else -%}
   {%- set property = schema_obj -%}
 {%- endif -%}
-{%- if property.description is defined and skip is not containing("description") -%}
+{%- if property.description is defined and skip is not containing("description") and desc is not defined -%}
 # {{ property.description | safe }}
+{%- endif -%}
+{%- if desc is defined -%}
+# {{ desc | safe }}
 {%- endif -%}
 {%- if property.default is defined and skip is not containing("default")  %}
 # Default: {{ property.default | json_encode() | safe }}

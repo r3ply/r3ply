@@ -22,3 +22,9 @@ pre code {
   white-space: pre-wrap;   /* Wrap long lines */
   word-break: break-word;  /* Break words if needed */
 }
+
+.prose {
+  sup {
+    margin-left: 0.5ch;
+  }
+}

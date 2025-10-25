@@ -1,5 +1,5 @@
 +++
-title = "r3ply Config"
+title = "r3ply docs: Config"
 template = "doc.html"
 +++
 
@@ -10,14 +10,14 @@ Configuration is an important topic in r3ply, as it's the primary way most peopl
 ## Table of Contents { .text-right .border-b .border-dashed }
 
 - [Config Fundamentals](#fundamentals)
-  - [Versioning of r3ply](/todo)
-  - [TOML or JSON Files](/todo)
-  - [JSON Schemas](/todo)
-  - [Variables & Types](/todo)
-- [Site Config](/todo)
-  - [`Sites`](/todo)
-  - [`Comments`](/todo)
-  - [`Moderation`](/todo)
+  - [Versioning of r3ply](#versioning-of-r3ply)
+  - [File Types and Locations](#file-types-and-locations)
+  - [Config Schemas](#config-schemas)
+  - [Variables & Types](#variables-and-types)
+- [Site Config](#r3ply-site-config)
+  - [`Sites`](#site-config-entry)
+  - [`Comments`](#comments-configuration)
+  - [`Moderation`](#moderation-configuration)
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-amber-200">{{ fleuron_fish() }}</div>
 
@@ -29,44 +29,48 @@ Your website's config is how you will control most of r3ply's behavior. Here are
 
 r3ply uses semantic versioning and this is enforced by the `version` config key, which is required. All the components of r3ply – the server, config, CLI, etc... – are designed to work with their corresponding major version.
 
-- Small changes such as bug fixes change the patch version number, i.e. 0.0.X
-- New features that are backwards compatible change the minor version number, i.e. 0.X.0
-- Breaking changes update the major version and, i.e. X.0.0
+- Small changes such as bug fixes change the patch version number, i.e. `0.0.Z`
+- Backwards compatible features change the minor version number, i.e. `0.Y.0`
+- Breaking changes update the major version and, i.e. `X.0.0`
 
-(_Your version of r3ply can be specified at the top-level of your site config, e.g. `version = "0.0.1"`_.)
+(Note: _Your version of r3ply can be specified at the top-level of your site config, e.g. `version = "0.0.1"`_.)
 
-In other words, if you're using a config at version 1.0.1, and a r3ply server is using 1.0.5 or 1.6.2, your config **SHOULD** _still_ work. The same also applies for the CLI tool.
+In other words, if you're using a config at version 1.0.1, and a r3ply server is using 1.0.5 or 1.6.2, your config _should_ still work. The same also applies for the CLI tool.
 
 ---
 
 {% warning() %}
-However, while r3ply is in version `0.x.y` semantic versioning _can_ be broken (_although we will try not to do it too much_). This is so we can get to a stable version as quickly as possible.
+However, while r3ply is in version `0.y.z` semantic versioning _can_ be broken (_although we will try not to do it too much_). This is so we can get to a stable version as quickly as possible.
 {% end %}
 
-### TOML/JSON Files at Well Known Locations { #toml-or-json }
+### Config File Types & Locations { #file-types-and-locations }
 
-r3ply configs can be written in either TOML or JSON. The r3ply servers will choose the first file that exists at the following locations, with precedence high to low:
+r3ply configs can be written as either TOML or JSON files. The r3ply servers will choose the first file that exists at the following locations, with precedence high to low:
 
 ```txt
-1. https://<DOMAIN>/.well-known/r3ply/config.toml
-2. https://<DOMAIN>/.well-known/r3ply/config.json
-3. https://<DOMAIN>/.well-known/r3ply.config.toml
-4. https://<DOMAIN>/.well-known/r3ply.config.json
-5. https://<DOMAIN>/r3ply.config.toml
-6. https://<DOMAIN>/r3ply.config.json
-7. https://<DOMAIN>/r3ply.toml
-8. https://<DOMAIN>/r3ply.json
+1. <PROJECT_ROOT>/.well-known/r3ply/config.toml
+2. <PROJECT_ROOT>/.well-known/r3ply/config.json
+3. <PROJECT_ROOT>/.well-known/r3ply.config.toml
+4. <PROJECT_ROOT>/.well-known/r3ply.config.json
+5. <PROJECT_ROOT>/r3ply.config.toml
+6. <PROJECT_ROOT>/r3ply.config.json
+7. <PROJECT_ROOT>/r3ply.toml
+8. <PROJECT_ROOT>/r3ply.json
 ```
 
-### JSON Schemas
+`<PROJECT_ROOT>` can, for example, be a domain, or it could also be your project's top-level directory, in the context of using r3ply locally with the CLI.
 
-The config code itself is written as a [JSON Schema](https://json-schema.org/). One of the benefits of this is you can put a _schema directive_ in your configuration, which will enable editor support, like validation, hints/examples, and auto-complete.
+### Config Schemas { #config-schemas}
 
-Here's how you do it in JSON:
+r3ply's configs [are written](/todo) as a [JSON Schemas ↗](https://json-schema.org/). They can be [browsed here](/schemas).
+
+One of the benefits of this is you can reference the schema in your configuration, enabling editor support like validation, hints/examples, and auto-complete.
+
+Here's how you do it with JSON configs:
 
 ```JSON
 {
-  "$schema": "http://r3ply.com/schemas/v0.0.x/config/site.v0.0.1.json",
+  "$schema": "https://r3ply.com/schemas/v0.0.1/config/site.v0.0.1.json",
   "version": "0.0.1",
   "site": [{
     "domain": "spenc.es",
@@ -74,22 +78,22 @@ Here's how you do it in JSON:
     "signet": "qhQ6YSUvQNLb1lCdw3kDR",
     "issued": "2025-08-22"
   }]
-  /* ... continued ... */
+  /* ... */
+}
 ```
 
-And now VSCode will provide detailed editor support.
+And now VSCode will provide detailed editor support:
 
+{% fig(caption="A very subtle typo found in a config") %}
 ![Screenshot showing vscode catching a very subtle typo in a config](/json-schema-editor-support.png)
+{% end %}
 
-Additionally the same can be done in TOML, although the tooling is not as robust in this department yet, by adding a `#:schema <URL_TO_SCHEMA>` comment at the top.
+The same can be done for TOML configs – _albeit not yet supported as well[^toml-support-for-json-schema]_ – using [tombi](https://tombi-toml.github.io/tombi/docs/installation), and then adding a schema _comment directive_ at the top.
 
 ```toml
-#:schema http://localhost:1111/schema/v0.0.x/site.config.json
-
-# r3ply configuration - see /docs/config for more
+#:schema https://r3ply.com/schemas/v0.0.1/config/site.v0.0.1.json
 version = "0.0.1"
 
-# each site x r3ply combo has an entry
 [[site]]
 domain = "example.com"
 r3ply = "r3ply.com"
@@ -97,33 +101,94 @@ signet = "iSQIIBcF7ka2UURJpFDkYw"
 issued = 2025-08-26
 ```
 
-**_Note: if you're interested in helping and developing better tooling for this please <!-- TODO -->[contact me](/)_**
+[^toml-support-for-json-schema]: If you're interested in helping to develop better tooling see [contributing](/todo).
 
-### Template Strings and Files { #template-variables }
+### Config Variables `&` Types { #variables-and-types }
 
-r3ply configs have normal config keys, like `version`, but there are also special config keys that end in `_{}` which indicate they're templates.
+A r3ply config variable consists of a _name_ and a _value_, e.g. `version = "0.0.1"`.
 
-For example, in the overview section we already saw [an example](/docs/overview#comment-processed) of this, when we added the `comment_{}` config key to add a comment template.
+The _value_ assigned to a config _name_ can have many types. To help communicate this information r3ply uses variable names that follow a convention.
 
-**All config keys that end in `_{}` are templates!**
-
-However, as observed in that same example, some templates are long and can make the rest of your config seem messy and unwieldy. For this reason, some special config keys that end in `_{}` are _references_ to **template files**. These config keys begin with `&` – to indicate that its value is a _reference_ - and they also end in `_{}`.
-
-**Therefore config keys that begin with `&` and end in `_{}` are references to template files. Config keys that only end in `_{}` are string template literals.**
-
-To summarize with an example:
-
-- `foo` = normal config key, no templating
-- `foo_{} = "{{ bar }}"` = string template literal, templating in value
-- `&foo_{} = "bar.txt"` = reference _to a file_ that has inside a string template
-
-**If both `foo_{}` and `&foo_{}` are configured, then `&foo_{}` will take precedence.**
+Skip to subsection: [`foo`](#types-normal), [`foo_{}`](#types-string-template), [`&foo`](#types-file-reference), [`foo*`](#types-glob-pattern), [`$foo`](#types-meta)
 
 ---
 
-Below we will discuss more in-depth the config keys themselves now.
+#### Variables named `foo` { #types-normal }
 
-## Site Config
+These are just normal variables. The have the same types that you expect in TOML or JSON, e.g. _string_, _number_, _date_, _list_, etc...
+
+```toml
+# string
+version = "0.0.1"
+# boolean
+enabled = true
+# date (in JSON these have to be quoted)
+issued = 2025-10-24
+```
+
+---
+
+#### Variables named `foo_{}` { #types-string-template }
+
+The `_{}` syntax means a template string is expected.
+
+```toml
+# here the path of a file is
+"file_path_{}" = "content/comments/{{ comment.ts_rcvd }}.md"
+"head_branch_{}" = "comment-{{ comment.ts_rcvd }}"
+"commit_msg_{}" = """
+  Comment submitted:
+  Sender: {{ author.pseudonym }}
+  Timestamp: {{ comment.ts_rcvd }}
+  Subject: {{ comment.subject.url }}"""
+```
+
+See the [string templating docs](/todo) for more info.
+
+---
+
+#### Variables named `&foo` { #types-file-reference }
+
+The `&foo` syntax means the value within is referencing a file that holds the _real_ value. Paths are relative to the location of the site's r3ply config.
+
+These variables are often combined with `_{}` ([see above](#types-string-template)) so that complex templates can have their own file. For example `&foo_{}` would read as
+
+> a reference to a file, that within contains a string template.
+
+Here are some examples with comments.
+
+```toml
+# `..` and `.` are relative to config path
+"&relative_example" = "../foo.bar.baz.txt"
+# read like, "the comment template string is in this file"
+"&comment_{}" = "./viaEmail/comment.template.html"
+```
+
+Each r3ply app knows how to deference these config variables in a way that's specific to their domain. For example, the public internet version of r3ply will interpret these as a URL path and perform a `fetch` request, while the r3ply CLI app `re` will interpret this as a path on the local file system.
+
+In either case the same variable _value_ works in both without having to be changed.
+
+#### Variables named `foo*` { #types-glob-pattern }
+
+The `foo*` syntax means glob patterns can be used. These variables are usually used with lists.
+
+```toml
+# i.e. only allow `"production"`
+"filter*" = ["production"]
+# i.e. allow all paths except those begining with "private"
+"paths*" = ["**", "!/private/**"]
+```
+
+#### Variables named `$foo` { #types-meta }
+
+The `$foo` syntax means this variable is some kind of meta variable reserved by r3ply and can usually not be changed.
+
+```toml
+# These can be safely ignored
+"$comment_sources" = ["email"]
+```
+
+## Site Config { #r3ply-site-config }
 
 Below is a site config with comments and all the defaults. For convenience there are also separate sections for [`sites`](/todo), [`comments`](/todo), and [`moderation`](/todo).
 
@@ -243,16 +308,12 @@ url = "https://TODO"
 {{ schema_comment(key="method" version="v0.0.1", schema="config/moderation/webhook") }}
 method = "POST"
 enabled = true
-{{ schema_comment(key="allow*" version="v0.0.1", schema="config/moderation", def="definitions.options", skip=["default"]) }}
+{{ schema_comment(key="allow*" version="v0.0.1", schema="config/moderation", def="definitions.options", skip=["default"], desc="Email addresses or pseudonyms to bypass moderation with") }}
 "allow*" = [ ]
 ```
 <!-- prettier-ignore-end -->
 
-## Config Keys/Values
-
-Here's an in-depth look at all the major config keys and their corresponding values. Additionally, practically any question about the config can be answered by looking at the config's [JSON schema](/schema/v0.0.x/site.config.json).
-
-### Site
+### Site { #site-config-entry }
 
 The `site` config key expects is an array of objects, each as follows:
 
@@ -273,7 +334,7 @@ One config file can be used for many sites. In fact this is a common scenario, w
 
 To add another site, simply add another `site` entry.
 
-### Comments
+### Comments { #comments-configuration }
 
 The `comments` key is where the behavior for comments is adjusted.
 
@@ -358,7 +419,7 @@ block_list = ['e8a20d6*', 'mallory@evil.com', '*@spam.com']
 
 **Note that if neither `comment_{}` nor `&comment_{}` is defined, then the comment will result as just plain JSON object. See [template preparation](/docs/overview#template-prepared) for more details.**
 
-### Moderation
+### Moderation { #moderation-configuration }
 
 The `moderation` key is also required by `comments`. This controls the parameters that r3ply uses when passing comments along for moderation. Currently either `github` or `webhook` moderation are supported.
 
