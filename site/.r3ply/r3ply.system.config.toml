@@ -8,7 +8,5 @@ email = "guybrush@example.com"
 
 [email]
 enabled = true
-moderation = false
 attachments = false
 max_size_bytes = 5_242_880
-"block*" = []

@@ -1,8 +1,9 @@
 {
   "$id": "https://r3ply.com/schemas/v0.0.1/config/moderation.v0.0.1.json",
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Moderation configuration",
-  "description": "Configure the various channels, i.e. what should happen to comment after they've been processed.",
+  "title": "Moderation config",
+  "description": "Control the various moderation channels",
+  "$comment": "i.e. what should happen to comment after they've been processed.",
   "type": "object",
   "definitions": {
     "options": {
@@ -12,14 +13,15 @@
       "required": [],
       "properties": {
         "enabled": {
-          "title": "Toggle on/off",
-          "description": "If false, the moderation channel is off. Default is true.",
+          "title": "Enable moderation",
+          "description": "False completely turns off moderation for this channel.",
           "type": "boolean",
-          "default": true
+          "default": true,
+          "$comment": "See `moderation.enabled`."
         },
         "allow*": {
-          "title": "Allow list for this moderation channel",
-          "description": "If a comment author matches this list, e.g. their pseudonym, then that information will be passed to whatever is handling the moderation. Usually this will result in comment bypassing moderation, although it depends on how the moderation channel is implemented. The name that is matched against will depend on the upstream commenting channel. For example, comments via email will be a pseudo-anonymized string of the commenter's email address. The \"allow*\" name means glob syntax is allowed. Default is `[]`.",
+          "title": "Allow list",
+          "description": "Plain text email or pseudonym bypassing moderation.",
           "type": "array",
           "items": {
             "type": "string",
@@ -30,12 +32,11 @@
           "examples": [
             "*@alice.com",
             "bob@example.com"
-          ],
-          "$comment": "Glob pattern."
+          ]
         },
         "comments": {
           "title": "Comment sources",
-          "description": "Specify which commenting sources to allow for this moderation channel. Default is undefined, which skips this check altogether.",
+          "description": "Specify which commenting sources to allow for this moderation channel.",
           "type": "array",
           "items": {
             "enum": [
@@ -45,14 +46,14 @@
         },
         "filter*": {
           "title": "Filter site",
-          "description": "Specifies which sites, by label, will have comments moderated. The 'filter*' name means a glob pattern can be provided. See `site` config key for more details. Default is undefined, which skips this check altogether.",
+          "description": "Specifies which sites (by label) will be processed.",
           "type": "array",
           "items": {
             "type": "string",
             "pattern": "^[\\s\\S]*$"
           },
           "examples": [
-            "test*",
+            "*",
             "!local"
           ]
         }
@@ -63,6 +64,8 @@
   "unevaluatedProperties": false,
   "properties": {
     "enabled": {
+      "title": "Enable moderation",
+      "description": "False completely disables moderation.",
       "type": "boolean",
       "default": true
     },

@@ -15,10 +15,10 @@
       {% include "includes/side-nav.html" %}
     </aside>
     {# These are very long so they get their own variable, I guess #}
-    {% set prose_overrides = "prose-li:marker:text-black prose-pink prose-em:text-sky-700 dark:prose-em:text-indigo-200 dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert" %}
+    {% set prose_overrides = "prose-li:marker:text-black prose-pink prose-em:font-light dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert" %}
     {% set decoration_overrides = "not-dark:prose-a:has-[code]:decoration-2 prose-a:has-[code]:decoration-dashed prose-a:has-[code]:underline-offset-[6px] prose-a:has-[code]:decoration-yellow-400 prose-a:has-[code]:hover:decoration-solid" %}
-    <article id="content" class="px-2 py-10 mx-auto prose  overflow-x-clip group-has-[:checked]:text-nowrap
-      {{ prose_overrides }} {{ decoration_overrides }}">
+    <article id="content" class="px-2 py-10 mx-auto prose overflow-x-clip group-has-[:checked]:text-nowrap
+      {{ prose_overrides }} {{ decoration_overrides }} max-w-[80ch]">
       {% include "includes/side-nav-toggle.html" %}
       {% set content = section.content | default(value=page.content) %}
       {{ content | safe }}

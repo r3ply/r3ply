@@ -518,4 +518,8 @@ By using the r3ply CLI tool `re`, we've seen how an email makes its way through 
 
 Moreover, you should now have an idea in your head of how r3ply works at a high level. Next, we need to understand what options are available to us through the config, to make the most of it. However, the process will mostly continue like this, using `re` to check how a change reflects in the comments produced downstream.
 
-{{ next_prev(prev_path="/docs", next_path="/docs/config") }}
+<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-blue-200">{{ fleuron_fish() }}</div>
+
+{{ next_prev(prev_path="/docs", prev_text="Docs Home", next_path="/docs/config", next_text="r3ply config") }}
+
+---

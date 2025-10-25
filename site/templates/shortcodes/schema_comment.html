@@ -27,25 +27,29 @@ In the sense of a for variables that exist a line is printed, but otherwise no l
 {%- endif -%}
 {%- if key -%}
   {%- set key_path = key | split(pat=".") -%}
-  {%- set properties = schema_obj.properties -%}
+  {%- set_global properties = schema_obj.properties -%}
   {%- for property_name in key_path -%}
     {%- set_global property = properties[property_name] -%}
     {# If there are more properties to explore then we update the properties object here #}
-    {%- if not loop.last %}{%- set properties = property.properties %}{% endif -%}
+    {%- if not loop.last %}{%- set_global properties = property.properties %}{% endif -%}
   {%- endfor -%}
 {%- else -%}
   {%- set property = schema_obj -%}
 {%- endif -%}
+# {{ property.title | safe }}
 {%- if property.description is defined and skip is not containing("description") and desc is not defined -%}
-# {{ property.description | safe }}
+: {{ property.description | safe }}
 {%- endif -%}
 {%- if desc is defined -%}
-# {{ desc | safe }}
+# {{ property.title | safe }}: {{ desc | safe }}
 {%- endif -%}
 {%- if property.default is defined and skip is not containing("default")  %}
 # Default: {{ property.default | json_encode() | safe }}
 {%- endif -%}
 {%- if property.examples is defined and skip is not containing("examples") %}
 # Examples: {{ property.examples | json_encode() | safe }}
+{%- endif -%}
+{%- if property['$comment'] is defined and skip is not containing("$comment") %}
+# {{ property['$comment'] | safe }}
 {%- endif -%}
 {#- prettier-ignore-end -#}

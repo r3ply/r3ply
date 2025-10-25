@@ -1,4 +1,4 @@
-import { extra, signet, site } from '../config'
+import { extra, signet, site, r3ply } from '../config'
 import { comments, email } from '../config/comments'
 import { moderation, github, local, webhook } from '../config/moderation'
 import path from 'path'
@@ -14,6 +14,7 @@ const dist_dir = 'dist'
  */
 const schemas = [
   site,
+  r3ply,
   extra,
   signet,
   comments,

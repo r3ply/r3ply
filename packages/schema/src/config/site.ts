@@ -9,9 +9,9 @@ import { parser, Schema } from '@exodus/schemasafe'
 export const site = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/site.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
-  title: 'r3ply config',
-  description:
-    'Describe a configuration for use with the r3ply commenting system. See https://r3ply.com/docs for more info.',
+  title: 'r3ply site config',
+  description: 'Used to configure the r3ply commenting system.',
+  $comment: 'See https://r3ply.com/docs for more info.',
   type: 'object',
   required: [],
   unevaluatedProperties: false,
@@ -24,8 +24,9 @@ export const site = {
       default: '0.0.1',
     },
     enabled: {
-      title: 'Toggle on/off',
-      description: 'Turn off r3ply altogether. Default is true.',
+      title: 'Enable r3ply',
+      description:
+        'False completely turns off r3ply, including any downstream processes.',
       type: 'boolean',
       default: true,
     },

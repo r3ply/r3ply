@@ -2,7 +2,8 @@
   "$id": "https://r3ply.com/schemas/v0.0.1/config/signet.v0.0.1.json",
   "$schema": "http://json-schema.org/draft-04/schema#",
   "$anchor": "signet",
-  "description": "Configuration for each site, including domain, r3ply server, and signet information.",
+  "title": "Site information",
+  "description": "Requires a separate entry for each `site` x `r3ply` (and `issued`) combination.",
   "type": "object",
   "required": [
     "domain",
@@ -13,28 +14,29 @@
   "properties": {
     "domain": {
       "title": "Site domain",
-      "description": "The domain that this configuration applies to. Hostname only, protocol, port, or path.",
+      "description": "The domain that this configuration applies to. Hostname only.",
       "type": "string",
       "format": "hostname"
     },
     "r3ply": {
-      "title": "r3ply service",
-      "description": "The r3ply server that this site expects to receive comments from. Hostname only, protocol, port, or path (note: you have to add a new site config item in order to add another r3ply service for the same site domain).",
+      "title": "r3ply domain",
+      "description": "The r3ply app to receive comments from. Hostname only.",
       "type": "string",
       "format": "hostname"
     },
     "signet": {
-      "title": "signet",
-      "description": "The r3ply-issued signet key. It is only valid per site x r3ply service x issue date. See docs for more info.",
+      "title": "Signet data",
+      "description": "The r3ply-issued signet key.",
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]{22}$",
       "examples": [
         "qhQ6YSUvQNLb1lCdw3kDRg"
-      ]
+      ],
+      "$comment": "See docs/overview#sites-signets."
     },
     "issued": {
       "title": "Issue date (of signet)",
-      "description": "The date this signet was issued. Used for rotation and versioning of signet key.",
+      "description": "Used as a key identifier, e.g. for signet rotations and versioning of signet key.",
       "type": "string",
       "format": "date",
       "examples": [
@@ -43,7 +45,8 @@
     },
     "label": {
       "title": "Site label",
-      "description": "A human readable label of a site that. Useful for filtering further downstream (note: while uniqueness is not technically required it is recommended).",
+      "description": "A human readable label of a site. Useful for filtering further downstream.",
+      "$comment": "See also `filter*`.",
       "type": "string",
       "pattern": "^[\\s\\S]+$",
       "maxLength": 256,

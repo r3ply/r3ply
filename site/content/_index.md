@@ -105,7 +105,7 @@ _note: r3ply has a **CLI tool** called `re` that can help you generate mailto li
 - Configurable `allow` or `block` lists with **glob pattern syntax** ([docs](/todo))
 - Designed to **work perfectly with static sites** and traditional web servers
 - **Signet key rotation** for best security practices ([docs](/todo))
-- A cache to serve **pending comments immediately** (for 24 hours) ([docs](/todo))
+- A cache to serve **pending comments immediately** ([docs](/todo))
 
 **r3ply also has a CLI tool** called `re` that is a local implementation of a r3ply app. It allows for easy debugging and development of your r3ply config, and to iterate on how you integrate comments with your website.
 

@@ -35,7 +35,7 @@ Although keep in mind to keep compatibility between your `re` version and your p
 
 After running this command you should see the following output:
 
-```text
+```txt
 Initialized empty r3ply project at /Users/spence/Developer/r3ply/site
 
 Add the following site entry to your config:
@@ -55,7 +55,7 @@ You should then update your config – if you have one – with this `[[site]]` 
 
 Use `re validate config` to validate configs. If nothing is printed then the output is valid. Otherwise you should all problematic keys and some basic info about what's wrong. For example:
 
-```text
+```txt
 config failed validation:
 
 [
@@ -102,14 +102,14 @@ The `--quite` and `--filter` options allow you to respectively silence or isolat
 
 Using these you can filter output. For example if you wanted to only see the initial email and the resulting comment then you could run:
 
-```text
+```txt
 # only show output of the `email` and `comment` stages
 re simulate email --filter email,comment
 ```
 
 Alternatively you could silence everything _but_ the `email` and `comment` stages
 
-```text
+```txt
 # silence only the `email` and `comment` stages
 re simulate email --quiet email,comment
 ```

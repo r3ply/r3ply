@@ -4,40 +4,45 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts'
 export const email = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/comments/email.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
-  title: 'Configuration for comments via email',
-  description: 'Specifies properties about comments that are unique to email.',
+  title: 'Emailed comments config',
+  description: 'Control parameters unique to email.',
   type: 'object',
   required: [],
   additionalProperties: false,
   properties: {
     enabled: {
-      title: 'Toggle on/off',
-      description: 'Disables comments via email if false. Default is true.',
+      title: 'Enable email comments',
+      description: 'False disables email comments only.',
       type: 'boolean',
       default: true,
+      $comment: 'See `comments.enabled`.',
     },
     'filter*': {
       title: 'Filter site',
-      description:
-        "Specifies which sites, by label, will have email comments handled. The 'filter*' name means a glob pattern can be provided. See `site` config key for more details. Default is ['**'] (all sites).",
+      description: 'Specifies which sites (by label) will be processed.',
       type: 'array',
       items: { type: 'string', pattern: '^[\\s\\S]*$' },
       default: ['**'],
-      examples: ['test*', '!local'],
+      examples: ['*', '!local'],
+      $comment: 'See `label` property on `site` config variable.',
     },
     email_signature_separator: {
       title: 'Email signature separator',
-      description:
-        'Many email clients automatically append a signature at the bottom. This config property tells r3ply what text boundary will appear before the email signature, to strip it out (note: you should include the same text boundary in your `mailto:` links for this to work propertly). Default is just "\n".',
+      description: 'Text boundary that appears before email signature.',
       type: 'string',
       pattern: '^[\\s\\S]*$',
       default: '\n',
       examples: [
-        '﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍',
-        '﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍\nWrite your comment above 👆\n\nEverything below this line 👇 will be ignore\n﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍',
+        `﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍
+Write your comment above 👆
+
+DON'T alter the subject line ⚠️
+
+Everything below this line 👇 will be ignored
+﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍`,
       ],
       $comment:
-        "when you prepopulate emails with mailto links, it's a good idea to use some recognizable text that can be used to separate the body of the comment from the sender's email signature, which is usually prepopulated by one's mail client.",
+        "This should be the same string you use in the `body` field of your mailto links. It's a good idea to use some recognizable text. You can also put instructions to the commenter in here.",
     },
     attachments: {
       title: 'Allow attachments',
@@ -46,41 +51,36 @@ export const email = {
       type: 'boolean',
       default: false,
       const: false,
-      $comment:
-        'for now attachments always false, but in the future they will be possible',
     },
     max_size_bytes: {
-      title: 'Max size (in bytes) allowed',
+      title: 'Max size (in bytes)',
       description:
-        'If a comment via email exceeds either this amount or the limit set upstream at the r3ply server it will be rejected.',
+        'If an email comment exceeds either this amount or the limit set upstream by the r3ply server it will be rejected.',
       type: 'integer',
       minimum: 0,
       default: 1048576,
+      $comment: 'i.e. 1 MB.',
     },
     'block*': {
       title: 'Block list',
-      description:
-        'Specifies which pseudyonym/email address to block. The "block*" name means glob patterns can be used.',
+      description: 'Specifies which pseudyonym/email address to block.',
       type: 'array',
       items: { type: 'string', pattern: '^[\\s\\S]*$' },
       default: [],
       examples: ['e8a20d6*', 'mallory@evil.com', '*@spam.com'],
-      $comment:
-        'a list of pseudonyms (or email addresses) to block. Globbing patterns are allowed.',
     },
     'comment_{}': {
       title: 'Comment template (string)',
       description:
-        'Specifies how email comments should be transformed into text. The "comment_{}" name means a template string can be provided. Tera 2 is the templating engine. See the r3ply or tera docs for more info.',
+        'Specifies how email comments should be transformed into text. Default is a stringified JSON object.',
       type: 'string',
       pattern: '^[\\s\\S]*$',
-      $comment:
-        'Template string. For longer comment templates, try using `&comment_{}`.',
+      $comment: 'For longer comment templates see `&comment_{}`.',
     },
     '&comment_{}': {
       title: 'Comment template (file)',
       description:
-        'Specifies how email comments should be transformed into text. The "&comment_{}" name means a reference to a file that holds a template string can be provided. Tera 2 is the templating engine. See the r3ply or tera docs for more info.',
+        'Specifies how email comments should be transformed into text. Must be a path.',
       type: 'string',
       format: 'uri-reference',
       examples: [
@@ -88,17 +88,16 @@ export const email = {
         '/example.comment.template.md',
         '../comment.txt',
       ],
-      $comment: 'File reference. Relative to the location of the r3ply config.',
+      $comment: 'See also `comment_{}`.',
     },
     comment_mime: {
       title: 'Comment mime type',
       description:
-        'Comments are templated as some kind of file. It can be at times useful to specify the mime type of the file.',
+        'It can be at times useful to specify the mime type of a comment file.',
       type: 'string',
       pattern: '^[\\S]*$',
       maxLength: 128,
       default: 'text/plain',
-      $comment: 'Can be useful if mime type of comment needs to be specified.',
     },
   },
 } as const satisfies JSONSchema & Schema

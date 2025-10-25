@@ -6,22 +6,24 @@ import { mk_r3ply_singleton } from '../codegen/r3ply'
 export const r3ply = {
   $id: 'https://r3ply.com/schemas/v0.0.1/config/r3ply.v0.0.1.json',
   $schema: 'http://json-schema.org/draft-04/schema#',
-  title: 'r3ply system config schema v0.0.1',
+  title: 'r3ply system config',
   description:
-    'JSON Schema to describe the configuration of a r3ply system. See https://r3ply.com for more info.',
+    'Used to configure a system that provides r3ply commenting functionality.',
+  $comment: 'See https://r3ply.com/docs for more info.',
   type: 'object',
   required: ['domains'],
   additionalProperties: false,
   properties: {
     version: {
-      description:
-        'used to determine what version of the schema to use (and the version of r3ply)',
+      title: 'r3ply version',
+      description: 'Declares what version of r3ply this config conforms to.',
       type: 'string',
       enum: ['0.0.1'],
       default: '0.0.1',
     },
     domains: {
-      description: 'The r3ply domains that configuration applies to',
+      title: 'r3ply domains',
+      description: 'The domains that configuration applies to. Hostname only.',
       type: 'array',
       items: [
         {
@@ -34,18 +36,21 @@ export const r3ply = {
         format: 'hostname',
       },
       minItems: 1,
-      examples: [['r3ply.com'], ['test.r3ply.com']],
+      examples: [['r3ply.com', 'test.r3ply.com'], ['your-r3ply-app.com']],
       $comment: 'must match the domain that serves the config',
     },
     enabled: {
-      description: 'If false, system will skip any requests it receives',
+      title: 'Enable r3ply',
+      description:
+        'False completely turns off r3ply, including any downstream processes.',
       type: 'boolean',
       default: true,
+      $comment: '⚠️: if disabled, downstream sites will be affected.',
     },
     'sites*': {
       title: 'Allowed sites',
-      description:
-        'Glob patterns specifying what sites to accepts comments on behalf of (default is undefined, which allows any).',
+      description: 'Specifies what sites to accepts comments on behalf of.',
+      $comment: 'If undefined then all sites are allowed.',
       type: 'array',
       items: {
         type: 'string',
@@ -55,7 +60,8 @@ export const r3ply = {
     },
     admin: {
       type: 'array',
-      description: 'list of system-wide admins',
+      title: 'Admin',
+      description: 'Contact list for r3ply system admins.',
       minItems: 1,
       maxItems: 99,
       uniqueItems: true,
@@ -83,59 +89,39 @@ export const r3ply = {
       },
     },
     email: {
+      title: 'Email processing',
       description:
-        'Configure parameters related to processing comments via email for sites',
+        'Configure parameters related to processing comments via email for sites.',
       type: 'object',
       required: [],
       additionalProperties: false,
       default: {
         enabled: true,
-        moderation: false,
         attachments: false,
         max_size_bytes: 5242880,
-        'block*': [],
       },
       properties: {
         enabled: {
-          description: 'If false, all emails are ignored',
+          title: 'Enable email comments',
+          description: 'If false, all emails are ignored.',
           type: 'boolean',
           default: true,
-          $comment:
-            '⚠️: if disabled, site configs for `enabed` will be ignored',
-        },
-        moderation: {
-          description:
-            'If false, replies to comments from site moderators are ignored',
-          type: 'boolean',
-          default: true,
-          $comment:
-            'Note: emails concerning moderation MUST have dkim, dmarc, and spf enabled',
+          $comment: '⚠️: if disabled, downstream sites will be affected.',
         },
         max_size_bytes: {
+          title: 'Max size (bytes)',
           description:
             'Emails are ignored if their size (in bytes) exceed the min(system, site) configs',
           type: 'number',
           default: 5242880,
-          $comment: 'Note: default is 5 MB',
+          $comment: 'i.e. 5 MB.',
           minimum: 0,
         },
         attachments: {
-          description: 'If false attachments are ignored',
-          const: false,
-          $comment:
-            'Warning: if disabled, site configs for attachments will be ignored',
-        },
-        'block*': {
+          title: 'Email attachments',
           description:
-            'system-wide block list, works upstream of site blocklists',
-          type: 'array',
-          default: [],
-          items: {
-            type: 'string',
-            pattern: '^[\\s\\S]*$',
-          },
-          $comment:
-            'globbing patterns can be used, otherwise matches must be exact',
+            'Attachments are currently disabled but support will be added in the future.',
+          const: false,
         },
       },
     },
