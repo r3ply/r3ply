@@ -58,29 +58,6 @@
               </li>
             </ol>
           </li>
-          <li>
-            <a href="/docs/overview#tracing-a-comment" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Tracing a Comment</a>
-            <ol class="px-4 list-decimal list-inside font-light">
-              <li>
-                <a href="/docs/overview#initial-email" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Initial Email</a>
-              </li>
-              <li>
-                <a href="/docs/overview#configs-gathered" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Configs Gathered</a>
-              </li>
-              <li>
-                <a href="/docs/overview#checks-performed" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Checks Performed</a>
-              </li>
-              <li>
-                <a href="/docs/overview#template-prepared" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Template Prepared</a>
-              </li>
-              <li>
-                <a href="/docs/overview#comment-processed" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Comment Processed</a>
-              </li>
-            </ol>
-          </li>
-          <li>
-              <a href="/docs/overview#iterating-on-this" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Iterating on This</a>
-          </li>
       </ul>
     </li>
     <li>
@@ -123,8 +100,14 @@
       </ul>
     </li>
     <li>
-      <a href="/docs/cli" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">`re` the r3ply CLI</a>
-      <ul class="px-4 list-disc list-inside font-light text-gray-700">
+      <a href="/docs/cli" class="{{ shared_nav_styles }} {{ top_level_nav_styles }} prose">
+        {{ '`re` - CLI Tool' | markdown | safe }}
+      </a>
+    </li>
+    <li>
+      <a href="/docs/cli" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Tracing a Comment</a>
+      {# TODO #}
+      {# <ul class="px-4 list-disc list-inside font-light text-gray-700">
           <li>
               <a href="/docs/cli#install" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Install `re`</a>
           </li>
@@ -145,7 +128,7 @@
                   </li>
               </ul>
           </li>
-      </ul>
+      </ul> #}
     </li>
   </ul>
 </nav>

@@ -50,6 +50,7 @@ namespace PrescreenChecks {
       result: 'fail'
       errors: [string, ...string[]]
       general_comments?: R3plyCommentsConfig
+      email_comments?: R3plyEmailCommentsConfig
     }
   }
   export type comments_configured =

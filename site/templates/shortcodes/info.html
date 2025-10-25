@@ -1,0 +1,18 @@
+{#
+    * `type` has preset defaults e.g. "tip"
+    * `style` let's you add types to the container
+    * `emoji` let's you change the icon displayed
+#}
+{% if type == "tip" %}
+  {% set style = "dark:border-green-300" %}
+  {% set emoji = emoji | default(value="💡") %}
+{% elif type == "warning" %}
+  {% set style = "dark:border-yellow-200" %}
+  {% set emoji = emoji | default(value="⚠️") %}
+{% elif type == "error" %}
+  {% set style = "dark:border-red-300" %}
+  {% set emoji = emoji | default(value="‼️") %}
+{% endif %}
+<div class="my-10 rounded-xl border-2 border-dashed flex prose-p:text-justify prose-p:mr-8 prose-pre:mr-12 {{ style }}">
+  <span class="text-3xl self-center mx-3">{{ emoji }}</span><div class="shrink">{{ body | markdown | safe }}</div>
+</div>

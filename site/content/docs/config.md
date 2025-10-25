@@ -40,7 +40,7 @@ In other words, if you're using a config at version 1.0.1, and a r3ply server is
 
 ---
 
-{% warning() %}
+{% info(type="warning") %}
 However, while r3ply is in version `0.y.z` semantic versioning _can_ be broken (_although we will try not to do it too much_). This is so we can get to a stable version as quickly as possible.
 {% end %}
 
@@ -398,7 +398,7 @@ allow_tags = [ "a", "br", "p", "span", "strong", "s", "del", "em", "u", "ul", "o
 ```
 <!-- prettier-ignore-end -->
 
-{% warning() %}
+{% info(type="warning") %}
 It is strongly advised **NOT** to disable `sanitize_html`.
 {% end %}
 

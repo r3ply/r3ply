@@ -11,6 +11,10 @@ import chalk from 'chalk'
 import TOML from '@iarna/toml'
 import path from 'path'
 import { Result } from 'oxide.ts'
+import {
+  DeliverableEmail,
+  PrescreenResult,
+} from 'packages/lib/src/comments/viaEmail'
 
 export namespace tty {
   export namespace cmds {
@@ -67,7 +71,7 @@ export namespace tty {
         if (util.print_w_quiet_and_filter_opts(options, 'email')) {
           // TODO: for some reason highlight.js doesn't support `eml`???
           if (options.heading)
-            console.log(`${chalk.whiteBright('=== Input Email ===\n')}`)
+            console.log(`${chalk.whiteBright('# === Input Email ===')}`)
           console.log(
             highlight(email.replace(/\r/g, ''), {
               language: 'yaml',
@@ -89,7 +93,7 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'config=system')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('=== Comment: System Config ===\n')}`,
+                `${chalk.whiteBright('# === Comment: System Config ===\n')}`,
               )
             console.log(
               highlight(
@@ -101,7 +105,7 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'config=site')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('=== Comment: Site Config ===\n')}`,
+                `${chalk.whiteBright('# === Comment: Site Config ===\n')}`,
               )
             console.log(
               `${highlight(
@@ -116,19 +120,20 @@ export namespace tty {
         if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
           if (options.heading)
             console.log(
-              chalk.whiteBright('=== Comment: Prescreening Results ===') + '\n',
+              chalk.whiteBright('# === Comment: Prescreening Results ===') +
+                '\n',
             )
           if (email_event_response.prescreening.isOk()) {
+            // Delete results in order to redact information that was shown in prior stages
+            const result: PrescreenResult =
+              email_event_response.prescreening.unwrap()
+            delete result.comments_configured.general_comments
+            delete result.comments_configured.email_comments
             console.log(
-              highlight(
-                TOML.stringify(
-                  email_event_response.prescreening.unwrap() as any,
-                ),
-                {
-                  language: 'toml',
-                  ignoreIllegals: true,
-                },
-              ),
+              highlight(TOML.stringify(result as any), {
+                language: 'toml',
+                ignoreIllegals: true,
+              }),
             )
           } else {
             console.log(chalk.redBright('Prescreening failed checks:\n'))
@@ -187,7 +192,7 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'receive')) {
             if (options.heading) {
               console.log(
-                chalk.whiteBright('=== Comment: Comment Received ===') + '\n',
+                chalk.whiteBright('# === Comment: Comment Received ===') + '\n',
               )
               if (receive_details.isOk()) {
                 console.log(
@@ -209,11 +214,15 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'deliverable')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('=== Comment: Deliverability Details ===')}\n`,
+                `${chalk.whiteBright('# === Comment: Deliverability Details ===')}\n`,
               )
             if (deliverable_details.isOk()) {
+              // Elide email to not repeat information
+              const result: Partial<DeliverableEmail> =
+                deliverable_details.unwrap()
+              delete result.email
               console.log(
-                `${highlight('# Note: `From` is redacted\n' + TOML.stringify(deliverable_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
+                `${highlight('# Note: `From` is redacted\n' + TOML.stringify(result as any), { language: 'toml', ignoreIllegals: true })}`,
               )
             } else {
               console.log(
@@ -229,11 +238,11 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'prepare')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('=== Comment: Template Context ===')}\n`,
+                `${chalk.whiteBright('# === Comment: Template Context ===\n')}`,
               )
             if (prepare_details.isOk()) {
               console.log(
-                `${highlight('# These are the values available to your templates\n' + TOML.stringify(prepare_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
+                `${highlight('# These are the values available to your templates\n\n' + TOML.stringify(prepare_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
               )
             } else {
               console.log(chalk.redBright(prepare_details.unwrapErr() + '\n'))
@@ -247,7 +256,7 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'comment')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('=== Comment: Processed ===')}\n`,
+                `${chalk.whiteBright('# === Comment: Processed ===')}\n`,
               )
             if (process_details.isOk()) {
               console.log(highlight(process_details.unwrap()))
@@ -256,56 +265,6 @@ export namespace tty {
             }
           }
         }
-
-        // TODO: for now moderation and notifying need to be refactored
-        // if (util.print_w_quiet_and_filter_opts(options, 'moderate')) {
-        //   if (
-        //     util.print_w_quiet_and_filter_opts(options, 'moderate=request')
-        //   ) {
-        //     if (options.heading)
-        //       console.log(
-        //         `${chalk.whiteBright('=== Moderation Args ===')}\n`,
-        //       )
-        //     console.log(
-        //       `${highlight('# These are the arguments used for moderation, alongside the comment\n' + TOML.stringify(email_event_response.moderation?.args as any), { language: 'toml', ignoreIllegals: true })}`,
-        //     )
-        //   }
-        //   if (
-        //     util.print_w_quiet_and_filter_opts(options, 'moderate=response')
-        //   ) {
-        //     if (options.heading)
-        //       `console.log`(
-        //         `${chalk.whiteBright('=== Notification Context ===')}\n`,
-        //       )
-        //     console.log(
-        //       `${highlight('# These values are available within notification templates\n' + TOML.stringify(email_event_response.moderation?.context as any), { language: 'toml', ignoreIllegals: true })}`,
-        //     )
-        //   }
-        // }
-        // if (util.print_w_quiet_and_filter_opts(options, 'notify')) {
-        //   if (
-        //     util.print_w_quiet_and_filter_opts(options, 'notify=commenter')
-        //   ) {
-        //     if (options.heading)
-        //       console.log(
-        //         `${chalk.whiteBright('=== Comment Submitted Notification ===')}\n`,
-        //       )
-        //     if (email_event_response.moderation?.commenter_notif)
-        //       console.log(
-        //         `${highlight(email_event_response.moderation?.commenter_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
-        //       )
-        //   }
-        //   if (util.print_w_quiet_and_filter_opts(options, 'notify=site')) {
-        //     if (options.heading)
-        //       console.log(
-        //         `${chalk.whiteBright('=== Comment Received Notification ===')}\n`,
-        //       )
-        //     if (email_event_response.moderation?.moderator_notif)
-        //       console.log(
-        //         `${highlight(email_event_response.moderation?.moderator_notif, { languageSubset: ['md', 'html', 'txt'], ignoreIllegals: true })}`,
-        //       )
-        //   }
-        // }
       }
       export function print_local_moderation_event(
         request: Result<moderation.LocalModerationRequest, Error>,
@@ -322,7 +281,7 @@ export namespace tty {
           ) {
             if (options.heading)
               console.log(
-                chalk.whiteBright(`=== Moderation: Local[${count}] ===\n`),
+                chalk.whiteBright(`# === Moderation: Local[${count}] ===\n`),
               )
             if (request.isOk()) {
               const partial_request: Partial<
@@ -397,7 +356,7 @@ export namespace tty {
             if (options.heading)
               console.log(
                 chalk.whiteBright(
-                  `=== Moderation: GitHub[${count}] (MOCKED) ===\n`,
+                  `# === Moderation: GitHub[${count}] (MOCKED) ===\n`,
                 ),
               )
             if (request.isOk()) {
@@ -467,7 +426,7 @@ export namespace tty {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
           if (util.print_w_quiet_and_filter_opts(options, `moderation=other`)) {
             if (options.heading)
-              console.log(chalk.whiteBright(`=== Moderation: Other ===\n`))
+              console.log(chalk.whiteBright(`# === Moderation: Other ===\n`))
             const ignored_moderation = TOML.stringify({
               ignored: ignored_moderation_types,
             }).replace(
