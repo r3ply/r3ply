@@ -27,17 +27,23 @@ issued = 2025-10-23
 [comments]
 cache = true
 
+# email addresses are anonymized
+# e.g. bob@foo.com -> 2bdffc137d4c....
 [comments.email]
 # block list uses glob patterns
 "block*" = ["*@evil*", "1ee44e372c*"]
 
 # See https://r3ply.com/docs/moderation
-# For how to add a moderation channel
+# For docs specific to each channel
+[moderation]
+# E.g. `github`, `webhook`, `local`
 ```
 
 {% end %}
 
-View the [demo](/todo) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.
+And then receive emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](/todo).
+
+**View the [demo](/todo) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.**
 
 ## Table of Contents { .text-right .border-b .border-dashed }
 
@@ -96,24 +102,42 @@ _note: r3ply has a **CLI tool** called `re` that can help you generate mailto li
 
 ## Features
 
-**For people who want to receive email comments:**
+r3ply is a win x win for websites and their readers. Here's a breakdown what there is to gain for each group.
 
-- Commenter **email addresses are anonymized** with HMAC-256 ([docs](/todo))
-- A **templating system** for processing comments ([docs](/todo))
+### Benefits for site visitors and commenters: { #user-experience-benefits }
+
+- There's **no account creation** required (or even possible)
+- Commenter **email addresses are anonymized** with HMAC-SHA256 ([docs](/todo))
+- Email clients provide **native app experience** for writing
+- Automatic **comment history** and **comment threading**
+- **Flexible to use** how you want! (e.g. `cc` a friend on a comment)
+- Familiar experience... everybody knows how to send an email
+
+By reusing mature and platform agnostic technology – like email – you allow your site visitors to truly bring their own client, offering a native app experience for writing.
+
+In our view this is a much preferable experience to the alternatives of requiring social media logins, or each website having to implement/embed a text editor.
+
+---
+
+### For websites using r3ply: { #websites-benefits }
+
+- Comment moderation possible with `block*` lists ([docs](/todo))
+- A **templating system** for formatting comments how you want ([docs](/todo))
 - "Fan-out" to **multiple moderation channels** (e.g. GitHub PR, webhook) ([docs](/todo))
 - **Restrict comments** to certain paths, _e.g._ `["**", "!/private/**"]` ([docs](/todo))
-- Configurable `allow` or `block` lists with **glob pattern syntax** ([docs](/todo))
+- Configurable `allow*` lists to bypass comment moderation ([docs](/todo))
 - Designed to **work perfectly with static sites** and traditional web servers
-- **Signet key rotation** for best security practices ([docs](/todo))
 - A cache to serve **pending comments immediately** ([docs](/todo))
 
-**r3ply also has a CLI tool** called `re` that is a local implementation of a r3ply app. It allows for easy debugging and development of your r3ply config, and to iterate on how you integrate comments with your website.
+**r3ply also has a CLI tool** called `re` that is a local implementation of the r3ply server. It allows for easy debugging and development of your r3ply config, and is indispensable in iterating on how you choose to integrate comments with your website.
 
 _E.g. you can just `re simulate email` and see [the entire pipeline](/todo) in the terminal._
 
 ---
 
-**For those who want to run a r3ply service** - r3ply in its most basic form is completely stateless. It therefore [can be run](/todo), comfortably within most free-tiers.
+### For those who want to run a r3ply service
+
+r3ply in its most basic form is completely stateless. It therefore [can be run](/todo), comfortably within most free-tiers.
 
 ## Why Email?
 

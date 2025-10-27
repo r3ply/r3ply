@@ -38,3 +38,4 @@ index_format = "fuse_json" # or "fuse_javascript"
 
 [extra]
 # Put all your custom variables here
+r3ply_api_domain = "test.r3ply.com"
