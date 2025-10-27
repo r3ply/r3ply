@@ -64,6 +64,7 @@ re generate config
 
 You should see output similar to this:
 
+<!-- prettier-ignore-start -->
 ```toml
 version = "0.0.1"
 enabled = true
@@ -85,6 +86,7 @@ webhook = []
 enabled = true
 "allow*" = []
 ```
+<!-- prettier-ignore-end -->
 
 (_If you look closely you can see that the `[[site]]` entry here is identical to the one from the `re init` command we ran earlier_)
 
@@ -115,13 +117,15 @@ re simulate email
 
 You should see a bunch of text and at the very bottom something that looks like this:
 
-```
-=== Comment: Prescreening Results ===
+<!-- prettier-ignore-start -->
+```toml
+# === Comment: Prescreening Results ===
 
-Prescreening failed checks:
+# Prescreening failed checks:
 
 comments_configured = [ "No comments configuration found" ]
 ```
+<!-- prettier-ignore-end -->
 
 This means that we will have to add a comment and email section to our config. Open your r3ply config from the prior step and add the following configuration between the `[[site]]` and `[[moderation]]` entries:
 
@@ -141,8 +145,9 @@ re simulate email --moderate
 
 Towards the bottom of the output you should see something similar to this (but not exactly the same):
 
-```
-=== Moderation: Local[0] ===
+<!-- prettier-ignore-start -->
+```toml
+# === Moderation: Local[0] ===
 
 #################################
 # Request portion of moderation #
@@ -166,6 +171,7 @@ bypass = false
 [ticket.local]
 absolute_path = "/Users/spence/Developer/r3ply/site/content/comments/b69922e4.json"
 ```
+<!-- prettier-ignore-end -->
 
 At the bottom we see the `absolute_path` the comment was written to! You can change this path by editing your config. In the next step we'll take a closer look at that comment.
 

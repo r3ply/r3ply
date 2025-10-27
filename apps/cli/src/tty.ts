@@ -136,7 +136,7 @@ export namespace tty {
               }),
             )
           } else {
-            console.log(chalk.redBright('Prescreening failed checks:\n'))
+            console.log(chalk.redBright('# Prescreening failed checks:\n'))
             const prescreen_failures =
               email_event_response.prescreening.unwrapErr()
             if (prescreen_failures.r3ply_is_disabled.result == 'fail') {
@@ -162,7 +162,6 @@ export namespace tty {
               )
             }
             if (prescreen_failures.comments_configured.result == 'fail') {
-              // console.log(chalk.redBright("- check: comments configured and enabled"))
               console.log(
                 highlight(
                   TOML.stringify({
@@ -173,7 +172,6 @@ export namespace tty {
               )
             }
             if (prescreen_failures.email_size_bytes.result == 'fail') {
-              // console.log(chalk.redBright("- check: email size (bytes)"))
               console.log(
                 highlight(
                   TOML.stringify({
