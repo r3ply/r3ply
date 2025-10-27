@@ -41,7 +41,7 @@ cache = true
 
 {% end %}
 
-And then receive emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](/todo).
+...and then receive emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](/todo).
 
 **View the [demo](/todo) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.**
 
@@ -96,9 +96,9 @@ To make a good experience for your site's visitors, you should generate `mailto`
 
 _note: r3ply has a **CLI tool** called `re` that can help you generate mailto links (as well as validate configs, simulate email comments, etc..._)
 
----
-
 **About hosting!** r3ply is an open source project and can therefore be self-hosted. In addition to this, there is a canonical, community instance of it available to all, for free, at [r3ply.com](https://r3ply.com).
+
+---
 
 ## Features
 
@@ -117,8 +117,6 @@ By reusing mature and platform agnostic technology – like email – you allow 
 
 In our view this is a much preferable experience to the alternatives of requiring social media logins, or each website having to implement/embed a text editor.
 
----
-
 ### For websites using r3ply: { #websites-benefits }
 
 - Comment moderation possible with `block*` lists ([docs](/todo))
@@ -133,11 +131,11 @@ In our view this is a much preferable experience to the alternatives of requirin
 
 _E.g. you can just `re simulate email` and see [the entire pipeline](/todo) in the terminal._
 
----
-
 ### For those who want to run a r3ply service
 
 r3ply in its most basic form is completely stateless. It therefore [can be run](/todo), comfortably within most free-tiers.
+
+---
 
 ## Why Email?
 
@@ -153,11 +151,11 @@ The appeal is simple. Not only is email the most popular and ubiquitous platform
 
 To this point, [the idea](https://spenc.es/writing/email-as-a-commenting-system/#email-as-a-commenting-system-is-not-new) of email comments has been done manually [for a while now](https://web.archive.org/web/20240430052558/https://www.dam.brown.edu/people/mumford/blog/2019/conscious.html#:~:text=SOME%20EMAIL%20RESPONSES). r3ply is just software (the first?) for automating this process, and therefore we hope improves upon that design.
 
----
-
 **Overall the user experience is actually very nice!**
 
 <img class="rounded-lg dark:border border-grey-400" alt='Screen recording of clicking a "comment" button in r3ply and sending' src="/animations/r3ply-screen-recording-demo.webp"/>
+
+---
 
 ## FAQ
 
