@@ -44,18 +44,60 @@ pre table td {
 }
 /* The line number cells */
 pre table td:nth-of-type(1) {
-  text-align: center;
+  /* commented because text editors typically right align their line no's. Leaving in place to document what changed from the Zola prescribed practice. */
+  /* text-align: center; */
   vertical-align: top;
   user-select: none;
 }
 pre mark {
   /* If you want your highlights to take the full width */
   display: block;
-  /* The default background colour of a mark is bright yellow */
-  background-color: rgba(254, 252, 232, 0.9);
 }
 pre table {
   width: 100%;
   border-collapse: collapse;
 }
 /* END suggested Zola styling for highlighting code */
+
+pre[data-name]::before {
+  content: "     === 📄 " attr(data-name) " ===";
+  font-weight: bold;
+}
+
+pre[data-name] code table {
+  margin-top: 1ch;
+  border-top: solid violet 1px;
+  display: block;
+  padding-top: 2ch;
+}
+
+pre[data-linenos] {
+  table {
+    margin-top: 0;
+    margin-bottom: 0;
+    tr:has(mark) {
+      /* Used to override mark background color because some lines span multiple rows, leading to the text but not the line no. to get a background. */
+      background-color: #172554ff !important;
+    }
+    tr {
+      border: none;
+      td mark {
+        /* Set background to transparent so it can override the inline styles and have the row (see above) set the background */
+        background-color: transparent !important;
+      }
+      td:first-of-type {
+        padding-left: 1ch;
+        width: 4ch;
+        user-select: none;
+        -webkit-user-select: none;
+        text-align: right;
+        mark {
+          color: violet;
+        }
+      }
+      td:nth-of-type(2) {
+        padding-left: 1ch;
+      }
+    }
+  }
+}

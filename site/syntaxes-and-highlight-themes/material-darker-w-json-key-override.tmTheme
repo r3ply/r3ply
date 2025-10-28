@@ -32,7 +32,7 @@
 				<key>invisibles</key>
 				<string>#65737e</string>
 				<key>lineHighlight</key>
-				<string>#00000050</string>
+				<string>#172554ff</string><!-- Overridden from #00000050 which was too dark -->
 				<key>popupCss</key>
 				<string><![CDATA[ html { background-color: #212121; color: #eeffffff; padding: 16px; } a { color: #B2CCD6; line-height: 16px; } .error, .deleted { color: #FF5370; } .success, .inserted { color: #C3E88D; } .warning, .modified { color: #FFCB6B; } .type { color: #89DDFF; font-style: italic; } .param { color: #F78C6C; } .current { text-decoration: underline; } ]]></string>
 				<key>selection</key>
@@ -55,7 +55,7 @@
 				<key>fontStyle</key>
 				<string>italic</string>
 				<key>foreground</key>
-				<string>#4A4A4A</string>
+				<string>#6b7280</string><!-- overriden from #4A4A4A because it didn't stand out very well -->
 			</dict>
 		</dict>
 		<dict>

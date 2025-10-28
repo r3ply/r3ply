@@ -5,7 +5,7 @@ template = "doc.html"
 
 # Getting Started
 
-In this tutorial we're going to walkthrough using r3ply from start to finish with an example. We will be installing the `re` CLI tool, generating a config, simulating a comment, and then discussing next steps. Follow the the steps below from within your project's directory.
+In this tutorial we're going to walkthrough using r3ply from start to finish with an example. We will be installing the `re` CLI tool, generating a config, simulating a comment, and then discussing next steps. Follow the the steps below from within your project's top-level directory.
 
 ## Table of Contents { .text-right .border-b .border-dashed }
 
@@ -92,10 +92,14 @@ enabled = true
 
 Now copy the above output and add it to a file named `config.toml` and save the file in a place where it can be accessed from your website. r3ply will look at the following paths in this order:
 
-1. https://${domain}/.well-known/r3ply/config.toml
-1. https://${domain}/.well-known/r3ply.config.toml
-1. https://${domain}/r3ply.config.toml
-1. https://${domain}/r3ply.toml
+```
+# Priority from highest to lowest:
+
+https://${domain}/.well-known/r3ply/config.toml
+https://${domain}/.well-known/r3ply.config.toml
+https://${domain}/r3ply.config.toml
+https://${domain}/r3ply.toml
+```
 
 (_The r3ply website itself stores the config at `static/.well-known/r3ply/config.toml` and can be reached online at [https://r3ply.com/.well-known/r3ply/config.toml](https://r3ply.com/.well-known/r3ply/config.toml)._)
 
@@ -135,7 +139,7 @@ This means that we will have to add a comment and email section to our config. O
 
 Here we added an empty `comments` object, with a nested `email` object. This is because r3ply provides defaults for most configuration items, but only if their top-level objects exist.
 
-Now re-run the `re simulate email` from earlier. You should see a bunch of text representing the each stage of the comment processing pipeline. You can [see the docs](/todo) for more info about how to read and understand this output, as well as how to silence and filter it. But for now we have one last thing to do: writing our comment as a file.
+Now re-run the `re simulate email` from earlier. You should see a bunch of text representing each stage of the comment processing pipeline. You can [see the docs](/todo) for more info about how to read and understand this output, as well as how to [silence and filter](/todo) it. But for now we have one last thing to do: writing our comment as a file.
 
 To actually have simulated email be written as a file we will need to add the `--moderate` flag to the same command. What this tells `re` to do is to simulate and email _and_ to moderate it. So go ahead and run the updated command:
 
@@ -146,7 +150,7 @@ re simulate email --moderate
 Towards the bottom of the output you should see something similar to this (but not exactly the same):
 
 <!-- prettier-ignore-start -->
-```toml
+```toml, linenos, hide_lines=16, hl_lines=23-24, name=moderation results
 # === Moderation: Local[0] ===
 
 #################################
@@ -161,6 +165,7 @@ bypass = false
   # `relative_path` is relative to project root.
   [request.args]
   relative_path = "content/comments/b69922e4.json"
+  # `comment` variable elided, see comment output from earlier steps in docs
   comment = '[elided... see "Comment: Processed" above]'
 
 ################################

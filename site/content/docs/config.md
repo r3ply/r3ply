@@ -48,15 +48,17 @@ However, while r3ply is in version `0.y.z` semantic versioning _can_ be broken (
 
 r3ply configs can be written as either TOML or JSON files. The r3ply servers will choose the first file that exists at the following locations, with precedence high to low:
 
-```txt
-1. <PROJECT_ROOT>/.well-known/r3ply/config.toml
-2. <PROJECT_ROOT>/.well-known/r3ply/config.json
-3. <PROJECT_ROOT>/.well-known/r3ply.config.toml
-4. <PROJECT_ROOT>/.well-known/r3ply.config.json
-5. <PROJECT_ROOT>/r3ply.config.toml
-6. <PROJECT_ROOT>/r3ply.config.json
-7. <PROJECT_ROOT>/r3ply.toml
-8. <PROJECT_ROOT>/r3ply.json
+```
+# Priority from highest to lowest:
+
+<PROJECT_ROOT>/.well-known/r3ply/config.toml
+<PROJECT_ROOT>/.well-known/r3ply/config.json
+<PROJECT_ROOT>/.well-known/r3ply.config.toml
+<PROJECT_ROOT>/.well-known/r3ply.config.json
+<PROJECT_ROOT>/r3ply.config.toml
+<PROJECT_ROOT>/r3ply.config.json
+<PROJECT_ROOT>/r3ply.toml
+<PROJECT_ROOT>/r3ply.json
 ```
 
 `<PROJECT_ROOT>` can, for example, be a domain, or it could also be your project's top-level directory, in the context of using r3ply locally with the CLI.
@@ -194,8 +196,14 @@ The `$foo` syntax means this variable is some kind of meta variable reserved by 
 Below is an example of the full site config, using every default and with every value set. For convenience there are also separate sections with more discussion for [`site`](/todo), [`comments`](/todo), and [`moderation`](/todo).
 
 <!-- prettier-ignore-start -->
-```toml
+```toml, linenos, name=r3ply site config.toml, hl_lines=1-8
+# ALL SITE CONFIG VARIABLES SET + DEFAULTS
+
 {{ schema_comment(version="v0.0.1", schema="config/site", skip=["default", "examples"]) }}
+
+# Should be accessible from a known location
+# E.g. `/.well-known/r3ply/config.toml`
+# See #file-types-and-locations for more
 
 {{ schema_comment(key="version", version="v0.0.1", schema="config/site", skip=["default", "examples"]) }}
 version = "0.0.1"
@@ -338,18 +346,14 @@ The `site` config key expects an array of objects. Each site entry object is as 
 {{ schema_comment(version="v0.0.1", schema="config/signet", skip=["examples"]) }}
 [[site]]
 {{ schema_comment(key="domain" version="v0.0.1", schema="config/signet") }}
-
-{{ schema_comment(key="r3ply" version="v0.0.1", schema="config/signet") }}
-
-{{ schema_comment(key="signet" version="v0.0.1", schema="config/signet") }}
-
-{{ schema_comment(key="issued" version="v0.0.1", schema="config/signet") }}
-
-{{ schema_comment(key="label" version="v0.0.1", schema="config/signet") }}
 domain = "spenc.es"
+{{ schema_comment(key="r3ply" version="v0.0.1", schema="config/signet") }}
 r3ply = "r3ply.com"
+{{ schema_comment(key="signet" version="v0.0.1", schema="config/signet") }}
 signet = "wXyyym86v0pKerq41HiSCA"
+{{ schema_comment(key="issued" version="v0.0.1", schema="config/signet") }}
 issued = 2025-10-24
+{{ schema_comment(key="label" version="v0.0.1", schema="config/signet") }}
 label = "prod"
 ```
 <!-- prettier-ignore-end -->
