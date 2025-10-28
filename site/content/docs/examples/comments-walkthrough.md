@@ -252,3 +252,9 @@ Now we can try printing some comments to the screen by editing the `template/ind
 </body>
 </html>
 ```
+
+Now if we look at the homepage we can see that comments have been added.
+
+{% fig(caption="Not the prettiest, but we've completed step 1.", add_class="prose-figcaption:-mt-12") %}
+![Result after following step 1](/screenshots/walkthrough-to-create-demo_after-step1.webp)
+{% end %}
