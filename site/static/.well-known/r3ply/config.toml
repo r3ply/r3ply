@@ -8,7 +8,22 @@ signet = "wWM5hk4DKr1xVRhVq-7aog"
 issued = "2025-10-16"
 label = "CLI"
 
+# Now we've templated the comment as a markdown file with front matter
 [comments.email]
+"comment_{}" = '''
++++
+render = false
+
+[extra]
+# The full comment context is captured and stored using `__tera_context`
+context = """
+{{ __tera_context }}
+"""
++++
+
+{{ comment.html | safe }}
+'''
 
 [[moderation.local]]
-"file_path_{}" = "content/comments/{{ comment.id[:8] }}.json"
+# notice how the `file_path_{}` ends now with `.md` instead of `.json`
+"file_path_{}" = "content/comments/{{ comment.id[:8] }}.md"

@@ -20,5 +20,21 @@
       {{ section.content | safe }}
     </article>
   </main>
+  {# Prepare comments to be used #}
+  {% set comment_section = get_section(path="comments/_index.md") %}
+  {% set comments = [] %}
+  {% for file_path in comment_section.assets %}
+    {% set json = load_data(path=file_path) %}
+    {# Only add comments whose path matches the page that's being rendered #}
+    {% if json.comment.subject.path == current_path %}
+      {% set_global comments = comments | concat(with=json) %}
+    {% endif %}
+  {% endfor %}
+  {# Simple way of printing the commments to the screen #}
+  <ul>
+    {% for c in comments %}
+    <li>{{ c.comment.html | safe }}</li>
+    {% endfor %}
+  </ul>
 </body>
 </html>

@@ -288,7 +288,7 @@ export namespace tty {
               delete partial_request['send']
               partial_request.args = request.unwrap().args
               partial_request.args.comment =
-                '[elided... see "Comment: Processed" above]'
+                '[elided... see above (or add `comment` to --filter`)]'
               const result_string = TOML.stringify({
                 request: partial_request,
               } as any)
@@ -364,7 +364,7 @@ export namespace tty {
               delete partial_request['send']
               partial_request.args = request.unwrap().args
               partial_request.args.comment_data =
-                '[elided... see "Comment: Processed" above]'
+                '[elided... see above (or add `comment` to --filter`)]'
               const result_string = TOML.stringify({
                 request: partial_request,
               } as any)

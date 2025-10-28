@@ -71,6 +71,11 @@ pre[data-name] code table {
   padding-top: 2ch;
 }
 
+pre mark {
+  /* only shows if inline styles aren't set... used to avoid the default of the text being black, where there's insufficient contrast */
+  color: cyan;
+}
+
 pre[data-linenos] {
   table {
     margin-top: 0;
@@ -96,13 +101,15 @@ pre[data-linenos] {
         -webkit-user-select: none;
         text-align: right;
         mark {
-          color: violet; /* only shows if inline styles aren't set... used to avoid the default of the text being black, where there's insufficient contrast */
+          /* only shows if inline styles aren't set... used to avoid the default of the text being black, where there's insufficient contrast */
+          color: violet;
         }
       }
       td:nth-of-type(2) {
         padding-left: 1ch;
         mark {
-          color: cyan; /* only shows if inline styles aren't set... used to avoid the default of the text being black, where there's insufficient contrast */
+          /* only shows if inline styles aren't set... used to avoid the default of the text being black, where there's insufficient contrast */
+          color: cyan;
         }
       }
     }
