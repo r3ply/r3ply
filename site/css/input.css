@@ -79,8 +79,12 @@ pre[data-linenos] {
       /* Used to override mark background color because some lines span multiple rows, leading to the text but not the line no. to get a background. */
       background-color: #172554ff !important;
     }
+    tbody {
+      display: block;
+    }
     tr {
       border: none;
+      display: block;
       td mark {
         /* Set background to transparent so it can override the inline styles and have the row (see above) set the background */
         background-color: transparent !important;
@@ -92,11 +96,14 @@ pre[data-linenos] {
         -webkit-user-select: none;
         text-align: right;
         mark {
-          color: violet;
+          color: violet; /* only shows if inline styles aren't set... used to avoid the default of the text being black, where there's insufficient contrast */
         }
       }
       td:nth-of-type(2) {
         padding-left: 1ch;
+        mark {
+          color: cyan; /* only shows if inline styles aren't set... used to avoid the default of the text being black, where there's insufficient contrast */
+        }
       }
     }
   }
