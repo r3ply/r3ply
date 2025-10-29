@@ -15,6 +15,7 @@ import {
   DeliverableEmail,
   PrescreenResult,
 } from 'packages/lib/src/comments/viaEmail'
+import { BaseCmdOptions } from '.'
 
 export namespace tty {
   export namespace cmds {
@@ -27,7 +28,7 @@ export namespace tty {
       export function print_initialized_new_project(
         r3ply_dir: string,
         signet_config: { site: R3plySignetConfig[] },
-        format: 'toml' | 'json' = 'toml',
+        format: BaseCmdOptions['format'],
       ) {
         console.info(
           `Initialized empty r3ply project at ${chalk.greenBright(path.dirname(r3ply_dir))}`,
@@ -47,17 +48,21 @@ export namespace tty {
         }
         console.log(chalk.blueBright(`mailto:${query}`))
       }
-      export function print_signet(signet: R3plySignetConfig) {
+      export function print_signet(signet: R3plySignetConfig, format: BaseCmdOptions['format']) {
         console.log(
           highlight(
-            TOML.stringify({
-              site: [{ ...(signet as any) }],
-            }),
+            format == 'toml' ?
+              TOML.stringify({
+                site: [{ ...(signet as any) }],
+              }):
+              JSON.stringify({
+                site: [{ ...(signet as any) }],
+              }, null, 2)
           ),
         )
       }
-      export function print_config(site_config: R3plySiteConfig) {
-        console.log(highlight(TOML.stringify(site_config as any)))
+      export function print_config(site_config: R3plySiteConfig, format: BaseCmdOptions['format']) {
+        console.log(highlight(format == 'toml' ? TOML.stringify(site_config as any) : JSON.stringify(site_config, null, 2)))
       }
       export function print_email(email: string) {
         console.log(highlight(email, { language: 'yaml' }))
@@ -88,6 +93,7 @@ export namespace tty {
         }: { site_config_path: string; site_config: R3plySiteConfig },
         email_event_response: comments.email.CommentEmailEventResponse,
         options: SimulateCmdEmailOpts,
+        format: BaseCmdOptions['format']
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'config')) {
           if (util.print_w_quiet_and_filter_opts(options, 'config=system')) {
@@ -96,10 +102,14 @@ export namespace tty {
                 `${chalk.whiteBright('# === Comment: System Config ===\n')}`,
               )
             console.log(
+              format == 'toml' ?
               highlight(
                 `# Generated using site config \n${TOML.stringify(cli_system_config)}`,
                 { language: 'toml', ignoreIllegals: true },
-              ) + '\n',
+              ) + '\n' : highlight(
+                `/* Generated using site config*/ \n${JSON.stringify(cli_system_config, null, 2)}`,
+                { language: 'json', ignoreIllegals: true }
+              ) + '\n'
             )
           }
           if (util.print_w_quiet_and_filter_opts(options, 'config=site')) {
@@ -108,10 +118,15 @@ export namespace tty {
                 `${chalk.whiteBright('# === Comment: Site Config ===\n')}`,
               )
             console.log(
+              format == 'toml' ?
               `${highlight(
                 `# From path ${site_config_path} \n${TOML.stringify(site_config as any)}`,
                 { language: 'toml', ignoreIllegals: true },
-              )}`,
+              )}` :
+              `${highlight(
+                `/* From path ${site_config_path} */ \n${JSON.stringify(site_config, null, 2)}`,
+                { language: 'json', ignoreIllegals: true },
+              )}` + "\n"
             )
           }
         }
@@ -130,10 +145,15 @@ export namespace tty {
             delete result.comments_configured.general_comments
             delete result.comments_configured.email_comments
             console.log(
+              format == 'toml' ?
               highlight(TOML.stringify(result as any), {
                 language: 'toml',
                 ignoreIllegals: true,
-              }),
+              }) :
+              highlight(JSON.stringify(result, null, 2), {
+                language: 'json',
+                ignoreIllegals: true,
+              }) + "\n",
             )
           } else {
             console.log(chalk.redBright('# Prescreening failed checks:\n'))
@@ -142,43 +162,71 @@ export namespace tty {
             if (prescreen_failures.r3ply_is_disabled.result == 'fail') {
               // console.log(chalk.redBright("- check: r3ply is disabled"))
               console.log(
+                format == 'toml' ?
                 highlight(
                   TOML.stringify({
                     r3ply_is_disabled:
                       prescreen_failures.r3ply_is_disabled.errors,
                   }),
-                ),
+                ) :
+                highlight(
+                  JSON.stringify({
+                    r3ply_is_disabled:
+                      prescreen_failures.r3ply_is_disabled.errors,
+                  }, null, 2) + "\n",
+                )
               )
             }
             if (prescreen_failures.comments_accepted.result == 'fail') {
               // console.log(chalk.redBright("- check: comments accepted"))
               console.log(
+                format == 'toml' ?
                 highlight(
                   TOML.stringify({
                     comments_accepted:
                       prescreen_failures.comments_accepted.errors,
                   }),
+                ) :
+                highlight(
+                  JSON.stringify({
+                    comments_accepted:
+                      prescreen_failures.comments_accepted.errors,
+                  }, null, 2) + "\n",
                 ),
               )
             }
             if (prescreen_failures.comments_configured.result == 'fail') {
               console.log(
+                format == 'toml' ?
                 highlight(
                   TOML.stringify({
                     comments_configured:
                       prescreen_failures.comments_configured.errors,
                   }),
-                ),
+                ) :
+                highlight(
+                  JSON.stringify({
+                    comments_configured:
+                      prescreen_failures.comments_configured.errors,
+                  }, null, 2),
+                )
               )
             }
             if (prescreen_failures.email_size_bytes.result == 'fail') {
               console.log(
+                format == 'toml' ?
                 highlight(
                   TOML.stringify({
                     email_size_bytes:
                       prescreen_failures.email_size_bytes.errors,
                   }),
-                ),
+                ) :
+                highlight(
+                  JSON.stringify({
+                    email_size_bytes:
+                      prescreen_failures.email_size_bytes.errors,
+                  }, null, 2),
+                )
               )
             }
           }
@@ -194,10 +242,15 @@ export namespace tty {
               )
               if (receive_details.isOk()) {
                 console.log(
+                  format == 'toml' ?
                   highlight(TOML.stringify(receive_details.unwrap() as any), {
                     language: 'toml',
                     ignoreIllegals: true,
-                  }),
+                  }) :
+                  highlight(JSON.stringify(receive_details.unwrap() as any), {
+                    language: 'json',
+                    ignoreIllegals: true,
+                  }) + "\n"
                 )
               } else {
                 console.log(chalk.redBright(receive_details.unwrapErr() + '\n'))
@@ -220,7 +273,9 @@ export namespace tty {
                 deliverable_details.unwrap()
               delete result.email
               console.log(
-                `${highlight('# Note: `From` is redacted\n' + TOML.stringify(result as any), { language: 'toml', ignoreIllegals: true })}`,
+                format == 'toml' ?
+                `${highlight('# Note: `From` is redacted\n' + TOML.stringify(result as any), { language: 'toml', ignoreIllegals: true })}` :
+                `${highlight('/* Note: `From` is redacted */\n' + JSON.stringify(result, null, 2), { language: 'json', ignoreIllegals: true })}\n`,
               )
             } else {
               console.log(
@@ -240,7 +295,9 @@ export namespace tty {
               )
             if (prepare_details.isOk()) {
               console.log(
-                `${highlight('# These are the values available to your templates\n\n' + TOML.stringify(prepare_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}`,
+                format == 'toml' ?
+                `${highlight('# These are the values available to your templates\n\n' + TOML.stringify(prepare_details.unwrap() as any), { language: 'toml', ignoreIllegals: true })}` :
+                `${highlight('/* These are the values available to your templates */\n' + JSON.stringify(prepare_details.unwrap(), null, 2), { language: 'json', ignoreIllegals: true })}\n`
               )
             } else {
               console.log(chalk.redBright(prepare_details.unwrapErr() + '\n'))
@@ -269,6 +326,7 @@ export namespace tty {
         ticket: moderation.LocalModerationTicket | undefined,
         count: number,
         options: SimulateCmdEmailOpts,
+        format: BaseCmdOptions['format']
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
           if (
@@ -289,7 +347,7 @@ export namespace tty {
               partial_request.args = request.unwrap().args
               partial_request.args.comment =
                 '[elided... see above (or add `comment` to --filter`)]'
-              const result_string = TOML.stringify({
+              const result_string = format == 'toml' ? TOML.stringify({
                 request: partial_request,
               } as any)
                 .replace(
@@ -300,26 +358,48 @@ export namespace tty {
                   /^(\s*)\[request\.args\]/m,
                   (_, spaces) =>
                     `${spaces}# \`relative_path\` is relative to project root.${spaces}[request.args]`,
+                ) :
+
+               JSON.stringify({
+                request: partial_request,
+              }, null, 2)
+                .replace(
+                  /^(\s*)"bypass":/m,
+                  (_, spaces) =>
+                    `${spaces}/* \`bypass\` asks to skip moderation altogether. For local moderation it has no effect. */\n${spaces}"bypass":`,
                 )
-              const request_comment = `#################################\n# Request portion of moderation #\n#################################\n`
+                .replace(
+                  /^(\s*)"args":/m,
+                  (_, spaces) =>
+                    `${spaces}/* \`relative_path\` is relative to project root. */\n${spaces}"args":`,
+                ) + "\n"
+              const request_comment = format == 'toml' ?  `#################################\n# Request portion of moderation #\n#################################\n` : `/*********************************\n * Request portion of moderation *\n *********************************/\n`
               console.log(
                 highlight(request_comment + '\n' + result_string, {
-                  language: 'toml',
+                  language: format,
                 }),
               )
               if (ticket) {
                 if (ticket.details.isOk()) {
                   const ticket_details = ticket.details.unwrap()
-                  const ticket_string = TOML.stringify({
+                  const ticket_string = format == 'toml' ? TOML.stringify({
                     ticket: ticket_details,
-                  }).replace(
+                  })
+                  .replace(
                     '[ticket.local]',
                     '# `ticket.local` is the response to a request for local moderation.\n[ticket.local]',
+                  ) : JSON.stringify({
+                    ticket: ticket_details,
+                  }, null, 2)
+                  .replace(
+                    /^(\s*)"local":/m,
+                    (_, spaces) =>
+                      `${spaces}/* \`ticket.local\` is the response to a request for local moderation. */\n${spaces}"local":`,
                   )
-                  const ticket_comment = `################################\n# Ticket portion of moderation #\n################################\n`
+                  const ticket_comment = format == 'toml' ? `################################\n# Ticket portion of moderation #\n################################\n` : `/********************************\n * Ticket portion of moderation *\n ********************************/\n`
                   console.log(
                     highlight(ticket_comment + '\n' + ticket_string, {
-                      language: 'toml',
+                      language: format,
                     }),
                   )
                 } else {
@@ -343,6 +423,7 @@ export namespace tty {
         ticket: moderation.GitHubModerationTicket | undefined,
         count: number,
         options: SimulateCmdEmailOpts,
+        format: BaseCmdOptions['format']
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
           if (
@@ -365,7 +446,7 @@ export namespace tty {
               partial_request.args = request.unwrap().args
               partial_request.args.comment_data =
                 '[elided... see above (or add `comment` to --filter`)]'
-              const result_string = TOML.stringify({
+              const result_string = format == 'toml' ? TOML.stringify({
                 request: partial_request,
               } as any)
                 .replace(
@@ -376,26 +457,51 @@ export namespace tty {
                   /^(\s*)\[request\.args\]/m,
                   (_, spaces) =>
                     `${spaces}# Arguments that would be sent to create a GitHub PR${spaces}[request.args]`,
+                ) :
+                JSON.stringify({
+                request: partial_request,
+              }, null, 2)
+                .replace(
+                  /^(\s*)"bypass":/m,
+                  (_, spaces) =>
+                    `${spaces}/* \`bypass\` would request to skip moderation altogether. */\n${spaces}"bypass":`,
                 )
-              const request_comment = `#################################\n# Request portion of moderation #\n#################################\n`
+                .replace(
+                  /^(\s*)"args":/m,
+                  (_, spaces) =>
+                    `${spaces}/* Arguments that would be sent to create a GitHub PR */\n${spaces}"args":`,
+                ) + "\n"
+              const request_comment = format == 'toml' ? `#################################\n# Request portion of moderation #\n#################################\n` : `/*********************************\n * Request portion of moderation *\n *********************************/\n`
               console.log(
                 highlight(request_comment + '\n' + result_string, {
-                  language: 'toml',
+                  language: format,
                 }),
               )
               if (ticket) {
                 if (ticket.details.isOk()) {
                   const ticket_details = ticket.details.unwrap()
-                  const ticket_string = TOML.stringify({
+                  const ticket_string = format == 'toml' ? TOML.stringify({
                     ticket: ticket_details as any,
                   }).replace(
                     '[ticket.github]',
                     '# `ticket.local` is the response to a request for local moderation.\n[ticket.local]',
+                  ) :
+                  JSON.stringify({
+                    ticket: ticket_details as any,
+                  }, null, 2)
+                  .replace(
+                    '[ticket.github]',
+                    '# `ticket.local` is the response to a request for local moderation.\n[ticket.local]',
                   )
-                  const ticket_comment = `################################\n# Ticket portion of moderation #\n################################\n`
+                  .replace(
+                    /^(\s*)"github":/m,
+                    (_, spaces) =>
+                      `${spaces}/* \`ticket.local\` is the response to a request for local moderation. */\n${spaces}"github":`,
+                  )
+                  const ticket_comment = format == 'toml' ? `################################\n# Ticket portion of moderation #\n################################\n` : `/********************************\n * Ticket portion of moderation *\n ********************************/\n`
                   console.log(
                     highlight(ticket_comment + '\n' + ticket_string, {
-                      language: 'toml',
+                      language: format,
                     }),
                   )
                 } else {
@@ -420,26 +526,43 @@ export namespace tty {
           comments.email.CommentEmailEventResponse['moderation']
         >,
         options: SimulateCmdEmailOpts,
+        format: BaseCmdOptions['format']
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
           if (util.print_w_quiet_and_filter_opts(options, `moderation=other`)) {
             if (options.heading)
               console.log(chalk.whiteBright(`# === Moderation: Other ===\n`))
-            const ignored_moderation = TOML.stringify({
+            const ignored_moderation = format == 'toml' ? TOML.stringify({
               ignored: ignored_moderation_types,
             }).replace(
               'ignored',
               "# moderation channels in your config that were ignored by the CLI (they're unsupported)\nignored",
-            )
+            ) :
+            JSON.stringify({
+              ignored: ignored_moderation_types,
+            }, null, 2)
+            .replace(
+              /^(\s*)"ignored":/m,
+              (_, spaces) =>
+                `${spaces}/* moderation channels in your config that were ignored by the CLI (they\'re unsupported) */\n${spaces}"ignored":`,
+            ) + "\n"
             console.log(highlight(ignored_moderation))
-            const not_implemented_mod = TOML.stringify({
+            const not_implemented_mod = format == 'toml' ? TOML.stringify({
               not_implemented: not_implemented_moderation_results as any,
-            })
+            }) :
+            JSON.stringify({
+              not_implemented: not_implemented_moderation_results as any,
+            }, null, 2)
             console.log(
+              format == 'toml' ?
               highlight(
                 "# unexpected moderation results that haven't been fully implemented\n" +
                   not_implemented_mod,
-              ),
+              ) :
+              highlight(
+                "/* unexpected moderation results that haven't been fully implemented */\n" +
+                  not_implemented_mod,
+              )
             )
           }
         }

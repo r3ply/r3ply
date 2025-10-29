@@ -23,6 +23,7 @@ import {
   LocalModerationRequest,
   LocalModerationTicket,
 } from 'packages/lib/src/moderation'
+import { BaseCmdOptions } from '.'
 
 // init ------------------------------------------------------------------------
 export type InitCmdOptions = {
@@ -68,7 +69,7 @@ export function init_cmd(cwd: string) {
           tty.cmds.init.print_initialized_new_project(
             r3ply_dir,
             signet_config,
-            init_cmd.parent?.opts().format,
+            init_cmd.parent!.opts<BaseCmdOptions>().format,
           )
         })
     })
@@ -85,7 +86,7 @@ export function config_cmd(cwd: string) {
     .action(async () => {
       const site_config_path = await project.resolve_config_path(
         cwd,
-        config_cmd.parent?.opts().config,
+        config_cmd.parent?.opts<BaseCmdOptions>().config,
       )
       const site_config = util.unsafeUnwrap(
         await project.parse_site_config(cwd, site_config_path),
@@ -291,7 +292,8 @@ export function generate_cmd(cwd: string) {
         options.r3ply = answers.r3ply
         options.date = answers.date
       }
-      tty.cmds.generate.print_signet(signet)
+      const format = generate_cmd.parent!.opts<BaseCmdOptions>().format
+      tty.cmds.generate.print_signet(signet, format)
     })
 
   const config_cmd = generate_cmd
@@ -370,7 +372,8 @@ export function generate_cmd(cwd: string) {
           ],
         },
       })
-      tty.cmds.generate.print_config(parsed.value!)
+      const format = generate_cmd.parent!.opts<BaseCmdOptions>().format
+      tty.cmds.generate.print_config(parsed.value!, format)
       return
     })
 
@@ -388,7 +391,7 @@ export function generate_cmd(cwd: string) {
     .action(async (options: GenerateEmailCmdOpts) => {
       let site_config: R3plySiteConfig = await project.resolve_config(
         cwd,
-        generate_cmd.parent?.opts().config,
+        generate_cmd.parent?.opts<BaseCmdOptions>().config,
       )
       const site = site_config.site[util.random_int(site_config.site.length)]
 
@@ -451,13 +454,16 @@ export function simulate_cmd(cwd: string) {
       util.split_list,
     )
     .action(async (options: SimulateCmdEmailOpts, cmd) => {
+      // TOML or JSON
+      const format = simulate_cmd.parent!.opts<BaseCmdOptions>().format
+
       // Get site config
       let site_config_path: string = await project.resolve_config_path(
         cwd,
-        simulate_cmd.parent?.opts().config,
+        simulate_cmd.parent?.opts<BaseCmdOptions>().config,
       )
       let site_config_result = await Result.safe(
-        project.resolve_config(cwd, simulate_cmd.parent?.opts().config),
+        project.resolve_config(cwd, simulate_cmd.parent?.opts<BaseCmdOptions>().config),
       )
       let site_config: R3plySiteConfig = site_config_result.expect(
         'Error while opening config (hint: run `re config validate` to debug)',
@@ -543,6 +549,7 @@ export function simulate_cmd(cwd: string) {
         { site_config_path, site_config },
         email_event_response,
         options,
+        format
       )
 
       // Print moderation
@@ -567,6 +574,7 @@ export function simulate_cmd(cwd: string) {
                     ticket,
                     index,
                     options,
+                    format,
                   )
                 } else {
                   print(
@@ -574,6 +582,7 @@ export function simulate_cmd(cwd: string) {
                     undefined,
                     index,
                     options,
+                    format
                   )
                 }
                 break
@@ -589,6 +598,7 @@ export function simulate_cmd(cwd: string) {
                     ticket,
                     index,
                     options,
+                    format
                   )
                 } else {
                   print(
@@ -596,6 +606,7 @@ export function simulate_cmd(cwd: string) {
                     undefined,
                     index,
                     options,
+                    format
                   )
                 }
                 break
@@ -621,6 +632,7 @@ export function simulate_cmd(cwd: string) {
             ignored_moderation_results,
             other_moderation_results,
             options,
+            format
           )
         }
       }
