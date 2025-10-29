@@ -20,4 +20,4 @@ import { sanitize_html } from '@r3ply/wasm'
 
 ## Tera 2 Templating Language
 
-See the [tera 2 docs](./tera2-language.md) in this repo for more.
+See the [templating language docs](https://r3ply.com/docs/templating) for more.
