@@ -1,7 +1,7 @@
 {% set shared_nav_styles = "hover:underline decoration-black" %}
-{% set top_level_nav_styles = "text-gray-800 dark:text-teal-200" %}
-{% set second_level_nav_styles = "text-gray-900 dark:text-orange-200 text-sm" %}
-{% set ternary_level_nav_styles = "text-gray-950 dark:text-pink-200 text-xs" %}
+{% set top_level_nav_styles = "text-gray-800 dark:text-cyan-300" %}
+{% set second_level_nav_styles = "text-gray-900 dark:text-amber-200 text-sm" %}
+{% set ternary_level_nav_styles = "text-gray-950 dark:text-fuchsia-300 text-xs" %}
 
 {# See includes/side-nav-toggle.html #}
 <input type="checkbox" name="open-menu" id="open-menu" class="peer hidden" />
@@ -142,32 +142,6 @@
       <a href="/docs/cli" class="{{ shared_nav_styles }} {{ top_level_nav_styles }} prose">
         {{ '`re` - CLI Tool' | markdown | safe }}
       </a>
-    </li>
-    <li>
-      <a href="/docs/cli" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Tracing a Comment</a>
-      {# TODO #}
-      {# <ul class="px-4 list-disc list-inside font-light text-gray-700">
-          <li>
-              <a href="/docs/cli#install" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Install `re`</a>
-          </li>
-          <li>
-              <a href="/docs/cli#init" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Initialize Project</a>
-          </li>
-          <li>
-              <a href="/docs/cli#config-validate" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Validating Configs</a>
-          </li>
-          <li>
-              <a href="/docs/cli#simulate" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Simulating Comments</a>
-              <ul class="px-4 list-disc list-inside font-light">
-                  <li>
-                      <a href="/docs/cli#simulate-filter" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Filtering Output</a>
-                  </li>
-                  <li>
-                      <a href="/docs/cli#write-simulation-output" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Writing Output</a>
-                  </li>
-              </ul>
-          </li>
-      </ul> #}
     </li>
   </ul>
 </nav>

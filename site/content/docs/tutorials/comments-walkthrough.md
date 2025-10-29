@@ -1,6 +1,7 @@
 +++
 template = "doc.html"
-title = "r3ply docs: Comments Walkthrough"
+title = "r3ply Tutorial: Adding Comments Walkthrough"
+draft = true
 +++
 
 # Comments Walkthrough

@@ -1,6 +1,7 @@
 +++
 template = "doc.html"
-title = "r3ply docs: Tracing a Comment"
+title = "r3ply Walkthrough: Tracing a Comment"
+draft = true
 +++
 
 ## Hello, World!

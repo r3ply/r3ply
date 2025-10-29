@@ -558,6 +558,6 @@ max_size_bytes = 5_242_880
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-violet-400">{{ fleuron_fish() }}</div>
 
-{{ next_prev(prev_path="/docs/overview", prev_text="r3ply Overview") }}
+{{ next_prev(prev_path="/docs/overview", prev_text="r3ply Overview", next_path="/docs/templating", next_text="Templating") }}
 
 ---
