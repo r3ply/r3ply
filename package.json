@@ -5,15 +5,17 @@
     "packages/*"
   ],
   "scripts": {
+    "initialize": "git submodule update --init --remote --recursive",
     "fmt": "prettier --write \"**/*.{js,cjs,ts,mts,jsx,tsx,json,md,toml}\"",
     "build:wasm": "pnpm --filter @r3ply/wasm run build:wasm && pnpm --filter @r3ply/wasm run pack",
     "build:pkgs": "pnpm -r --filter './packages/*' run build",
     "build:apps": "pnpm -r --filter './apps/*' run build",
-    "build:all": "pnpm build:wasm && pnpm build:pkgs && pnpm build:apps",
+    "build:site": "pnpm initialize && pnpm -r --filter './site' run build",
+    "build:all": "pnpm build:wasm && pnpm build:pkgs && pnpm build:apps && pnpm build:site",
     "test:ts": "vitest run",
     "test:ts:watch": "vitest",
     "test:all": "pnpm -r test",
-    "site": "pnpm -r --filter './site' run serve"
+    "site": "pnpm initialize && pnpm -r --filter './site' run serve"
   },
   "pnpm": {
     "overrides": {}
