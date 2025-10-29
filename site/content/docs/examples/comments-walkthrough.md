@@ -51,7 +51,6 @@ Here's a simplified tree view of the r3ply website with comments:
 Great, that's the file structure. Our site's r3ply config will start out as follows:
 
 ```toml, name=static/.well-known/r3ply/config.toml (v1)
-
 version = "0.0.1"
 enabled = true
 
@@ -80,7 +79,7 @@ The plan will be to:
 2. Template the comments to the HTML we want.
 3. Integrate the template with the comment cache.
 
-## Getting Comments to Appear
+## Step 1: Getting Comments to Appear
 
 Let's start by getting some comment files in their directory. If you recall from the [starting out](#starting-out) section, our comments will live in `content/comments`.
 
@@ -140,7 +139,7 @@ So now we can take a look at the comment that was written at that path:
     <span class="hidden group-open:inline">Close File Details</span>
   </summary>
 
-```json, name=0d495c4e.json, linenos
+```json, name=content/comments/0d495c4e.json, linenos
 {
   "r3ply": {
     "config_version": "0.0.1",
@@ -200,8 +199,7 @@ If we do this then Zola will automatically construct an object for that comment 
 
 ```md, name=content/comments/_index.md
 +++
-# ensures that this section isn't rendered
-# it will still be available in to templates
+# ensures that this section isn't rendered (i.e. apart of our sitemap)
 render = false
 +++
 ```
@@ -255,6 +253,13 @@ Now we can try printing some comments to the screen by editing the `template/ind
 
 Now if we look at the homepage we can see that comments have been added.
 
-{% fig(caption="Not the prettiest, but we've completed step 1.", add_class="prose-figcaption:-mt-12") %}
+{% fig(caption="Not the prettiest, but we've completed step 1.", add_class="-mt-8 prose-figcaption:-mt-12") %}
 ![Result after following step 1](/screenshots/walkthrough-to-create-demo_after-step1.webp)
 {% end %}
+
+You can test that this working by trying to simulate a comment at a different path with `re simulate email --subject "/foo" --moderate`.
+
+---
+
+## Step 2: Getting the HTML We Want (Using Templating)
+

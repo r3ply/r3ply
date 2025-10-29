@@ -89,6 +89,10 @@ pub fn tera(template: String, data: JsValue) -> Result<String, JsError> {
     ctx.insert(key, &value);
   };
   let mut tera = Tera::default();
+  tera.register_filter("date", tera_contrib::dates::date);
+  tera.register_filter("json_encode", tera_contrib::json::json_encode);
+  tera.register_filter("urlencode", tera_contrib::urlencode::urlencode);
+  tera.register_filter("urlencode_strict", tera_contrib::urlencode::urlencode_strict);
   tera.render_str(&template, &ctx).map_err(|error| JsError::from(error))
 }
 

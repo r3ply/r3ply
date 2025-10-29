@@ -33,8 +33,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/schema
       '@r3ply/wasm':
-        specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
-        version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
+        specifier: workspace:^
+        version: link:../../crates/r3ply-wasm/pkg
       '@types/prompts':
         specifier: ^2.4.9
         version: 2.4.9
@@ -112,8 +112,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/schema
       '@r3ply/wasm':
-        specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
-        version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
+        specifier: workspace:^
+        version: link:../../crates/r3ply-wasm/pkg
       '@types/node':
         specifier: ^24.2.1
         version: 24.2.1
@@ -149,7 +149,7 @@ importers:
         specifier: ^4.42.0
         version: 4.42.0
 
-  crates/r3ply-wasm: {}
+  crates/r3ply-wasm/pkg: {}
 
   packages/lib:
     dependencies:
@@ -163,8 +163,8 @@ importers:
         specifier: workspace:*
         version: link:../schema
       '@r3ply/wasm':
-        specifier: file:../../crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
-        version: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz
+        specifier: workspace:^
+        version: link:../../crates/r3ply-wasm/pkg
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -218,6 +218,9 @@ importers:
 
   site:
     dependencies:
+      '@r3ply/wasm':
+        specifier: workspace:^
+        version: link:../crates/r3ply-wasm/pkg
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
@@ -1154,10 +1157,6 @@ packages:
 
   '@poppinss/exception@1.2.2':
     resolution: {integrity: sha512-m7bpKCD4QMlFCjA/nKTs23fuvoVFoA83brRKmObCUNmi/9tVu8Ve3w4YQAnJu4q3Tjf5fr685HYIC/IA2zHRSg==}
-
-  '@r3ply/wasm@file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz':
-    resolution: {integrity: sha512-275tHmYyWUQCRJM+MLx7jH5xU+uIy6U0WFSPhat8Gr700n42hweGq0tMii8SU6MEcxnhO+1W7SxHuwh+jI5N0w==, tarball: file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz}
-    version: 0.0.1
 
   '@rollup/rollup-android-arm-eabi@4.35.0':
     resolution: {integrity: sha512-uYQ2WfPaqz5QtVgMxfN6NpLD+no0MYHDBywl7itPYd3K5TjjSghNKmX8ic9S8NU8w81NVhJv/XojcHptRly7qQ==}
@@ -3271,8 +3270,6 @@ snapshots:
 
   '@poppinss/exception@1.2.2': {}
 
-  '@r3ply/wasm@file:crates/r3ply-wasm/pkg/r3ply-wasm-0.0.1.tgz': {}
-
   '@rollup/rollup-android-arm-eabi@4.35.0':
     optional: true
 
@@ -4417,7 +4414,7 @@ snapshots:
 
   tsx@4.19.3:
     dependencies:
-      esbuild: 0.25.1
+      esbuild: 0.25.10
       get-tsconfig: 4.10.0
     optionalDependencies:
       fsevents: 2.3.3

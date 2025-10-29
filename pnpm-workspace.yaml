@@ -1,5 +1,5 @@
 packages:
-  - crates/r3ply-wasm
+  - crates/r3ply-wasm/pkg
   - packages/*
   - apps/*
   - site/

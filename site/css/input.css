@@ -64,7 +64,7 @@ pre[data-name]::before {
   font-weight: bold;
 }
 
-pre[data-name] code table {
+pre[data-name] code {
   margin-top: 1ch;
   border-top: solid violet 1px;
   display: block;

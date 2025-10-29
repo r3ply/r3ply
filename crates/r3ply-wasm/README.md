@@ -1,15 +1,15 @@
 # r3ply-wasm
 
-This crate provides functionality to the r3ply library by exporting several useful rust functions with wasm bindings.
+This crate exports several useful rust functions with wasm bindings.
 
 ## Build/Install
 
 ```sh
 # build bundler + node targets, patch bundler imports for cloudflare workers, copy package json over
-npm run build
+pnpm build:wasm
 
-# packages everything into a tar file so it can be imported for projects
-npm run pack
+# (optional) if you want to generate a tar file for quick exports for testing
+pnpm pack
 ```
 
 Then you can use everything like you would a normal JS/TS module, in both node and bundler projects.
@@ -17,3 +17,7 @@ Then you can use everything like you would a normal JS/TS module, in both node a
 ```ts
 import { sanitize_html } from '@r3ply/wasm'
 ```
+
+## Tera 2 Templating Language
+
+See the [tera 2 docs](./tera2-language.md) in this repo for more.
