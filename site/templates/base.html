@@ -1,0 +1,76 @@
+{#-
+  To override a block in an extending template just redeclare it.
+  To extend a block, redeclare it and use `{{ super() }}` to render the parent.
+
+  Sometimes you can't do that, for example if you need to change the parent AND declare it before or after. In which case there are {% block_open/close_tag %}. This way you can always place content before/after some other content AND change the middle content. For example:
+
+  {% block main_tag%}
+  {{ super() }} <!-- re-render the parent's main tag -->
+    <aside>...</aside>{% endblock main_tag%} <!-- add an <aside> -->
+    <!-- AND change the article -->
+    {% block article %}<article>...change the parent</article>{% endblock article %}
+  </main>
+-#}
+<!DOCTYPE html>
+{% block html %}
+<html lang="{{ lang }}">
+{% block head %}
+<head>
+  {% block preamble %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% endblock preamble %}
+  {% block title %}
+    <title>{{ section.title | default(value=page.title) }}</title>
+  {% endblock title %}
+  {% block styling %}
+    <link rel="stylesheet" href="/style.css">
+    <meta name="color-scheme" content="dark light">
+  {% endblock styling %}
+  {% block favicon %}
+    {% include "includes/favicon.html" %}
+  {% endblock favicon %}
+</head>
+{% endblock head %}
+{% block body %}
+{% block body_open_tag %}
+<body class="bg-green-50 dark:bg-slate-950 bg-[url(/patterns/bank-note.svg)] dark:bg-[url(/patterns/bank-note_dark.svg)]">{% endblock body_open_tag %}
+  {% block top_nav %}
+    {% include "includes/top-nav.html" %}
+  {% endblock top_nav %}
+  {% block main %}
+  {% block main_open_tag %}
+   <main class="py-6">{% endblock main_open_tag %}
+    {% block article %}
+      {% block article_open_tag %}
+      <article id="content" class="overflow-x-clip prose
+        {% block article_width %}
+          max-w-prose
+        {% endblock article_width %}
+        {% block article_margins_and_padding %}
+          px-4 md:px-0 mx-auto
+        {% endblock article_margins_and_padding %}
+        {% block prose_overrides %}
+          prose-neutral prose-li:marker:text-black prose-pink prose-em:font-light dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert
+        {% endblock prose_overrides %}
+        {% block decoration_overrides %}
+          not-dark:prose-a:has-[code]:decoration-2 prose-a:has-[code]:decoration-dashed prose-a:has-[code]:underline-offset-[6px] prose-a:has-[code]:decoration-yellow-400 prose-a:has-[code]:hover:decoration-solid
+        {% endblock decoration_overrides %}
+        {% block article_extra_styling %}{% endblock article_extra_styling %}
+      ">{% endblock article_open_tag %}
+        {% block content %}
+          {# For some reason, if I don't save as a variable first, then it breaks how other pages that extend the content block escape #}
+          {% set content = section.content | default(value=page.content) %}
+          {{ content | safe }}
+        {% endblock content %}
+      {% block article_close_tag %}
+      </article>{% endblock article_close_tag %}
+    {% endblock article %}
+  {% block main_close_tag %}
+  </main>{% endblock main_close_tag %}
+  {% endblock main %}
+{% block body_close_tag %}
+</body>{% endblock body_close_tag %}
+{% endblock body %}
+</html>
+{% endblock html %}
