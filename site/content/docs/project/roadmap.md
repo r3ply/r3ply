@@ -19,7 +19,7 @@ title = "r3ply roadmap"
 
 ### Moderation
 
-- [ ] Email based moderation (Approve/Add to `block*`/`approve* lists) from within email
+- [ ] Email based moderation (Approve/Add to `block*`/`approve*` lists) from within email
 
 ### CLI
 
@@ -28,6 +28,3 @@ title = "r3ply roadmap"
 ### App/Infrastructure
 
 - [ ] Email server
-
-
-

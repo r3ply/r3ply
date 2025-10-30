@@ -263,4 +263,3 @@ You can test that this working by trying to simulate a comment at a different pa
 ---
 
 ## Step 2: Getting the HTML We Want
-

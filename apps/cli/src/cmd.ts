@@ -463,7 +463,10 @@ export function simulate_cmd(cwd: string) {
         simulate_cmd.parent?.opts<BaseCmdOptions>().config,
       )
       let site_config_result = await Result.safe(
-        project.resolve_config(cwd, simulate_cmd.parent?.opts<BaseCmdOptions>().config),
+        project.resolve_config(
+          cwd,
+          simulate_cmd.parent?.opts<BaseCmdOptions>().config,
+        ),
       )
       let site_config: R3plySiteConfig = site_config_result.expect(
         'Error while opening config (hint: run `re config validate` to debug)',
@@ -549,7 +552,7 @@ export function simulate_cmd(cwd: string) {
         { site_config_path, site_config },
         email_event_response,
         options,
-        format
+        format,
       )
 
       // Print moderation
@@ -582,7 +585,7 @@ export function simulate_cmd(cwd: string) {
                     undefined,
                     index,
                     options,
-                    format
+                    format,
                   )
                 }
                 break
@@ -598,7 +601,7 @@ export function simulate_cmd(cwd: string) {
                     ticket,
                     index,
                     options,
-                    format
+                    format,
                   )
                 } else {
                   print(
@@ -606,7 +609,7 @@ export function simulate_cmd(cwd: string) {
                     undefined,
                     index,
                     options,
-                    format
+                    format,
                   )
                 }
                 break
@@ -632,7 +635,7 @@ export function simulate_cmd(cwd: string) {
             ignored_moderation_results,
             other_moderation_results,
             options,
-            format
+            format,
           )
         }
       }

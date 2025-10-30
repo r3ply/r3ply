@@ -123,6 +123,7 @@ I may not always love you
 But long as there are
 Stars above you
 {% endset %}
+```
 
 Variable assignment can use templating inside of it:
 
