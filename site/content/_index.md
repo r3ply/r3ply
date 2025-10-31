@@ -46,7 +46,7 @@ cache = true
 
 ...and then receive emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](/todo).
 
-**View the [demo](/todo) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.**
+**View the [demo](/docs/getting-started/#comments) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.**
 
 ## Table of Contents { .text-right .border-b .border-dashed }
 
@@ -54,7 +54,7 @@ cache = true
 - [Features](#features)
 - [Why Email?](#why-email)
 - [FAQ](#faq)
-- [Demo](#demo)
+- [Demo](/docs/getting-started/#comments)
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-green-200">{{ fleuron_fish() }}</div>
 
@@ -230,7 +230,3 @@ r3ply is open source software, and [r3ply.com](https://r3ply.com) is just one, c
 For example, if someone deployed r3ply at `https://r4ply.com`, then websites could add that to their config and receive comments at `<site>@r4ply.com`.
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-pink-300">{{ fleuron_fish() }}</div>
-
-## Demo
-
-TODO
