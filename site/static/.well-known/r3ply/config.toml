@@ -9,8 +9,7 @@ issued = "2025-10-16"
 label = "CLI"
 
 [comments.email]
-# With no `comment_{}` set, the default is just
-# JSON consisting of the full comment context
+"&comment_{}" = "comment.template.md"
 
 [[moderation.local]]
-"file_path_{}" = "content/comments/{{ comment.id[:8] }}.json"
+"file_path_{}" = "content/comments/{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"

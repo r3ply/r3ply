@@ -11,6 +11,7 @@
     {% block article %}<article>...change the parent</article>{% endblock article %}
   </main>
 -#}
+{% import "macros/comments.html" as comments %}
 <!DOCTYPE html>
 {% block html %}
 <html lang="{{ lang }}">
@@ -69,6 +70,14 @@
   {% block main_close_tag %}
   </main>{% endblock main_close_tag %}
   {% endblock main %}
+  {% block comments %}
+    {% set doc = section | default(value=page | default(value=false)) %}
+    {% if doc.extra.comments.enabled %}
+      <section id="comments" class="max-w-prose mx-auto">
+        {{ comments::write_all(for_comments=get_section(path="comments/_index.md") | get(key="pages") | filter(attribute="extra.comment.document", value=current_path), doc=doc)}}
+      </section>
+    {% endif %}
+  {% endblock comments %}
 {% block body_close_tag %}
 </body>{% endblock body_close_tag %}
 {% endblock body %}

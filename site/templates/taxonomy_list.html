@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}
+ <title>r3ply > {{ taxonomy.name }}</title>
+{% endblock title %}
+{% block content %}
+<ul>
+{% for t in terms %}
+  <li>
+    <a href="{{ t.path }}">{{ t.name }} ({{ t.page_count }})</a>
+  </li>
+{% endfor %}
+</ul>
+{% endblock content %}

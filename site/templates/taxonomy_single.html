@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}
+ <title>r3ply > {{ taxonomy.name }} > {{ term.name }}</title>
+{% endblock title %}
+{% block content %}
+<ul>
+{% for p in term.pages %}
+  <li>
+    <a href="{{ p.path }}">{{ p.title | default(value=p.content | truncate(length=30)) }}</a>
+  </li>
+{% endfor %}
+</ul>
+{% endblock content %}

@@ -1,0 +1,24 @@
+{#
+  Zola/Tera don't have a urldecode feature
+#}
+{% macro urldecode(encoded) %}
+ {{ encoded
+  | regex_replace(pattern="%20", rep=" ")
+  | regex_replace(pattern="%21", rep="!")
+  | regex_replace(pattern="%22", rep='"')
+  | regex_replace(pattern="%23", rep="#")
+  | regex_replace(pattern="%24", rep="$")
+  | regex_replace(pattern="%25", rep="%")
+  | regex_replace(pattern="%26", rep="&")
+  | regex_replace(pattern="%27", rep="'")
+  | regex_replace(pattern="%28", rep="(")
+  | regex_replace(pattern="%29", rep=")")
+  | regex_replace(pattern="%2C", rep=",")
+  | regex_replace(pattern="%2D", rep="-")
+  | regex_replace(pattern="%2E", rep=".")
+  | regex_replace(pattern="%2F", rep="/")
+  | regex_replace(pattern="%3A", rep=":")
+  | regex_replace(pattern="%3B", rep=";")
+  | regex_replace(pattern="%3F", rep="?")
+}}
+{% endmacro  %}

@@ -115,3 +115,12 @@ pre[data-linenos] {
     }
   }
 }
+
+#comments details {
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary {
+    list-style: none;
+  }
+}

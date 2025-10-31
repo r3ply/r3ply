@@ -1,6 +1,9 @@
 +++
 title = "r3ply docs: Getting Started"
 template = "doc.html"
+
+[extra.comments]
+enabled = true
 +++
 
 # Getting Started

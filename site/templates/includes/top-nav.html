@@ -12,10 +12,10 @@
       </li>
       <!-- TODO - Search
       <li class="ml-auto"><input placeholder="🔍 ⌘k" type="search" name="TODO" id="search-input" autocomplete="off" class="rounded-3xl w-24 m-0 focus:w-full"></li> -->
-      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="/">Home</a></li>
-      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="/docs">Docs</a></li>
-      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="<!-- TODO -->">Contact</a></li>
+      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/_index.md', lang=lang) }}">Home</a></li>
+      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/docs/_index.md', lang=lang) }}">Docs</a></li>
+      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="/todo">Contact</a></li>
       <li>|</li>
-      <li class="mr-2 md:mr-4 shrink"><a class="md:text-xl font-light after:content-['_↗']" href="<!-- TODO -->">GitHub</a></li>
+      <li class="mr-2 md:mr-4 shrink"><a class="md:text-xl font-light after:content-['_↗']" href="https://github.com/asimpletune/r3ply">GitHub</a></li>
     </ul>
   </nav>

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set ctx = load_data(literal=page.extra.comment.ctx, format="json") %}
+{{ ctx.email | json_encode }}
+{% endblock content %}

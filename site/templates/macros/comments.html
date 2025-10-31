@@ -1,0 +1,115 @@
+{% import "macros/util.html" as util %}
+{% macro write_all(for_comments, doc) %}
+  {% set root_comments = for_comments
+    | filter(attribute="extra.comment.root", value=true)
+    | sort(attribute="date")
+    | reverse %}
+  {% for r in root_comments %}
+    {{ self::write_thread(parent=r, comments=for_comments
+      | filter(attribute="extra.comment.root", value=false), level=1) }}
+  {% endfor %}
+{% endmacro  %}
+
+{% macro write_thread(parent, comments, level) %}
+  {% set groups = ["group/0", "group/1", "group/2", "group/3", "group/4", "group/5", "group/6%", "group/7", "group/8", "group/9"] %}
+  <details class="{{ groups[level] }} ml-3.5 open:mb-2
+  " open>
+    {{ self::summary(comment=parent, level=level) }}
+    <div class="ml-[1.5ch] border-l border-emerald-400 border-dashed pb-[1ch]">
+      {{ self::render(comment=parent) }}
+      {% set children = comments
+        | filter(attribute="extra.comment.in_reply_to", value="#" ~ parent.slug)
+        | sort(attribute="date")
+        | reverse %}
+      {% for c in children %}
+        {{ self::write_thread(parent=c, comments=comments, level=level+1) }}
+      {% endfor %}
+    </div>
+  </details>
+{% endmacro  %}
+
+{% macro summary(comment, level) %}
+{% set content_before = [
+  "group-open/0:before:content-['[-]']",
+  "group-open/1:before:content-['[-]']",
+  "group-open/2:before:content-['[-]']",
+  "group-open/3:before:content-['[-]']",
+  "group-open/4:before:content-['[-]']",
+  "group-open/5:before:content-['[-]']",
+  "group-open/6:before:content-['[-]']",
+  "group-open/7:before:content-['[-]']",
+  "group-open/8:before:content-['[-]']",
+  "group-open/9:before:content-['[-]']",
+] %}
+{% set comment_hidden = [
+    "group-open/0:hidden",
+    "group-open/1:hidden",
+    "group-open/2:hidden",
+    "group-open/3:hidden",
+    "group-open/4:hidden",
+    "group-open/5:hidden",
+    "group-open/6:hidden",
+    "group-open/7:hidden",
+    "group-open/8:hidden",
+    "group-open/9:hidden",
+  ] %}
+<summary class="hover:cursor-pointer before:content-['[+]'] {{ content_before[level] }} font-mono overflow-ellipsis">
+  <ul class="float-right inline-flex divide-x gap-2 divide-dashed divide-red-300 justify-around">
+    <li class="pr-2"><a href="">next</a></li>
+    <li class="pr-2"><a href="">prev</a></li>
+    <li class="pr-2"><a href="">parent</a></li>
+    <li><a href="">root</a></li>
+  </ul>
+
+  <span class="{{ comment_hidden[level] }}">
+    {{ comment.content | striptags | truncate(length=15) }}
+  </span>
+</summary>
+{% endmacro %}
+
+{% macro render(comment) %}
+{% set ctx = load_data(literal=comment.extra.comment.ctx, format="json") %}
+<article id="{{ comment.slug }}" class="pl-6 py-3">
+  <header class="font-mono font-lg">
+    <dl>
+      <div class="flex">
+        <dt class="inline text-purple-300">Comment-ID</dt>
+        <span class="text-cyan-300">: <</span>
+        <dd class="inline text-amber-400">{{ comment.slug }}</dd>
+        <span class="text-cyan-300 before:content-['>']"></span>
+      </div>
+      <div class="flex">
+        <dt class="inline text-gray-100">From</dt>
+        <span class="text-cyan-300">: <</span>
+        <dd class="inline text-amber-400">{{ comment.authors[0] | truncate(length=7) }}</dd>
+        <span class="text-cyan-300 before:content-['>']"></span>
+      </div>
+      <div class="flex overflow-clip">
+        <dt class="inline text-gray-100">Subject</dt>
+        <span class="text-cyan-300">: </span>
+        <dd class="inline text-amber-400 ml-[1ch] truncate">{{ ctx.comment.subject.path }}{{ ctx.comment.subject.fragment | default(value="") }}</dd>
+      </div>
+      <div class="flex">
+        {# date(format="%a, %d %b %Y %H:%M:%S %z") #}
+        <dt class="inline text-gray-100">Date</dt>
+        <span class="text-cyan-300">: </span>
+        <dd class="inline-flex text-amber-400 ml-[1ch]">
+          {{ comment.date | date(format="%a") }}
+          <span class="text-cyan-300">,</span>
+          {{ comment.date | date(format="%d %b %Y %H") }}
+          <span class="text-cyan-300">:</span>
+          {{ comment.date | date(format="%M") }}
+          <span class="text-cyan-300">:</span>
+          {{ comment.date | date(format="%S") }}
+          <span class="text-cyan-300 ml-[1ch]">{{ comment.date | date(format="%z") }}</span>
+        </dd>
+      </div>
+    </dl>
+    </span>
+  </header>
+  <div class="prose prose-neutral dark:prose-invert mt-[2ch]">
+    {{ comment.content | safe }}
+  </div>
+  <hr class="border-blue-400 mt-[1ch] pb-[1ch] border-dashed">
+</article>
+{% endmacro %}

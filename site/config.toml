@@ -1,6 +1,13 @@
 # The URL the site will be built for
 base_url = "https://r3ply.com"
 
+# The site title and description; used in feeds by default.
+title = "r3ply - comments simple as email"
+description = "An open source software project that leverages the power of email to enable commenting on websites."
+
+# The default language; used in feeds.
+default_language = "en"
+
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = false
 
@@ -13,6 +20,20 @@ build_search_index = true
 # Example:
 #     ignored_content = ["*.{graphml,xlsx}", "temp.*", "**/build_folder"]
 ignored_content = ["**/content/comments/README.md"]
+
+# The taxonomies to be rendered for the site and their configuration of the default languages
+# Example:
+#     taxonomies = [
+#       {name = "tags", feed = true}, # each tag will have its own feed
+#       {name = "tags"}, # you can have taxonomies with the same name in multiple languages
+#       {name = "categories", paginate_by = 5},  # 5 items per page for a term
+#       {name = "authors"}, # Basic definition: no feed or pagination
+#     ]
+#
+taxonomies = [
+  { name = "commenters", render = true, feed = true },
+  { name = "threads", render = true, feed = true },
+]
 
 [markdown]
 # Whether to do syntax highlighting
@@ -36,6 +57,12 @@ bottom_footnotes = true
 # "heading" means the full heading becomes the text of the anchor.
 # See "Internal links & deep linking" in the documentation for more information.
 insert_anchor_links = "right"
+
+# Various slugification strategies, see below for details
+# Defaults to everything being a slug
+[slugify]
+paths = "safe"
+taxonomies = "off"
 
 [search]
 index_format = "fuse_json" # or "fuse_javascript"
