@@ -1,5 +1,5 @@
 # The URL the site will be built for
-base_url = "https://r3ply.com"
+base_url = "https://r3ply-site.pages.dev"
 
 # The site title and description; used in feeds by default.
 title = "r3ply - comments simple as email"
