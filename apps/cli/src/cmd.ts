@@ -380,6 +380,7 @@ export function generate_cmd(cwd: string) {
   const email_cmd = generate_cmd
     .command('email')
     .description('generate a comment as an email, based on your config')
+    .argument('[input]', 'Input text (can also accept pipe)')
     // Add email header options
     .option('--message-id <id>', 'override Message-ID header')
     .option('--date <date>', 'override Date header')
@@ -388,15 +389,22 @@ export function generate_cmd(cwd: string) {
     .option('--subject <url>', 'override email subject')
     .option('--subject-path <path>', 'override just path of subject')
     .option('--body <text>', 'override email body')
-    .action(async (options: GenerateEmailCmdOpts) => {
+    .action(async (input: string | undefined, options: GenerateEmailCmdOpts) => {
       let site_config: R3plySiteConfig = await project.resolve_config(
         cwd,
         generate_cmd.parent?.opts<BaseCmdOptions>().config,
       )
       const site = site_config.site[util.random_int(site_config.site.length)]
 
+      // If no argument, check for piped input
+      if (!input && !process.stdin.isTTY) {
+        console.log("reading from STDIN");
+        input = await util.read_stdin()
+      }
+
       const email = Result.safe(
-        generate.email(site.domain, site.r3ply, options),
+        // --body overrides input
+        generate.email(site.domain, site.r3ply, { body: input, ...options }),
       )
       await email.then(async (email) => {
         if (email.isOk()) {
@@ -434,6 +442,7 @@ export function simulate_cmd(cwd: string) {
 
   simulate_cmd
     .command('email')
+    .argument('[input]', 'Input text (can also accept pipe)')
     .option('--moderate', 'send comment for moderation (local-only)', false)
     .option('--dry-run', 'print output but have no side effects', false)
     .option('--message-id <id>', 'override Message-ID header')
@@ -453,7 +462,7 @@ export function simulate_cmd(cwd: string) {
       `filter output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify]. Stages can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderation=local]. If a stage is acted upon as an array, then you can append an underscore to filter a specific element, e.g. moderation=local_0`,
       util.split_list,
     )
-    .action(async (options: SimulateCmdEmailOpts, cmd) => {
+    .action(async (input: string | undefined, options: SimulateCmdEmailOpts, cmd) => {
       // TOML or JSON
       const format = simulate_cmd.parent!.opts<BaseCmdOptions>().format
 
@@ -507,8 +516,9 @@ export function simulate_cmd(cwd: string) {
       })(options.to)
 
       // Generate email
+      if (!input && !process.stdin.isTTY) input = await util.read_stdin()
       const email = await generate
-        .email(signet.domain, signet.r3ply, options)
+        .email(signet.domain, signet.r3ply, { body: input, ...options })
         .then((email) => {
           tty.cmds.simulate.print_comment_via_email_initial(email, options)
           return email
