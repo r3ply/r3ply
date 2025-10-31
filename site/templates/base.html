@@ -80,11 +80,14 @@
         <details class="group" open>
           <summary class="pl-4">
             <h2 class="text-center text-5xl font-thin">
+              <a href="#comments" class="text-pink-400">#</a>
               Comments ({{ comments | length }})
             </h2>
             <div id="comment-controls" class="flex justify-center gap-16 my-12">
               {% set controls = "text-gray-900 font-light text-xl cursor-pointer rounded-lg px-3 py-2 border border-gray-500" %}
-              <a href="/todo" class="{{ controls }} bg-yellow-300 hover:bg-yellow-500">Write Comment</a>
+              <a
+              href="{{ util::mailto(to=config.extra.comments_email, subject=current_path, body=config.extra.mail_body_instructions) }}"
+              class="{{ controls }} bg-yellow-300 hover:bg-yellow-500">Write Comment</a>
               <label for="commenting-instructions" class="{{ controls }} bg-green-300 hover:bg-green-400">[?] Info</label>
               <span class="hidden group-open:inline {{ controls }} bg-blue-300 hover:bg-blue-400">
                 [-] Collapse All
