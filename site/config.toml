@@ -70,3 +70,19 @@ index_format = "fuse_json" # or "fuse_javascript"
 [extra]
 # Put all your custom variables here
 r3ply_api_domain = "test.r3ply.com"
+comments_email = "r3ply.com@r3ply.com"
+mail_body_instructions = """
+
+﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍
+1. Write you comment above this ☝️ line
+2. When you're ready just hit send 📤
+3. Do NOT edit the email subject ⚠️
+
+NOTE: Your email address will remain private
+
+A subset of markdown can be used
+(no images, headings, or script tags)
+
+(Email signatures below 👇 will be ignored)
+﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉
+"""

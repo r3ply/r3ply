@@ -10,6 +10,7 @@ label = "CLI"
 
 [comments.email]
 "&comment_{}" = "comment.template.md"
+email_signature_separator = "﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍"
 
 [[moderation.local]]
 "file_path_{}" = "content/comments/{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"

@@ -73,11 +73,52 @@
   {% block comments %}
     {% set doc = section | default(value=page | default(value=false)) %}
     {% if doc.extra.comments.enabled %}
-      <section id="comments" class="max-w-prose mx-auto">
-        {{ comments::write_all(for_comments=get_section(path="comments/_index.md") | get(key="pages") | filter(attribute="extra.comment.document", value=current_path), doc=doc)}}
+      {% set comments = get_section(path="comments/_index.md")
+        | get(key="pages")
+        | filter(attribute="extra.comment.document", value=current_path) %}
+      <section id="comments" class="py-12 border-t-4 border-b-4 border-gray-500 border-dashed pr-6">
+        <details class="group" open>
+          <summary class="pl-4">
+            <h2 class="text-center text-5xl font-thin">
+              Comments ({{ comments | length }})
+            </h2>
+            <div id="comment-controls" class="flex justify-center gap-16 my-12">
+              {% set controls = "text-gray-900 font-light text-xl cursor-pointer rounded-lg px-3 py-2 border border-gray-500" %}
+              <a href="/todo" class="{{ controls }} bg-yellow-300 hover:bg-yellow-500">Write Comment</a>
+              <label for="commenting-instructions" class="{{ controls }} bg-green-300 hover:bg-green-400">[?] Info</label>
+              <span class="hidden group-open:inline {{ controls }} bg-blue-300 hover:bg-blue-400">
+                [-] Collapse All
+              </span>
+              <span class="inline group-open:hidden {{ controls }} bg-blue-300 hover:bg-blue-400">
+                [+] Expand All
+              </span>
+
+              <input type="checkbox" id="commenting-instructions" class="peer hidden">
+              <div class="fixed inset-0 hidden peer-checked:flex items-center justify-center bg-slate-950/50 dark:bg-white/25">
+                <div class="bg-green-50 p-4 rounded-lg shadow relative max-h-[90vh] overflow-y-auto">
+                  <label for="commenting-instructions" class="text-black cursor-pointer absolute top-2 right-4">Close</label>
+                  <div class="prose py-12">
+                    {{ load_data(path="commenting-instructions.md")
+                        | regex_replace(pattern="\{\{ current_path \}\}", rep=current_path)
+                        | markdown
+                        | safe }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </summary>
+          {{ comments::write_all(for_comments=comments, doc=doc)}}
+        </details>
       </section>
     {% endif %}
   {% endblock comments %}
+  {% block footer %}
+  {% block footer_open_tag %}
+  <footer id="footer" class="h-96 bg-gray-800">{% endblock footer_open_tag %}
+
+  {% block footer_close_tag %}
+  </footer>{% endblock footer_close_tag %}
+  {% endblock footer %}
 {% block body_close_tag %}
 </body>{% endblock body_close_tag %}
 {% endblock body %}

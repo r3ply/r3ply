@@ -22,3 +22,7 @@
   | regex_replace(pattern="%3F", rep="?")
 }}
 {% endmacro  %}
+
+{% macro mailto(to, subject, body) %}
+  mailto:{{ to }}?subject={{ subject | urlencode }}&body={{ body | urlencode }}
+{% endmacro %}
