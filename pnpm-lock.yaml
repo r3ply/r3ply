@@ -218,16 +218,10 @@ importers:
 
   site:
     dependencies:
-      '@r3ply/wasm':
-        specifier: workspace:^
-        version: link:../crates/r3ply-wasm/pkg
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
     devDependencies:
-      '@r3ply/schema':
-        specifier: workspace:*
-        version: link:../packages/schema
       '@tailwindcss/cli':
         specifier: ^4.1.16
         version: 4.1.16
