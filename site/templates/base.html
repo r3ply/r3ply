@@ -22,8 +22,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   {% endblock preamble %}
   {% block title %}
-    <title>{{ section.title | default(value=page.title) }}</title>
+    {% set title = section.title | default(value=page.title) %}
+    <title>{{ title }}</title>
+    <meta property="og:title" content="{{ title }}" />
+    <meta name="twitter:title" content="{{ title }}" />
   {% endblock title %}
+  {% block description %}
+    {% if page or section or taxonomy %}
+      {% set description = section.description
+        | default(value=page.description
+        | default(value=config.description)) %}
+    {% endif %}
+    <meta name="description" content="{{ description }}" />
+    <meta property="og:description" content="{{ description }}" />
+    <meta name="twitter:description" content="{{ description }}" />
+  {% endblock description %}
   {% block styling %}
     <link rel="stylesheet" href="/style.css">
     <meta name="color-scheme" content="dark light">
@@ -31,6 +44,14 @@
   {% block favicon %}
     {% include "includes/favicon.html" %}
   {% endblock favicon %}
+  {% block share_img %}
+  <meta property="og:image" content="/illustrations/banner.png" />
+  <meta name="twitter:image" content="/illustrations/banner.png" />
+  <meta property="og:image:width" content="1280" />
+  <meta property="og:image:height" content="650" />
+  <meta name="og:image:alt" content="r3ply share banner with pain pattern" />
+  <meta name="twitter:image:alt" content="r3ply share banner with pain pattern" />
+  {% endblock share_img %}
 </head>
 {% endblock head %}
 {% block body %}
