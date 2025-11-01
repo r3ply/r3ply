@@ -276,7 +276,7 @@ async function get_site_config(domain: string): Promise<R3plySiteConfig> {
       if (site_config) {
         return util.config.resolve_references(
           site_config,
-          domain,
+          url.href,
           DereferenceFileAtURL,
         )
       }
