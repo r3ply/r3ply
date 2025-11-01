@@ -3,7 +3,7 @@ title = "r3ply home"
 template="index.html"
 
 [extra.comments]
-enabled = true
+enabled = false
 +++
 
 {% fig(dark="/illustrations/r3ply-landing_dark@0.5x.webp" caption="r3ply, born from the inferno of the internet") %}

@@ -2,11 +2,21 @@ version = "0.0.1"
 enabled = true
 
 [[site]]
+domain = "test.r3ply.com"
+r3ply = "test.r3ply.com"
+signet = "lAQZNwe9Cd0SsjTCxGv21g"
+issued = 2025-11-01
+label = "test"
+
+[[site]]
 domain = "site.local.test"
 r3ply = "cli.r3ply.test"
 signet = "wWM5hk4DKr1xVRhVq-7aog"
-issued = "2025-10-16"
+issued = 2025-10-16
 label = "CLI"
+
+[comments]
+"paths*" = ["/**", "!/"]
 
 [comments.email]
 "&comment_{}" = "comment.template.md"
@@ -14,3 +24,19 @@ email_signature_separator = "﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍
 
 [[moderation.local]]
 "file_path_{}" = "content/comments/{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"
+
+[[moderation.github]]
+owner = "asimpletune"
+repo = "r3ply"
+"file_path_{}" = "content/comments/{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"
+"base_branch_{}" = "unstable-release/v0.0.1"
+"head_branch_{}" = "comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md"
+"commit_msg_{}" = """
+Comment submitted:
+Sender: {{ author.pseudonym }}
+Timestamp: {{ comment.ts_rcvd }}
+Subject: {{ comment.subject.url }}
+Comment: > {{ comment.txt | split(pat="
+") | join(sep="> ") }}"""
+"pr_title_{}" = "New comment ({{ comment.id[:8] }}) on {{ comment.subject.url }} by author `{{ author.pseudonym[:7] }}`"
+"allow*" = [ ]
