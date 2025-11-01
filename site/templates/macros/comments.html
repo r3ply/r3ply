@@ -164,11 +164,11 @@
     {% endif %}
     {{ comment.content | safe }}
   </div>
-  <hr class="border-blue-400 mt-[1ch] pb-[1ch] border-dashed">
   <a
     href="{{ util::mailto(to=config.extra.comments_email, subject=current_path ~ '#' ~comment.slug, body=config.extra.mail_body_instructions) }}"
-    class="inline-block mt-4 px-3 py-2 text-lg rounded-lg
+    class="block max-w-fit ml-auto md:ml-0 mt-4 px-2 py-1 text-lg rounded-lg
       bg-yellow-300 hover:bg-yellow-400 border border-gray-500
-      text-gray-800">r3ply!</a>
+       font-light text-gray-800">r3ply!</a>
+  <hr class="border-blue-400 mt-[2ch] pb-[0ch] border-dashed">
 </article>
 {% endmacro %}
