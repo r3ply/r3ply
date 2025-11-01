@@ -28,7 +28,7 @@ email_signature_separator = "﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍
 [[moderation.github]]
 owner = "asimpletune"
 repo = "r3ply-site-comments"
-"file_path_{}" = "content/comments/{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"
+"file_path_{}" = "{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"
 "base_branch_{}" = "unstable-release/v0.0.1"
 "head_branch_{}" = "comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md"
 "commit_msg_{}" = """
