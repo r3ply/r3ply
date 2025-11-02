@@ -97,7 +97,7 @@
       {% set comments = get_section(path="comments/_index.md")
         | get(key="pages")
         | filter(attribute="extra.comment.document", value=current_path) %}
-      <section id="comments" class="py-12 border-t-4 border-b-4 border-gray-500 border-dashed md:pr-6 pr-2">
+      <section id="comments" class="py-12 border-t-4 border-gray-500 dark:border-pink-300 border-dashed md:pr-6 pr-2">
         <details class="group" open>
           <summary class="pl-4">
             <h2 class="text-center text-4xl md:text-5xl font-thin">
@@ -146,7 +146,7 @@
   {% endblock comments %}
   {% block footer %}
   {% block footer_open_tag %}
-  <footer id="footer" class="h-96 bg-gray-800">{% endblock footer_open_tag %}
+  <footer id="footer" class="h-96 bg-gray-800 border-t border-solid border-violet-600">{% endblock footer_open_tag %}
 
   {% block footer_close_tag %}
   </footer>{% endblock footer_close_tag %}
