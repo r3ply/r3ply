@@ -478,4 +478,4 @@ text = "I was spending time debating which to use. There are pros and cons for e
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-violet-400">{{ fleuron_fish() }}</div>
 
-{{ next_prev(prev_path="/docs/config", prev_text="r3ply config", next_path="/docs/cli", next_text="The CLI") }}
+{{ next_prev(prev_path="/docs/config/", prev_text="r3ply config", next_path="/docs/cli/", next_text="The CLI") }}

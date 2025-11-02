@@ -21,4 +21,4 @@ The r3ply docs are arranged as a mixture of pure documentation, concepts, and tu
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-cyan-300">{{ fleuron_fish() }}</div>
 
-{{ next_prev(next_path="/docs/getting-started" next_text="Getting Started") }}
+{{ next_prev(next_path="/docs/getting-started/" next_text="Getting Started") }}

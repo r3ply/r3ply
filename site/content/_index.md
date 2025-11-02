@@ -230,3 +230,5 @@ r3ply is open source software, and [r3ply.com](https://r3ply.com) is just one, c
 For example, if someone deployed r3ply at `https://r4ply.com`, then websites could add that to their config and receive comments at `<site>@r4ply.com`.
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-pink-300">{{ fleuron_fish() }}</div>
+
+{{ next_prev(next_path="/docs/" next_text="r3ply Docs") }}
