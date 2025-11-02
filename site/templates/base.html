@@ -147,17 +147,16 @@
   {% block footer %}
   {% block footer_open_tag %}
   <footer id="footer" class="h-full flex flex-col md:bg-[url(/illustrations/r3ply-footer.png)] bg-contain bg-no-repeat
-
   bg-center bg-gray-950
   border-t border-solid border-violet-600 relative">{% endblock footer_open_tag %}
     <a href="#footer" class="absolute top-3 right-4 text-pink-400 text-2xl">#</a>
     <img src="/illustrations/r3ply-footer.png" alt="A volcano with a dark background" class="md:hidden">
-    <ul class="grow h-full w-full grid grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-6 px-4 mt-2 pb-10 md:py-48 text-slate-300 items-start justify-items-start pl-[22%] md:pl-0 md:justify-around md:place-items-center">
+    <ul class="grow h-full w-full grid grid-cols-2 md:grid-cols-4 gap-y-6 px-4 md:px-0 mt-2 pb-10 md:py-48 text-slate-300 place-items-center">
       {% set sub_menu_headers = "font-medium text-lg md:text-xl" %}
       {# {% set main_menu_items = "ml-12 md:ml-0" %} #}
       {% set sub_menu_styles = "pt-3" %}
       {% set sub_menu_items = "underline decoration-dotted text-sm md:text-lg font-light hover:text-white hover:decoration-solid" %}
-      <li>
+      <li class="w-[7rem]">
         <span class="text-teal-300 {{ sub_menu_headers }}">Sections:</span>
         <ul class="{{ sub_menu_styles }}">
           {% set site_sections_styles = "decoration-teal-300" %}
@@ -168,7 +167,7 @@
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}">Contact</li>
         </ul>
       </li>
-      <li>
+      <li class="w-[7rem]">
         {% set doc_styles = "decoration-pink-300" %}
         <span class="text-pink-300 {{ sub_menu_headers }} hover:underline {{ doc_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}">Docs:</a></span>
         <ul class="{{ sub_menu_styles }}">
@@ -179,7 +178,7 @@
           <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/cli.md') }}">CLI</a></li>
         </ul>
       </li>
-      <li>
+      <li class="w-[7rem]">
         <span class="text-yellow-200 {{ sub_menu_headers }}">Site Links:</span>
         <ul class="{{ sub_menu_styles }}">
           {% set site_links_styles = "decoration-yellow-200" %}
@@ -189,7 +188,7 @@
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="{{ get_url(path='/sitemap.xml') }}">Sitemap.xml</a></li>
         </ul>
       </li>
-      <li>
+      <li class="w-[7rem]">
         <span class="text-red-300 {{ sub_menu_headers }}">RSS Feeds:</span>
         <ul class="{{ sub_menu_styles }}">
           {% set rss_feeds_styles = "decoration-red-300" %}
