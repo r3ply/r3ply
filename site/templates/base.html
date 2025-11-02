@@ -146,11 +146,14 @@
   {% endblock comments %}
   {% block footer %}
   {% block footer_open_tag %}
-  <footer id="footer" class="h-full flex flex-col bg-[url(/illustrations/r3ply-footer.png)] bg-contain bg-no-repeat bg-center bg-gray-950
+  <footer id="footer" class="h-full flex flex-col bg-[url(/illustrations/r3ply-footer.png)] bg-contain bg-no-repeat
+  bg-top
+  md:bg-center bg-gray-950
   border-t border-solid border-violet-600 relative">{% endblock footer_open_tag %}
-  <a href="#footer" class="absolute top-3 right-4 text-pink-400 text-2xl">#</a>
-    <ul class="grow h-full w-full flex justify-around px-4 py-32 md:py-48 text-slate-300">
+    <a href="#footer" class="absolute top-3 right-4 text-pink-400 text-2xl">#</a>
+    <ul class="grow h-full w-full grid grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-6 px-4 pt-82 pb-10 md:py-48 text-slate-300 items-start justify-items-start pl-[22%] md:pl-0 md:justify-around md:place-items-center">
       {% set sub_menu_headers = "font-medium text-lg md:text-xl" %}
+      {# {% set main_menu_items = "ml-12 md:ml-0" %} #}
       {% set sub_menu_styles = "pt-3" %}
       {% set sub_menu_items = "underline decoration-dotted text-sm md:text-lg font-light hover:text-white hover:decoration-solid" %}
       <li>
