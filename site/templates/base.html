@@ -151,12 +151,12 @@
   border-t border-solid border-violet-600 relative">{% endblock footer_open_tag %}
     <a href="#footer" class="absolute top-3 right-4 text-pink-400 text-2xl">#</a>
     <img src="/illustrations/r3ply-footer.png" alt="A volcano with a dark background" class="md:hidden">
-    <ul class="grow h-full w-full grid grid-cols-2 md:grid-cols-4 gap-y-6 px-4 md:px-0 mt-2 pb-10 md:py-48 text-slate-300 place-items-center">
+    <ul class="grow h-full w-full grid grid-cols-2 md:grid-cols-4 gap-y-6 px-4 md:px-0 mt-2 pb-10 md:py-48 text-slate-300 justify-items-center">
       {% set sub_menu_headers = "font-medium text-lg md:text-xl" %}
       {# {% set main_menu_items = "ml-12 md:ml-0" %} #}
       {% set sub_menu_styles = "pt-3" %}
       {% set sub_menu_items = "underline decoration-dotted text-sm md:text-lg font-light hover:text-white hover:decoration-solid" %}
-      <li class="w-[7rem]">
+      <li class="w-[8rem] md:w-auto text-right">
         <span class="text-teal-300 {{ sub_menu_headers }}">Sections:</span>
         <ul class="{{ sub_menu_styles }}">
           {% set site_sections_styles = "decoration-teal-300" %}
@@ -167,7 +167,7 @@
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}">Contact</li>
         </ul>
       </li>
-      <li class="w-[7rem]">
+      <li class="w-[8rem] md:w-auto md:text-right">
         {% set doc_styles = "decoration-pink-300" %}
         <span class="text-pink-300 {{ sub_menu_headers }} hover:underline {{ doc_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}">Docs:</a></span>
         <ul class="{{ sub_menu_styles }}">
@@ -178,27 +178,29 @@
           <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/cli.md') }}">CLI</a></li>
         </ul>
       </li>
-      <li class="w-[7rem]">
+      <li class="w-[8rem] md:w-auto text-right md:text-left">
         <span class="text-yellow-200 {{ sub_menu_headers }}">Site Links:</span>
         <ul class="{{ sub_menu_styles }}">
           {% set site_links_styles = "decoration-yellow-200" %}
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://github.com/asimpletune/r3ply/">Project GitHub</a></li>
+          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://liberapay.com/spence/donate">Donate</li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">Browse Comments</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">RSS Feeds</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="{{ get_url(path='/sitemap.xml') }}">Sitemap.xml</a></li>
         </ul>
       </li>
-      <li class="w-[7rem]">
+      <li class="w-[8rem] md:w-auto">
         <span class="text-red-300 {{ sub_menu_headers }}">RSS Feeds:</span>
         <ul class="{{ sub_menu_styles }}">
           {% set rss_feeds_styles = "decoration-red-300" %}
+          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }} cursor-not-allowed text-gray-600 no-underline!"><a href="/todo">Blog (Soon)</a></li>
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">All Comments</a></li>
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Page</a></li>
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Thread</a></li>
         </ul>
       </li>
     </ul>
-    <p class="font-serif font-thin text-center mb-8 md:mb-3.5 text-gray-800"><a href="/todo" class="hover:underline decoration-gray-800 tracking-tight">AB IMO VENIMUS</a><span> | <span><a href="https://spenc.es/" class="hover:underline decoration-gray-800">Made in Rome MMXXV</a></p>
+    <p class="font-serif font-thin text-center mb-8 md:mb-3.5 text-gray-800"><a href="/todo" class="hover:underline decoration-gray-800 tracking-tight">AB IMO VENIMUS</a><span> | <span><a href="https://spenc.es/" class="hover:underline decoration-gray-800"><span class="hidden md:inline">Made in </span>Rome MMXXV</a></p>
   {% block footer_close_tag %}
   </footer>{% endblock footer_close_tag %}
   {% endblock footer %}
