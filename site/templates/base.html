@@ -56,13 +56,13 @@
 {% endblock head %}
 {% block body %}
 {% block body_open_tag %}
-<body class="bg-green-50 dark:bg-slate-950 bg-[url(/patterns/bank-note.svg)] dark:bg-[url(/patterns/bank-note_dark.svg)] has-[#commenting-instructions:checked]:overflow-hidden">{% endblock body_open_tag %}
+<body class="min-h-screen flex flex-col bg-green-50 dark:bg-slate-950 bg-[url(/patterns/bank-note.svg)] dark:bg-[url(/patterns/bank-note_dark.svg)] has-[#commenting-instructions:checked]:overflow-hidden">{% endblock body_open_tag %}
   {% block top_nav %}
     {% include "includes/top-nav.html" %}
   {% endblock top_nav %}
   {% block main %}
   {% block main_open_tag %}
-   <main class="py-6">{% endblock main_open_tag %}
+   <main class="grow py-6">{% endblock main_open_tag %}
     {% block article %}
       {% block article_open_tag %}
       <article id="content" class="overflow-x-clip prose
