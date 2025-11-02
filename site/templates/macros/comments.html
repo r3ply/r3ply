@@ -66,12 +66,13 @@
      divide-gray-800
     text-gray-800 font-mono font-black md:font-sans md:font-light text-xl md:text-lg md:tracking-wider my-0.5
     ">
-    {% set comment_nav_styles = "w-7 h-7 md:w-auto md:h-auto md:py-1 px-2 bg-teal-200 hover:bg-teal-300 dark:bg-cyan-200 dark:hover:bg-cyan-300 overflow-hidden border border-gray-800 text-center" %}
-    {% set inactive_nav = "bg-gray-400! text-gray-500 cursor-not-allowed" %}
+    {% set comment_nav_styles = "w-7 h-7 md:w-auto md:h-auto bg-teal-200 hover:bg-teal-300 dark:bg-cyan-200 dark:hover:bg-cyan-300 overflow-hidden border border-gray-800 text-center" %}
+    {% set nav_link_styles = "inline-block w-full h-full md:py-1 px-2" %}
+    {% set inactive_nav = "bg-gray-400! text-gray-500 cursor-not-allowed md:py-1 px-2" %}
     {# render root? #}
     {% if level >= 3 %}
     <li class="{{ comment_nav_styles }} rounded-l-lg border-l! border-r-0">
-      <a href="#{{ root.slug }}" class="inline-block w-full h-full">
+      <a href="#{{ root.slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">root</span>
         <span class="inline md:hidden">/</span>
       </a>
@@ -87,7 +88,7 @@
     {# render parent? #}
     {% if level >= 2 %}
     <li class="{{ comment_nav_styles }} border-x-0">
-      <a href="{{ comment.extra.comment.in_reply_to }}" class="inline-block w-full h-full">
+      <a href="{{ comment.extra.comment.in_reply_to }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">parent</span>
         <span class="inline md:hidden font-sans">..</span>
       </a>
@@ -102,7 +103,7 @@
     {% endif %}
     {# render current #}
     <li class="{{ comment_nav_styles }} border-x-0">
-      <a href="#{{ comment.slug }}" class="inline-block w-full h-full">
+      <a href="#{{ comment.slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline text-pink-400">#</span>
         <span class="inline md:hidden text-pink-300">.</span>
       </a>
@@ -110,7 +111,7 @@
     {# render next? #}
     {% if next %}
     <li class="{{ comment_nav_styles }} border-x-0">
-      <a href="#{{ next.slug }}" class="inline-block w-full h-full">
+      <a href="#{{ next.slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">next</span>
         <span class="inline md:hidden">↓</span>
       </a>
@@ -126,7 +127,7 @@
     {# render prev? #}
     {% if prev %}
     <li class="{{ comment_nav_styles }} rounded-r-lg border-l-0">
-      <a href="#{{ prev.slug }}" class="inline-block w-full h-full">
+      <a href="#{{ prev.slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">prev.</span>
         <span class="inline md:hidden">↑</span>
       </a>
