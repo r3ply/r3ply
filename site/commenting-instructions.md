@@ -26,4 +26,8 @@ And your signature below will be removed
 
 If you want to respond to someone, you must include their comment as an anchor link in the path, e.g. `Subject: /docs/getting-started/#abcd1234` (please note the trailing slash).
 
-You can also respond to text fragments, e.g. `Subject: /docs/getting-started/#:~:text=You%20should%20see%20a%20bunch%20of%20text%20representing`.
+You can also respond to text fragments, e.g.
+
+```email
+Subject: /docs/getting-started/#:~:text=You%20should%20see%20a%20bunch%20of%20text%20representing
+```
