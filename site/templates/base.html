@@ -146,8 +146,49 @@
   {% endblock comments %}
   {% block footer %}
   {% block footer_open_tag %}
-  <footer id="footer" class="h-96 bg-gray-800 border-t border-solid border-violet-600">{% endblock footer_open_tag %}
-
+  <footer id="footer" class="h-full flex flex-col bg-[url(/illustrations/r3ply-footer.png)] bg-contain bg-no-repeat bg-center bg-gray-950
+  border-t border-solid border-violet-600">{% endblock footer_open_tag %}
+    <ul class="grow h-full w-full flex justify-around px-4 py-32 md:py-48 text-slate-300">
+      {% set sub_menu_headers = "font-medium text-lg md:text-xl" %}
+      {% set sub_menu_styles = "pt-3 underline decoration-dotted text-sm md:text-lg font-light" %}
+      <li>
+        <span class="text-teal-300 {{ sub_menu_headers }}">Sections:</span>
+        <ul class="{{ sub_menu_styles }} decoration-teal-300">
+          <li>Home</li>
+          <li>Demo</li>
+          <li>Docs</li>
+          <li>Project</li>
+          <li>Contact</li>
+        </ul>
+      </li>
+      <li>
+        <span class="text-pink-300 {{ sub_menu_headers }}">Docs:</span>
+        <ul class="{{ sub_menu_styles }} decoration-pink-300">
+          <li>Getting Started</li>
+          <li>Overview</li>
+          <li>Config</li>
+          <li>Templating</li>
+          <li>CLI</li>
+        </ul>
+      </li>
+      <li>
+        <span class="text-yellow-200 {{ sub_menu_headers }}">Site Links:</span>
+        <ul class="{{ sub_menu_styles }} decoration-yellow-200">
+          <li>Project GitHub</li>
+          <li>Browse Comments</li>
+          <li>RSS Feeds</li>
+          <li>Sitemap.xml</li>
+        </ul>
+      </li>
+      <li>
+        <span class="text-red-300 {{ sub_menu_headers }}">RSS Feeds:</span>
+        <ul class="{{ sub_menu_styles }} decoration-red-300">
+          <li>All Comments</li>
+          <li>By Thread</li>
+        </ul>
+      </li>
+    </ul>
+    <p class="font-serif font-thin text-center mb-8 md:mb-3.5 text-gray-800">AB IMO VENIMUS | Made in Rome</p>
   {% block footer_close_tag %}
   </footer>{% endblock footer_close_tag %}
   {% endblock footer %}
