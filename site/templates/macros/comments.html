@@ -5,33 +5,58 @@
     | sort(attribute="date")
     | reverse %}
   {% for r in root_comments %}
-    {{ self::write_thread(parent=r, comments=for_comments
-      | filter(attribute="extra.comment.root", value=false), level=1) }}
+    {{ self::write_thread(head=r, comments=for_comments, level=1, root=r) }}
+    {# {{ self::write_thread(head=r, comments=for_comments
+      | filter(attribute="extra.comment.root", value=false), level=1, root=r) }} #}
   {% endfor %}
 {% endmacro  %}
 
-{% macro write_thread(parent, comments, level) %}
+{% macro write_thread(head, comments, level, root) %}
   {% set groups = ["group/0", "group/1", "group/2", "group/3", "group/4", "group/5", "group/6%", "group/7", "group/8", "group/9"] %}
-  <details id="{{ parent.slug }}" class="{{ groups[level] }} ml-3.5 open:mb-2
+  <details id="{{ head.slug }}" class="{{ groups[level] }} ml-3.5 open:mb-2
   " open>
-    {{ self::summary(comment=parent, level=level) }}
+    {# Determine prev/next #}
+    {% set prev = false %}
+    {% set next = false %}
+    {% if head.extra.comment.root %}
+      {# Root comments can still have in_reply_to set, if they're text fragments #}
+      {% set siblings = comments
+        | filter(attribute="extra.comment.root", value=head.extra.comment.root)
+        | sort(attribute="date")
+        | reverse %}
+    {% else %}
+      {% set siblings = comments
+        | filter(attribute="extra.comment.in_reply_to", value=head.extra.comment.in_reply_to)
+        | sort(attribute="date")
+        | reverse %}
+    {% endif %}
+    {# {{ throw(message=siblings|map(attribute="slug")|as_str) }} #}
+    {% for s in siblings %}
+      {% if s.slug == head.slug %}
+        {% set prev_i = loop.index0 - 1 %}
+        {% set next_i = loop.index0 + 1 %}
+        {% set_global prev = siblings[prev_i] | default(value=false) %}
+        {% set_global next = siblings[next_i] | default(value=false) %}
+      {% endif %}
+    {% endfor %}
+    {{ self::summary(comment=head, level=level, root=root, prev=prev, next=next) }}
     <div class="ml-[1.5ch] border-l border-emerald-400 border-dashed pb-[1ch]">
-      {{ self::render(comment=parent) }}
+      {{ self::render(comment=head) }}
       {% set children = comments
-        | filter(attribute="extra.comment.in_reply_to", value="#" ~ parent.slug)
+        | filter(attribute="extra.comment.in_reply_to", value="#" ~ head.slug)
         | sort(attribute="date")
         | reverse %}
       {% for c in children %}
-        {{ self::write_thread(parent=c, comments=comments, level=level+1) }}
+        {{ self::write_thread(head=c, comments=comments, level=level+1, root=root) }}
       {% endfor %}
     </div>
   </details>
 {% endmacro  %}
 
-{% macro summary(comment, level) %}
+{% macro summary(comment, level, root, prev, next) %}
 {# prettier-ignore #}
 {% set content_before = ["group-open/0:before:content-['[-]']","group-open/1:before:content-['[-]']","group-open/2:before:content-['[-]']","group-open/3:before:content-['[-]']","group-open/4:before:content-['[-]']","group-open/5:before:content-['[-]']","group-open/6:before:content-['[-]']","group-open/7:before:content-['[-]']","group-open/8:before:content-['[-]']","group-open/9:before:content-['[-]']"] %}
-<summary class="hover:cursor-pointer before:content-['[+]'] {{ content_before[level] }} font-mono overflow-ellipsis flex justify-between items-center gap-1">
+<summary class="cursor-pointer before:content-['[+]'] {{ content_before[level] }} font-mono overflow-ellipsis flex justify-between items-center gap-1">
   {# prettier-ignore #}
   {% set comment_hidden = ["group-open/0:hidden","group-open/1:hidden","group-open/2:hidden","group-open/3:hidden","group-open/4:hidden","group-open/5:hidden","group-open/6:hidden","group-open/7:hidden","group-open/8:hidden","group-open/9:hidden"] %}
   <span class="{{ comment_hidden[level] }} flex-1 truncate">
@@ -39,33 +64,81 @@
   </span>
   <ul class="float-right inline-flex divide-x! justify-around items-center
      divide-gray-800
-    text-gray-800 font-mono font-black md:font-sans md:font-light text-xl md:text-lg tracking-wider my-0.5
+    text-gray-800 font-mono font-black md:font-sans md:font-light text-xl md:text-lg md:tracking-wider my-0.5
     ">
-    {% set comment_nav_styles = "md:py-1 px-2 bg-teal-200 hover:bg-teal-300 dark:bg-cyan-200 dark:hover:bg-cyan-300 overflow-hidden border border-gray-800" %}
+    {% set comment_nav_styles = "w-7 h-7 md:w-auto md:h-auto md:py-1 px-2 bg-teal-200 hover:bg-teal-300 dark:bg-cyan-200 dark:hover:bg-cyan-300 overflow-hidden border border-gray-800 text-center" %}
+    {% set inactive_nav = "bg-gray-400! text-gray-500 cursor-not-allowed" %}
+    {# render root? #}
+    {% if level >= 3 %}
     <li class="{{ comment_nav_styles }} rounded-l-lg border-l! border-r-0">
-      <a href="">
+      <a href="#{{ root.slug }}" class="inline-block w-full h-full">
         <span class="hidden md:inline">root</span>
         <span class="inline md:hidden">/</span>
       </a>
     </li>
+    {% else %}
+    <li class="{{ comment_nav_styles }} {{ inactive_nav }} rounded-l-lg border-l! border-r-0">
+      <button class="cursor-not-allowed">
+        <span class="hidden md:inline">root</span>
+        <span class="inline md:hidden">/</span>
+      </button>
+    </li>
+    {% endif %}
+    {# render parent? #}
+    {% if level >= 2 %}
     <li class="{{ comment_nav_styles }} border-x-0">
-      <a href="">
+      <a href="{{ comment.extra.comment.in_reply_to }}" class="inline-block w-full h-full">
         <span class="hidden md:inline">parent</span>
-        <span class="inline md:hidden">..</span>
+        <span class="inline md:hidden font-sans">..</span>
       </a>
     </li>
+    {% else %}
+    <li class="{{ comment_nav_styles }} {{ inactive_nav }} border-x-0">
+      <button class="cursor-not-allowed">
+        <span class="hidden md:inline">parent</span>
+        <span class="inline md:hidden font-sans">..</span>
+      </button>
+    </li>
+    {% endif %}
+    {# render current #}
     <li class="{{ comment_nav_styles }} border-x-0">
-      <a href="">
-        <span class="hidden md:inline">prev</span>
-        <span class="inline md:hidden">↑</span>
+      <a href="#{{ comment.slug }}" class="inline-block w-full h-full">
+        <span class="hidden md:inline text-pink-400">#</span>
+        <span class="inline md:hidden text-pink-300">.</span>
       </a>
     </li>
-    <li class="{{ comment_nav_styles }} rounded-r-lg border-l-0">
-      <a href="">
+    {# render next? #}
+    {% if next %}
+    <li class="{{ comment_nav_styles }} border-x-0">
+      <a href="#{{ next.slug }}" class="inline-block w-full h-full">
         <span class="hidden md:inline">next</span>
         <span class="inline md:hidden">↓</span>
       </a>
     </li>
+    {% else %}
+    <li class="{{ comment_nav_styles }} {{ inactive_nav }} border-x-0">
+      <button class="cursor-not-allowed">
+        <span class="hidden md:inline">next</span>
+        <span class="inline md:hidden">↓</span>
+      </button>
+    </li>
+    {% endif %}
+    {# render prev? #}
+    {% if prev %}
+    <li class="{{ comment_nav_styles }} rounded-r-lg border-l-0">
+      <a href="#{{ prev.slug }}" class="inline-block w-full h-full">
+        <span class="hidden md:inline">prev.</span>
+        <span class="inline md:hidden">↑</span>
+      </a>
+    </li>
+    {% else %}
+    <li class="{{ comment_nav_styles }} {{ inactive_nav }} rounded-r-lg border-l-0">
+      <button class="cursor-not-allowed">
+        <span class="hidden md:inline">prev.</span>
+        <span class="inline md:hidden">↑</span>
+      </button>
+    </li>
+    {% endif %}
   </ul>
 </summary>
 {% endmacro %}

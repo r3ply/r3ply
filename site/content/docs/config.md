@@ -1,6 +1,9 @@
 +++
 title = "r3ply docs: Config"
 template = "doc.html"
+
+[extra.comments]
+enabled = true
 +++
 
 # Configuration
@@ -19,6 +22,7 @@ Configuration is an important topic in r3ply, as it's the primary way most peopl
   - [`Comments`](#comments-configuration)
   - [`Moderation`](#moderation-configuration)
 - [System Config](#r3ply-system-config)
+- [Comments](./#comments)
 
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-amber-200">{{ fleuron_fish() }}</div>
 
