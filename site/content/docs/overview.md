@@ -145,5 +145,3 @@ Each moderation channel allows you to specify an [allow list](/todo), granting c
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-blue-200">{{ fleuron_fish() }}</div>
 
 {{ next_prev(prev_path="/docs", prev_text="Docs Home", next_path="/docs/config", next_text="r3ply config") }}
-
----

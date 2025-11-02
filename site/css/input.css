@@ -27,6 +27,12 @@ pre code {
   sup {
     margin-left: 0.5ch;
   }
+  /* tailwind prose doesn't have a footer styling so I have to style it here */
+  footer {
+    margin-top: 3em;
+    padding-top: 2em;
+    border-top: 1px solid var(--color-gray-800);
+  }
 }
 
 /* BEGIN suggested Zola styling for highlighting code */
