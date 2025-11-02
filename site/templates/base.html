@@ -147,48 +147,55 @@
   {% block footer %}
   {% block footer_open_tag %}
   <footer id="footer" class="h-full flex flex-col bg-[url(/illustrations/r3ply-footer.png)] bg-contain bg-no-repeat bg-center bg-gray-950
-  border-t border-solid border-violet-600">{% endblock footer_open_tag %}
+  border-t border-solid border-violet-600 relative">{% endblock footer_open_tag %}
+  <a href="#footer" class="absolute top-3 right-4 text-pink-400 text-2xl">#</a>
     <ul class="grow h-full w-full flex justify-around px-4 py-32 md:py-48 text-slate-300">
       {% set sub_menu_headers = "font-medium text-lg md:text-xl" %}
-      {% set sub_menu_styles = "pt-3 underline decoration-dotted text-sm md:text-lg font-light" %}
+      {% set sub_menu_styles = "pt-3" %}
+      {% set sub_menu_items = "underline decoration-dotted text-sm md:text-lg font-light hover:text-white hover:decoration-solid" %}
       <li>
         <span class="text-teal-300 {{ sub_menu_headers }}">Sections:</span>
-        <ul class="{{ sub_menu_styles }} decoration-teal-300">
-          <li>Home</li>
-          <li>Demo</li>
-          <li>Docs</li>
-          <li>Project</li>
-          <li>Contact</li>
+        <ul class="{{ sub_menu_styles }}">
+          {% set site_sections_styles = "decoration-teal-300" %}
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/_index.md') }}">Home</a></li>
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="/todo" class="hover:text-white">Demo</a></li>
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}" >Docs</a></li>
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="/todo">Project</a></li>
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }}">Contact</li>
         </ul>
       </li>
       <li>
-        <span class="text-pink-300 {{ sub_menu_headers }}">Docs:</span>
-        <ul class="{{ sub_menu_styles }} decoration-pink-300">
-          <li>Getting Started</li>
-          <li>Overview</li>
-          <li>Config</li>
-          <li>Templating</li>
-          <li>CLI</li>
+        {% set doc_styles = "decoration-pink-300" %}
+        <span class="text-pink-300 {{ sub_menu_headers }} hover:underline {{ doc_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}">Docs:</a></span>
+        <ul class="{{ sub_menu_styles }}">
+          <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/getting-started.md') }}">Getting Started</a></li>
+          <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/overview.md') }}">Overview</a></li>
+          <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/config.md') }}">Config</a></li>
+          <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/templating.md') }}">Templating</a></li>
+          <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/cli.md') }}">CLI</a></li>
         </ul>
       </li>
       <li>
         <span class="text-yellow-200 {{ sub_menu_headers }}">Site Links:</span>
-        <ul class="{{ sub_menu_styles }} decoration-yellow-200">
-          <li>Project GitHub</li>
-          <li>Browse Comments</li>
-          <li>RSS Feeds</li>
-          <li>Sitemap.xml</li>
+        <ul class="{{ sub_menu_styles }}">
+          {% set site_links_styles = "decoration-yellow-200" %}
+          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://github.com/asimpletune/r3ply/">Project GitHub</a></li>
+          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">Browse Comments</a></li>
+          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">RSS Feeds</a></li>
+          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="{{ get_url(path='/sitemap.xml') }}">Sitemap.xml</a></li>
         </ul>
       </li>
       <li>
         <span class="text-red-300 {{ sub_menu_headers }}">RSS Feeds:</span>
-        <ul class="{{ sub_menu_styles }} decoration-red-300">
-          <li>All Comments</li>
-          <li>By Thread</li>
+        <ul class="{{ sub_menu_styles }}">
+          {% set rss_feeds_styles = "decoration-red-300" %}
+          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">All Comments</a></li>
+          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Page</a></li>
+          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Thread</a></li>
         </ul>
       </li>
     </ul>
-    <p class="font-serif font-thin text-center mb-8 md:mb-3.5 text-gray-800">AB IMO VENIMUS | Made in Rome</p>
+    <p class="font-serif font-thin text-center mb-8 md:mb-3.5 text-gray-800"><a href="/todo" class="hover:underline decoration-gray-800 tracking-tight">AB IMO VENIMUS</a><span> | <span><a href="https://spenc.es/" class="hover:underline decoration-gray-800">Made in Rome</a></p>
   {% block footer_close_tag %}
   </footer>{% endblock footer_close_tag %}
   {% endblock footer %}
