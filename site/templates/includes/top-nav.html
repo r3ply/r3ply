@@ -7,15 +7,20 @@
   ">
     <ul class="flex items-center gap-2 text-slate-800 dark:text-yellow-50">
       <li class="flex-1 ml-2 md:ml-4 py-4">
-        <a class="font-black text-xl md:text-3xl mr-1" href="/">r3ply</a>
-        <span class="text-xs font-mono md:ml-4 md:text-md text-neutral-700 dark:text-cyan-200">v0.0.1</span>
+        <a class="font-black text-xl md:text-3xl mr-0.5" href="/">r3ply</a>
+        <span class="text-xs font-mono md:ml-4 md:text-md text-neutral-700 dark:text-cyan-200 tracking-tighter md:tracking-normal">v{{ config.extra.r3ply_version }}</span>
       </li>
-      <!-- TODO - Search
-      <li class="ml-auto"><input placeholder="🔍 ⌘k" type="search" name="TODO" id="search-input" autocomplete="off" class="rounded-3xl w-24 m-0 focus:w-full"></li> -->
-      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/_index.md', lang=lang) }}">Home</a></li>
+      <li><a class="hidden md:inline text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/_index.md', lang=lang) }}">Home</a></li>
       <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/docs/_index.md', lang=lang) }}">Docs</a></li>
-      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="/todo">Contact</a></li>
+      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/docs/_index.md', lang=lang) }}">Demo</a></li>
       <li>|</li>
-      <li class="mr-2 md:mr-4 shrink"><a class="md:text-xl font-light after:content-['_↗']" href="https://github.com/asimpletune/r3ply">GitHub</a></li>
+      <li>
+        <a class="md:text-xl font-light after:content-['_↗']" href="https://github.com/asimpletune/r3ply">GitHub</a>
+      </li>
+      <li class="mr-2 md:mr-4 shrink cursor-pointer">
+        <a href="https://liberapay.com/spence/donate">
+          <img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" class="w-16 md:w-18">
+        </a>
+      </li>
     </ul>
   </nav>
