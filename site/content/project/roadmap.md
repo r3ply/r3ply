@@ -1,30 +1,30 @@
 +++
-template = "doc.html"
-title = "r3ply roadmap"
+template = "base.html"
+title = "r3ply Roadmap"
 +++
 
-## Roadmap
+# Roadmap
 
-### Config
+## Config
 
 - [x] Add `site`, `comments`, `moderation` top-level variables
 - [ ] Add `notify` top-level variables - allow notification channels to be added and configured, e.g. slack message or email
 - [ ] Secret storage Allow users to store encrypted secrets in their config, e.g. protect webhook endpoint
 - [ ] Stabilize config API for existing features
 
-### Comments
+## Comments
 
 - [ ] Add support for email attachments (this could be a good path towards allowing sites to implement user icons)
 - [ ] Add other comment sources. Perhaps a magic link or even a POST comment source?
 
-### Moderation
+## Moderation
 
 - [ ] Email based moderation (Approve/Add to `block*`/`approve*` lists) from within email
 
-### CLI
+## CLI
 
 - [ ] Rewrite in rust
 
-### App/Infrastructure
+## App/Infrastructure
 
 - [ ] Email server

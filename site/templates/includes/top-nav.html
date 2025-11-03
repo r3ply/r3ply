@@ -8,18 +8,29 @@
     <ul class="flex items-center gap-2 text-slate-800 dark:text-yellow-50">
       <li class="flex-1 ml-2 md:ml-4 py-4">
         <a class="font-black text-xl md:text-3xl mr-0.5" href="/">r3ply</a>
-        <span class="text-xs font-mono md:ml-4 md:text-md text-neutral-700 dark:text-cyan-200 tracking-tighter md:tracking-normal">v{{ config.extra.r3ply_version }}</span>
+        <details id="doc-version-picker" class="inline-block relative group">
+          <summary class="cursor-pointer flex items-center text-xs font-mono px-1 py-0.5 md:ml-2 md:px-2 md:py-1 rounded-lg md:text-md text-neutral-700 dark:text-cyan-200 tracking-tighter md:tracking-normal border border-black-800 bg-yellow-200 dark:bg-gray-600">
+            <span class="">v{{ config.extra.r3ply_version }}</span>
+            <span class="ml-0.5 md:ml-1 dark:text-cyan-200 inline group-open:hidden">▴</span>
+            <span class="ml-0.5 md:ml-1 dark:text-cyan-200 hidden group-open:inline">▾</span>
+          </summary>
+          <ul class="absolute top-8 md:left-2  py-2 rounded-lg border bg-yellow-200 border-gray-800 dark:bg-gray-600 dark:border-gray-400">
+            {% set version_opts = "py-1 px-2 font-mono hover:bg-blue-300 dark:hover:bg-gray-800 dark:hover:text-gray-100" %}
+            <li class="{{ version_opts }}"><a href="{{ current_path }}" class="block w-full">v0.0.1<span class="ml-2">✓</span></a></li>
+          </ul>
+        </details>
+        </span>
       </li>
       <li><a class="hidden md:inline text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/_index.md', lang=lang) }}">Home</a></li>
       <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/docs/_index.md', lang=lang) }}">Docs</a></li>
-      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/docs/_index.md', lang=lang) }}">Demo</a></li>
+      <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/demo.md', lang=lang) }}">Demo</a></li>
       <li>|</li>
       <li>
         <a class="md:text-xl font-light after:content-['_↗']" href="https://github.com/asimpletune/r3ply">GitHub</a>
       </li>
       <li class="mr-2 md:mr-4 shrink cursor-pointer">
         <a href="https://liberapay.com/spence/donate">
-          <img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" class="w-16 md:w-18">
+          <img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" class="w-14 md:w-16">
         </a>
       </li>
     </ul>
