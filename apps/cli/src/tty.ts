@@ -34,6 +34,7 @@ export namespace tty {
           `Initialized empty r3ply project at ${chalk.greenBright(path.dirname(r3ply_dir))}`,
           `\n\n${chalk.yellowBright('Add the following site entry to your config:')}`,
           `\n\n${highlight(format == 'toml' ? TOML.stringify(signet_config as any) : JSON.stringify(signet_config, null, 2))}`,
+          `\n${chalk.yellowBright("Help:")} You can generate a config one with ${chalk.yellowBright("`re generate config`")} if you don't already have one.`,
         )
       }
     }

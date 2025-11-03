@@ -5,21 +5,9 @@ template = "doc.html"
 
 # `re` - the r3ply CLI
 
-The r3ply CLI tool `re` is useful for developing your site to integrate comments and test/debug config changes, among other things.
+The r3ply CLI tool `re` is useful for developing your site to integrate comments, and to test/debug changes, such as edits to your r3ply config.
 
 ## Installation { #install }
-
-Install r3ply for a project as follows:
-
-```sh
-# for per-project setups, use with `npx re`
-npm install -D @r3ply/cli
-npx re --help
-```
-
-**When installed like this r3ply can only be used with `npx re` but the version information will remain apart of your project's dependencies.**
-
-Optionally you can do a global install:
 
 ```sh
 # for global install, use with just `re`
@@ -27,29 +15,66 @@ npm install -g @r3ply/cli
 re --help
 ```
 
-Although keep in mind to keep compatibility between your `re` version and your project's r3ply config. See [config](/docs/config#versioning-of-r3ply) for more about config versioning.
+Keep in mind the need to maintain compatibility between your `re` version and your project's r3ply config. See [config](@/docs/config.md#versioning-of-r3ply) for more about config versioning.
+
+If you plan on scripting your use of r3ply then it's recommended to include it as a part of your project's dependencies:
+
+```sh
+# for per-project setups, use with `npx re`
+npm install -D @r3ply/cli
+npx re --help
+```
+
+When installed like this r3ply can only be used with `npx re` and the specific version will be fixed.
 
 ## Initializing a r3ply Project { #init }
 
-`re` needs to know what is the top-level of your project in order to do the rest of its job. To do this run `re init` at the top-level of your project.
+`re` needs to know what is the top-level of your project in order to do the rest of its job. To do this run `re init` at the root of your project.
 
-After running this command you should see the following output:
+You should see something similar (but not exactly the same) as the following output:
 
-```txt
-Initialized empty r3ply project at /Users/spence/Developer/r3ply/site
+```md
+Initialized empty r3ply project at /Users/spence/Desktop/deleteme
 
 Add the following site entry to your config:
 
 [[site]]
 domain = "site.local.test"
 r3ply = "cli.r3ply.test"
-signet = "YBvbKupP12wehwkUNkIPtQ"
-issued = 2025-08-28
+signet = "voyLvBfeRJ5W5ELcoJtf7A"
+issued = "2025-11-03"
+label = "CLI"
+
+Help: You can generate a config one with `re generate config` if you don't already have one.
 ```
 
-**Note: if you run `re init` with the `--config <path>` option, a config will be generated at `<path>`.**
+## Generating a Config { #generate-config }
 
-You should then update your config – if you have one – with this `[[site]]` entry. Otherwise, you can also <!-- TODO -->[generate a standalone config](/).
+Generate a r3ply config with `re config generate`:
+
+```toml
+version = "0.0.1"
+enabled = true
+
+[[site]]
+domain = "site.local.test"
+r3ply = "cli.r3ply.test"
+signet = "voyLvBfeRJ5W5ELcoJtf7A"
+issued = "2025-11-03"
+label = "CLI"
+
+[moderation]
+enabled = true
+github = [ ]
+webhook = [ ]
+
+  [[moderation.local]]
+  "file_path_{}" = "comment_{{ comment.id[:8] }}.json"
+  enabled = true
+  "allow*" = [ ]
+```
+
+You can also generate configuration for your moderation channels by adding `--moderation`.
 
 ## Validating Configs { #config-validate }
 

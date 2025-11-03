@@ -33,6 +33,14 @@ pre code {
     padding-top: 2em;
     border-top: 1px solid var(--color-gray-800);
   }
+  /* Use default for selecting text inside long code snippets */
+  pre code {
+    user-select: auto;
+  }
+  /* Auto select inline code */
+  code {
+    user-select: all;
+  }
 }
 
 /* BEGIN suggested Zola styling for highlighting code */
