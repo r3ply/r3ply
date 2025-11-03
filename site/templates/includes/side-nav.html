@@ -5,12 +5,13 @@
 
 {# See includes/side-nav-toggle.html #}
 <input type="checkbox" name="open-menu" id="open-menu" class="peer hidden" />
-<nav id="secondary-nav" class="bg-amber-200 bg-[url(/patterns/wiggle.svg)]
+<nav id="secondary-nav" class="pb-4 bg-amber-200 bg-[url(/patterns/wiggle.svg)]
   dark:bg-slate-900 dark:bg-[url(/patterns/wiggle_dark.svg)]
   w-64 overflow-y-scroll h-full
   hidden md:block peer-checked:block">
+  {# r3ply Docs #}
   <ul id="docs-toc" class="py-4 px-4 list-disc list-inside font-medium dark:marker:text-neutral-50">
-    <li class="list-none text-center mb-4"><a href="{{ get_url(path='@/docs/_index.md', lang=lang) }}" class="text-slate-900 dark:text-green-500 text-2xl font-black underline hover:decoration-2">r3ply Docs</a></li>
+    <li class="list-none text-center mb-4"><a href="{{ get_url(path='@/docs/_index.md', lang=lang) }}" class="text-slate-900 dark:text-pink-300 text-2xl font-black underline hover:decoration-2">r3ply Docs</a></li>
     <li class="list-none"><a href="{{ get_url(path='@/docs/_index.md#table-of-contents', lang=lang) }}" class="font-extrabold text-lg text-slate-800 dark:text-blue-300 {{ shared_nav_styles }}">Table of Contents:</a></li>
     <li>
       <a href="{{ get_url(path='@/docs/getting-started.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Getting Started</a>
@@ -144,9 +145,10 @@
       </a>
     </li>
   </ul>
-  <hr class="border-red-300">
+  <hr class="my-4 border-2 dark:border-gray-300 border-dashed">
+  {# Other Links #}
   <ul id="other-toc" class="py-4 px-4 list-disc list-inside font-medium dark:marker:text-neutral-50">
-    <li class="list-none text-center mb-4"><a href="#footer" class="text-slate-900 dark:text-blue-500 text-2xl font-black underline hover:decoration-2">Other Links</a></li>
+    <li class="list-none text-center mb-4"><a href="#footer" class="text-slate-900 dark:text-emerald-200 text-2xl font-black underline hover:decoration-2">Other Links</a></li>
     <li>
       <a href="{{ get_url(path='@/docs/getting-started.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Project</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700 dark:text-red-100">
