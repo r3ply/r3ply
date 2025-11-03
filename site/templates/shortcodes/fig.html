@@ -1,3 +1,8 @@
+{#
+  `dark` - source of dark variant, e.g. /illustrations/r3ply-landing_dark.png
+  `caption` - caption
+  `add_class` - any extra classes to add to the containig figure tag
+#}
 <figure {% if add_class %}class="{{ add_class }}"{% endif %} >
   <picture>
     {% if dark %}
