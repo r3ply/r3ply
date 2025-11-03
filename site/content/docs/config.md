@@ -12,8 +12,6 @@ Configuration is an important topic in r3ply, as it's the primary way most peopl
 
 
 {% toc() %}
-## Table of Contents
-
 - [Config Fundamentals](#fundamentals)
   - [Versioning of r3ply](#versioning-of-r3ply)
   - [File Types and Locations](#file-types-and-locations)

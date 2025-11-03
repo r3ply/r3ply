@@ -164,8 +164,7 @@
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/_index.md') }}">Home</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="/todo" class="hover:text-white">Demo</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}" >Docs</a></li>
-          <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="/todo">Project</a></li>
-          <li class="{{ sub_menu_items }} {{ site_sections_styles }}">Contact</li>
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/project/_index.md', lang=lang) }}">Project</a></li>
         </ul>
       </li>
       {# Doc Links #}
@@ -185,7 +184,7 @@
         <span class="text-yellow-200 {{ sub_menu_headers }}">Site Links:</span>
         <ul class="{{ sub_menu_styles }}">
           {% set site_links_styles = "decoration-yellow-200" %}
-          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://github.com/asimpletune/r3ply/">Project GitHub</a></li>
+          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://github.com/asimpletune/r3ply/">GitHub Repo</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://liberapay.com/spence/donate">Donate</li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">Browse Comments</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">RSS Feeds</a></li>

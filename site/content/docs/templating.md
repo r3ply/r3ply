@@ -1,6 +1,9 @@
 +++
 template = "doc.html"
 title = "r3ply docs: Templating"
+
+[extra.comments]
+enabled = true
 +++
 
 # Templating
@@ -8,8 +11,6 @@ title = "r3ply docs: Templating"
 Templating allows you to control how your comment files are structured using an easy text based language. This page discusses the syntax of this templating language, as well as documents the templating context that's available to your templates.
 
 {% toc() %}
-## Table of Contents
-
 - [Templating Language & Syntax](#templating-language-syntax)
   - [Basics](#language-basics)
     - [Expressions](#expressions)

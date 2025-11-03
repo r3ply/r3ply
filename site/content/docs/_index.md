@@ -8,8 +8,6 @@ template = "doc.html"
 The r3ply docs are arranged as a mixture of pure documentation, concepts, and tutorials/walkthroughs.
 
 {% toc() %}
-## Table of Contents
-
 - [Getting Started](/docs/getting-started) <span class="font-extralight dark:text-emerald-200 ">(Tutorial/Walkthrough)</span>
 - [Overview](/docs/overview) <span class="font-extralight dark:text-blue-200">(Concepts/High-level)</span>
 - [Configuration](/docs/config) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>

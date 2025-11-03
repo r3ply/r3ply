@@ -18,7 +18,7 @@
       <a href="{{ get_url(path='@/docs/getting-started.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Getting Started</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700 dark:text-red-100">
           <li>
-              <a href="{{ get_url(path='/docs/getting-started.md#installation-setup', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Installation & Setup</a>
+              <a href="{{ get_url(path='@/docs/getting-started.md#installation-and-setup', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Installation & Setup</a>
           </li>
           <li>
               <a href="{{ get_url(path='@/docs/getting-started.md#generating-a-config', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Generate a Config</a>
@@ -255,117 +255,6 @@
               <a href="https://liberapay.com/spence/donate" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Donate</a>
           </li>
       </ul>
-    </li>
-    <li>
-      <a href="{{ get_url(path='@/docs/overview.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Overview</a>
-      <ul class="px-4 list-disc list-inside font-light text-gray-700">
-          <li>
-            <a href="{{ get_url(path='@/docs/overview.md#fundamentals', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Fundamentals</a>
-            <ol class="px-4 list-['⁃_'] list-inside font-light">
-              <li>
-                <a href="{{ get_url(path='@/docs/overview.md#r3ply', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">r3ply</a>
-              </li>
-              <li>
-                <a href="{{ get_url(path='@/docs/overview.md#sites-signets', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Sites & Signets</a>
-              </li>
-              <li>
-                <a href="{{ get_url(path='@/docs/overview.md#configs', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Configs</a>
-              </li>
-              <li>
-                <a href="{{ get_url(path='@/docs/overview.md#anonymization', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Anonymization</a>
-              </li>
-              <li>
-                <a href="{{ get_url(path='@/docs/overview.md#encryption', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Encryption</a>
-              </li>
-              <li>
-                <a href="{{ get_url(path='@/docs/overview.md#moderation', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Moderation</a>
-              </li>
-            </ol>
-          </li>
-      </ul>
-    </li>
-    <li>
-      <a href="{{ get_url(path='@/docs/config.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Config</a>
-      <ul class="px-4 list-disc list-inside font-light text-gray-700">
-          <li>
-              <a href="{{ get_url(path='@/docs/config.md#fundamentals', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Fundamentals</a>
-              <ul class="px-4 list-disc list-inside font-light">
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#versioning-of-r3ply', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Versioning of r3ply</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#file-types-and-locations', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">File Types & Locations</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#config-schemas', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Config Schemas</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#variables-and-types', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Variables & Types</a>
-                  </li>
-              </ul>
-          </li>
-          <li>
-              <a href="{{ get_url(path='@/docs/config.md#r3ply-site-config', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Site Config</a>
-              <ul class="px-4 list-disc list-inside font-light">
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#site-config-entry', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Sites</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Comments</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#moderation-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Moderation</a>
-                  </li>
-              </ul>
-          </li>
-          <li>
-              <a href="{{ get_url(path='@/docs/config.md#r3ply-system-config', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">System Config</a>
-          </li>
-      </ul>
-    </li>
-    <li>
-      <a href="{{ get_url(path='@/docs/templating.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Templating</a>
-      <ul class="px-4 list-disc list-inside font-light text-gray-700">
-          <li>
-              <a href="{{ get_url(path='@/docs/templating.md#templating-language-syntax', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Language & Syntax</a>
-              <ul class="px-4 list-disc list-inside font-light">
-                  <li>
-                      <a href="{{ get_url(path='@/docs/templating.md#language-basics', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Basics</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/templating.md#assigning-variables', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Assigning Variables</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/templating.md#accessing-variables', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Accessing Variables</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/templating.md#control-structures', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Control Structures</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/templating.md#filters', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Filters</a>
-                  </li>
-              </ul>
-          </li>
-          <li>
-              <a href="{{ get_url(path='@/docs/templating.md#template-context', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Template Contexts</a>
-              <ul class="px-4 list-disc list-inside font-light">
-                  <li>
-                      <a href="{{ get_url(path='@/docs/templating.md#base-comment-template-context', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Base Context</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/templating.md#email-comment-template-context', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Email Context</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/templating.md#example-template-contexts', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Examples</a>
-                  </li>
-              </ul>
-          </li>
-      </ul>
-    </li>
-    <li>
-      <a href="{{ get_url(path='@/docs/cli.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }} prose">
-        {{ '`re` - CLI Tool' | markdown | safe }}
-      </a>
     </li>
   </ul>
 </nav>

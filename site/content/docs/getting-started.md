@@ -11,9 +11,7 @@ enabled = true
 In this tutorial we're going to walkthrough using r3ply from start to finish with an example. We will be installing the `re` CLI tool, generating a config, simulating a comment, and then discussing next steps. Follow the the steps below from within your project's top-level directory.
 
 {% toc() %}
-## Table of Contents
-
-- [Installation/Setup](#installation-setup)
+- [Installation/Setup](#installation-and-setup)
 - [Generating a Config](#generating-a-config)
 - [Simulating a Comment](#simulating-a-comment)
 - [What's Inside a Comment](#what-s-inside-a-comment)
@@ -23,7 +21,7 @@ In this tutorial we're going to walkthrough using r3ply from start to finish wit
 
 {{ fleuron_fish() }}
 
-## Installation & Setup
+## Installation & Setup { #installation-and-setup }
 
 For this tutorial we will need to install the r3ply CLI tool called `re`.
 

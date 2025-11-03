@@ -1,6 +1,9 @@
 +++
 title = "`re` - the r3ply CLI"
 template = "doc.html"
+
+[extra.comments]
+enabled = true
 +++
 
 # `re` - the r3ply CLI
@@ -8,8 +11,6 @@ template = "doc.html"
 The r3ply CLI tool `re` is useful for developing your site to integrate comments, and to test/debug changes, such as edits to your r3ply config.
 
 {% toc() %}
-## Table of Contents
-
 - [Installation](#install)
 - [Initializing a reply Project](#init)
 - [Working with Configs](#config)

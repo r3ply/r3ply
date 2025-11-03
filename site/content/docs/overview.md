@@ -1,6 +1,9 @@
 +++
 title = "r3ply docs: Overview"
 template = "doc.html"
+
+[extra.comments]
+enabled = true
 +++
 
 # Overview
@@ -14,8 +17,6 @@ In this page we'll discuss concepts and terminology of r3ply. The goal is to giv
 This page is meant to be useful to both future contributors to the codebase, as well as site owners who are using r3ply to receive comments.
 
 {% toc() %}
-## Table of Contents
-
 - [Fundamentals](#fundamentals)
   - [r3ply](#r3ply)
   - [Sites & Signets](#sites-signets)
@@ -146,4 +147,4 @@ Each moderation channel allows you to specify an [allow list](/todo), granting c
 
 {{ fleuron_fish() }}
 
-{{ next_prev(prev_path="/docs/", prev_text="Docs Home", next_path="/docs/config/", next_text="r3ply config") }}
+{{ next_prev(prev_path="/docs/getting-started/", prev_text="Getting Started", next_path="/docs/config/", next_text="r3ply config") }}

@@ -49,8 +49,6 @@ cache = true
 **View the [demo](/docs/getting-started/#comments) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.**
 
 {% toc() %}
-## Table of Contents
-
 - [About](#about)
 - [Features](#features)
 - [Why Email?](#why-email)
