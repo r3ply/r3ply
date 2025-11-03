@@ -58,3 +58,6 @@ If you have javascript enabled try it out now by highlight some text on this pag
 {% fig(dark="/screenshots/text-fragment-email_dark-bg.png", caption="After clicking the comment icon.") %}
 ![](/screenshots/text-fragment-email_light-bg.png)
 {% end %}
+
+## Comment Navigation
+

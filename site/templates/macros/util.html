@@ -27,101 +27,275 @@
   mailto:{{ to }}?subject={{ subject | urlencode }}&body={{ body | urlencode }}
 {% endmacro %}
 
-{% macro mailto_text_fragment(to, path, body, icon="💬", delay=100) %}
+{% macro mailto_text_fragment(to, path, body, icon="💬", delay=600) %}
 <script>
-(function() {
-  const CONFIG = {
+(function () {
+   const CONFIG = {
     to: "{{ to }}",
     subjectPrefix: "{{ path | safe }}#:~:text=",
     body: `{{ body }}`,
     icon: "{{ icon }}",
-    delay: {{ delay | int }}
+    delay: {{ delay | int }},
+    buttonSize: 36, // px square
+    margin: 8
   }
 
-  let timeoutId = null
-  let button = null
+  let button = null;
+  let showTimer = null;
+  let lastSelection = "";
 
-  // Helper: safely remove existing button
+  // Remove button helper
   function removeButton() {
     if (button) {
-      button.remove()
-      button = null
+      button.remove();
+      button = null;
     }
   }
 
-  // Helper: create mailto link
+  // Double-encode subject so mail clients keep % sequences intact
   function createMailtoLink(selectedText) {
-    const subject = encodeURIComponent(CONFIG.subjectPrefix + encodeURIComponent(selectedText.trim()))
-    const body = encodeURIComponent(CONFIG.body + "\n\n\"" + selectedText.trim() + "\"")
-    return `mailto:${CONFIG.to}?subject=${subject}&body=${body}`
+    const raw = CONFIG.subjectPrefix + encodeURIComponent(selectedText.trim());
+    const encoded = encodeURIComponent(raw);
+    const body = encodeURIComponent(CONFIG.body + "\n\n\"" + selectedText.trim() + "\"");
+    return `mailto:${CONFIG.to}?subject=${encoded}&body=${body}`;
   }
 
-  // Helper: get position near selection
-  function getSelectionPosition() {
-    const selection = window.getSelection()
-    if (selection.rangeCount === 0) return null
-    const range = selection.getRangeAt(0)
-    const rect = range.getBoundingClientRect()
-    return rect
-  }
+  // Get best rect for selection. Prefer a visible client rect (non-zero width/height).
+  function getSelectionRect() {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return null;
 
-  // Show button
-  function showButton(rect, selectedText) {
-    removeButton()
-
-    button = document.createElement("button")
-    button.textContent = CONFIG.icon
-    button.style.position = "fixed"
-    button.style.zIndex = "9999"
-    button.style.cursor = "pointer"
-    button.style.fontSize = "18px"
-    button.style.padding = "4px 6px"
-    button.style.border = "none"
-    button.style.borderRadius = "6px"
-    button.style.background = "#fff"
-    button.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)"
-
-    // Position near selection (try top-right first)
-    let top = rect.top - 30
-    let left = rect.right + 5
-
-    // Adjust if off-screen
-    if (left + 30 > window.innerWidth) left = rect.left - 35
-    if (top < 0) top = rect.bottom + 5
-
-    button.style.top = `${top}px`
-    button.style.left = `${left}px`
-
-    // Click opens mailto
-    button.addEventListener("click", () => {
-      const mailto = createMailtoLink(selectedText)
-      window.location.href = mailto
-      removeButton()
-    })
-
-    document.body.appendChild(button)
-  }
-
-  // Listen for text selection
-  document.addEventListener("mouseup", () => {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(() => {
-      const selection = window.getSelection()
-      const selectedText = selection.toString().trim()
-      if (!selectedText) {
-        removeButton()
-        return
+    try {
+      const range = sel.getRangeAt(0);
+      const rects = Array.from(range.getClientRects()).filter(r => r.width > 0 && r.height > 0);
+      // Prefer the first visible rect or the middle rect for multiline
+      if (rects.length === 0) {
+        const r = range.getBoundingClientRect();
+        if (r && (r.width || r.height)) return r;
+        return null;
       }
+      // Choose rect in the vertical middle (for multiline, pick center)
+      const midIndex = Math.floor(rects.length / 2);
+      return rects[midIndex];
+    } catch (e) {
+      return null;
+    }
+  }
 
-      const rect = getSelectionPosition()
-      if (rect) showButton(rect, selectedText)
-    }, CONFIG.delay)
-  })
+  // Compute viewport offsets (visualViewport is required on iOS for accurate coords)
+  function viewportOffsets() {
+    if (window.visualViewport) {
+      return {
+        offsetX: window.visualViewport.offsetLeft || 0,
+        offsetY: window.visualViewport.offsetTop || 0,
+        width: window.visualViewport.width,
+        height: window.visualViewport.height,
+        pageLeft: window.visualViewport.pageLeft || 0,
+        pageTop: window.visualViewport.pageTop || 0
+      };
+    }
+    return {
+      offsetX: 0,
+      offsetY: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      pageLeft: 0,
+      pageTop: window.scrollY || 0
+    };
+  }
 
-  // Hide button if clicking elsewhere
-  document.addEventListener("mousedown", (e) => {
-    if (button && !button.contains(e.target)) removeButton()
-  })
-})()
+  // Show the floating button near selection rect
+  function showButtonForSelection(selectedText) {
+    const rect = getSelectionRect();
+    if (!rect) return removeButton();
+
+    removeButton();
+
+    button = document.createElement("button");
+    button.type = "button";
+    button.ariaLabel = "Comment via email";
+    button.textContent = CONFIG.icon;
+
+    // Styling
+    Object.assign(button.style, {
+      position: "fixed", // fixed works on modern iOS; fallback below if needed
+      zIndex: 999999,
+      width: CONFIG.buttonSize + "px",
+      height: CONFIG.buttonSize + "px",
+      lineHeight: CONFIG.buttonSize + "px",
+      textAlign: "center",
+      fontSize: "18px",
+      padding: "0",
+      borderRadius: "10px",
+      border: "none",
+      background: "#fff",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
+      cursor: "pointer",
+      transition: "opacity 0.14s",
+      opacity: "0",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center"
+    });
+
+    // Use visualViewport when available to map client coords to viewport correctly
+    const vp = viewportOffsets();
+
+    // rect's properties are relative to layout viewport — clientX/Y used are fine when using fixed,
+    // but on iOS with visualViewport we need to consider offsetTop/Left.
+    // We'll compute a desired position above-right of the rect center first.
+    let desiredTop = (rect.top + rect.height / 2) - CONFIG.buttonSize - 6; // prefer above
+    let desiredLeft = rect.right + 6; // prefer right of selection
+
+    // If visualViewport provided offsets, adjust for them.
+    if (window.visualViewport) {
+      // rect.top is relative to layout viewport; visualViewport.pageTop shifts with keyboard/zoom
+      // Map to visual viewport space:
+      desiredTop = (rect.top - vp.offsetY) + vp.pageTop - CONFIG.buttonSize - 6;
+      desiredLeft = (rect.right - vp.offsetX) + vp.pageLeft + 6;
+    } else {
+      // account for page scroll
+      desiredTop = rect.top + window.scrollY - CONFIG.buttonSize - 6;
+      desiredLeft = rect.right + (window.scrollX || 0) + 6;
+    }
+
+    // For narrow screens, center above selection instead of right
+    if (vp.width < 420) {
+      if (window.visualViewport) {
+        desiredLeft = (rect.left - vp.offsetX) + vp.pageLeft + (rect.width / 2) - CONFIG.buttonSize / 2;
+      } else {
+        desiredLeft = rect.left + (rect.width / 2) - CONFIG.buttonSize / 2 + (window.scrollX || 0);
+      }
+    }
+
+    // If not enough room above, place below
+    const aboveSpace = (window.visualViewport ? (rect.top - vp.offsetY) : rect.top) - CONFIG.margin;
+    if (aboveSpace < CONFIG.buttonSize + 6) {
+      // place below
+      if (window.visualViewport) {
+        desiredTop = (rect.bottom - vp.offsetY) + vp.pageTop + 6;
+      } else {
+        desiredTop = rect.bottom + (window.scrollY || 0) + 6;
+      }
+    }
+
+    // Clamp to viewport so button cannot be off-screen
+    const minLeft = CONFIG.margin;
+    const maxLeft = (vp.width || window.innerWidth) - CONFIG.buttonSize - CONFIG.margin;
+    const minTop = CONFIG.margin;
+    const maxTop = (vp.height || window.innerHeight) - CONFIG.buttonSize - CONFIG.margin;
+
+    // desiredLeft/Top are in page coordinate space; when using fixed, we want viewport coords.
+    // Convert page coords to viewport coords:
+    let viewportLeft = desiredLeft - (window.scrollX || 0);
+    let viewportTop = desiredTop - (window.scrollY || 0);
+    if (window.visualViewport) {
+      viewportLeft = desiredLeft - vp.pageLeft;
+      viewportTop = desiredTop - vp.pageTop;
+    }
+
+    // Final clamping
+    viewportLeft = Math.max(minLeft, Math.min(viewportLeft, maxLeft));
+    viewportTop = Math.max(minTop, Math.min(viewportTop, maxTop));
+
+    button.style.left = Math.round(viewportLeft) + "px";
+    button.style.top = Math.round(viewportTop) + "px";
+
+    // Click behaviour
+    button.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const mailto = createMailtoLink(selectedText);
+      // use location.href to open mail client
+      window.location.href = mailto;
+      removeButton();
+    });
+
+    // Hide when user taps outside
+    document.addEventListener("touchstart", onDocTouchStart, { passive: true });
+
+    document.body.appendChild(button);
+    // small delay to allow layout and avoid jumping under native selection handles
+    requestAnimationFrame(() => {
+      button.style.opacity = "1";
+    });
+  }
+
+  function onDocTouchStart(e) {
+    if (!button) return;
+    if (!button.contains(e.target)) {
+      removeButton();
+      document.removeEventListener("touchstart", onDocTouchStart);
+    }
+  }
+
+  // Called after selection stabilizes
+  function handleSelectionSettle() {
+    showTimer = null;
+    const sel = window.getSelection();
+    if (!sel) return removeButton();
+
+    const text = sel.toString().trim();
+    if (!text) return removeButton();
+
+    // If selection hasn't changed since last time, do nothing; avoids flicker
+    if (text === lastSelection) return;
+    lastSelection = text;
+
+    showButtonForSelection(text);
+  }
+
+  // Start timer on selection-related events
+  function scheduleShow() {
+    clearTimeout(showTimer);
+    showTimer = setTimeout(handleSelectionSettle, CONFIG.delay);
+  }
+
+  // Cancel when selection removed
+  function cancelShow() {
+    clearTimeout(showTimer);
+    showTimer = null;
+    lastSelection = "";
+    // don't immediately remove button on iOS while user interacts with selection handles;
+    // but if selection collapsed, remove
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) removeButton();
+  }
+
+  // Events:
+  // - selectionchange covers keyboard-based selections and some touch cases.
+  // - touchend handles mobile taps that end a selection.
+  // - mouseup covers desktop.
+  document.addEventListener("selectionchange", () => {
+    // selectionchange fires a lot; only act when there's a non-empty selection
+    const sel = window.getSelection();
+    if (!sel) return cancelShow();
+    if (sel.isCollapsed) return cancelShow();
+    scheduleShow();
+  });
+
+  document.addEventListener("mouseup", () => {
+    // desktop
+    scheduleShow();
+  });
+
+  document.addEventListener("touchend", () => {
+    // touch-based
+    scheduleShow();
+  }, { passive: true });
+
+  // Hide if user scrolls or resizes or taps elsewhere
+  window.addEventListener("scroll", cancelShow, true);
+  window.addEventListener("resize", cancelShow);
+
+  // If visualViewport changes (keyboard opens/closes), reposition or remove
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", () => {
+      // If the viewport moved (keyboard open), remove button to avoid misplacement
+      // A more advanced approach would re-position but removing is safest.
+      removeButton();
+    });
+  }
+})();
 </script>
-{% endmacro  %}
+{% endmacro %}

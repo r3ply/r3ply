@@ -450,7 +450,7 @@ export namespace generate {
     )
     return markov.then((markov) =>
       markov.generate({
-        maxLength: 128,
+        maxLength: 36,
         temperature: 1,
         allowDuplicates: true,
         seed,
