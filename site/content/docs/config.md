@@ -10,7 +10,9 @@ enabled = true
 
 Configuration is an important topic in r3ply, as it's the primary way most people would interact with the system. **This page will first cover fundamentals of r3ply configuration**, before specifying the configuration options for _site configs_ and _r3ply app configs_.
 
-## Table of Contents { .text-right .border-b .border-dashed }
+
+{% toc() %}
+## Table of Contents
 
 - [Config Fundamentals](#fundamentals)
   - [Versioning of r3ply](#versioning-of-r3ply)
@@ -23,8 +25,9 @@ Configuration is an important topic in r3ply, as it's the primary way most peopl
   - [`Moderation`](#moderation-configuration)
 - [System Config](#r3ply-system-config)
 - [Comments](./#comments)
+{% end %}
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-amber-200">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 ## Fundamentals
 
@@ -560,6 +563,6 @@ max_size_bytes = 5_242_880
 ```
 <!-- prettier-ignore-end -->
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-violet-400">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 {{ next_prev(prev_path="/docs/overview/", prev_text="r3ply Overview", next_path="/docs/templating/", next_text="Templating") }}

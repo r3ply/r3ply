@@ -7,7 +7,7 @@ title = "r3ply schemas"
 
 This page is a listing of all the schemas used by r3ply so they can be browsed or referenced by tooling.
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-amber-200">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 ## Config Schemas
 

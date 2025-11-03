@@ -13,7 +13,8 @@ In this page we'll discuss concepts and terminology of r3ply. The goal is to giv
 
 This page is meant to be useful to both future contributors to the codebase, as well as site owners who are using r3ply to receive comments.
 
-## Table of Contents { .text-right .border-b .border-dashed }
+{% toc() %}
+## Table of Contents
 
 - [Fundamentals](#fundamentals)
   - [r3ply](#r3ply)
@@ -24,8 +25,9 @@ This page is meant to be useful to both future contributors to the codebase, as 
   - [Moderation](#moderation)
 - [Tracing a Comment](/todo)
 - [Why Comments as Files?](/todo)
+{% end %}
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-amber-200">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 ## Fundamentals
 
@@ -142,6 +144,6 @@ Conceptually though moderation channels can be thought of as destinations for co
 
 Each moderation channel allows you to specify an [allow list](/todo), granting certain senders to bypass moderation. [Block lists](/todo) are also possible but they are handled further upstream the comment pipeline, in the `[comments.email]` config section.
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-blue-200">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 {{ next_prev(prev_path="/docs/", prev_text="Docs Home", next_path="/docs/config/", next_text="r3ply config") }}

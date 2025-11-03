@@ -13,6 +13,6 @@ This section of the site is for organizing information about the r3ply project i
 - [Contact](/project/contact/)
 - [Donate](https://liberapay.com/spence/donate)
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-cyan-300">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 {{ next_prev(next_path="/project/about/" next_text="About") }}

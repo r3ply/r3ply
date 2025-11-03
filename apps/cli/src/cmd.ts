@@ -152,6 +152,87 @@ export function generate_cmd(cwd: string) {
     'generate useful text',
   )
 
+  const config_cmd = generate_cmd
+    .command('config')
+    .description('generate a config')
+    .option(
+      '--site <domain>',
+      `site domain the signet is issued to`,
+      project.DEFAULT_SITE_DOMAIN,
+    )
+    .option(
+      '--r3ply <r3ply domain>',
+      `domain of issuing r3ply server`,
+      project.DEFAULT_R3PLY_DOMAIN,
+    )
+    .option(
+      '--date <YYYY-MM-DD>',
+      'date signet was issued',
+      dayjs().format('YYYY-MM-DD'),
+    )
+    .option(
+      '--label <string>',
+      'name for this signet, e.g. "production", "test"',
+      project.DEFAULT_CLI_SIGNET_LABEL,
+    )
+    .option(
+      '--moderation <github | webhook | local>',
+      'moderation method',
+      'local',
+    )
+    .option('--full', 'Generate config with defaults set for all values', false)
+    .action(async (options: GenerateConfigCmdOpts) => {
+      const site = await project.get_keys(cwd).then((keys) =>
+        project.get_cli_system_config(cwd).then((system_config) => {
+          return generate.signet(
+            keys.signet_key,
+            util.unsafeUnwrap(system_config),
+            {
+              domain: options.site,
+              r3ply: options.r3ply,
+              issued: options.date,
+              label: options.label,
+            },
+          )
+        }),
+      )
+      const minimal_github_config = {
+        owner: '<YOUR_GITHUB_USERNAME>',
+        repo: '<YOUR_PROJECT>',
+        'file_path_{}': 'comment_{{ comment.id[:8] }}.json',
+      }
+      const minimal_webhook_config = {
+        url: 'https://TODO',
+      }
+      const minimal_local_config = {
+        'file_path_{}': 'comment_{{ comment.id[:8] }}.json',
+      }
+      const parsed = R3plySiteConfig({
+        site: [{ ...site, label: options.label }],
+        comments: options.full ? { email: {} } : undefined,
+        moderation: {
+          [options.moderation]: [
+            (() => {
+              if (options.moderation == 'github') {
+                return minimal_github_config
+              } else if (options.moderation == 'webhook') {
+                return minimal_webhook_config
+              } else if (options.moderation == 'local') {
+                return minimal_local_config
+              } else {
+                throw new Error(
+                  `Unknown moderation type: ${options.moderation}`,
+                )
+              }
+            })(),
+          ],
+        },
+      })
+      const format = generate_cmd.parent!.opts<BaseCmdOptions>().format
+      tty.cmds.generate.print_config(parsed.value!, format)
+      return
+    })
+
   const mailto_cmd = generate_cmd
     .command('mailto [body]')
     .description('generate a one-off `mailto:` link')
@@ -296,87 +377,6 @@ export function generate_cmd(cwd: string) {
       tty.cmds.generate.print_signet(signet, format)
     })
 
-  const config_cmd = generate_cmd
-    .command('config')
-    .description('generate a config')
-    .option(
-      '--site <domain>',
-      `site domain the signet is issued to`,
-      project.DEFAULT_SITE_DOMAIN,
-    )
-    .option(
-      '--r3ply <r3ply domain>',
-      `domain of issuing r3ply server`,
-      project.DEFAULT_R3PLY_DOMAIN,
-    )
-    .option(
-      '--date <YYYY-MM-DD>',
-      'date signet was issued',
-      dayjs().format('YYYY-MM-DD'),
-    )
-    .option(
-      '--label <string>',
-      'name for this signet, e.g. "production", "test"',
-      project.DEFAULT_CLI_SIGNET_LABEL,
-    )
-    .option(
-      '--moderation <github | webhook | local>',
-      'moderation method',
-      'local',
-    )
-    .option('--full', 'Generate config with defaults set for all values', false)
-    .action(async (options: GenerateConfigCmdOpts) => {
-      const site = await project.get_keys(cwd).then((keys) =>
-        project.get_cli_system_config(cwd).then((system_config) => {
-          return generate.signet(
-            keys.signet_key,
-            util.unsafeUnwrap(system_config),
-            {
-              domain: options.site,
-              r3ply: options.r3ply,
-              issued: options.date,
-              label: options.label,
-            },
-          )
-        }),
-      )
-      const minimal_github_config = {
-        owner: '<YOUR_GITHUB_USERNAME>',
-        repo: '<YOUR_PROJECT>',
-        'file_path_{}': 'comment_{{ comment.id[:8] }}.json',
-      }
-      const minimal_webhook_config = {
-        url: 'https://TODO',
-      }
-      const minimal_local_config = {
-        'file_path_{}': 'comment_{{ comment.id[:8] }}.json',
-      }
-      const parsed = R3plySiteConfig({
-        site: [{ ...site, label: options.label }],
-        comments: options.full ? { email: {} } : undefined,
-        moderation: {
-          [options.moderation]: [
-            (() => {
-              if (options.moderation == 'github') {
-                return minimal_github_config
-              } else if (options.moderation == 'webhook') {
-                return minimal_webhook_config
-              } else if (options.moderation == 'local') {
-                return minimal_local_config
-              } else {
-                throw new Error(
-                  `Unknown moderation type: ${options.moderation}`,
-                )
-              }
-            })(),
-          ],
-        },
-      })
-      const format = generate_cmd.parent!.opts<BaseCmdOptions>().format
-      tty.cmds.generate.print_config(parsed.value!, format)
-      return
-    })
-
   const email_cmd = generate_cmd
     .command('email')
     .description('generate a comment as an email, based on your config')
@@ -398,7 +398,6 @@ export function generate_cmd(cwd: string) {
 
       // If no argument, check for piped input
       if (!input && !process.stdin.isTTY) {
-        console.log("reading from STDIN");
         input = await util.read_stdin()
       }
 

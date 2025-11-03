@@ -1,4 +1,4 @@
-{% set shared_nav_styles = "hover:underline decoration-black" %}
+{% set shared_nav_styles = "hover:underline decoration-black prose-p:inline" %}
 {% set top_level_nav_styles = "text-gray-800 dark:text-cyan-300" %}
 {% set second_level_nav_styles = "text-gray-900 dark:text-amber-200 text-sm" %}
 {% set ternary_level_nav_styles = "text-gray-950 dark:text-fuchsia-300 text-xs" %}
@@ -13,6 +13,7 @@
   <ul id="docs-toc" class="py-4 px-4 list-disc list-inside font-medium dark:marker:text-neutral-50">
     <li class="list-none text-center mb-4"><a href="{{ get_url(path='@/docs/_index.md', lang=lang) }}" class="text-slate-900 dark:text-pink-300 text-2xl font-black underline hover:decoration-2">r3ply Docs</a></li>
     <li class="list-none"><a href="{{ get_url(path='@/docs/_index.md#table-of-contents', lang=lang) }}" class="font-extrabold text-lg text-slate-800 dark:text-blue-300 {{ shared_nav_styles }}">Table of Contents:</a></li>
+    {# Getting Started #}
     <li>
       <a href="{{ get_url(path='@/docs/getting-started.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Getting Started</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700 dark:text-red-100">
@@ -33,6 +34,7 @@
           </li>
       </ul>
     </li>
+    {# Overview #}
     <li>
       <a href="{{ get_url(path='@/docs/overview.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Overview</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700">
@@ -61,6 +63,7 @@
           </li>
       </ul>
     </li>
+    {# Config #}
     <li>
       <a href="{{ get_url(path='@/docs/config.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Config</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700">
@@ -100,6 +103,7 @@
           </li>
       </ul>
     </li>
+    {# Templating #}
     <li>
       <a href="{{ get_url(path='@/docs/templating.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Templating</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700">
@@ -139,10 +143,46 @@
           </li>
       </ul>
     </li>
+    {# CLI #}
     <li>
       <a href="{{ get_url(path='@/docs/cli.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }} prose prose-p:inline">
         {{ '`re` - CLI Tool' | markdown | safe }}
       </a>
+      <ul class="px-4 list-disc list-inside font-light text-gray-700">
+          <li>
+              <a href="{{ get_url(path='@/docs/cli.md#install', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Installation</a>
+          </li>
+          <li>
+              <a href="{{ get_url(path='@/docs/cli.md#init', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Initializing a r3ply Project</a>
+          </li>
+          <li>
+              <a href="{{ get_url(path='@/docs/cli.md#generate', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }} prose">
+                The {{ '`generate` cmd' | markdown | safe }}
+                </a>
+              <ul class="px-4 list-disc list-inside font-light">
+                  <li>
+                      <a href="{{ get_url(path='@/docs/cli.md#generate-config', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
+                        {{ '`config`' | markdown | safe }}
+                      </a>
+                  </li>
+                  <li>
+                      <a href="{{ get_url(path='@/docs/cli.md#generate-mailto', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
+                        {{ '`mailto`' | markdown | safe }}
+                      </a>
+                  </li>
+                  <li>
+                      <a href="{{ get_url(path='@/docs/cli.md#generate-signet', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
+                        {{ '`signet`' | markdown | safe }}
+                      </a>
+                  </li>
+                  <li>
+                      <a href="{{ get_url(path='@/docs/cli.md#generate-email', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
+                        {{ '`email`' | markdown | safe }}
+                      </a>
+                  </li>
+              </ul>
+          </li>
+      </ul>
     </li>
   </ul>
   <hr class="my-4 border-2 dark:border-gray-300 border-dashed">
@@ -276,7 +316,7 @@
       </ul>
     </li>
     <li>
-      <a href="{{ get_url(path='@/docs/cli.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }} prose prose-p:inline">
+      <a href="{{ get_url(path='@/docs/cli.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }} prose">
         {{ '`re` - CLI Tool' | markdown | safe }}
       </a>
     </li>

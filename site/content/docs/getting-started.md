@@ -10,7 +10,8 @@ enabled = true
 
 In this tutorial we're going to walkthrough using r3ply from start to finish with an example. We will be installing the `re` CLI tool, generating a config, simulating a comment, and then discussing next steps. Follow the the steps below from within your project's top-level directory.
 
-## Table of Contents { .text-right .border-b .border-dashed }
+{% toc() %}
+## Table of Contents
 
 - [Installation/Setup](#installation-setup)
 - [Generating a Config](#generating-a-config)
@@ -18,8 +19,9 @@ In this tutorial we're going to walkthrough using r3ply from start to finish wit
 - [What's Inside a Comment](#what-s-inside-a-comment)
 - [Summary & Next Steps](#next-steps)
 - [Comments](./#comments)
+{% end %}
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-amber-200">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 ## Installation & Setup
 
@@ -324,6 +326,6 @@ repo = "<REPO>"
 
 Finally, read the [config](/todo) and [CLI](/todo) docs to take full advantage of r3ply.
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-emerald-400">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 {{ next_prev(prev_path="/docs/" prev_text="Docs Home" next_path="/docs/overview/" next_text="r3ply Overview") }}

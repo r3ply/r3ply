@@ -48,15 +48,17 @@ cache = true
 
 **View the [demo](/docs/getting-started/#comments) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.**
 
-## Table of Contents { .text-right .border-b .border-dashed }
+{% toc() %}
+## Table of Contents
 
 - [About](#about)
 - [Features](#features)
 - [Why Email?](#why-email)
 - [FAQ](#faq)
 - [Demo](/docs/getting-started/#comments)
+{% end %}
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-green-200">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 ## About
 
@@ -229,6 +231,6 @@ r3ply is open source software, and [r3ply.com](https://r3ply.com) is just one, c
 
 For example, if someone deployed r3ply at `https://r4ply.com`, then websites could add that to their config and receive comments at `<site>@r4ply.com`.
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-pink-300">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 {{ next_prev(next_path="/docs/" next_text="r3ply Docs") }}

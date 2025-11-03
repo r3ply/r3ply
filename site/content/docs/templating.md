@@ -7,7 +7,8 @@ title = "r3ply docs: Templating"
 
 Templating allows you to control how your comment files are structured using an easy text based language. This page discusses the syntax of this templating language, as well as documents the templating context that's available to your templates.
 
-## Table of Contents { .text-right .border-b .border-dashed }
+{% toc() %}
+## Table of Contents
 
 - [Templating Language & Syntax](#templating-language-syntax)
   - [Basics](#language-basics)
@@ -31,8 +32,9 @@ Templating allows you to control how your comment files are structured using an 
   - [Examples](#example-template-contexts)
     - [JSON](#json-example)
     - [TOML](#toml-example)
+{% end %}
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-amber-200">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 ## Templating Language & Syntax { #templating-language-syntax }
 
@@ -476,6 +478,6 @@ text = "I was spending time debating which to use. There are pros and cons for e
   token = "dsrsxBx-PCT7apDF08C6SM22_vdqXmw_O8Ogzm74PjU4S8JLCGQsPsrbUK4jJ88eShfXj9ELpZGfJTXEdFdmfNAmp6l6WQCmJ7nPrt1tX5ELf2tt_iXJD4jjC_h29Nht5pBPgqCCykfp6n2Vt90wboFQyV7ypnKvvidLbUWltsAZ3H1XezKKhTsXW_jFd96PCPdCtIbjTnn3wLEn5_A-WW4XEhL9GqPwICEhUPS5U2fGJ71IUBsiGE9hiq89Y4lOWmSmtBwAxO7UYBi6G8uY5vteZ8w1ZY8cnHJfZxCdcL4_z0bWmIJ03-C-KQeQymMmrTyR_wGH2XGq0GgH623xUJb5Vb-Gga6LuuPRlOxO6ie60jUISdHoF6GyJ4F98Qr2hXh2ezhjkiYUNgIJKzbJffsxXK9TputMRLBGzkzqI7zMKcKR5FvfKxFPxddcf_OCaQYMow-n2-a486tX"
 ```
 
-<div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 dark:text-violet-400">{{ fleuron_fish() }}</div>
+{{ fleuron_fish() }}
 
 {{ next_prev(prev_path="/docs/config/", prev_text="r3ply config", next_path="/docs/cli/", next_text="The CLI") }}
