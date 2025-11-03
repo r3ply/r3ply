@@ -52,12 +52,15 @@ This makes for a very old-web style, comment addressable system that's quite dur
 
 If you have javascript enabled try it out now by highlight some text on this page.
 
-{% fig(dark="/screenshots/text-fragment-screenshot_dark-bg-cropped.png", caption="You can even receive comments on text.") %}
-![](/screenshots/text-fragment_light-bg-cropped.png)
+{% fig(dark="/screenshots/text-fragment_dark-bg-cropped.png", caption="You can even receive comments on text.") %}
+![Screenshot showing comment button that appears when text is highlighted.](/screenshots/text-fragment_light-bg-cropped.png)
 {% end %}
+
 {% fig(dark="/screenshots/text-fragment-email_dark-bg.png", caption="After clicking the comment icon.") %}
-![](/screenshots/text-fragment-email_light-bg.png)
+![Screenshot showing how responding to a text fragment looks in the email client](/screenshots/text-fragment-email_light-bg.png)
 {% end %}
 
 ## Comment Navigation
+
+TODO
 
