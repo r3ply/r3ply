@@ -149,35 +149,82 @@
         {{ '`re` - CLI Tool' | markdown | safe }}
       </a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700">
+          {# Installation #}
           <li>
               <a href="{{ get_url(path='@/docs/cli.md#install', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Installation</a>
           </li>
+          {# Initialization #}
           <li>
               <a href="{{ get_url(path='@/docs/cli.md#init', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Initializing a r3ply Project</a>
           </li>
+          {# `config` cmd #}
+          <li>
+              <a href="{{ get_url(path='@/docs/cli.md#config', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }} prose">
+                Working with Configs
+                </a>
+              <ul class="px-4 list-disc list-inside font-light">
+                  {# `validate` #}
+                  <li>
+                      <a href="{{ get_url(path='@/docs/cli.md#config-validate', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
+                        Validate Configs
+                      </a>
+                  </li>
+                  {# `set-default` #}
+                  <li>
+                      <a href="{{ get_url(path='@/docs/cli.md#config-set-default', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
+                        Set a Default Config
+                      </a>
+                  </li>
+              </ul>
+          </li>
+          {# `generate` cmd #}
           <li>
               <a href="{{ get_url(path='@/docs/cli.md#generate', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }} prose">
                 The {{ '`generate` cmd' | markdown | safe }}
                 </a>
               <ul class="px-4 list-disc list-inside font-light">
+                  {# `generate config` #}
                   <li>
                       <a href="{{ get_url(path='@/docs/cli.md#generate-config', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
                         {{ '`config`' | markdown | safe }}
                       </a>
                   </li>
+                  {# `generate mailto` #}
                   <li>
                       <a href="{{ get_url(path='@/docs/cli.md#generate-mailto', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
                         {{ '`mailto`' | markdown | safe }}
                       </a>
                   </li>
+                  {# `generate signet` #}
                   <li>
                       <a href="{{ get_url(path='@/docs/cli.md#generate-signet', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
                         {{ '`signet`' | markdown | safe }}
                       </a>
                   </li>
+                  {# `generate email` #}
                   <li>
                       <a href="{{ get_url(path='@/docs/cli.md#generate-email', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
                         {{ '`email`' | markdown | safe }}
+                      </a>
+                  </li>
+              </ul>
+          </li>
+          {# `simulate` cmd #}
+          <li>
+              <a href="{{ get_url(path='@/docs/cli.md#simulate', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }} prose">
+                The `simulate` cmd
+                </a>
+              <ul class="px-4 list-disc list-inside font-light">
+                  {# `simulate email` #}
+                  <li>
+                      <a href="{{ get_url(path='@/docs/cli.md#simulate-email', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
+                        Simulating Emails
+                      </a>
+                  </li>
+                  {# `--filter/--quiet` #}
+                  <li>
+                      <a href="{{ get_url(path='@/docs/cli.md#simulate-filtering-output', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }} prose">
+                        Filtering Output
                       </a>
                   </li>
               </ul>

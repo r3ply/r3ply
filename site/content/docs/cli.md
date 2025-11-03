@@ -12,11 +12,18 @@ The r3ply CLI tool `re` is useful for developing your site to integrate comments
 
 - [Installation](#install)
 - [Initializing a reply Project](#init)
+- [Working with Configs](#config)
+  - [Validating a config](#config-validate)
+  - [Setting a Default Config](#config-set-default)
 - [The `generate` cmd](#generate)
   - [Generating a Config](#generate-config)
   - [Generating `mailto` Links](#generate-mailto)
   - [Generating Signets ](#generate-signet)
   - [Generating Emails](#generate-email)
+- [The `simulate` cmd](#simulate)
+  - [Simulating Email Comments](#simulate-email)
+  - [Filtering Output](#simulate-filtering-output)
+    - [Email Comment Stages](#simulate-email-stages)
 {% end %}
 
 {{ fleuron_fish() }}
@@ -76,7 +83,67 @@ label = "CLI"
 Help: You can generate a config one with `re generate config` if you don't already have one.
 ```
 
-## The `generate` Cmd { #generate }
+## Working with Configs { #config }
+
+```bash,name=re config usage statement
+# re config --help
+
+Usage: re config [options] [command]
+
+r3ply config commands
+
+Options:
+  -h, --help          display help for command
+
+Commands:
+  validate            validate your r3ply configuration
+  set-default <path>  the default config path r3ply will use
+  help [command]      display help for command
+```
+
+### Validating Configs { #config-validate }
+
+```bash,name=re config validate usage statement
+# re config validate --help
+
+Usage: re config validate [options]
+
+validate your r3ply configuration
+
+Options:
+  -h, --help  display help for command
+```
+
+If nothing is printed then the output is valid. Otherwise you should all problematic keys and some basic info about what's wrong. For example:
+
+```
+config failed validation:
+
+[
+  {
+    "keywordLocation": "#/properties/comments/$ref/properties/md_to_html/type",
+    "instanceLocation": "#/comments/md_to_html"
+  }
+]
+```
+
+Here `"keywordLocation": "#/.../md_to_html/type",` is telling you that the `type` for the key `md_to_html` is wrong _(the `type` in this case should be a boolean)_.
+
+### Setting Default Config Path { #config-set-default }
+
+```bash,name=re config set-default usage statement
+# re config set-default --help
+Usage: re config set-default [options] <path>
+
+the default config path r3ply will use
+
+Options:
+  -h, --help  display help for command
+```
+
+If there are multiple configs r3ply will need a `--config` option to tell it which to use. With `re config set-default` you can tell it the path of the config you want it to use by default.
+
+## The `generate` command { #generate }
 
 ```bash,name=re generate usage statement
 # re generate --help
@@ -239,77 +306,109 @@ In addition, this computer has only one working USB port, so I cannot insert dev
 If you'd like to help with this, please [contact us](@/project/contact.md) or see the [contributing docs](@/project/contributing.md) (_We were thinking to train the text on vintage adventure video games._).
 {% end %}
 
-## Validating Configs { #config-validate }
+## The `simulate` command { #simulate }
 
-Use `re validate config` to validate configs. If nothing is printed then the output is valid. Otherwise you should all problematic keys and some basic info about what's wrong. For example:
+```bash,name=re simulate usage statement
+# re simulate --help
 
-```
-config failed validation:
+Usage: re simulate [options] [command]
 
-[
-  {
-    "keywordLocation": "#/properties/comments/$ref/properties/md_to_html/type",
-    "instanceLocation": "#/comments/md_to_html"
-  }
-]
-```
+simulate receiving a comment using your r3ply config
 
-Here `"keywordLocation": "#/.../md_to_html/type",` is telling you that the `type` for the key `md_to_html` is wrong _(the `type` in this case should be a boolean)_.
+Options:
+  -h, --help               display help for command
 
-## Simulating Comments { #simulate }
-
-`re` can help you simulate a comment with the `simulate` subcommand.
-
-```
-re simulate email
+Commands:
+  email [options] [input]
+  help [command]           display help for command
 ```
 
-**The output represents a complete trace of an email through the r3ply system. See [filter/silencing output](#simulate-filter) for more on this.**
+### Simulating Email Comments { #simulate-email }
 
-### Silencing/Filtering Output { #simulate-filter }
+One of `re`'s most useful features is the ability to simulate email comments.
 
-The `--quite` and `--filter` options allow you to respectively silence or isolate certain output. These options work well with arguments that correspond to the various 'stages' of an email's journey through r3ply to become a comment.
+```bash,name=re simulate email usage statement
+# re simulate email --help
 
-- `email` - the initial email itself
-- `config` - r3ply fetches the appropriate site and system configs
-  - `config=system` - refine the config filter to just the system's config
-  - `config=site` - refine the config filter to just the sites's config
-- `prescreen` - prescreen checks are performed
-- `receive` - the email is received and assigned metadata (an id and timestamp)
-- `deliverable` - deliverability of email is checked against the configs
-- `prepare` - the email is parsed and becomes a template context
-- `comment` - the template context is used and the comment is formed
-- `moderate` - the comment along with its moderation arguments are prepared
-  - `moderate=request` - refine the `moderate` filter to just the request
-  - `moderate=response` - refine the `moderate` filter to just the response
-- `notify` - notifications are prepared per the config
-  - `notify=commenter` - just notification prepared for the commenter
-  - `notify=site` - just the notification prepared for the site maintainer
+Usage: re simulate email [options] [input]
 
-Using these you can filter output. For example if you wanted to only see the initial email and the resulting comment then you could run:
+Arguments:
+  input                    Input text (can also accept pipe)
 
-```txt
-# only show output of the `email` and `comment` stages
-re simulate email --filter email,comment
+Options:
+  --moderate               send comment for moderation (local-only) (default:
+                           false)
+  --dry-run                print output but have no side effects (default:
+                           false)
+  --message-id <id>        override Message-ID header
+  --date <date>            override Date header
+  --from <address>         override From header
+  --to <address>           override To header
+  --subject <url | path>   override email subject
+  --body <text>            override email body
+  --no-heading             hide headings for each stage of simulation
+  -q, --quiet [stage...]   silence output at `stages` or all output if stages is
+                           blank. stages are:
+                           [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify].
+                           Stages can be further narrowed by adding an `=` after
+                           the stage name:
+                           [config=site,config=system,moderation=local]. If a
+                           stage is acted upon as an array, then you can append
+                           an underscore to silce a specific element, e.g.
+                           moderation=local_0
+  -f, --filter [stage...]  filter output at `stages` or all output if stages is
+                           blank. stages are:
+                           [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify].
+                           Stages can be further narrowed by adding an `=` after
+                           the stage name:
+                           [config=site,config=system,moderation=local]. If a
+                           stage is acted upon as an array, then you can append
+                           an underscore to filter a specific element, e.g.
+                           moderation=local_0
+  -h, --help               display help for command
 ```
 
-Alternatively you could silence everything _but_ the `email` and `comment` stages
+Add `--moderate` to simulate moderation. Only local moderation will actually take effect on your file system. Use `--dry-run` to use moderation but without any effects taking place.
 
-```txt
-# silence only the `email` and `comment` stages
-re simulate email --quiet email,comment
-```
+Additionally, the usual options for emails are available.
 
-Three important corner cases are:
+### Filtering Output { #simulate-filtering-output }
 
-- if `--quiet` and `--filter` are used together, `--quiet` will take precedence
-- if `--quiet` is used without arguments then all output is silenced
-- if `--filter` is used without arguments than all output is allowed
+When simulating comments, it's very useful to filter or silence certain stages. For this purpose you can use `--filter` to opt-in to the stages you want to see, or `--quiet` to opt-out of the stages you want to see.
 
-### Writing Output { #write-simulation-output }
-
-You can save the output of a comment simulation by redirecting `STDOUT` to a file. The `--no-heading` option will remove the `=== Example ===` heading above each stage in the comment simulation pipeline. Here's an example of how you would save an email comment as a file:
+If no stages are provides then `--filter` and `--quiet` will assume all stages. Multiple stages can be provided.
 
 ```bash
-re simulate comment --filter email > comment_output.html --no-heading
+re simulate email --filter prepare,comment
 ```
+
+Additionally, some stages have substages that can be further narrowed down.
+
+```bash
+re simulate email --moderate --dry-run --filter config=site,moderation=local
+```
+
+If a stage is acted upon as an array, then you can append an underscore to filter a specific element.
+
+```bash
+re simulate email --moderate --dry-run --filter moderation=local_1
+```
+
+#### Email Comment Stages { #simulate-email-stages }
+
+These are the stages that can be [filtered/silenced](#simulate-filtering-output):
+
+| stage       | substages                 | Is Array? |
+|-------------|---------------------------|-----------|
+| email       |                           |     ❌    |
+| config      | site, system              |     ❌    |
+| prescreen   |                           |     ❌    |
+| receive     |                           |     ❌    |
+| deliverable |                           |     ❌    |
+| prepare     |                           |     ❌    |
+| comment     |                           |     ❌    |
+| moderation  | local, github, moderation |     ✅    |
+
+{{ fleuron_fish() }}
+
+{{ next_prev(prev_path="/docs/templating/", prev_text="Templating", next_path="/project/", next_text="r3ply Project") }}
