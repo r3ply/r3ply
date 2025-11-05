@@ -2,14 +2,14 @@
   <a href="#toc" class="float-right text-2xl text-pink-300 no-underline ml-2">#</a>
   {{ subtitle | default(value="## Table of Contents") | markdown | safe }}
   {% set doc = section | default(value=page) %}
-  <div class="w-fit {% if doc.extra.comments.enabled %}border-b{% endif %} border-gray-300 border-dashed">
+  <div class="w-fit pr-4 {% if doc.extra.comments.enabled %}border-b{% endif %} dark:border-gray-300 border-dashed">
   {{ body | markdown | safe }}
   </div>
 
   {% if  doc.extra.comments.enabled %}
   <ul>
     <li>
-      <a href="#comments">Comments 💬</a>
+    <a href="#comments" class="no-underline text-inherit  dark:text-emerald-200 ">Comments</a><span> 💬</span>
     </li>
   </ul>
   {% endif %}

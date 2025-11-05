@@ -16,7 +16,6 @@ In this tutorial we're going to walkthrough using r3ply from start to finish wit
 - [Simulating a Comment](#simulating-a-comment)
 - [What's Inside a Comment](#what-s-inside-a-comment)
 - [Summary & Next Steps](#next-steps)
-- [Comments](./#comments)
 {% end %}
 
 {{ fleuron_fish() }}

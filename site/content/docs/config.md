@@ -22,7 +22,6 @@ Configuration is an important topic in r3ply, as it's the primary way most peopl
   - [`Comments`](#comments-configuration)
   - [`Moderation`](#moderation-configuration)
 - [System Config](#r3ply-system-config)
-- [Comments](./#comments)
 {% end %}
 
 {{ fleuron_fish() }}
