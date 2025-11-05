@@ -10,10 +10,10 @@
         <a class="font-black text-xl md:text-3xl" href="/">r3ply</a>
         {# Doc version picker #}
         <details id="doc-version-picker" class="inline-block relative group">
-          <summary class="flex items-center text-xs font-mono px-1 py-0.5 md:px-2 md:py-1 rounded-lg md:text-md text-neutral-700 dark:text-cyan-200 tracking-tighter md:tracking-normal border border-black-800 bg-yellow-200 dark:bg-gray-600 cursor-pointer ">
+          <summary class="flex items-center text-xs font-mono px-1 py-0.5 md:px-2 md:py-1 rounded-lg md:text-md text-neutral-700 dark:text-inherit tracking-tighter md:tracking-normal border border-black-800 bg-yellow-200 dark:bg-gray-600 cursor-pointer ">
             <span class="">v{{ config.extra.r3ply_version }}</span>
-            <span class="ml-0.5 md:ml-1 dark:text-cyan-200 inline group-open:hidden">▴</span>
-            <span class="ml-0.5 md:ml-1 dark:text-cyan-200 hidden group-open:inline">▾</span>
+            <span class="ml-0.5 md:ml-1 dark:text-neutral-200 inline group-open:hidden">▴</span>
+            <span class="ml-0.5 md:ml-1 dark:text-neutral-200 hidden group-open:inline">▾</span>
           </summary>
           <ul class="absolute z-20 top-8 py-2 rounded-lg border bg-yellow-200 border-gray-800 dark:bg-gray-600 dark:border-gray-400">
             {% set version_opts = "py-1 px-2 font-mono hover:bg-blue-300 dark:hover:bg-gray-800 dark:hover:text-gray-100" %}

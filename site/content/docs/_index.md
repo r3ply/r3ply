@@ -8,11 +8,11 @@ template = "doc.html"
 The r3ply docs are arranged as a mixture of pure documentation, concepts, and tutorials/walkthroughs.
 
 {% toc() %}
-- [Getting Started](/docs/getting-started) <span class="font-extralight dark:text-emerald-200 ">(Tutorial/Walkthrough)</span>
-- [Overview](/docs/overview) <span class="font-extralight dark:text-blue-200">(Concepts/High-level)</span>
-- [Configuration](/docs/config) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
-- [Templating](/docs/templating) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
-- `re` - [The r3ply CLI](/todo) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
+- [Getting Started](@/docs/getting-started.md) <span class="font-extralight dark:text-emerald-200 ">(Tutorial/Walkthrough)</span>
+- [Overview](@/docs/overview.md) <span class="font-extralight dark:text-blue-200">(Concepts/High-level)</span>
+- [Configuration](@/docs/config.md) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
+- [Templating](@/docs/templating.md) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
+- `re` - [The r3ply CLI](@/docs/cli.md) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
 {% end %}
 
 {{ fleuron_fish() }}

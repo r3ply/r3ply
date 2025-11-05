@@ -158,8 +158,8 @@
       {% set sub_menu_styles = "pt-3" %}
       {% set sub_menu_items = "underline decoration-dotted text-sm md:text-lg font-light hover:text-white hover:decoration-solid" %}
       {# Site Sections #}
-      <li class="w-[8rem] md:w-auto text-right">
-        <span class="text-teal-300 {{ sub_menu_headers }}">Sections:</span>
+      <li class="w-32 md:w-auto text-right">
+        <span class="text-teal-300 {{ sub_menu_headers }}">Sections<span class="hidden md:inline">:</span></span>
         <ul class="{{ sub_menu_styles }}">
           {% set site_sections_styles = "decoration-teal-300" %}
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/_index.md') }}">Home</a></li>
@@ -169,9 +169,9 @@
         </ul>
       </li>
       {# Doc Links #}
-      <li class="w-[8rem] md:w-auto md:text-right">
+      <li class="w-32 md:w-auto md:text-right">
         {% set doc_styles = "decoration-pink-300" %}
-        <span class="text-pink-300 {{ sub_menu_headers }} hover:underline {{ doc_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}">Docs:</a></span>
+        <span class="text-pink-300 {{ sub_menu_headers }} hover:underline {{ doc_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}">Docs<span class="hidden md:inline">:</span></a></span>
         <ul class="{{ sub_menu_styles }}">
           <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/getting-started.md') }}">Getting Started</a></li>
           <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/overview.md') }}">Overview</a></li>
@@ -181,8 +181,8 @@
         </ul>
       </li>
       {# "Site" Links #}
-      <li class="w-[8rem] md:w-auto text-right md:text-left">
-        <span class="text-yellow-200 {{ sub_menu_headers }}">Site Links:</span>
+      <li class="w-32 md:w-auto text-right md:text-left">
+        <span class="text-yellow-200 {{ sub_menu_headers }}">Site Links<span class="hidden md:inline">:</span></span>
         <ul class="{{ sub_menu_styles }}">
           {% set site_links_styles = "decoration-yellow-200" %}
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://github.com/asimpletune/r3ply/">GitHub Repo</a></li>
@@ -193,14 +193,15 @@
         </ul>
       </li>
       {# RSS Feeds #}
-      <li class="w-[8rem] md:w-auto">
-        <span class="text-red-300 {{ sub_menu_headers }}">RSS Feeds:</span>
+      <li class="w-32 md:w-auto">
+        <span class="text-red-300 {{ sub_menu_headers }}">RSS Feeds<span class="hidden md:inline">:</span></span>
         <ul class="{{ sub_menu_styles }}">
           {% set rss_feeds_styles = "decoration-red-300" %}
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }} cursor-not-allowed text-gray-600 no-underline!"><a href="/todo">Blog (Soon)</a></li>
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">All Comments</a></li>
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Page</a></li>
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Thread</a></li>
+          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Author</a></li>
         </ul>
       </li>
     </ul>

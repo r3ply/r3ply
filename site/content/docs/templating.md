@@ -14,7 +14,7 @@ Templating allows you to control how your comment files are structured using an 
 - [Templating Language & Syntax](#templating-language-syntax)
   - [Basics](#language-basics)
     - [Expressions](#expressions)
-    - [Comments](#comments)
+    - [Comments](#language-comments)
     - [Statements](#statements)
     - [Literals](#literals)
   - [Assigning Variables](#assigning-variables)
@@ -51,7 +51,7 @@ Double curly braces (e.g. `{{ }}`) contain _expressions_. This means there's out
 Greetings, {{ name }}!
 ```
 
-#### Comments
+#### Comments { #language-comments }
 
 Comments are in single braces + a hash sign (e.g. `{# #}`). Everything within them is ignored by the templating engine. They do take up whitespace though.
 
@@ -71,7 +71,7 @@ Greetings, {{ name }}!
 
 #### Whitespace Control
 
-You can use minus signs in combination with either an [expression](#expressions), [comment](#comments), or [statement](#statements) to remove white space.
+You can use minus signs in combination with either an [expression](#expressions), [comment](#language-comments), or [statement](#statements) to remove white space.
 
 ```jinja
 # e.g. Hello,bob !

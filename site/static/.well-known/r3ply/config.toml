@@ -16,7 +16,7 @@ issued = 2025-10-16
 label = "CLI"
 
 [comments]
-"paths*" = ["/**", "!/"]
+"paths*" = ["/demo/", "/docs/**/", "/project/**/"]
 
 [comments.email]
 "&comment_{}" = "comment.template.md"

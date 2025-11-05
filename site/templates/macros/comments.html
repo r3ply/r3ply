@@ -146,7 +146,7 @@
 
 {% macro render(comment) %}
 {% set ctx = load_data(literal=comment.extra.comment.ctx, format="json") %}
-<article id="comment:{{ comment.slug }}" class="pl-6 py-3 min-w-[40ch]">
+<article id="comment:{{ comment.slug }}" class="pl-6 min-w-[calc(100vw-0.875rem-1.5ch-1.5rem)]{# calc a min width of what 'auto' would be, but allowing the the content to grow and overflow #}">
   <header class="font-mono font-lg">
     {% set purple_text = "text-purple-500 dark:text-purple-300" %}
     {% set cyan_text = "text-cyan-500 dark:text-cyan-300" %}
@@ -218,8 +218,8 @@
       {# Auth: #}
       <div class="flex">
         <dt class="inline {{ purple_text }}">Auth</dt>
-        <span class="text-inherit {{ cyan_text }} after:content-['_['] after:dark:text-emerald-300">:</span>
         <dd class="flex {{ amber_text }} truncate">
+          <span class="text-inherit {{ cyan_text }} after:content-['_['] after:dark:text-emerald-300">:</span>
           {# dkim #}
           <span class="{{ blue_text }}">dkim</span>
           <span class="mr-2 {{ cyan_text }}">:</span>
@@ -234,8 +234,8 @@
           <span class="ml-2 {{ blue_text }}">dmarc</span>
           <span class="mr-2 {{ cyan_text }}">:</span>
           {% if ctx.email.auth.dmarc %}<span class="text-green-500 font-bold"> ✔</span>{% else %}<span class="text-red-500 font-bold"> x</span>{% endif %}
+          <span class="text-inherit before:content-[']'] before:dark:text-emerald-300"></span>
         </dd>
-        <span class="text-inherit before:content-[']'] before:dark:text-emerald-300"></span>
       </div>
     </dl>
     </span>
