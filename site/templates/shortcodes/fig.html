@@ -13,6 +13,6 @@
     {{ body | markdown | regex_replace(pattern=`<p>(?P<img>.*)</p>`, rep=`$img`) | safe }}
   </picture>
   {% if caption %}
-  <figcaption class="mt-2 text-sm text-center">{{ caption }}</figcaption>
+  <figcaption class="mt-2 text-sm text-center prose-p:m-0">{{ caption | markdown | safe }}</figcaption>
   {% endif %}
 </figure>

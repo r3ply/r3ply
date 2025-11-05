@@ -31,12 +31,10 @@ repo = "r3ply-site-comments"
 "file_path_{}" = "{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"
 "base_branch_{}" = "main"
 "head_branch_{}" = "comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md"
-"commit_msg_{}" = """
-Comment submitted:
-Sender: {{ author.pseudonym }}
-Timestamp: {{ comment.ts_rcvd }}
-Subject: {{ comment.subject.url }}
-Comment: > {{ comment.txt | split(pat="
-") | join(sep="> ") }}"""
+"commit_msg_{}" = """Comment submitted:\n
+  - Sender: {{ author.pseudonym }}
+  - Timestamp: {{ comment.ts_rcvd }}
+  - Subject: {{ comment.subject.url }}
+\n> {{ comment.txt | split(pat="\r\n") | join(sep="\n> ") }}"""
 "pr_title_{}" = "New comment ({{ comment.id[:8] }}) on {{ comment.subject.url }} by author `{{ author.pseudonym[:7] }}`"
 "allow*" = [ ]

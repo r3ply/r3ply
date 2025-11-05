@@ -113,14 +113,14 @@
     <li class="{{ comment_nav_styles }} border-x-0">
       <a href="#{{ next.slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">next</span>
-        <span class="inline md:hidden">↓</span>
+        <span class="inline md:hidden">⭣</span>
       </a>
     </li>
     {% else %}
     <li class="{{ comment_nav_styles }} {{ inactive_nav }} border-x-0">
       <button class="cursor-not-allowed">
         <span class="hidden md:inline">next</span>
-        <span class="inline md:hidden">↓</span>
+        <span class="inline md:hidden">⭣</span>
       </button>
     </li>
     {% endif %}
@@ -129,14 +129,14 @@
     <li class="{{ comment_nav_styles }} rounded-r-lg border-l-0">
       <a href="#{{ prev.slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">prev.</span>
-        <span class="inline md:hidden">↑</span>
+        <span class="inline md:hidden">⭡</span>
       </a>
     </li>
     {% else %}
     <li class="{{ comment_nav_styles }} {{ inactive_nav }} rounded-r-lg border-l-0">
       <button class="cursor-not-allowed">
         <span class="hidden md:inline">prev.</span>
-        <span class="inline md:hidden">↑</span>
+        <span class="inline md:hidden">⭡</span>
       </button>
     </li>
     {% endif %}
@@ -152,7 +152,9 @@
     {% set cyan_text = "text-cyan-500 dark:text-cyan-300" %}
     {% set gray_text = "text-gray-800 dark:text-gray-100" %}
     {% set amber_text = "text-amber-600 dark:text-amber-400" %}
+    {% set blue_text = "text-blue-400 dark:text-blue-300" %}
     <dl>
+      {# Comment-ID: #}
       <div class="flex">
         <dt class="inline {{ purple_text }}">Comment-ID</dt>
         <span class="{{ cyan_text }}">: <</span>
@@ -161,8 +163,9 @@
             {{ ctx.comment.id | truncate(length=8) }}
           </a>
         </dd>
-        <span class="text-cyan-300 before:content-['>']"></span>
+        <span class="{{ cyan_text }} before:content-['>']"></span>
       </div>
+      {# From: #}
       <div class="flex">
         <dt class="inline text-gray-800 dark:text-gray-100">From</dt>
         <span class="{{ cyan_text }}">: <</span>
@@ -173,6 +176,7 @@
         </dd>
         <span class="{{ cyan_text }} before:content-['>']"></span>
       </div>
+      {# Subject: #}
       <div class="flex overflow-clip">
         <dt class="inline text-gray-800 dark:text-gray-100">Subject</dt>
         <span class="{{ cyan_text }}">: </span>
@@ -191,8 +195,8 @@
           </a>
         </dd>
       </div>
+      {# Date: #}
       <div class="flex">
-        {# date(format="%a, %d %b %Y %H:%M:%S %z") #}
         <dt class="inline text-gray-800 dark:text-gray-100">Date</dt>
         <span class="{{ cyan_text }}">: </span>
         <dd class="hidden md:inline-flex {{ amber_text }} ml-[1ch]">
@@ -210,6 +214,28 @@
           <span class="text-pink-400 ml-[1ch]">{{ comment.date | date(format="%H:%M") }}</span>
           <span class="text-yellow-300 ml-[1ch]">{{ comment.date | date(format="%z") }}</span>
         </dd>
+      </div>
+      {# Auth: #}
+      <div class="flex">
+        <dt class="inline {{ purple_text }}">Auth</dt>
+        <span class="text-inherit {{ cyan_text }} after:content-['_['] after:dark:text-emerald-300">:</span>
+        <dd class="flex {{ amber_text }} truncate">
+          {# dkim #}
+          <span class="{{ blue_text }}">dkim</span>
+          <span class="mr-2 {{ cyan_text }}">:</span>
+          {% if ctx.email.auth.dkim %}<span class="text-green-500 font-bold"> ✔</span>{% else %}<span class="text-red-500 font-bold"> x</span>{% endif %}
+          {# spf #}
+          <span class="{{ cyan_text }}">,</span>
+          <span class="ml-2 {{ blue_text }}">spf</span>
+          <span class="mr-2 {{ cyan_text }}">:</span>
+          {% if ctx.email.auth.spf %}<span class="text-green-500 font-bold"> ✔</span>{% else %}<span class="text-red-500 font-bold"> x</span>{% endif %}
+          {# dmarc #}
+          <span class="{{ cyan_text }}">,</span>
+          <span class="ml-2 {{ blue_text }}">dmarc</span>
+          <span class="mr-2 {{ cyan_text }}">:</span>
+          {% if ctx.email.auth.dmarc %}<span class="text-green-500 font-bold"> ✔</span>{% else %}<span class="text-red-500 font-bold"> x</span>{% endif %}
+        </dd>
+        <span class="text-inherit before:content-[']'] before:dark:text-emerald-300"></span>
       </div>
     </dl>
     </span>

@@ -16,7 +16,10 @@ The purpose of this page is to demonstrate what a site that uses r3ply _could_ l
   - [Privacy Respecting](#privacy-respecting)
   - [Easy as Pushing a Button](#easy-button)
   - [Content Addressable](#content-addressable)
-- [Reading Comments](#reading-comments)
+- [Reading Comments](#moderating-and-reading-comments)
+  - [Comment Moderation](#comment-moderation)
+  - [Individual Comment Fields](#comment-fields)
+  - [Navigating Comments](#navigating-comments)
 
 {% end %}
 
@@ -99,7 +102,60 @@ And after clicking that icon, we see the same process as before:
 ![Screenshot showing how responding to a text fragment looks in the email client](/screenshots/text-fragment-email_light-bg.webp)
 {% end %}
 
-## Reading Comments
+## Moderating & Reading Comments { #moderating-and-reading-comments }
 
-TODO
+After a comment has been received, it's processed by r3ply and then sent for moderation according to the site's config.
+
+### Comment Moderation
+
+In the case of this demo, the comments use GitHub moderation. The comments themselves are stored in separate repo, and are pulled into the r3ply site as a git submodule. Here's an excerpt from the config:
+
+
+```toml, name=this site's github moderation:
+[[moderation.github]]
+owner = "asimpletune"
+repo = "r3ply-site-comments"
+"file_path_{}" = "{{ comment.ts_rcvd }}_{{ comment.id[:8] }}-{{ author.pseudonym[:7] }}.md"
+"base_branch_{}" = "main"
+"head_branch_{}" = "comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md"
+"commit_msg_{}" = """Comment submitted:\n
+  - Sender: {{ author.pseudonym }}
+  - Timestamp: {{ comment.ts_rcvd }}
+  - Subject: {{ comment.subject.url }}
+\n> {{ comment.txt | split(pat="\r\n") | join(sep="\n> ") }}"""
+"pr_title_{}" = "New comment ({{ comment.id[:8] }}) on {{ comment.subject.url }} by author `{{ author.pseudonym[:7] }}`"
+"allow*" = [ ]
+```
+
+### Comment Fields
+
+Each comment has been rendered to display similar to a actual email, which makes their fields readily understandable.
+
+```email
+Comment-ID: <60e3283a…> (links to the comment, individually)
+From: <5bcb8f1…> (pseudonym of sender)
+Subject: /demo/
+Date: Mon, 27 Oct 2025 15:25:31 +0000
+Auth: [dkim : x , spf : x , dmarc : x] (auth details of the orig. email)
+
+Now, if only we had a captain. . . What about it? How much is it? That's 100 pieces of eight. I'd like to make you an offer. Great!
+```
+
+### Navigating Comments
+
+<div class="dark:prose-code:bg-transparent! dark:prose-code:text-violet-300!">
+
+This demo also implements a [hn](https://news.ycombinator.com) style commenting system with `prev`, `next`, `parent`, and `root` controls, in addition to adding a `#` control for a comment to link to itself.
+
+{% fig(dark="/screenshots/comment-navigation_desktop_dark.webp", add_class="p-4 rounded-lg bg-blue-100 dark:bg-slate-900", caption="Hackernews style comment navigation") %}
+![Screenshot showing "hackernews" style comment navigation](/screenshots/comment-navigation_desktop_light.webp)
+{% end %}
+
+On mobile it uses a shorthand version of the same navigation, but `/` for root, `..` for parent, and `.` for self, along with `⭣` and `⭡` for next and prev.
+
+{% fig(dark="/screenshots/comment-navigation_mobile_dark.webp", add_class="p-4 rounded-lg bg-blue-100 dark:bg-slate-900", caption="*nix style symbols for 'root', 'parent', and 'self'.") %}
+![Screenshot showing "hackernews" style but on mobile](/screenshots/comment-navigation_mobile_light.webp)
+{% end %}
+
+</div>
 
