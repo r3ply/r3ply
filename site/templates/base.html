@@ -97,7 +97,7 @@
       {% set comments = get_section(path="comments/_index.md")
         | get(key="pages")
         | filter(attribute="extra.comment.document", value=current_path) %}
-      <section id="comments" class="py-12 border-t-4 border-gray-500 dark:border-pink-300 border-dashed md:pr-6 pr-2 overflow-x-scroll">
+      <section id="comments" class="py-12 border-t-4 border-blue-300 dark:border-pink-300 border-dashed md:pr-6 pr-2 overflow-x-scroll bg-red-50 bg-[url(/patterns/bank-note.svg)] dark:bg-inherit">
         <details class="group" open>
           <summary class="pl-4">
             <h2 class="text-center text-4xl md:text-5xl font-thin">

@@ -16,6 +16,7 @@ The purpose of this page is to demonstrate what a site that uses r3ply _could_ l
   - [Privacy Respecting](#privacy-respecting)
   - [Easy as Pushing a Button](#easy-button)
   - [Content Addressable](#content-addressable)
+- [Reading Comments](#reading-comments)
 
 {% end %}
 
@@ -98,7 +99,7 @@ And after clicking that icon, we see the same process as before:
 ![Screenshot showing how responding to a text fragment looks in the email client](/screenshots/text-fragment-email_light-bg.webp)
 {% end %}
 
-## Comment Navigation
+## Reading Comments
 
 TODO
 
