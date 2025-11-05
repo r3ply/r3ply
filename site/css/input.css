@@ -74,8 +74,9 @@ pre table {
 /* END suggested Zola styling for highlighting code */
 
 pre[data-name]::before {
-  content: "     === 📄 " attr(data-name) " ===";
+  content: "=== 📄 " attr(data-name) " ===";
   font-weight: bold;
+  padding-left: 1ch;
 }
 
 pre[data-name] code {
