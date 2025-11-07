@@ -143,11 +143,15 @@
           {% set r3ply_config = load_data(path="/static/.well-known/r3ply/config.toml") %}
           {% if r3ply_config.comments.cache %}
           <script src="/scripts/pending-comments.js"></script>
+          {# Used to determine if we're running in a CF environment or not #}
+          {% set is_pages = get_env(name="CF_PAGES", default=false) %}
           <script type="module">
             // url: URL that points directly to this page's cache endpoint
             // e.g. https://api.r3ply.com/cache/comments/pending/example.com/blog/posts/123/
+            const hostname = new URL("{% if is_pages %}{{ current_url }}{% else %}https://site.local.test{% endif %}")
+              .hostname
             const cache_server = new URL("{{ config.extra.cache_server | safe }}")
-            const url = new URL("/cache/comments/pending/site.local.test{{ current_path | safe }}", cache_server)
+            const url = new URL(`/cache/comments/pending/${hostname}{{ current_path | safe }}`, cache_server)
             try {
               const response = await fetch(url)
               if (!response.ok) {
