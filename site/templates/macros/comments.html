@@ -1,27 +1,31 @@
+{#
+  For some frontend code (static/pending-comments.js), there's a `template` variable that floats around this file. It's a flag that tells the template to write surround some code in a <template></template> tag.
+
+  Probably the better way to do this would be to have the template broken into smaller parts that could each be surrounded with one of these tags and to make this template use those as well.
+#}
+
 {% import "macros/util.html" as util %}
-{% macro write_all(for_comments, doc) %}
+{% macro write_all(for_comments, doc, template) %}
   {% set root_comments = for_comments
     | filter(attribute="extra.comment.root", value=true)
     | sort(attribute="date")
     | reverse %}
   {% for r in root_comments %}
-    {{ self::write_thread(head=r, comments=for_comments, level=1, root=r) }}
-    {# {{ self::write_thread(head=r, comments=for_comments
-      | filter(attribute="extra.comment.root", value=false), level=1, root=r) }} #}
+    {{ self::write_thread(head=r, comments=for_comments, level=1, root=r, template=template) }}
   {% endfor %}
 {% endmacro  %}
 
-{% macro write_thread(head, comments, level, root) %}
+{% macro write_thread(head, comments, level, root, template) %}
   {% set groups = ["group/0", "group/1", "group/2", "group/3", "group/4", "group/5", "group/6", "group/7", "group/8", "group/9", "group/10", "group/11", "group/12", "group/13", "group/14", "group/15", "group/16", "group/16", "group/17", "group/18", "group/19"] %}
-  <details id="{{ head.slug }}" class="{{ groups[level] }} ml-3.5 open:mb-2
-  " open>
+  {% if template %}<template id="comment-template">{% endif %}
+  <details id="{{ head.slug }}" class="{{ groups[level] }} ml-3.5 open:mb-2" open>
     {# Determine prev/next #}
     {% set prev = false %}
     {% set next = false %}
     {% if head.extra.comment.root %}
       {# Root comments can still have in_reply_to set, if they're text fragments #}
       {% set siblings = comments
-        | filter(attribute="extra.comment.root", value=head.extra.comment.root)
+        | filter(attribute="extra.comment.root", value=true)
         | sort(attribute="date")
         | reverse %}
     {% else %}
@@ -30,7 +34,6 @@
         | sort(attribute="date")
         | reverse %}
     {% endif %}
-    {# {{ throw(message=siblings|map(attribute="slug")|as_str) }} #}
     {% for s in siblings %}
       {% if s.slug == head.slug %}
         {% set prev_i = loop.index0 - 1 %}
@@ -39,21 +42,22 @@
         {% set_global next = siblings[next_i] | default(value=false) %}
       {% endif %}
     {% endfor %}
-    {{ self::summary(comment=head, level=level, root=root, prev=prev, next=next) }}
+    {{ self::summary(comment=head, level=level, root=root, prev=prev, next=next, template=template) }}
     <div class="ml-[1.5ch] border-l border-emerald-400 border-dashed pb-[1ch]">
-      {{ self::render(comment=head) }}
+      {{ self::render(comment=head, template=template) }}
       {% set children = comments
         | filter(attribute="extra.comment.in_reply_to", value="#" ~ head.slug)
         | sort(attribute="date")
         | reverse %}
       {% for c in children %}
-        {{ self::write_thread(head=c, comments=comments, level=level+1, root=root) }}
+        {{ self::write_thread(head=c, comments=comments, level=level+1, root=root, template=template) }}
       {% endfor %}
     </div>
   </details>
+  {% if template %}</template>{% endif %}
 {% endmacro  %}
 
-{% macro summary(comment, level, root, prev, next) %}
+{% macro summary(comment, level, root, prev, next, template) %}
 {# prettier-ignore #}
 {% set content_before = ["group-open/0:before:content-['[-]']","group-open/1:before:content-['[-]']","group-open/2:before:content-['[-]']","group-open/3:before:content-['[-]']","group-open/4:before:content-['[-]']","group-open/5:before:content-['[-]']","group-open/6:before:content-['[-]']","group-open/7:before:content-['[-]']","group-open/8:before:content-['[-]']","group-open/9:before:content-['[-]']", "group-open/10:before:content-['[-]']","group-open/11:before:content-['[-]']","group-open/12:before:content-['[-]']","group-open/13:before:content-['[-]']","group-open/14:before:content-['[-]']","group-open/15:before:content-['[-]']","group-open/16:before:content-['[-]']","group-open/17:before:content-['[-]']","group-open/18:before:content-['[-]']","group-open/19:before:content-['[-]']"] %}
 <summary class="cursor-pointer before:content-['[+]'] {{ content_before[level] }} font-mono overflow-ellipsis flex justify-between items-center gap-1">
@@ -70,83 +74,110 @@
     {% set nav_link_styles = "inline-block w-full h-full md:py-1 px-2" %}
     {% set inactive_nav = "bg-gray-400! text-gray-500 cursor-not-allowed md:py-1 px-2" %}
     {# render root? #}
-    {% if level >= 3 %}
+    {% set render_root = level >= 3 %}
+    {% if render_root or template %}
+      {% if template %}<template id="comment-nav-render-root-true">{% endif %}
     <li class="{{ comment_nav_styles }} rounded-l-lg border-l! border-r-0">
       <a href="#{{ root.slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">root</span>
         <span class="inline md:hidden">/</span>
       </a>
     </li>
-    {% else %}
+      {% if template %}</template>{% endif %}
+    {% endif %}
+    {% if not render_root or template %}
+      {% if template %}<template id="comment-nav-render-root-false">{% endif %}
     <li class="{{ comment_nav_styles }} {{ inactive_nav }} rounded-l-lg border-l! border-r-0">
       <button class="cursor-not-allowed">
         <span class="hidden md:inline">root</span>
         <span class="inline md:hidden">/</span>
       </button>
     </li>
+      {% if template %}</template>{% endif %}
     {% endif %}
     {# render parent? #}
-    {% if level >= 2 %}
+    {% set render_parent = level >= 2%}
+    {% if render_parent or template %}
+      {% if template %}<template id="comment-nav-render-parent-true">{% endif %}
     <li class="{{ comment_nav_styles }} border-x-0">
       <a href="{{ comment.extra.comment.in_reply_to }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">parent</span>
         <span class="inline md:hidden font-sans">..</span>
       </a>
     </li>
-    {% else %}
+      {% if template %}</template>{% endif %}
+    {% endif %}
+    {% if not render_parent or template %}
+      {% if template %}<template id="comment-nav-render-parent-false">{% endif %}
     <li class="{{ comment_nav_styles }} {{ inactive_nav }} border-x-0">
       <button class="cursor-not-allowed">
         <span class="hidden md:inline">parent</span>
         <span class="inline md:hidden font-sans">..</span>
       </button>
     </li>
+      {% if template %}</template>{% endif %}
     {% endif %}
     {# render current #}
+      {% if template %}<template id="comment-nav-render-current">{% endif %}
     <li class="{{ comment_nav_styles }} border-x-0">
       <a href="#{{ comment.slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline text-pink-400">#</span>
         <span class="inline md:hidden text-pink-300">.</span>
       </a>
     </li>
+      {% if template %}</template>{% endif %}
     {# render next? #}
-    {% if next %}
+    {% if next or template %}
+      {% if template %}<template id="comment-nav-render-next-true">{% endif %}
+      {% set next_slug = next.slug | default(value="CHANGEME") %}
     <li class="{{ comment_nav_styles }} border-x-0">
-      <a href="#{{ next.slug }}" class="{{ nav_link_styles }}">
+      <a href="#{{ next_slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">next</span>
         <span class="inline md:hidden">⭣</span>
       </a>
     </li>
-    {% else %}
+      {% if template %}</template>{% endif %}
+    {% endif %}
+    {% if not next or template %}
+      {% if template %}<template id="comment-nav-render-next-false">{% endif %}
     <li class="{{ comment_nav_styles }} {{ inactive_nav }} border-x-0">
       <button class="cursor-not-allowed">
         <span class="hidden md:inline">next</span>
         <span class="inline md:hidden">⭣</span>
       </button>
     </li>
+      {% if template %}</template>{% endif %}
     {% endif %}
     {# render prev? #}
-    {% if prev %}
+    {% if prev or template %}
+      {% if template %}<template id="comment-nav-render-prev-true">{% endif %}
+      {% set prev_slug = prev.slug | default(value="CHANGEME") %}
     <li class="{{ comment_nav_styles }} rounded-r-lg border-l-0">
-      <a href="#{{ prev.slug }}" class="{{ nav_link_styles }}">
+      <a href="#{{ prev_slug }}" class="{{ nav_link_styles }}">
         <span class="hidden md:inline">prev.</span>
         <span class="inline md:hidden">⭡</span>
       </a>
     </li>
-    {% else %}
+      {% if template %}</template>{% endif %}
+    {% endif %}
+    {% if not prev or template %}
+      {% if template %}<template id="comment-nav-render-prev-false">{% endif %}
     <li class="{{ comment_nav_styles }} {{ inactive_nav }} rounded-r-lg border-l-0">
       <button class="cursor-not-allowed">
         <span class="hidden md:inline">prev.</span>
         <span class="inline md:hidden">⭡</span>
       </button>
     </li>
+      {% if template %}</template>{% endif %}
     {% endif %}
   </ul>
 </summary>
 {% endmacro %}
 
-{% macro render(comment) %}
+{% macro render(comment, template) %}
 {% set ctx = load_data(literal=comment.extra.comment.ctx, format="json") %}
-<article id="comment:{{ comment.slug }}" class="pl-6 min-w-[calc(100vw-0.875rem-1.5ch-1.5rem)]{# calc a min width of what 'auto' would be, but allowing the the content to grow and overflow #}">
+  {% if template %}<template id="comment-article-template">{% endif %}
+<article id="comment:{{ comment.slug }}" class="pl-6 min-w-[calc(100vw-0.875rem-1.5ch-1.5rem)]{# calc a min width of what 'auto' would be, but allowing the the content to grow and overflow #} md:min-w-auto">
   <header class="font-mono font-lg">
     {% set purple_text = "text-purple-500 dark:text-purple-300" %}
     {% set cyan_text = "text-cyan-500 dark:text-cyan-300" %}
@@ -158,8 +189,8 @@
       <div class="flex">
         <dt class="inline {{ purple_text }}">Comment-ID</dt>
         <span class="{{ cyan_text }}">: <</span>
-        <dd class="inline {{ amber_text }} truncate hover:underline">
-          <a href="{{ comment.path }}">
+        <dd data-comment-id-field class="inline {{ amber_text }} truncate">
+          <a class="hover:underline" href="{{ comment.path }}">
             {{ ctx.comment.id | truncate(length=8) }}
           </a>
         </dd>
@@ -170,23 +201,23 @@
         <dt class="inline text-gray-800 dark:text-gray-100">From</dt>
         <span class="{{ cyan_text }}">: <</span>
         <dd class="inline {{ amber_text }} hover:underline">
-          <a href="/commenters/{{ comment.authors[0] | truncate(length=7, end='') }}/">
+          <a data-from-field href="/commenters/{{ comment.authors[0] | truncate(length=7, end='') }}/">
             {{ comment.authors[0] | truncate(length=7) }}
           </a>
         </dd>
         <span class="{{ cyan_text }} before:content-['>']"></span>
       </div>
       {# Subject: #}
-      <div class="flex overflow-clip">
+      <div data-subject-field class="flex overflow-clip">
         <dt class="inline text-gray-800 dark:text-gray-100">Subject</dt>
         <span class="{{ cyan_text }}">: </span>
         <dd class="hidden md:inline {{ amber_text }} ml-[1ch] truncate hover:underline">
-          <a href="{{ ctx.comment.subject.path }}{{ ctx.comment.subject.fragment | default(value='') }}">
+          <a data-subject-md href="{{ ctx.comment.subject.path }}{{ ctx.comment.subject.fragment | default(value='') }}">
           {{ ctx.comment.subject.path }}{{ ctx.comment.subject.fragment | default(value="") }}
           </a>
         </dd>
         <dd class="inline md:hidden {{ amber_text }} ml-[1ch] truncate">
-          <a href="{{ ctx.comment.subject.path }}{{ ctx.comment.subject.fragment | default(value='') }}">
+          <a data-subject-sm href="{{ ctx.comment.subject.path }}{{ ctx.comment.subject.fragment | default(value='') }}">
           {% if ctx.comment.subject.fragment %}
           {{ ctx.comment.subject.fragment }}
           {% else %}
@@ -196,20 +227,20 @@
         </dd>
       </div>
       {# Date: #}
-      <div class="flex">
+      <div data-date-field class="flex">
         <dt class="inline text-gray-800 dark:text-gray-100">Date</dt>
         <span class="{{ cyan_text }}">: </span>
-        <dd class="hidden md:inline-flex {{ amber_text }} ml-[1ch]">
-          {{ comment.date | date(format="%a") }}
+        <dd data-date-md class="hidden md:inline-flex {{ amber_text }} ml-[1ch]">
+          <span data-date-md-day>{{ comment.date | date(format="%a") }}</span>
           <span class="{{ cyan_text }}">,</span>
-          <span class="ml-[1ch]">{{ comment.date | date(format="%d %b %Y %H") }}</span>
+          <span data-date-d-b-Y-H class="ml-[1ch]">{{ comment.date | date(format="%d %b %Y %H") }}</span>
           <span class="{{ cyan_text }}">:</span>
-          {{ comment.date | date(format="%M") }}
+          <span data-date-min>{{ comment.date | date(format="%M") }}</span>
           <span class="{{ cyan_text }}">:</span>
-          {{ comment.date | date(format="%S") }}
-          <span class="{{ cyan_text }} ml-[1ch]">{{ comment.date | date(format="%z") }}</span>
+          <span data-date-sec>{{ comment.date | date(format="%S") }}</span>
+          <span data-date-tz class="{{ cyan_text }} ml-[1ch]">{{ comment.date | date(format="%z") }}</span>
         </dd>
-        <dd class="inline-flex md:hidden {{ amber_text }} ml-[1ch]">
+        <dd data-date-sm class="inline-flex md:hidden {{ amber_text }} ml-[1ch]">
           <span class="text-blue-400">{{ comment.date | date() }}</span>
           <span class="text-pink-400 ml-[1ch]">{{ comment.date | date(format="%H:%M") }}</span>
           <span class="text-yellow-300 ml-[1ch]">{{ comment.date | date(format="%z") }}</span>
@@ -223,17 +254,42 @@
           {# dkim #}
           <span class="{{ blue_text }}">dkim</span>
           <span class="mr-2 {{ cyan_text }}">:</span>
-          {% if ctx.email.auth.dkim %}<span class="text-green-500 font-bold"> ✔</span>{% else %}<span class="text-red-500 font-bold"> x</span>{% endif %}
+          {% if ctx.email.auth.dkim or template %}
+            {% if template %}<template id="dkim-pass-template">{% endif %}
+            <span class="text-green-500 font-bold"> ✔</span>
+            {% if template %}</template>{% endif %}
+          {% endif %}
+          {% if not ctx.email.auth.dkim or template %}
+            {% if template %}<template id="dkim-fail-template">{% endif %}
+            <span class="text-red-500 font-bold"> x</span>
+            {% if template %}</template>{% endif %}
+          {% endif %}
           {# spf #}
           <span class="{{ cyan_text }}">,</span>
           <span class="ml-2 {{ blue_text }}">spf</span>
           <span class="mr-2 {{ cyan_text }}">:</span>
-          {% if ctx.email.auth.spf %}<span class="text-green-500 font-bold"> ✔</span>{% else %}<span class="text-red-500 font-bold"> x</span>{% endif %}
+          {% if ctx.email.auth.spf %}
+            {% if template %}<template id="spf-pass-template">{% endif %}
+            <span class="text-green-500 font-bold"> ✔</span>
+            {% if template %}</template>{% endif %}
+          {% else %}
+            {% if template %}<template id="spf-fail-template">{% endif %}
+            <span class="text-red-500 font-bold"> x</span>
+            {% if template %}</template>{% endif %}
+          {% endif %}
           {# dmarc #}
           <span class="{{ cyan_text }}">,</span>
           <span class="ml-2 {{ blue_text }}">dmarc</span>
           <span class="mr-2 {{ cyan_text }}">:</span>
-          {% if ctx.email.auth.dmarc %}<span class="text-green-500 font-bold"> ✔</span>{% else %}<span class="text-red-500 font-bold"> x</span>{% endif %}
+          {% if ctx.email.auth.dmarc %}
+            {% if template %}<template id="dmarc-pass-template">{% endif %}
+            <span class="text-green-500 font-bold"> ✔</span>
+            {% if template %}</template>{% endif %}
+          {% else %}
+            {% if template %}<template id="dmarc-fail-template">{% endif %}
+            <span class="text-red-500 font-bold"> x</span>
+            {% if template %}</template>{% endif %}
+          {% endif %}
           <span class="text-inherit before:content-[']'] before:dark:text-emerald-300"></span>
         </dd>
       </div>
@@ -242,10 +298,12 @@
   </header>
   <div class="prose prose-neutral dark:prose-invert mt-[2ch]">
     {% if ctx.comment.subject.fragment and ctx.comment.subject.fragment is starting_with("#:~:text=") %}
-    {% set text_fragment = util::urldecode(encoded=ctx.comment.subject.fragment
+      {% if template %}<template id="comment-text-fragment-template">{% endif %}
+      {# All of the following is an attempt to prevent the browser from highlighting the quoted text fragment - TODO: it doesn't work in safari #}
+      {% set text_fragment = util::urldecode(encoded=ctx.comment.subject.fragment
       | regex_replace(pattern="#:~:text=", rep="> ")) %}
-      <a href="{{ ctx.comment.subject.fragment }}" class="float-right font-serif  italic dark:text-violet-300">(source)</a>
-      <span>
+      <a data-text-fragment-src href="{{ ctx.comment.subject.fragment }}" class="float-right font-serif  italic dark:text-violet-300">(source)</a>
+      <span data-text-fragment-content>
       {% set left = text_fragment
         | split(pat="")
         | slice(end=-3)
@@ -261,8 +319,11 @@
         | markdown
         | safe }}
       </span>
+        {% if template %}</template>{% endif %}
     {% endif %}
+      {% if template %}<template id="comment-content-template">{% endif %}
     {{ comment.content | safe }}
+      {% if template %}</template>{% endif %}
   </div>
   <a
     href="{{ util::mailto(to=config.extra.comments_email, subject=current_path ~ '#' ~comment.slug, body=config.extra.mail_body_instructions) }}"
@@ -271,4 +332,5 @@
        font-light text-gray-800">r3ply!</a>
   <hr class="border-blue-400 mt-[2ch] pb-[0ch] border-dashed">
 </article>
+  {% if template %}</template>{% endif %}
 {% endmacro %}

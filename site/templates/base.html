@@ -139,7 +139,52 @@
               </div>
             </div>
           </summary>
-          {{ comments::write_all(for_comments=comments, doc=doc)}}
+          {# Set-up pending comments cache if enabled in r3ply config #}
+          {% set r3ply_config = load_data(path="/static/.well-known/r3ply/config.toml") %}
+          {% if r3ply_config.comments.cache %}
+          <script src="/scripts/pending-comments.js"></script>
+          <script type="module">
+            // url: URL that points directly to this page's cache endpoint
+            // e.g. https://api.r3ply.com/cache/comments/pending/example.com/blog/posts/123/
+            const cache_server = new URL("{{ config.extra.cache_server | safe }}")
+            const url = new URL("/cache/comments/pending/site.local.test{{ current_path | safe }}", cache_server)
+            try {
+              const response = await fetch(url)
+              if (!response.ok) {
+                console.warn("HTTP error:", response.status)
+              } else {
+                // filter out comments that are permanent now but still temporarily cached
+                const pending_comments = await response.json()
+                  .then(all => all.filter(c => document.getElementById(`${get_slug(c)}`) === null))
+                const rendered_comments = await render_pending_comments(pending_comments)
+                console.log(rendered_comments)
+                document.querySelector('#pending-comments h3 span').innerText = `(${pending_comments.length})`
+                rendered_comments.forEach(c => document.querySelector('#pending-comments-container').append(c))
+              }
+            } catch (error) {
+              console.error(error)
+            }
+
+          </script>
+          <details id="pending-comments" class="mb-6 p-4 ml-6 bg-gray-700/50
+            border border-dashed border-red-300 rounded-lg
+            group/pending-comments">
+            <summary class="after:content-['[+]'] group-open/pending-comments:after:content-['[-]'] after:font-mono
+              flex justify-end items-center gap-2 cursor-pointer">
+              <h3 class="text-xl font-light text-green-300">
+                Pending Comments
+                <span>(0)</span>
+              </h3></summary>
+            <div id="pending-comments-container" class="mt-6"></div>
+          </details>
+          {% endif %}
+          {{ comments::write_all(for_comments=comments, doc=doc, template=false) }}
+          {% set template_comments = get_section(path="comments/_index.md")
+            | get(key="pages")
+            | filter(attribute="extra.comment.document", value="/debug-comment-template/") %}
+          {% if r3ply_config.comments.cache %}
+            {{ comments::write_all(for_comments=template_comments, doc=doc, template=true) }}
+          {% endif %}
         </details>
       </section>
       {{ util::mailto_text_fragment(to=config.extra.comments_email, path=current_path, body=config.extra.mail_body_instructions) }}

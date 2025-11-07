@@ -3,7 +3,7 @@ import {
   R3plySiteConfig,
   R3plySignetConfig,
 } from '@r3ply/schema/config'
-import { SimulateCmdEmailOpts } from './cmd'
+import { simulate as cmd_simulate, cache as cmd_cache } from './cmd'
 import { comments, moderation } from '@r3ply/lib'
 import { util } from './util'
 import { highlight } from 'cli-highlight'
@@ -88,7 +88,7 @@ export namespace tty {
     export namespace simulate {
       export function print_comment_via_email_initial(
         email: string,
-        options: SimulateCmdEmailOpts,
+        options: cmd_simulate.SimulateCmdEmailOpts,
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'email')) {
           // TODO: for some reason highlight.js doesn't support `eml`???
@@ -109,7 +109,7 @@ export namespace tty {
           site_config,
         }: { site_config_path: string; site_config: R3plySiteConfig },
         email_event_response: comments.email.CommentEmailEventResponse,
-        options: SimulateCmdEmailOpts,
+        options: cmd_simulate.SimulateCmdEmailOpts,
         format: BaseCmdOptions['format'],
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'config')) {
@@ -365,7 +365,7 @@ export namespace tty {
         request: Result<moderation.LocalModerationRequest, Error>,
         ticket: moderation.LocalModerationTicket | undefined,
         count: number,
-        options: SimulateCmdEmailOpts,
+        options: cmd_simulate.SimulateCmdEmailOpts,
         format: BaseCmdOptions['format'],
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
@@ -478,7 +478,7 @@ export namespace tty {
         request: Result<moderation.GitHubModerationRequest, Error>,
         ticket: moderation.GitHubModerationTicket | undefined,
         count: number,
-        options: SimulateCmdEmailOpts,
+        options: cmd_simulate.SimulateCmdEmailOpts,
         format: BaseCmdOptions['format'],
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
@@ -599,7 +599,7 @@ export namespace tty {
         not_implemented_moderation_results: NonNullable<
           comments.email.CommentEmailEventResponse['moderation']
         >,
-        options: SimulateCmdEmailOpts,
+        options: cmd_simulate.SimulateCmdEmailOpts,
         format: BaseCmdOptions['format'],
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
@@ -652,6 +652,13 @@ export namespace tty {
             )
           }
         }
+      }
+    }
+    export namespace cache {
+      export function print_serving_cache(cache_dir: string, options: cmd_cache.CacheStartOpts) {
+        if (options.reset) console.log(`Resetting cache at ${cache_dir}`)
+        console.log(`Static server running at http://${options.interface}:${options.port}`);
+        console.log(`Serving files from: ${cache_dir}`);
       }
     }
   }

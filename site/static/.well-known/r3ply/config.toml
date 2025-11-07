@@ -17,6 +17,7 @@ label = "CLI"
 
 [comments]
 "paths*" = ["/demo/", "/docs/**/", "/project/**/"]
+cache = true
 
 [comments.email]
 "&comment_{}" = "comment.template.md"

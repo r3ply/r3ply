@@ -43,7 +43,7 @@ issued = ${result.issued}\n`)
     })
   })
 
-  api.get('/comments/pending/get/:domain/:path{.+}', async (c) => {
+  api.get('/cache/comments/pending/:domain/:path{.+}', async (c) => {
     const { domain, path } = c.req.param()
     c.res.headers.set('Access-Control-Allow-Origin', '*')
     return CommentCache(c.env.R3PLY_STAGING_DB)
