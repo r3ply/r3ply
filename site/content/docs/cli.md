@@ -70,18 +70,18 @@ Options:
 You should see something similar (but not exactly the same) as the following output:
 
 ```md
-Initialized empty r3ply project at /Users/spence/Desktop/deleteme
+Initialized empty r3ply project at /Users/demo/Developer/r3ply/site
 
 Add the following site entry to your config:
 
 [[site]]
 domain = "site.local.test"
 r3ply = "cli.r3ply.test"
-signet = "voyLvBfeRJ5W5ELcoJtf7A"
-issued = "2025-11-03"
+signet = "6Be8MUKnqpXZ73MDbX2u2g"
+issued = "2025-11-08"
 label = "CLI"
 
-Help: You can generate a config one with `re generate config` if you don't already have one.
+Help: You can generate a config with `re generate config` if you have not already.
 ```
 
 ## Working with Configs { #config }
@@ -174,13 +174,16 @@ Usage: re generate config [options]
 generate a config
 
 Options:
-  --site <domain>                          site domain the signet is issued to (default: "site.local.test")
-  --r3ply <r3ply domain>                   domain of issuing r3ply server (default: "cli.r3ply.test")
-  --date <YYYY-MM-DD>                      date signet was issued (default: "2025-11-03")
-  --label <string>                         name for this signet, e.g. "production", "test" (default: "CLI")
-  --moderation <github | webhook | local>  moderation method (default: "local")
-  --full                                   Generate config with defaults set for all values (default: false)
-  -h, --help                               display help for command
+  --site <domain>              site domain (default: "site.local.test")
+  --r3ply <r3ply domain>       r3ply domain (default: "cli.r3ply.test")
+  --date <YYYY-MM-DD>          date signet issued (default: "2025-11-08")
+  --label <string>             e.g. "prod", "test" (default: "CLI")
+  --comments <comment-source>  options are: email (default: "email")
+  --moderation <channel>       See below (default: "local")
+  --verbose                    include more defaults explicitly (default: false)
+  -h, --help                   display help for command
+
+Moderation <channel> options: <github | webhook | local>
 ```
 
 Generate a r3ply config with `re config generate`:
@@ -247,13 +250,10 @@ Usage: re generate signet [options]
 get a signet issued
 
 Options:
-  --site <domain>         domain the signet is issued to (default:
-                          "site.local.test")
-  --r3ply <r3ply domain>  domain of issuing r3ply server (default:
-                          "cli.r3ply.test")
-  --date <YYYY-MM-DD>     date signet was issued (default: "2025-11-03")
-  --label <string>        name for this signet, e.g. "production", "test"
-                          (default: "CLI")
+  --site <domain>         site domain (default: "site.local.test")
+  --r3ply <r3ply domain>  r3ply domain (default: "cli.r3ply.test")
+  --date <YYYY-MM-DD>     date issued (default: "2025-11-08")
+  --label <string>        e.g. "prod", "test" (default: "CLI")
   -h, --help              display help for command
 ```
 
@@ -337,36 +337,28 @@ Arguments:
   input                    Input text (can also accept pipe)
 
 Options:
-  --moderate               send comment for moderation (local-only) (default:
-                           false)
-  --dry-run                print output but have no side effects (default:
-                           false)
-  --message-id <id>        override Message-ID header
-  --date <date>            override Date header
-  --from <address>         override From header
-  --to <address>           override To header
-  --subject <url | path>   override email subject
-  --body <text>            override email body
-  --no-heading             hide headings for each stage of simulation
-  -q, --quiet [stage...]   silence output at `stages` or all output if stages is
-                           blank. stages are:
-                           [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify].
-                           Stages can be further narrowed by adding an `=` after
-                           the stage name:
-                           [config=site,config=system,moderation=local]. If a
-                           stage is acted upon as an array, then you can append
-                           an underscore to silce a specific element, e.g.
-                           moderation=local_0
-  -f, --filter [stage...]  filter output at `stages` or all output if stages is
-                           blank. stages are:
-                           [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify].
-                           Stages can be further narrowed by adding an `=` after
-                           the stage name:
-                           [config=site,config=system,moderation=local]. If a
-                           stage is acted upon as an array, then you can append
-                           an underscore to filter a specific element, e.g.
-                           moderation=local_0
+  --moderate               Moderate comment (local-only) (default: false)
+  --dry-run                Print output only (default: false)
+  --message-id <id>        Message-ID header
+  --date <date>            Date header (default: "now (UTC)")
+  --from <address>         From header
+  --to <address>           To header
+  --subject <url | path>   Email subject
+  --body <text>            Email body
+  --no-heading             Hide headings for each stage of simulation
+  -q, --quiet [stage...]   silence output at `stages` (or all output if stages is blank).
+  -f, --filter [stage...]  filter output at `stages` (or all output if stages is blank).
   -h, --help               display help for command
+
+Filtering/Silencing:
+  <stage> = <email | config | prescreen | receive | deliverable | prepare | comment | moderation | notify>
+  For substages add `=` after the stage name. Options are config=<site | system>, moderation=<github | webhook | local>
+  If a substage is an array you can append an underscore + index to specify which element, e.g. moderation=local_0
+
+Examples:
+  $ cat hello.txt | re simulate email --filter comment
+  $ re simulate email --subject /demo/ --silence prescreen,receive,deliverable
+  $ re simulate email --moderate --dry-run --body "testing" --filter comment,moderation=local_0
 ```
 
 Add `--moderate` to simulate moderation. Only local moderation will actually take effect on your file system. Use `--dry-run` to use moderation but without any effects taking place.

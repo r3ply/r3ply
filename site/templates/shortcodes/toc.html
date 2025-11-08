@@ -2,7 +2,7 @@
   <a href="#toc" class="float-right text-2xl text-pink-300 no-underline ml-2">#</a>
   {{ subtitle | default(value="## Table of Contents") | markdown | safe }}
   {% set doc = section | default(value=page) %}
-  <div class="w-fit pr-4 {% if doc.extra.comments.enabled %}border-b{% endif %} dark:border-gray-300 border-dashed">
+  <div class="pr-4 {% if doc.extra.comments.enabled %}border-b{% endif %} dark:border-gray-300 border-dashed">
   {{ body | markdown | safe }}
   </div>
 

@@ -42,7 +42,7 @@ export namespace init {
         'set date of CLI issued signet',
         dayjs().format('YYYY-MM-DD'),
       )
-      .option('--force', 'overwrite an existing r3ply project', false)
+      .option('-f, --force', 'overwrite an existing r3ply project', false)
       .option(
         '--rotate-keys',
         'regenerate anonymization and encryption keys',
@@ -139,8 +139,9 @@ export namespace generate {
     r3ply: string
     date: string
     label: string
+    comments: string
     moderation: string
-    full: boolean
+    verbose: boolean
   }
 
   export type GenerateEmailCmdOpts = {
@@ -162,30 +163,40 @@ export namespace generate {
       .description('generate a config')
       .option(
         '--site <domain>',
-        `site domain the signet is issued to`,
+        `site domain`,
         project.DEFAULT_SITE_DOMAIN,
       )
       .option(
         '--r3ply <r3ply domain>',
-        `domain of issuing r3ply server`,
+        `r3ply domain`,
         project.DEFAULT_R3PLY_DOMAIN,
       )
       .option(
         '--date <YYYY-MM-DD>',
-        'date signet was issued',
+        'date signet issued',
         dayjs().format('YYYY-MM-DD'),
       )
       .option(
         '--label <string>',
-        'name for this signet, e.g. "production", "test"',
+        'e.g. "prod", "test"',
         project.DEFAULT_CLI_SIGNET_LABEL,
       )
       .option(
-        '--moderation <github | webhook | local>',
-        'moderation method',
+        '--comments <comment-source>',
+        'options are: email',
+        'email',
+      )
+      .option(
+        '--moderation <channel>',
+        'See below',
         'local',
       )
-      .option('--full', 'Generate config with defaults set for all values', false)
+      .addHelpText('after', `\nModeration <channel> options: <github | webhook | local>`)
+      .option(
+        '--verbose',
+        'include more defaults explicitly',
+        false,
+      )
       .action(async (options: GenerateConfigCmdOpts) => {
         const site = await project.get_keys(cwd).then((keys) =>
           project.get_cli_system_config(cwd).then((system_config) => {
@@ -201,6 +212,7 @@ export namespace generate {
             )
           }),
         )
+        const minimal_comments_config = { [options.comments]: { enabled: true } }
         const minimal_github_config = {
           owner: '<YOUR_GITHUB_USERNAME>',
           repo: '<YOUR_PROJECT>',
@@ -214,7 +226,8 @@ export namespace generate {
         }
         const parsed = R3plySiteConfig({
           site: [{ ...site, label: options.label }],
-          comments: options.full ? { email: {} } : undefined,
+          // if --verbose is false it's removed later (set here to preserve desired key order for TOML)
+          comments: minimal_comments_config,
           moderation: {
             [options.moderation]: [
               (() => {
@@ -233,8 +246,14 @@ export namespace generate {
             ],
           },
         })
+
         const format = generate_cmd.parent!.opts<BaseCmdOptions>().format
-        tty.cmds.generate.print_config(parsed.value!, format)
+        const config_json = parsed.value! as any
+        // Here if --verbose is not set then a more minimal comments key is generated
+        if (options.verbose == false) {
+          config_json.comments = minimal_comments_config
+        }
+        tty.cmds.generate.print_config(config_json, format)
         return
       })
 
@@ -339,22 +358,22 @@ export namespace generate {
       .description('get a signet issued')
       .option(
         '--site <domain>',
-        `domain the signet is issued to`,
+        `site domain`,
         project.DEFAULT_SITE_DOMAIN,
       )
       .option(
         '--r3ply <r3ply domain>',
-        `domain of issuing r3ply server`,
+        `r3ply domain`,
         project.DEFAULT_R3PLY_DOMAIN,
       )
       .option(
         '--date <YYYY-MM-DD>',
-        'date signet was issued',
+        'date issued',
         dayjs().format('YYYY-MM-DD'),
       )
       .option(
         '--label <string>',
-        'name for this signet, e.g. "production", "test"',
+        'e.g. "prod", "test"',
         project.DEFAULT_CLI_SIGNET_LABEL,
       )
       .action(async (options: GenerateSignetCmdOpts) => {
@@ -448,8 +467,8 @@ export namespace simulate {
     simulate_cmd
       .command('email')
       .argument('[input]', 'Input text (can also accept pipe)')
-      .option('--moderate', 'Send comment for moderation (local-only)', false)
-      .option('--dry-run', 'Print output but have no side effects', false)
+      .option('--moderate', 'Moderate comment (local-only)', false)
+      .option('--dry-run', 'Print output only', false)
       .option('--message-id <id>', 'Message-ID header')
       .option('--date <date>', 'Date header', 'now (UTC)')
       .option('--from <address>', 'From header')
@@ -459,14 +478,22 @@ export namespace simulate {
       .option('--no-heading', 'Hide headings for each stage of simulation', true)
       .option(
         '-q, --quiet [stage...]',
-        `silence output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify]. Stages can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderation=local]. If a stage is acted upon as an array, then you can append an underscore to silce a specific element, e.g. moderation=local_0`,
+        `silence output at \`stages\` (or all output if stages is blank).`,
         util.split_list,
       )
       .option(
         '-f, --filter [stage...]',
-        `filter output at \`stages\` or all output if stages is blank. stages are: [email,config,prescreen,receive,deliverable,prepare,comment,moderation,notify]. Stages can be further narrowed by adding an \`=\` after the stage name: [config=site,config=system,moderation=local]. If a stage is acted upon as an array, then you can append an underscore to filter a specific element, e.g. moderation=local_0`,
+        `filter output at \`stages\` (or all output if stages is blank).`,
         util.split_list,
       )
+     .addHelpText('after', `\nFiltering/Silencing:
+  <stage> = <email | config | prescreen | receive | deliverable | prepare | comment | moderation | notify>
+  For substages add \`=\` after the stage name. Options are config=<site | system>, moderation=<github | webhook | local>
+  If a substage is an array you can append an underscore + index to specify which element, e.g. moderation=local_0`)
+    .addHelpText('after', `\nExamples:
+  $ cat hello.txt | re simulate email --filter comment
+  $ re simulate email --subject /demo/ --silence prescreen,receive,deliverable
+  $ re simulate email --moderate --dry-run --body "testing" --filter comment,moderation=local_0`)
       .action(async (input: string | undefined, options: SimulateCmdEmailOpts, cmd) => {
         // Check if date is default
         if (options.date == "now (UTC)") options.date = new Date().toUTCString()

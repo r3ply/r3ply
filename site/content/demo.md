@@ -178,8 +178,6 @@ Now, if only we had a captain. . . What about it? How much is it? That's 100 pie
 
 ### Comment Navigation { #comment-navigation }
 
-<div class="dark:prose-code:bg-transparent! dark:prose-code:text-violet-300!">
-
 This demo also implements a [hn](https://news.ycombinator.com) style commenting system with `prev`, `next`, `parent`, and `root` controls, in addition to adding a `#` control for a comment to link to itself.
 
 {% fig(dark="/screenshots/comment-navigation_desktop_dark.webp", add_class="p-4 rounded-lg bg-blue-100 dark:bg-slate-900", caption="Hackernews style comment navigation") %}
@@ -191,7 +189,5 @@ On mobile it uses a shorthand version of the same navigation, but `/` for root, 
 {% fig(dark="/screenshots/comment-navigation_mobile_dark.webp", add_class="p-4 rounded-lg bg-blue-100 dark:bg-slate-900", caption="*nix style symbols for 'root', 'parent', and 'self'.") %}
 ![Screenshot showing "hackernews" style but on mobile](/screenshots/comment-navigation_mobile_light.webp)
 {% end %}
-
-</div>
 
 {{ fleuron_fish(add_class="mb-2") }}
