@@ -153,7 +153,7 @@
           <script type="module">
             // url: URL that points directly to this page's cache endpoint
             // e.g. https://api.r3ply.com/cache/comments/pending/example.com/blog/posts/123/
-            const hostname = new URL("{% if is_pages %}{{ current_url }}{% else %}https://site.local.test{% endif %}")
+            const hostname = new URL("{% if is_pages %}{{ current_url | safe }}{% else %}https://site.local.test{% endif %}")
               .hostname
             const cache_server = new URL("{{ config.extra.cache_server | safe }}")
             const url = new URL(`/cache/comments/pending/${hostname}{{ current_path | safe }}`, cache_server)

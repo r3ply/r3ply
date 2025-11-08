@@ -2,6 +2,13 @@ version = "0.0.1"
 enabled = true
 
 [[site]]
+domain = "r3ply.com"
+r3ply = "r3ply.com"
+signet = "3ittH-OrSNatN6CoWg6syw"
+issued = 2025-11-08
+label = "prod"
+
+[[site]]
 domain = "r3ply-site.pages.dev"
 r3ply = "test.r3ply.com"
 signet = "QbToBhCu13sPzj9Btx8dkw"

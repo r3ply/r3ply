@@ -1,5 +1,5 @@
 # The URL the site will be built for
-base_url = "https://r3ply-site.pages.dev"
+base_url = "https://r3ply.com"
 
 # The site title and description; used in feeds by default.
 title = "r3ply - comments simple as email"
@@ -69,10 +69,10 @@ index_format = "fuse_json" # or "fuse_javascript"
 
 [extra]
 r3ply_version = "0.0.1"
-cache_server = "http://127.0.0.1:2274"
+cache_server = "https://r3ply.com"
 # Put all your custom variables here
-r3ply_api_domain = "test.r3ply.com"
-comments_email = "r3ply-site.pages.dev@test.r3ply.com"
+r3ply_api_domain = "r3ply.com"
+comments_email = 'r3ply site & docs <r3ply.com@r3ply.com>'
 mail_body_instructions = """
 
 ﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍

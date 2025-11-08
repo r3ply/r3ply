@@ -1,6 +1,6 @@
 +++
 template = "comment.html"
-title = {{ comment.txt[:120] | json_encode }}
+title = {{ comment.txt[:120] | trim | json_encode }}
 authors = {{ [author.pseudonym] | str }}
 date = {{ email.date }}
 slug = {{ comment.id[:8] | json_encode }}
