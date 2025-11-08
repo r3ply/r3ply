@@ -297,7 +297,7 @@ STARS ABOVE YOU
 
 See [chrono docs ↗](https://docs.rs/chrono/0.4.39/chrono/format/strftime/index.html) for info on formatting dates
 
-## Template Context
+## Template Context { #template-context }
 
 The _template context_ is what variables are available to your templates.
 

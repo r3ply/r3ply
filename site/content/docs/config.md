@@ -247,6 +247,8 @@ label = "CLI"
 [comments]
 {{ schema_comment(key="enabled" version="v0.0.1", schema="config/comments") }}
 enabled = true
+{{ schema_comment(key="paths*" version="v0.0.1", schema="config/comments") }}
+"paths*" = ["/demo/", "/docs/**/", "/project/**/"]
 {{ schema_comment(key="cache" version="v0.0.1", schema="config/comments") }}
 cache = false
 {{ schema_comment(key="md_to_html" version="v0.0.1", schema="config/comments") }}
@@ -392,6 +394,8 @@ The `comments` key is where the behavior for comments is adjusted. Here are the 
 [comments]
 {{ schema_comment(key="enabled" version="v0.0.1", schema="config/comments") }}
 enabled = true
+{{ schema_comment(key="paths*" version="v0.0.1", schema="config/comments") }}
+"paths*" = ["/demo/", "/docs/**/", "/project/**/"]
 {{ schema_comment(key="cache" version="v0.0.1", schema="config/comments") }}
 cache = false
 {{ schema_comment(key="md_to_html" version="v0.0.1", schema="config/comments") }}
