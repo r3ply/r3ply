@@ -150,13 +150,18 @@
           <script src="/scripts/pending-comments.js"></script>
           {# Used to determine if we're running in a CF environment or not #}
           {% set is_pages = get_env(name="CF_PAGES", default=false) %}
+          {% if is_pages %}
+            {% set site_domain = config.extra.prod.site_domain %}
+            {% set cache_server = config.extra.prod.cache_server %}
+          {% else %}
+            {% set site_domain = config.extra.local.site_domain %}
+            {% set cache_server = config.extra.local.cache_server %}
+          {% endif %}
           <script type="module">
             // url: URL that points directly to this page's cache endpoint
             // e.g. https://api.r3ply.com/cache/comments/pending/example.com/blog/posts/123/
-            const hostname = new URL("{% if is_pages %}{{ current_url | safe }}{% else %}https://site.local.test{% endif %}")
-              .hostname
-            const cache_server = new URL("{{ config.extra.cache_server | safe }}")
-            const url = new URL(`/cache/comments/pending/${hostname}{{ current_path | safe }}`, cache_server)
+            const cache_server = new URL("{{ cache_server | safe }}")
+            const url = new URL(`/cache/comments/pending/{{ site_domain | safe }}{{ current_path | safe }}`, cache_server)
             try {
               const response = await fetch(url)
               if (!response.ok) {

@@ -67,10 +67,9 @@ taxonomies = "off"
 [search]
 index_format = "fuse_json" # or "fuse_javascript"
 
+# Put all your custom variables here
 [extra]
 r3ply_version = "0.0.1"
-cache_server = "https://r3ply.com"
-# Put all your custom variables here
 r3ply_api_domain = "r3ply.com"
 comments_email = 'r3ply site & docs <r3ply.com@r3ply.com>'
 mail_body_instructions = """
@@ -88,3 +87,11 @@ A subset of markdown can be used
 (Email signatures below 👇 will be ignored)
 ﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉﹉
 """
+
+[extra.prod]
+site_domain = "r3ply.com"
+cache_server = "https://r3ply.com"
+
+[extra.local]
+site_domain = "site.local.test"
+cache_server = "http://127.0.0.1:2274"

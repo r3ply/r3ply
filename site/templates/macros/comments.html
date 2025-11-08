@@ -268,11 +268,12 @@
           <span class="{{ cyan_text }}">,</span>
           <span class="ml-2 {{ blue_text }}">spf</span>
           <span class="mr-2 {{ cyan_text }}">:</span>
-          {% if ctx.email.auth.spf %}
+          {% if ctx.email.auth.spf or template %}
             {% if template %}<template id="spf-pass-template">{% endif %}
             <span class="text-green-500 font-bold"> ✔</span>
             {% if template %}</template>{% endif %}
-          {% else %}
+          {% endif %}
+          {% if not ctx.email.auth.spf or template %}
             {% if template %}<template id="spf-fail-template">{% endif %}
             <span class="text-red-500 font-bold"> x</span>
             {% if template %}</template>{% endif %}
@@ -281,11 +282,12 @@
           <span class="{{ cyan_text }}">,</span>
           <span class="ml-2 {{ blue_text }}">dmarc</span>
           <span class="mr-2 {{ cyan_text }}">:</span>
-          {% if ctx.email.auth.dmarc %}
+          {% if ctx.email.auth.dmarc or template %}
             {% if template %}<template id="dmarc-pass-template">{% endif %}
             <span class="text-green-500 font-bold"> ✔</span>
             {% if template %}</template>{% endif %}
-          {% else %}
+           {% endif %}
+          {% if not ctx.email.auth.dmarc or template %}
             {% if template %}<template id="dmarc-fail-template">{% endif %}
             <span class="text-red-500 font-bold"> x</span>
             {% if template %}</template>{% endif %}
