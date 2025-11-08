@@ -24,9 +24,6 @@ pre code {
 }
 
 .prose {
-  sup {
-    margin-left: 0.5ch;
-  }
   /* tailwind prose doesn't have a footer styling so I have to style it here */
   footer {
     margin-top: 3em;

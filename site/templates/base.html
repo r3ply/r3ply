@@ -132,9 +132,11 @@
               <div class="fixed inset-0 hidden peer-checked:flex z-10 px-6 items-center justify-center bg-slate-950/50 dark:bg-gray-500/80">
                 <div class="pointer-events-auto relative max-h-[90vh] overflow-y-auto p-4 rounded-lg bg-blue-50 dark:bg-slate-900 shadow">
                   <label for="commenting-instructions" class="pointer-events-auto absolute top-3 right-5 text-black dark:text-inherit cursor-pointer">Close</label>
-                  <div class="py-6 prose dark:prose-invert prose-code:wrap-anywhere text-left">
+                  <div class="py-6 prose prose-pink dark:prose-invert prose-code:wrap-anywhere text-left">
                     {{ load_data(path="commenting-instructions.md")
+                        | regex_replace(pattern="\{\{ mailto \}\}", rep=util::mailto(to=config.extra.comments_email, subject=current_path, body=config.extra.mail_body_instructions))
                         | regex_replace(pattern="\{\{ current_path \}\}", rep=current_path)
+                        | regex_replace(pattern="\{\{ mailto_body \}\}", rep=config.extra.mail_body_instructions)
                         | markdown
                         | safe }}
                   </div>
