@@ -32,6 +32,10 @@ pre code {
     margin-top: 3em;
     padding-top: 2em;
     border-top: 1px solid var(--color-gray-800);
+    /* Dark mode variant */
+    @media (prefers-color-scheme: dark) {
+      border-top: 1px solid var(--color-gray-300); /* lighter border for dark bg */
+    }
   }
   /* Use default for selecting text inside long code snippets */
   pre code {

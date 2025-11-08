@@ -100,10 +100,12 @@
       <section id="comments" class="py-12 border-t-4 border-blue-300 dark:border-pink-300 border-dashed md:pr-6 pr-2 overflow-x-scroll bg-orange-50 bg-[url(/patterns/bank-note.svg)] dark:bg-inherit">
         <details class="group" open>
           <summary class="pl-4 pointer-events-none">
+            {# title #}
             <h2 class="text-center text-4xl md:text-5xl font-thin">
               Comments ({{ comments | length }})
               <a href="#comments" class="text-pink-400 font-normal">#</a>
             </h2>
+            {# controls #}
             <div id="comment-controls" class="flex justify-center gap-2 md:gap-16 my-12 text-center">
               {% set controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer pointer-events-auto md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
               <a
@@ -125,11 +127,12 @@
                 <span class="hidden md:inline pointer-events-auto">Expand All</span>
                 <span class="inline md:hidden">Expand</span>
               </div>
+              {# 'info' modal #}
               <input type="checkbox" id="commenting-instructions" class="peer hidden">
-              <div class="fixed inset-0 hidden peer-checked:flex z-10 px-6 items-center justify-center bg-slate-950/50 dark:bg-white/25">
-                <div class="pointer-events-auto relative max-h-[90vh] overflow-y-auto p-4 rounded-lg bg-blue-50 shadow">
-                  <label for="commenting-instructions" class="pointer-events-auto absolute top-3 right-5 text-black cursor-pointer">Close</label>
-                  <div class="prose py-6 prose-code:wrap-anywhere text-left">
+              <div class="fixed inset-0 hidden peer-checked:flex z-10 px-6 items-center justify-center bg-slate-950/50 dark:bg-gray-500/80">
+                <div class="pointer-events-auto relative max-h-[90vh] overflow-y-auto p-4 rounded-lg bg-blue-50 dark:bg-slate-900 shadow">
+                  <label for="commenting-instructions" class="pointer-events-auto absolute top-3 right-5 text-black dark:text-inherit cursor-pointer">Close</label>
+                  <div class="py-6 prose dark:prose-invert prose-code:wrap-anywhere text-left">
                     {{ load_data(path="commenting-instructions.md")
                         | regex_replace(pattern="\{\{ current_path \}\}", rep=current_path)
                         | markdown

@@ -159,3 +159,4 @@ On mobile it uses a shorthand version of the same navigation, but `/` for root, 
 
 </div>
 
+{{ fleuron_fish(add_class="mb-2") }}
