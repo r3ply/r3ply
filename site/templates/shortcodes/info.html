@@ -13,6 +13,6 @@
   {% set style = "dark:border-red-300" %}
   {% set emoji = emoji | default(value="‼️") %}
 {% endif %}
-<div class="my-10 rounded-xl border-2 border-dashed flex prose-p:text-justify prose-p:mr-8 prose-pre:mr-12 {{ style }}">
-  <span class="text-3xl self-center mx-3">{{ emoji }}</span><div class="shrink">{{ body | markdown | safe }}</div>
+<div class="my-12 rounded-xl border-2 border-dashed flex prose-p:text-justify prose-p:my-4 md:prose-p:my-8 prose-p:mr-6 md:prose-p:mr-8 prose-pre:mr-12 {{ style }} leading-5">
+  <span class="text-3xl self-center mx-1.5 md:mx-3">{{ emoji }}</span><div class="shrink">{{ body | markdown | safe }}</div>
 </div>

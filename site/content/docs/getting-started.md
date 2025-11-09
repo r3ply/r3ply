@@ -11,7 +11,7 @@ enabled = true
 In this tutorial we're going to walkthrough using r3ply from start to finish with an example. We will be installing the `re` CLI tool, generating a config, simulating a comment, and then discussing next steps. Follow the the steps below from within your project's top-level directory.
 
 {% toc() %}
-- [Installation/Setup](#installation-and-setup)
+- [Installation & Setup](#installation-and-setup)
 - [Generating a Config](#generating-a-config)
 - [Simulating a Comment](#simulating-a-comment)
 - [What's Inside a Comment](#inside-a-comment)
@@ -23,7 +23,7 @@ In this tutorial we're going to walkthrough using r3ply from start to finish wit
 
 ## Installation & Setup { #installation-and-setup }
 
-For this tutorial we will need to install the r3ply CLI tool called `re`.
+For this tutorial you will need to install the r3ply CLI tool called `re`.
 
 ```bash
 # use npm -D @r3ply/cli for per project installations
@@ -124,6 +124,10 @@ re config set-default <your-config-path>
 
 We can run `re config validate` to verify that our config is well formed. If there's no output then you're ready to proceed to the next section and begin simulating email comments.
 
+{% info(type="warning") %}
+If you do see output from `re config validate` then you will need to fix it before you move on.
+{% end %}
+
 ## Simulating a Comment
 
 ```bash
@@ -133,12 +137,10 @@ re simulate email --moderate
 You should see a large amount of text representing each stage of the comment processing pipeline. The [docs](/todo) cover output more in-depth, but it's basically the entire email to comment pipeline broken into stages.
 
 {% info(type="tip") %}
-
-The CLI docs also cover how to [silence and filter](@/docs/cli.md#simulate-filtering-output) this output. Check it out later.
-
+`re simulate email` generates a pretty huge amount of text. Normally it will be filtered. The [CLI docs](@/docs/cli.md#simulate-filtering-output) cover how to do that.
 {% end %}
 
-The `--moderate` flag told `re` to simulate email to comment pipeline, _and then_ to send that comment for moderation. Towards the bottom of the output you should see something similar to this (but not exactly the same):
+The `--moderate` flag told `re` to to send the comment for moderation. Towards the bottom of the output you should see something similar to this (but not exactly the same):
 
 <!-- prettier-ignore-start -->
 ```toml, linenos, hl_lines=23-24, name=moderation results
@@ -155,7 +157,7 @@ bypass = false
 
   # `relative_path` is relative to project root.
   [request.args]
-  relative_path = "content/comments/b69922e4.json"
+  relative_path = "content/comments/49aa56d3.json"
   # `comment` variable elided, see comment output from earlier steps in docs
   comment = '[elided... see "Comment: Processed" above]'
 
@@ -165,7 +167,7 @@ bypass = false
 
 # `ticket.local` is the response to a request for local moderation.
 [ticket.local]
-absolute_path = "/Users/demo/Developer/r3ply/site/content/comments/b69922e4.json"
+absolute_path = "/Users/demo/Developer/r3ply/site/content/comments/49aa56d3.json"
 ```
 <!-- prettier-ignore-end -->
 
@@ -175,7 +177,7 @@ At the bottom we see the `absolute_path` the comment was written to. You can cha
 
 Now that we can simulate the receiving comments based on a real configuration, we need to understand what's inside a comment object. Open the file that was at the `absolute_path` from the last step. You can also expand the one that was used during the making of this tutorial.
 
-<details class="group" id="full-comment-example">
+<details class="group">
   <summary class="bg-violet-300 border-2 border-black dark:border-blue-400 rounded-lg py-3 px-2 w-48 hover:cursor-pointer font-extrabold text-gray-800 ml-auto">
     <span class="group-open:hidden">Expand to See File</span>
     <span class="hidden group-open:inline">Close File Details</span>
@@ -191,28 +193,28 @@ Now that we can simulate the receiving comments based on a real configuration, w
     "issued": "2025-10-16"
   },
   "author": {
-    "pseudonym": "2ec68974e2f82e9bd891a351eefe4bbeefe2670b745c861df31c975e54c207c1",
-    "token": "kktE_W_Nlh95kjQpAbbcDkpOPtTjh8SRJNAdulGWav5Nv0zJNUABG91PMIeTo8K6PyMXkHp8iJsxuR-Qg0rFwKLk3LmZt0NTJ1SNUOLL8-0k0Ik-bNSBWCnH_lRCkWFc7LRpTfPNurZ7ncifRVFGbqgKrFoLhvwGSujQivorr9tNKq_r7C2aTyb-ECmTWJdgWVHaD4lwetqv0tU-tueGkBlbTHWlAR6JUX2UwOrQrTSgzx6Ft3-hb4Q9esLhlN1ffUK43Ov0E8dhGReH-Uy1fj2k_EzyOwLLfZ771mkfC4dMsjPl0jMZTSjDQqP-tK3hiA5xJsC6Aa00S04ZFVXBIZVNHEgds4AbcfUhpZqwOfBLfCXey4scQBW5DZFGkF3Km3_gaBJUYKTaYoYLN71Xd5rjELcpahwzvxUurUoNYQn-D6zt_U-Fbt4SeoA9370ivV1U0HeY6w-5YWrk"
+    "pseudonym": "30e991c8dd7ef21de607f346d063d68033338049778be8aee61410c8a96a4d13",
+    "token": "qQ3KhRG_ZTbBOBZ9vFWk2MSWhHeWJ8ZBSKXbwwyRdp6auUPlq0MavGiVo0q0P2QWQzf-S7a4KrFioEmyag_6EbxHeXXsZzxElT85e68Hb4Be5p75BdClBeVOCqqHONjRB6R9KxXcjW4V313HVTBHG8iH0H4IwJ0iYoPov_b3Tk-OULtHrNS1rpzdP_1s2atMqm02qhPvWDneC2D-dwXdC0YBMoRvonBI40UPBKT5g_ukpf_GI9T3r8Q-Is_9kjPM8hJ2AQ9vKRME3a3qxH6-139UtCVjgdNhvb5S1qyUWy7afZvv0RZNFS8qLJwy63czZR1rGvT8Jx9fvfrKt-zYYjt8BnggopaWqecSTfqzfPCHHZ-SFhvbhzvUPpnmmrsafSRHR2k0-77lI9LKT9jWiBd5bGykNtS-OO4ggRjKd7iii4ofqM7WywQxQVlylmbkSt4hxq1s7Rdn8KV9"
   },
   "comment": {
-    "id": "b69922e4da6e45cf9cd75cc3b878fc5c",
-    "ts_rcvd": "1761144137",
+    "id": "49aa56d3ab184f67a4643437d0837aef",
+    "ts_rcvd": "1762680510",
     "subject": {
-      "url": "https://site.local.test/reviews/toughest-fights-in-monkey-island",
+      "url": "https://site.local.test/docs/getting-started/",
       "origin": "https://site.local.test",
       "protocol": "https:",
       "hostname": "site.local.test",
-      "path": "/reviews/toughest-fights-in-monkey-island"
+      "path": "/docs/getting-started/"
     },
-    "txt": "Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?",
-    "md": "<p>Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?</p>\n",
-    "html": "<p>Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?</p>\n"
+    "txt": "If you think about it... commenting systems have been a sort of a [great filter](https://en.wikipedia.org/wiki/Great_Filter) for websites, since at least the 1990s.\r\n",
+    "md": "<p>If you think about it... commenting systems have been a sort of a <a href=\"https://en.wikipedia.org/wiki/Great_Filter\">great filter</a> for websites, since at least the 1990s.</p>\n",
+    "html": "<p>If you think about it... commenting systems have been a sort of a <a href=\"https://en.wikipedia.org/wiki/Great_Filter\" rel=\"noopener noreferrer\">great filter</a> for websites, since at least the 1990s.</p>\n"
   },
   "email": {
     "to": "site.local.test@cli.r3ply.test",
-    "subject": "https://site.local.test/reviews/toughest-fights-in-monkey-island",
-    "date": "2018-08-26T07:24:01+00:00",
-    "text": "Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?",
+    "subject": "/docs/getting-started/",
+    "date": "2025-11-09T09:28:30+00:00",
+    "text": "If you think about it... commenting systems have been a sort of a [great filter](https://en.wikipedia.org/wiki/Great_Filter) for websites, since at least the 1990s.\r\n",
     "auth": {
       "dkim": false,
       "spf": false,
@@ -220,10 +222,10 @@ Now that we can simulate the receiving comments based on a real configuration, w
       "pass": false
     },
     "from": {
-      "pseudonym": "2ec68974e2f82e9bd891a351eefe4bbeefe2670b745c861df31c975e54c207c1",
+      "pseudonym": "acae7e02620773047964ab4e7e6af86278d93582f3e6bd67640936f7e51229c3",
       "signet": "wWM5hk4DKr1xVRhVq-7aog",
       "issued": "2025-10-16",
-      "token": "kktE_W_Nlh95kjQpAbbcDkpOPtTjh8SRJNAdulGWav5Nv0zJNUABG91PMIeTo8K6PyMXkHp8iJsxuR-Qg0rFwKLk3LmZt0NTJ1SNUOLL8-0k0Ik-bNSBWCnH_lRCkWFc7LRpTfPNurZ7ncifRVFGbqgKrFoLhvwGSujQivorr9tNKq_r7C2aTyb-ECmTWJdgWVHaD4lwetqv0tU-tueGkBlbTHWlAR6JUX2UwOrQrTSgzx6Ft3-hb4Q9esLhlN1ffUK43Ov0E8dhGReH-Uy1fj2k_EzyOwLLfZ771mkfC4dMsjPl0jMZTSjDQqP-tK3hiA5xJsC6Aa00S04ZFVXBIZVNHEgds4AbcfUhpZqwOfBLfCXey4scQBW5DZFGkF3Km3_gaBJUYKTaYoYLN71Xd5rjELcpahwzvxUurUoNYQn-D6zt_U-Fbt4SeoA9370ivV1U0HeY6w-5YWrk"
+      "token": "qQ3KhRG_ZTbBOBZ9vFWk2MSWhHeWJ8ZBSKXbwwyRdp6auUPlq0MavGiVo0q0P2QWQzf-S7a4KrFioEmyag_6EbxHeXXsZzxElT85e68Hb4Be5p75BdClBeVOCqqHONjRB6R9KxXcjW4V313HVTBHG8iH0H4IwJ0iYoPov_b3Tk-OULtHrNS1rpzdP_1s2atMqm02qhPvWDneC2D-dwXdC0YBMoRvonBI40UPBKT5g_ukpf_GI9T3r8Q-Is_9kjPM8hJ2AQ9vKRME3a3qxH6-139UtCVjgdNhvb5S1qyUWy7afZvv0RZNFS8qLJwy63czZR1rGvT8Jx9fvfrKt-zYYjt8BnggopaWqecSTfqzfPCHHZ-SFhvbhzvUPpnmmrsafSRHR2k0-77lI9LKT9jWiBd5bGykNtS-OO4ggRjKd7iii4ofqM7WywQxQVlylmbkSt4hxq1s7Rdn8KV9"
     }
   }
 }
@@ -252,9 +254,9 @@ Next let's look at `author`:
 ```json, name=author information
   ...
   "author": {
-    "pseudonym": "2ec68974e2f82...",
+    "pseudonym": "30e991c8dd7ef21de607f346d063d68033338049778be8aee61410c8a96a4d13",
     "token": "..."
-  },
+  }
   ...
 ```
 
@@ -263,79 +265,89 @@ Here we see details about the comment's author. Their email address has been ano
 ```json, name=comment payload
   ...
   "comment": {
-    "id": "b69922e4da6e45cf9cd75cc3b878fc5c",
-    "ts_rcvd": "1761144137",
+    "id": "49aa56d3ab184f67a4643437d0837aef",
+    "ts_rcvd": "1762680510",
     "subject": {
-      "url": "https://site.local.test/reviews/toughest-fights-in-monkey-island",
+      "url": "https://site.local.test/docs/getting-started/",
       "origin": "https://site.local.test",
       "protocol": "https:",
       "hostname": "site.local.test",
-      "path": "/reviews/toughest-fights-in-monkey-island"
+      "path": "/docs/getting-started/"
     },
-    "txt": "Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?",
-    "md": "<p>Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?</p>\n",
-    "html": "<p>Is it possible to run a startup successfully without Investor/funding. Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?</p>\n"
+    "txt": "If you think about it... commenting systems have been a sort of a [great filter](https://en.wikipedia.org/wiki/Great_Filter) for websites, since at least the 1990s.\r\n",
+    "md": "<p>If you think about it... commenting systems have been a sort of a <a href=\"https://en.wikipedia.org/wiki/Great_Filter\">great filter</a> for websites, since at least the 1990s.</p>\n",
+    "html": "<p>If you think about it... commenting systems have been a sort of a <a href=\"https://en.wikipedia.org/wiki/Great_Filter\" rel=\"noopener noreferrer\">great filter</a> for websites, since at least the 1990s.</p>\n"
   },
   ...
 ```
 
-Here's the actual `comment` object. There're three nearly identical versions of the comment body: `txt`, `md`, and `html`. This is because r3ply supports text written as markdown, as well as converting that markdown to HTML, but it will also strip out malicious html tags. You can configure this further within the `[comment]` object ([docs](@/docs/config.md#comments-configuration)).
+Here's the actual `comment` object. There're three nearly identical versions of the comment body: `txt`, `md`, and `html`. This is because r3ply supports text written as markdown, as well as converting that markdown to HTML, but it will also strip out malicious html tags. You can configure this further within `[comment.sanitize_html]` ([docs](@/docs/config.md#comments-configuration)).
+
+{% info(type="warning") %}
+It is strongly advised to only use the `.html` content when you render your comments. Out of the three, only `.html` is sanitized. Otherwise it's possible malicious comments could be crafted.
+{% end %}
 
 There's also the `subject` field of the `comment` object, which tells us the URL of what the comment was in response to. Using this you should be able to identify the page the comment belongs on.
 
-## Integrating Comments in Your Site
+## Integrating Comments { #integrating-comments }
 
-To take the comments and build them into your site you just treat them like you would do any other content. Since everyone's websites are built differently, specific advice can't be given, however r3ply allows you to customize how comments look using a templating language. Therefore you have a few options at your disposal. The choice is yours.
+To build comments into your site you just treat them like you would do any other content. Since everyone's websites are built differently, specific advice can't be given, however r3ply allows you to customize how comments look using a templating language ([docs](@/docs/templating.md)). Therefore you have a few options at your disposal.
 
 1. You can just save comments as plain json files and build your site from those
 2. or you can customize it in a way that works with how you would like them to be built into your site.
 
-Let's look at a quick example though, using the comment [from above](./#full-comment-example). We could render that comment as HTML as follows:
+{% info(type="tip") %}
+It's recommended to store the original JSON somewhere in your comment, even if you do template it. This is in case you ever need to migrate old comments to a new look.
+
+The variable `__tera_context` is how you access the whole object.
+{% end %}
+
+Let's look at a quick example though, using the comment [from above](#inside-a-comment). We could render that comment as HTML as follows:
 
 ```html, name=html example of comment
 <article data-comment-id="48ec61da69b743cda2d6747efe6dca80">
   <header>
-    <time datetime="2025-11-08T14:58:08+00:00">26 August, 2025</time>
+    <time datetime="2025-11-08T14:58:08+00:00">11 November, 2025</time>
     <span> - </span>
-    <strong>5b4f46b</strong> 🗣️
+    <strong>30e991c8</strong> 🗣️
   </header>
   <section>
     <blockquote>
-      <p>I would appreciate the advice. Top 10 reasons or even top 5 reasons. What are your favorite tech and non-tech podcasts?</p>
+      <p>If you think about it... commenting systems have been a sort of a <a href="https://en.wikipedia.org/wiki/Great_Filter" rel="noopener noreferrer">great filter</a> for websites, since at least the 1990s.</p>
     </blockquote>
   </section>
   <hr>
   <nav>
-    <a href="/reviews/guybrushs-best-comebacks">View related post</a>
-    <a href="/commenters/5b4f46b5/">More posts by user</a>
+    <a href="/docs/getting-started/">View related post</a>
+    <a href="/commenters/30e991c8/">More posts by user</a>
   </nav>
 </article>
-
 ```
 
 And that same comment above would render like this (with a little added styling):
 
-<article class="bg-teal-600 p-4 md:p-6 rounded-lg" data-comment-id="b69922e4da6e45cf9cd75cc3b878fc5c">
-  <header class="text-black text-xl">
-    <time datetime="2018-08-26T07:24:01+00:00" class="text-blue-700 font-serif">August 26, 2018</time><span class="text-black"> - </span><strong class="text-gray-900 font-mono">2ec6897</strong> 🗣️
-  </header>
-  <section>
-    <blockquote class="border-red-400 text-black!">
-      Is it possible to run a startup successfully without Investor/funding? Is there any platform where I could contribute to build a project based on ongoing research, like implementing a research paper?
-      <p>And if yes, are there any conceivable reasons for a startup to be a bank startup?</p>
-    </blockquote>
-  </section>
-  <hr class="m-0 p-0">
-  <nav class="flex justify-end items-center divide-x divide-red-400">
-    <a class="px-2 text-yellow-500!"
-       href="/reviews/toughest-fights-in-monkey-island/">
-      View related post
-    </a>
-    <a class="px-2 text-yellow-500!" href="/commenters/2ec6897/">More posts by user</a>
-  </nav>
-</article>
+<div class="p-4 rounded-lg dark:bg-gray-800/50 bg-blue-200/50">
+  <article class="bg-teal-500 dark:bg-teal-600 rounded-lg p-4 md:p-6" data-comment-id="b69922e4da6e45cf9cd75cc3b878fc5c">
+    <header class="text-black text-xl">
+      <time datetime="2025-11-09T09:28:30+00:00" class="text-blue-800 dark:text-blue-700 font-serif">11 November, 2025</time><span class="text-black"> - </span><strong class="text-gray-900 font-mono">30e991c8</strong> 🗣️
+    </header>
+    <section>
+      <blockquote class="border-red-400 text-black!">
+        <p>If you think about it... commenting systems have been a sort of a <a class="text-gray-600! dark:text-slate-700!" href="https://en.wikipedia.org/wiki/Great_Filter" rel="noopener noreferrer">great filter</a> for websites, since at least the 1990s.</p>
+      </blockquote>
+    </section>
+    <hr class="my-6! md:my-8! border-teal-600! dark:border-violet-500!">
+    <nav class="flex justify-end items-center divide-x divide-teal-800 dark:divide-violet-300">
+      <a class="px-2 text-violet-500 dark:text-teal-400!"
+        href="/docs/getting-started/">
+        View related post
+      </a>
+      <a class="px-2 text-violet-500 dark:text-teal-400!" href="/commenters/30e991c8/">More posts by user</a>
+    </nav>
+  </article>
+</div>
 
-To get something like the above example you can add the `comment_{}` variable (under `[comments]`):
+To get something like the above example you can add the `comment_{}` variable (under `[comments.email]`):
 
 <!-- prettier-ignore-start -->
 ```toml, linenos, name=updated config with templating, hl_lines=13-31
@@ -383,7 +395,11 @@ webhook = [ ]
 ```
 <!-- prettier-ignore-end -->
 
-To get more ideas on what's possible, check out the [demo](@/demo.md) section of the website.
+{% info(type="tip") %}
+If your `comment_{}` gets too long then you can put it in a separate file and reference that file with `&comment_{}` ([docs](@/docs/config.md#variables-and_types)).
+{% end %}
+
+There is much more you can do with building your comment section using templating. To get some ideas check out the [demo](@/demo.md) section.
 
 ## Summary & Next Steps { #next-steps }
 
@@ -409,7 +425,19 @@ repo = "<REPO>"
 "file_path_{}" = "content/comments/{{ comment.id[:8] }}.md"
 ```
 
-Finally, read the [config](/todo) and [CLI](/todo) docs to take full advantage of r3ply.
+{% info(type="tip") %}
+To use GitHub moderation with a private repo, you have to give the [r3ply GitHub bot](https://github.com/apps/r3ply) permission to access your repo.
+{% end %}
+
+With GitHub moderation you should see incoming comments like this:
+
+{% fig(caption="The GitHub bot helps keep your commit history clean.", dark="/screenshots/github-moderation_dark.png", add_class="pb-4 md:p-4 rounded-lg prose-figcaption:-mt-2 bg-blue-100/50 dark:bg-slate-950/50") %}
+![Screenshot of a comment waiting for GitHub Moderation](/screenshots/github-moderation_light.png)
+{% end %}
+
+The details (PR title, commit message, etc...) are all customizable, as are many things and features in r3ply.
+
+Read the [config](@/docs/config.md) and [CLI](@/docs/cli.md) docs to take full advantage of all the features.
 
 {{ fleuron_fish() }}
 
