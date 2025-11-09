@@ -12,9 +12,9 @@ enabled = false
 
 # r3ply - Comments simple as email.
 
-r3ply is an [open source project](/todo) that allows websites to receive comments via email. It receives emailed comments on your behalf and packages them for your site to use.
+r3ply is an [open source project](https://github.com/asimpletune/r3ply) that allows websites to receive comments via email. It receives emailed comments on your behalf and packages them for your site to use.
 
-There's no sign up – simply serve a [r3ply config](/todo) from your domain:
+There's no sign up – simply serve a [r3ply config](@/docs/config.md) from your domain:
 
 {% make_signet() %}
 
@@ -44,7 +44,7 @@ cache = true
 
 {% end %}
 
-...and then receive emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](/todo).
+...and then receive emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](@/docs/config.md#moderation-configuration).
 
 **View the [demo](/docs/getting-started/#comments) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.**
 
@@ -60,7 +60,7 @@ cache = true
 
 ## About
 
-r3ply will receive emails on your website's behalf and package them up as a comment in a way that you can configure and [protects the privacy](/todo) of the sender. **There's no sign-up.** Instead you just host a [r3ply config](/todo) from your `<domain>`, and then email comments can be addressed to `<domain>@r3ply.com`.
+r3ply will receive emails on your website's behalf and package them up as a comment in a way that you can configure and [protects the privacy](@/docs/overview.md#privacy) of the sender. **There's no sign-up.** Instead you just host a [r3ply config](@/docs/config.md) from your `<domain>`, and then email comments can be addressed to `<domain>@r3ply.com`.
 
 _The email's `subject` field is a link (or path) to what is being commented on. It must be on the same domain that hosted the config._
 
@@ -110,7 +110,7 @@ r3ply is a win x win for websites and their readers. Here's a breakdown what the
 ### Benefits for site visitors and commenters: { #user-experience-benefits }
 
 - There's **no account creation** required (or even possible)
-- Commenter **email addresses are anonymized** with HMAC-SHA256 ([docs](/todo))
+- Commenter **email addresses are anonymized** with HMAC-SHA256 ([docs](@/docs/overview.md#anonymization))
 - Email clients provide **native app experience** for writing
 - Automatic **comment history** and **comment threading**
 - **Flexible to use** how you want! (e.g. `cc` a friend on a comment)
@@ -122,11 +122,11 @@ In our view this is a much preferable experience to the alternatives of requirin
 
 ### For websites using r3ply: { #websites-benefits }
 
-- Comment moderation possible with `block*` lists ([docs](/todo))
-- A **templating system** for formatting comments how you want ([docs](/todo))
-- "Fan-out" to **multiple moderation channels** (e.g. GitHub PR, webhook) ([docs](/todo))
-- **Restrict comments** to certain paths, _e.g._ `["**", "!/private/**"]` ([docs](/todo))
-- Configurable `allow*` lists to bypass comment moderation ([docs](/todo))
+- Comment moderation possible with `block*` lists ([docs](@/docs/config.md#email-comments))
+- A **templating system** for formatting comments how you want ([docs](@/docs/templating.md))
+- "Fan-out" to **multiple moderation channels** (e.g. GitHub PR, webhook) ([docs](@/docs/config.md#moderation-configuration))
+- **Restrict comments** to certain paths, _e.g._ `["**", "!/private/**"]` ([docs](@/docs/config.md#comments-configuration))
+- Configurable `allow*` lists to bypass comment moderation ([docs](@/docs/config.md#moderation-configuration))
 - Designed to **work perfectly with static sites** and traditional web servers
 - A cache to serve **pending comments immediately** ([docs](/todo))
 
@@ -136,7 +136,7 @@ _E.g. you can just `re simulate email` and see [the entire pipeline](/todo) in t
 
 ### For those who want to run a r3ply service
 
-r3ply in its most basic form is completely stateless. It therefore [can be run](/todo), comfortably within most free-tiers.
+r3ply in its most basic form is completely stateless. It therefore can be run <!-- TODO: add documentation on how to run r3ply -->, comfortably within most free-tiers.
 
 ---
 
@@ -179,7 +179,7 @@ Below are answers to common questions. Check the [docs](/docs) for more details.
 
 Here's an overview of the flow of data:
 
-1. the site owner hosts a [r3ply config](/todo) from their domain
+1. the site owner hosts a [r3ply config](@/docs/config.md) from their domain
 2. then they pre-populate mailto links for the parts of their website where they want to receive comments
 3. a user then clicks the mailto link, writes their comment, and submits it
 4. the email arrives at the r3ply server, which then checks the site the email is addressed to and fetches that site's config
@@ -205,11 +205,11 @@ _Signet's_ can not be used by other websites, nor can they be used with other r3
 
 ### What Comment Sources Are Supported?
 
-Currently there's just email. However, r3ply was designed from the beginning to allow for additional commenting sources. If you're interested in adding more, then please checkout r3ply's [GitHub repo](/todo) and the [contributing](/todo) docs.
+Currently there's just email. However, r3ply was designed from the beginning to allow for additional commenting sources. If you're interested in adding more, then please checkout r3ply's [GitHub repo](https://github.com/asimpletune/r3ply) and the [contributing](@/project/contributing.md) docs.
 
 ### What Moderation Channels Are Supported?
 
-Currently there's just `GitHub`, `webhook`, and `local` (which is used by the CLI). If you're interested in adding more, then please checkout r3ply's [GitHub repo](/todo) and the [contributing](/todo) docs.
+Currently there's just `GitHub`, `webhook`, and `local` (which is used by the CLI). If you're interested in adding more, then please checkout r3ply's [GitHub repo](https://github.com/asimpletune/r3ply) and the [contributing](@/project/contributing.md) docs.
 
 ### Can Commenters Receive an Email Notification?
 
