@@ -47,6 +47,10 @@ highlight_theme = "material-darker-w-json-key-override"
 # A list of directories used to search for additional `.sublime-syntax` and `.tmTheme` files.
 extra_syntaxes_and_themes = ["syntaxes-and-highlight-themes"]
 
+# Whether external links are to be opened in a new tab
+# If this is true, a `rel="noopener"` will always automatically be added for security reasons
+external_links_target_blank = true
+
 # Whether footnotes are rendered in the GitHub-style (at the bottom, with back references) or plain (in the place, where they are defined)
 bottom_footnotes = true
 
