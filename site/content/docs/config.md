@@ -69,7 +69,7 @@ r3ply configs can be written as either TOML or JSON files. The r3ply servers wil
 
 ### Config Schemas { #config-schemas}
 
-r3ply's configs [are written](/todo) as a [JSON Schemas ↗](https://json-schema.org/). They can be [browsed here](/schemas).
+r3ply's configs are written as a [JSON Schemas (json-schema.org ↗)](https://json-schema.org/). They can be [browsed here](@/docs/schemas.md).
 
 One of the benefits of this is you can reference the schema in your configuration, enabling editor support like validation, hints/examples, and auto-complete.
 
