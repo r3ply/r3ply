@@ -107,10 +107,8 @@
       "additionalProperties": false,
       "default": {
         "enabled": true,
-        "moderation": false,
         "attachments": false,
-        "max_size_bytes": 5242880,
-        "block*": []
+        "max_size_bytes": 5242880
       },
       "properties": {
         "enabled": {
@@ -125,7 +123,7 @@
           "description": "Emails are ignored if their size (in bytes) exceed the min(system, site) configs",
           "type": "number",
           "default": 5242880,
-          "$comment": "Note: default is 5 MB",
+          "$comment": "i.e. 5 MB.",
           "minimum": 0
         },
         "attachments": {

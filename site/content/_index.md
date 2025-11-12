@@ -44,7 +44,7 @@ cache = true
 
 {% end %}
 
-...and then receive emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](@/docs/config.md#moderation-configuration).
+...and then receive emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](@/docs/overview.md#moderation-channels).
 
 **View the [demo](/docs/getting-started/#comments) to try it out, follow the [getting started](/docs#getting-started) tutorial, and read the [docs](/docs) to learn more.**
 
@@ -124,7 +124,7 @@ In our view this is a much preferable experience to the alternatives of requirin
 
 - Comment moderation possible with `block*` lists ([docs](@/docs/config.md#email-comments))
 - A **templating system** for formatting comments how you want ([docs](@/docs/templating.md))
-- "Fan-out" to **multiple moderation channels** (e.g. GitHub PR, webhook) ([docs](@/docs/config.md#moderation-configuration))
+- "Fan-out" to **multiple moderation channels** (e.g. GitHub PR, webhook) ([docs](@/docs/overview.md#moderation-channels))
 - **Restrict comments** to certain paths, _e.g._ `["**", "!/private/**"]` ([docs](@/docs/config.md#comments-configuration))
 - Configurable `allow*` lists to bypass comment moderation ([docs](@/docs/config.md#moderation-configuration))
 - Designed to **work perfectly with static sites** and traditional web servers

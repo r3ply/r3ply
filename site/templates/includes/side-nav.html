@@ -43,7 +43,7 @@
       <ul class="px-4 list-disc list-inside font-light text-gray-700">
           <li>
             <a href="{{ get_url(path='@/docs/overview.md#fundamentals', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Fundamentals</a>
-            <ol class="px-4 list-['⁃_'] list-inside font-light">
+            <ul class="px-4 list-['⁃_'] list-inside font-light">
               <li>
                 <a href="{{ get_url(path='@/docs/overview.md#r3ply', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">r3ply</a>
               </li>
@@ -57,9 +57,31 @@
                 <a href="{{ get_url(path='@/docs/overview.md#privacy', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Privacy</a>
               </li>
               <li>
-                <a href="{{ get_url(path='@/docs/overview.md#moderation', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Moderation</a>
+                <a href="{{ get_url(path='@/docs/overview.md#data-flow', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Data Flow</a>
               </li>
-            </ol>
+            </ul>
+          </li>
+          <li>
+            <a href="{{ get_url(path='@/docs/overview.md#comment-sources', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Comment Sources</a>
+            <ul class="px-4 list-['⁃_'] list-inside font-light">
+              <li>
+                <a href="{{ get_url(path='@/docs/overview.md#comments-via-email', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Email</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="{{ get_url(path='@/docs/overview.md#moderation-channels', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Moderation Channels</a>
+            <ul class="px-4 list-['⁃_'] list-inside font-light">
+              <li>
+                <a href="{{ get_url(path='@/docs/overview.md#github-moderation', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">GitHub</a>
+              </li>
+              <li>
+                <a href="{{ get_url(path='@/docs/overview.md#webhook-moderation', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Webhook</a>
+              </li>
+              <li>
+                <a href="{{ get_url(path='@/docs/overview.md#local-moderation', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Local</a>
+              </li>
+            </ul>
           </li>
       </ul>
     </li>

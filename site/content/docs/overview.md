@@ -21,9 +21,8 @@ This page is meant to be useful to both future contributors to the codebase, as 
   - [r3ply](#r3ply)
   - [Sites & Signets](#sites-signets)
   - [Configs](#configs)
-  - [Anonymization](#encryption)
-  - [Encryption](#encryption)
-  - [Moderation](#moderation)
+  - [Privacy](#encryption)
+  - [Data Flow](/todo)
 <!-- - [Tracing a Comment](/todo)
 - [Why Comments as Files?](/todo) -->
 {% end %}
@@ -147,15 +146,80 @@ Currently encryption is done mostly for the purpose of future proofing. It will 
 
 A 32-byte AES-256 symmetric key is used for encryption.
 
-### Moderation
+### Data Flow
+
+The general flow of data is as follows.
+
+{% fig(dark="/illustrations/r3ply-email-comment-swim-lanes_dark@0.5x.webp" caption="Swim lanes detailing the flow of data in r3ply") %}
+![Swim lane architectural diagram depicting the flow of data when receiving an email comment](/illustrations/r3ply-email-comment-swim-lanes@0.5x.webp)
+{% end %}
+
+1. The data flow begins when a r3ply app receives a request for comment from a [commenting source](/todo), e.g. email.
+2. The r3ply app will check fetch the config from the site for whom the comment request is destined.
+3. The site responds to the r3ply app with its config.
+4. The r3ply app resumes processing the comment request according to the site's configuration. The specific details are covered more in depth in the [comment processing pipeline](/todo) docs. When this step is finished the comment request is now a comment.
+5. The comment is then passed along to the various [moderation channels](/todo) specified in the site's config.
+6. A response is sent to the original commenter. This is usually but in the case of `re` – the r3ply CLI – it might just be printing to the terminal.
+7. TODO: notify the site (see [roadmap](@/project/roadmap.md))
+
+Each comment is abstracted as a file. The file per comment approach allows us to avoid the issue of merge conflicts with version control systems.
+
+## Comment Sources
+
+Each commenting source is a way to begin the r3ply [data flow](#data-flow). They are configured below the `[config]` variable. Currently there is only email as a commenting source.
+
+{% info(type="tip") %}
+Each commenting source can specify a `filter*` variable in their config that filters what `[[site]]` entries ([docs](/@/docs.md#sites-and-signets)) it accepts comments from. The `filter*` variable is a list of strings that [can be glob patterns](@/docs/config.md#variables-and-types) reference that site entry's label.
+{% end %}
+
+### Email { #comments-via-email }
+
+Commenters can send comment requests via email. Emails must conform to the following requirements:
+
+1. The `To` field of the email must be addressed to the site + r3ply app like `<SITE-DOMAIN>@<R3PLY-DOMAIN>`.
+2. The `Subject` field must either be a full URL or a URL path. It is not valid to send an email request with a URL in the subject line that has a different hostname than the local portion of the `To` address. The email address in the `From` field will be [anonymized](#anonymization) into an author [pseudonym](@/docs/templating.md#base-comment-template-context).
+3. The body of the email will be the comment. There is a field in the site config to [remove the email signature](@/docs/config.md#email-comments) from the body.
+
+It's advised to generate the `To`, `Subject`, and `Body` of the email in advance with a `mailto` link to ensure that sending comments is a reliable and repeatable process for your users.
 
 Offensive commenters can be blocked by adding their pseudonym to a block list ([docs](@/docs/config.md#email-comments)).
 
-r3ply handles _receiving_ and _transforming_ comments according to site configs, however _moderation channels_ are used for ultimately getting the comments to the sites. They can effectively be thought of as a handoff. There is a [section](@/docs/config.md#moderation-configuration) in the config documentation where moderation channels are discussed more thoroughly.
+r3ply handles _receiving_ and _transforming_ comments according to site configs, however [_moderation channels_](#moderation-channels) are used for ultimately getting the comments to the sites. They can effectively be thought of as a handoff.
 
-Conceptually, moderation channels can be thought of as destinations for comments. For the purpose of flexibility r3ply allows you to [_fan-out_ (wikipedia ↗)](https://en.wikipedia.org/wiki/Fan-out_(software)) a comment to multiple moderation channels. This could be used, for example, to open a pull request with the [GitHub Moderation Channel](@/docs/config.md#github-moderation) and then to send the comment to a [Webhook Moderation Channel](@/docs/config.md#webhook-moderation) for delivering a slack notification.
+#### The Email Comment Pipeline
+
+Here are the precise steps of the email comment pipeline. To see the steps clearly yourself try running `re simulate email`
+
+1. `prescreen`: checks made to the email before it's actually opened. These are very basic checks such as ensuring that the email is within the accepted size, or that both the configured site and its r3ply app are enabled and accepting comments. The block list is not checked here. The analogy to the postal service would be asking if your package has anything flammable.
+2. `receive`: an ID and timestamp is assigned to the email comment. This would be similar to the postal service giving you a tracking number.
+3. `accept`: the actual email bytes are parsed. This would be analogous to someone from the post office actually physically picking up your package.
+4. `deliverable`: the email itself is examined for deliverability. Here is where the block list is checked, along with the the Subject line.
+5. `prepare`: the parsed email is prepared into a [template context](@/docs/templating.md#template-context) that will provide all the variables that the templating will use later.
+6. `process`: here is when the actual comment is produced by binding the templating context from above with the user's configured template, if any. If there is none then the comment is just the template context.
+
+After these stages the comment request has finished becoming a comment. It will then be sent to any moderation channels that accept it.
+
+## Moderation Channels
+
+Conceptually, moderation channels can often be thought of as destinations for comments. For the purpose of flexibility r3ply allows you to [_fan-out_ (wikipedia ↗)](https://en.wikipedia.org/wiki/Fan-out_(software)) a comment to multiple moderation channels. This could be used, for example, to open a pull request with the [GitHub Moderation Channel](@/docs/config.md#github-moderation) and  to send the comment to a [Webhook Moderation Channel](@/docs/config.md#webhook-moderation) for delivering a slack notification.
 
 Additionally, each moderation channel allows you to specify an [allow list](@/docs/config.md#moderation-configuration), granting permission to bypass moderation for certain senders. As mentioned above, [Block lists](@/docs/config.md#email-comments) are also possible but they are handled further upstream the comment pipeline, in the `[comments.email]` config section ([docs](@/docs/config.md#email-comments)).
+
+Offensive commenters can be blocked by adding their pseudonym to a block list ([docs](@/docs/config.md#email-comments)).
+
+There is a [subsection](@/docs/config.md#moderation-configuration) in the config documentation where the configuration of each moderation channel is documented.
+
+### GitHub Moderation
+
+GitHub moderation allows r3ply to submit each comment as a file in a pull request. To use it with a private repo you need to give the [r3ply GitHub bot](https://github.com/apps/r3ply) permission to access your repo. It can be configured according to the [GitHub Moderation config](@/docs/config.md#github-moderation) docs.
+
+### Webhook Moderation
+
+The webhook moderation channel is for general purpose integration. It can be configured according to the [Webhook Moderation config](@/docs/config.md#webhook-moderation) docs.
+
+### Local Moderation
+
+Local moderation is used by `re` – the r3ply CLI – to simulate comments. It can be configured according to the [Local Moderation config](@/docs/config.md#local-moderation) docs.
 
 {{ fleuron_fish() }}
 

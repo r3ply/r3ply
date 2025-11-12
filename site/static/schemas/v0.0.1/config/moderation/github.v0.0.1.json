@@ -76,7 +76,7 @@
       "type": "string",
       "pattern": "^[\\s\\S]*$",
       "maxLength": 2096,
-      "default": "Comment submitted:\nSender: {{ author.pseudonym }}\nTimestamp: {{ comment.ts_rcvd }}\nSubject: {{ comment.subject.url }}\nComment: > {{ comment.txt | split(pat=\"\n\") | join(sep=\"> \") }}"
+      "default": "\"commit_msg_{}\" = \"\"\"Comment submitted:\n\n  - Sender: {{ author.pseudonym }}\n  - Timestamp: {{ comment.ts_rcvd }}\n  - Subject: {{ comment.subject.url }}\n\n> {{ comment.txt | split(pat=\"\r\n\") | join(sep=\"\n> \") }}\"\"\""
     },
     "&commit_msg_{}": {
       "title": "Commit message template (file)",

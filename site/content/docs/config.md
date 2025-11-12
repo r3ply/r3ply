@@ -240,7 +240,7 @@ label = "staging"
 domain = "site.local.test"
 r3ply = "cli.r3ply.test"
 signet = "cmq0jqG3c2JxKKzDJ6qpXQ"
-issued = "2025-10-24"
+issued = 2025-10-24
 label = "CLI"
 
 {{ schema_comment(version="v0.0.1", schema="config/comments") }}
@@ -491,13 +491,11 @@ repo = "<YOUR_PROJECT>"
 "head_branch_{}" = "comment-{{ comment.ts_rcvd }}-{{ comment.id[:8] }}.md"
 {{ schema_comment(key="commit_msg_{}" version="v0.0.1", schema="config/moderation/github", skip=["default"]) }}
 # Default: (same as what's shown below)
-"commit_msg_{}" = """
-Comment submitted:
-Sender: {{ author.pseudonym }}
-Timestamp: {{ comment.ts_rcvd }}
-Subject: {{ comment.subject.url }}
-Comment: > {{ comment.txt | split(pat="
-") | join(sep="> ") }}"""
+"commit_msg_{}" = """Comment submitted:\n
+  - Sender: {{ author.pseudonym }}
+  - Timestamp: {{ comment.ts_rcvd }}
+  - Subject: {{ comment.subject.url }}
+\n> {{ comment.txt | split(pat="\r\n") | join(sep="\n> ") }}"""
 {{ schema_comment(key="pr_title_{}" version="v0.0.1", schema="config/moderation/github", skip=["default"]) }}
 # Default: (same as what's shown below)
 "pr_title_{}" = "New comment ({{ comment.id[:8] }}) on {{ comment.subject.url }} by author `{{ author.pseudonym[:7] }}`"
