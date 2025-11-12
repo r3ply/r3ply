@@ -108,7 +108,7 @@ signet = "iSQIIBcF7ka2UURJpFDkYw"
 issued = 2025-08-26
 ```
 
-[^toml-support-for-json-schema]: If you're interested in helping to develop better tooling see [contributing](/todo).
+[^toml-support-for-json-schema]: If you're interested in helping to develop better tooling see [contributing](@/project/contributing.md).
 
 ### Config Variables `&` Types { #variables-and-types }
 
@@ -150,7 +150,7 @@ The `_{}` syntax means a template string is expected.
   Subject: {{ comment.subject.url }}"""
 ```
 
-See the [string templating docs](/todo) for more info.
+See the [templating docs](@/docs/templating.md) for more info.
 
 ---
 
@@ -197,7 +197,7 @@ The `$foo` syntax means this variable is some kind of meta variable reserved by 
 
 ## Site Config { #r3ply-site-config }
 
-Below is an example of the full site config, using every default and with every value set. For convenience there are also separate sections with more discussion for [`site`](/todo), [`comments`](/todo), and [`moderation`](/todo).
+Below is an example of the full site config, using every default and with every value set. For convenience there are also separate sections with more discussion for [`site`](#site-config-entry), [`comments`](#comments-configuration), and [`moderation`](#moderation-configuration).
 
 <!-- prettier-ignore-start -->
 ```toml, linenos, name=r3ply site config.toml, hl_lines=1-8

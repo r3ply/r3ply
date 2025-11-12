@@ -134,7 +134,7 @@ If you do see output from `re config validate` then you will need to fix it befo
 re simulate email --moderate
 ```
 
-You should see a large amount of text representing each stage of the comment processing pipeline. The [docs](/todo) cover output more in-depth, but it's basically the entire email to comment pipeline broken into stages.
+You should see a large amount of text representing each stage of the comment processing pipeline. The [docs](@/docs/overview.md#the-email-comment-pipeline) cover output more in-depth, but it's basically the entire email to comment pipeline broken into stages.
 
 {% info(type="tip") %}
 `re simulate email` generates a pretty huge amount of text. Normally it will be filtered. The [CLI docs](@/docs/cli.md#simulate-filtering-output) cover how to do that.
@@ -260,7 +260,7 @@ Next let's look at `author`:
   ...
 ```
 
-Here we see details about the comment's author. Their email address has been anonymized to a stable `pseudonym` that can be used like an ID. There's also a long `token` which isn't shown fully here (You can read more about these in the [docs](/todo), but it isn't necessary right now).
+Here we see details about the comment's author. Their email address has been anonymized to a stable `pseudonym` that can be used like an ID. There's also a long `token` which isn't shown fully here (You can read more about these in the [docs](@/docs/overview.md#privacy), but it isn't necessary right now).
 
 ```json, name=comment payload
   ...

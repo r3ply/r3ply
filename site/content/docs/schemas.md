@@ -129,3 +129,5 @@ This page is a listing of all the schemas used by r3ply so they can be browsed o
 <src/>
 ```
 {% end %}
+
+{{ next_prev(prev_path="/docs/cli/", prev_text="r3ply CLI", next_path="/docs/api/", next_text="r3ply APIs") }}

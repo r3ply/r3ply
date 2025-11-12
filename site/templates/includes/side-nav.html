@@ -259,6 +259,23 @@
         Schemas
       </a>
     </li>
+    {# API #}
+    <li>
+      <a href="{{ get_url(path='@/docs/api.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">API</a>
+      <ul class="px-4 list-disc list-inside font-light text-gray-700">
+          <li>
+              <a href="{{ get_url(path='@/docs/api.md#rest', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">REST</a>
+              <ul class="px-4 list-disc list-inside font-light">
+                  <li>
+                      <a href="{{ get_url(path='@/docs/api.md#issue-signet', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Issue Signet</a>
+                  </li>
+                  <li>
+                      <a href="{{ get_url(path='@/docs/api.md#pending-comments-cache', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Comments Cache</a>
+                  </li>
+              </ul>
+          </li>
+      </ul>
+    </li>
   </ul>
   <hr class="my-4 border-2 dark:border-gray-300 border-dashed">
   {# Other Links #}

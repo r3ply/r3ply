@@ -128,11 +128,11 @@ In our view this is a much preferable experience to the alternatives of requirin
 - **Restrict comments** to certain paths, _e.g._ `["**", "!/private/**"]` ([docs](@/docs/config.md#comments-configuration))
 - Configurable `allow*` lists to bypass comment moderation ([docs](@/docs/config.md#moderation-configuration))
 - Designed to **work perfectly with static sites** and traditional web servers
-- A cache to serve **pending comments immediately** ([docs](/todo))
+- A cache to serve **pending comments immediately** ([docs](@/docs/api.md#pending-comments-cache))
 
 **r3ply also has a CLI tool** called `re` that is a local implementation of the r3ply server. It allows for easy debugging and development of your r3ply config, and is indispensable in iterating on how you choose to integrate comments with your website.
 
-_E.g. you can just `re simulate email` and see [the entire pipeline](/todo) in the terminal._
+_E.g. you can just `re simulate email` and see [the entire pipeline](@/docs/overview.md#the-email-comment-pipeline) in the terminal._
 
 ### For those who want to run a r3ply service
 

@@ -221,6 +221,7 @@
         <span class="text-teal-300 {{ sub_menu_headers }}">Sections<span class="hidden md:inline">:</span></span>
         <ul class="{{ sub_menu_styles }}">
           {% set site_sections_styles = "decoration-teal-300" %}
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }} cursor-not-allowed text-gray-600 no-underline!">Blog (Soon)</li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/_index.md') }}">Home</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="/todo" class="hover:text-white">Demo</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}" >Docs</a></li>
@@ -237,6 +238,8 @@
           <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/config.md') }}">Config</a></li>
           <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/templating.md') }}">Templating</a></li>
           <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/cli.md') }}">CLI</a></li>
+          <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/schemas.md') }}">Schemas</a></li>
+          <li class="{{ sub_menu_items }} {{ doc_styles }}"><a href="{{ get_url(path='@/docs/api.md') }}">APIs</a></li>
         </ul>
       </li>
       {# "Site" Links #}
@@ -256,7 +259,7 @@
         <span class="text-red-300 {{ sub_menu_headers }}">RSS Feeds<span class="hidden md:inline">:</span></span>
         <ul class="{{ sub_menu_styles }}">
           {% set rss_feeds_styles = "decoration-red-300" %}
-          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }} cursor-not-allowed text-gray-600 no-underline!"><a href="/todo">Blog (Soon)</a></li>
+          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }} cursor-not-allowed text-gray-600 no-underline!">Blog (Soon)</li>
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">All Comments</a></li>
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Page</a></li>
           <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Thread</a></li>

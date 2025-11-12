@@ -22,9 +22,14 @@ This page is meant to be useful to both future contributors to the codebase, as 
   - [Sites & Signets](#sites-signets)
   - [Configs](#configs)
   - [Privacy](#encryption)
-  - [Data Flow](/todo)
-<!-- - [Tracing a Comment](/todo)
-- [Why Comments as Files?](/todo) -->
+  - [Data Flow](#data-flow)
+- [Comment Sources](#comment-sources)
+  - [Email](#comments-via-email)
+    - [The Email Comment Pipeline](#the-email-comment-pipeline)
+- [Moderation Channels](#moderation-channels)
+  - [GitHub Moderation](#github-moderation)
+  - [Webhook Moderation](#webhook-moderation)
+  - [Local Moderation](#local-moderation)
 {% end %}
 
 {{ fleuron_fish() }}
@@ -154,11 +159,11 @@ The general flow of data is as follows.
 ![Swim lane architectural diagram depicting the flow of data when receiving an email comment](/illustrations/r3ply-email-comment-swim-lanes@0.5x.webp)
 {% end %}
 
-1. The data flow begins when a r3ply app receives a request for comment from a [commenting source](/todo), e.g. email.
+1. The data flow begins when a r3ply app receives a request for comment from a [commenting source](#comment-sources), e.g. email.
 2. The r3ply app will check fetch the config from the site for whom the comment request is destined.
 3. The site responds to the r3ply app with its config.
-4. The r3ply app resumes processing the comment request according to the site's configuration. The specific details are covered more in depth in the [comment processing pipeline](/todo) docs. When this step is finished the comment request is now a comment.
-5. The comment is then passed along to the various [moderation channels](/todo) specified in the site's config.
+4. The r3ply app resumes processing the comment request according to the site's configuration. The specific details are covered more in depth in the [comment processing pipeline](#the-email-comment-pipeline) docs. When this step is finished the comment request is now a comment.
+5. The comment is then passed along to the various [moderation channels](#moderation-channels) specified in the site's config.
 6. A response is sent to the original commenter. This is usually but in the case of `re` – the r3ply CLI – it might just be printing to the terminal.
 7. TODO: notify the site (see [roadmap](@/project/roadmap.md))
 

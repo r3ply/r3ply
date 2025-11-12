@@ -404,4 +404,4 @@ These are the stages that can be [filtered/silenced](#simulate-filtering-output)
 
 {{ fleuron_fish() }}
 
-{{ next_prev(prev_path="/docs/templating/", prev_text="Templating", next_path="/project/", next_text="r3ply Project") }}
+{{ next_prev(prev_path="/docs/templating/", prev_text="Templating", next_path="/docs/schemas/", next_text="r3ply Schemas") }}

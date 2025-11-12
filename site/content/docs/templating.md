@@ -303,7 +303,7 @@ The _template context_ is what variables are available to your templates.
 
 ### Base Comment Template Context
 
-There's a base template context ([src](/packages/lib/src/comments/process.ts)) that is available to any comment, when templates are being processed ([docs](/todo)). It's TypeScript interface looks as follows:
+There's a base template context ([src](/packages/lib/src/comments/process.ts)) that is available to any comment, when templates are being processed ([docs](@/docs/overview.md#the-email-comment-pipeline)). It's TypeScript interface looks as follows:
 
 ```ts, name=Base Comment Template Context
 /**
