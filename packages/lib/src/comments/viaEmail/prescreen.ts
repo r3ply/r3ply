@@ -128,10 +128,6 @@ export function prescreen(
     ),
   )
 
-  // TODO!
-  // Check if from matches either system or site blocklists
-  // check_blocklist(checks.from, system.email.block_list, site.comments.email.block_list)
-
   // Return final results
   const prescreen_checks = Result.all(
     r3ply_is_disabled_check,

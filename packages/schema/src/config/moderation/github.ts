@@ -67,11 +67,11 @@ export const github = {
       type: 'string',
       pattern: '^[\\s\\S]*$',
       maxLength: 2096,
-      default: `Comment submitted:
-Sender: {{ author.pseudonym }}
-Timestamp: {{ comment.ts_rcvd }}
-Subject: {{ comment.subject.url }}
-Comment: > {{ comment.txt | split(pat="\n") | join(sep="> ") }}`,
+      default: `"commit_msg_{}" = """Comment submitted:\n
+  - Sender: {{ author.pseudonym }}
+  - Timestamp: {{ comment.ts_rcvd }}
+  - Subject: {{ comment.subject.url }}
+\n> {{ comment.txt | split(pat="\r\n") | join(sep="\n> ") }}"""`,
     },
     '&commit_msg_{}': {
       title: 'Commit message template (file)',
