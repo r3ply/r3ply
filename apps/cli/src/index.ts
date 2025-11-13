@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { program } from 'commander'
 import { init, config, generate, simulate, cache } from './cmds'
-import chalk from 'chalk'
+import tty from './tty'
 
 const allowed_formats = ['toml', 'json'] as const
 type AllowedFormats = (typeof allowed_formats)[number]
@@ -35,5 +35,5 @@ program.addCommand(generate(process.cwd()))
 program.addCommand(simulate(process.cwd()))
 program.addCommand(cache(process.cwd()))
 program.parseAsync(process.argv).catch((error: Error) => {
-  program.error(chalk.redBright(error.message))
+  program.error(tty.txt.warn(error.message))
 })

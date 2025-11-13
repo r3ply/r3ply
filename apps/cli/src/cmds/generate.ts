@@ -6,7 +6,7 @@ import {
   R3plySiteConfig,
 } from '@r3ply/schema/config'
 import { BaseCmdOptions } from ".."
-import { tty } from "../tty"
+import tty from "../tty"
 import { mailbox } from "typescript-mailbox-parser"
 import { Result } from "oxide.ts"
 

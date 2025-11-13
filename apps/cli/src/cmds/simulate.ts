@@ -14,7 +14,7 @@ import {
   util as r3ply_util,
 } from '@r3ply/lib'
 import { mailbox } from "typescript-mailbox-parser"
-import { tty } from "../tty"
+import tty from "../tty"
 
 
 type SimulateCmdEmailOpts = {

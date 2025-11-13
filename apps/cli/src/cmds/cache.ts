@@ -2,7 +2,7 @@ import { Command } from "commander"
 import { project } from "../lib"
 import http from "http"
 import handler from "serve-handler"
-import { tty } from "../tty"
+import tty from "../tty"
 
 type CacheStartOpts = {
   port: number

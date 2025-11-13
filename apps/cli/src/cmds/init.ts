@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import dayjs from 'dayjs'
-import { tty } from '../tty'
+import tty from '../tty'
 import { project } from '../lib'
 import { util } from '../util'
 import { SignetIssuer } from '@r3ply/lib'
