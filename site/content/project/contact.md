@@ -1,10 +1,12 @@
 +++
-template = "base-with-breadcrumbs.html"
+template = "base.html"
 title = "r3ply Contact!"
 
 [extra.comments]
 enabled = true
 +++
+
+{{ breadcrumbs() }}
 
 # r3ply Contact!
 

@@ -1,23 +1,19 @@
-{% extends "base.html" %}
-
-{% block header %}
 {% set doc = page | default(value=section) %}
-<header class="w-[65ch] mx-auto mt-4">
 <nav>
-  <ul class="flex gap-2 justify-end">
+  <ul class="flex gap-1 justify-end prose-li:list-none">
       <li>🍞:</li>
-    {% set path = doc.ancestors | concat(with=current_url) %}
+    {% set path = doc.ancestors | concat(with=doc.permalink) %}
     {% for a in path %}
       {% if not loop.last %}
         {% set url = get_url(path='@/' ~ a) %}
       {% else %}
-        {% set url = a %}
+        {% set url = get_url(path='@/' ~ doc.relative_path) %}
       {% endif %}
       <li>/</li>
       <li><a href="{{ url }}" class="text-red-400 hover:underline">
         {% if loop.first %}
-         home
-         {% else %}
+        home
+        {% else %}
         {{ doc.components | nth(n=loop.index0-1) }}
         {% endif %}
 
@@ -26,5 +22,3 @@
     <li>/</li>
   </ul>
 </nav>
-</header>
-{% endblock header %}

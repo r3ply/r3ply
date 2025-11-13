@@ -1,10 +1,12 @@
 +++
-template = "base-with-breadcrumbs.html"
+template = "base.html"
 title = "Contributing to r3ply"
 
 [extra.comments]
 enabled = true
 +++
+
+{{ breadcrumbs() }}
 
 # Contributing
 

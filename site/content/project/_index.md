@@ -1,7 +1,9 @@
 +++
-template = "base-with-breadcrumbs.html"
+template = "base.html"
 title = "r3ply Project Info."
 +++
+
+{{ breadcrumbs() }}
 
 # Project Info
 

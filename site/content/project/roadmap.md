@@ -1,10 +1,12 @@
 +++
-template = "base-with-breadcrumbs.html"
+template = "base.html"
 title = "r3ply Roadmap"
 
 [extra.comments]
 enabled = true
 +++
+
+{{ breadcrumbs() }}
 
 # Roadmap
 
