@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block header %}
+{% set doc = page | default(value=section) %}
+<header class="w-[65ch] mx-auto mt-4">
+<nav>
+  <ul class="flex gap-2 justify-end">
+      <li>🍞:</li>
+    {% set path = doc.ancestors | concat(with=current_url) %}
+    {% for a in path %}
+      {% if not loop.last %}
+        {% set url = get_url(path='@/' ~ a) %}
+      {% else %}
+        {% set url = a %}
+      {% endif %}
+      <li>/</li>
+      <li><a href="{{ url }}" class="text-red-400 hover:underline">
+        {% if loop.first %}
+         home
+         {% else %}
+        {{ doc.components | nth(n=loop.index0-1) }}
+        {% endif %}
+
+      </a></li>
+    {% endfor %}
+    <li>/</li>
+  </ul>
+</nav>
+</header>
+{% endblock header %}

@@ -1,5 +1,5 @@
 +++
-template = "base.html"
+template = "base-with-breadcrumbs.html"
 title = "r3ply Project Info."
 +++
 
@@ -7,11 +7,10 @@ title = "r3ply Project Info."
 
 This section of the site is for organizing information about the r3ply project itself. Here you'll find information about future plans, how to get in touch, the code structure, etc...
 
-- [About](/project/about/)
-- [Contributing](/project/contributing/)
-- [Roadmap](/project/roadmap/)
-- [Contact](/project/contact/)
-- [Donate](https://liberapay.com/spence/donate)
+- [About](@/project/about.md)
+- [Roadmap](@/project/roadmap.md)
+- [Contributing](@/project/contributing.md)
+- [Contact & Support](@/project/contact.md)
 
 {{ fleuron_fish() }}
 

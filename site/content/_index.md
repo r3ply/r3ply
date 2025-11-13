@@ -1,6 +1,6 @@
 +++
 title = "r3ply home"
-template="index.html"
+template="base.html"
 
 [extra.comments]
 enabled = false

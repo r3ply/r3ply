@@ -1,0 +1,60 @@
+<!-- Built using `tree --dirsfirst -L 4 -I 'node_modules|package-lock.json|target|pnpm-lock.yaml|*.json|*.eml|dist|*.html|*.ts|*.js|public|*.svg|*.png|*.webp|*.jpg|*.lock' -H https://github.com/asimpletune/r3ply/tree/main --noreport` and then manually pruning unnecessary files/directories from there -->
+<div class="font-mono leading-5 whitespace-nowrap overflow-x-scroll bg-gray-800 p-4 rounded-lg">
+  {% set root = "https://github.com/asimpletune/r3ply/tree/main" %}
+  <a href="{{ root }}">./</a> # Project Root<br>
+  ├── <a href="{{ root }}/apps/">apps</a> # Implementations of r3ply. These mostly handle IO and the r3ply library (below) handles the core logic.<br>
+  │   ├── <a href="{{ root }}/apps/cli/">cli</a> # <code>r3</code>, r3ply's CLI<br>
+  │   └── <a href="{{ root }}/apps/cloudflare-worker/">cloudflare-worker</a> # Handles email comments<br>
+  ├── <a href="{{ root }}/crates/">crates</a> # r3ply's rust codebase<br>
+  │   └── <a href="{{ root }}/crates/r3ply-wasm/">r3ply-wasm</a> # All the WASM rust code r3ply uses<br>
+  ├── <a href="{{ root }}/packages/">packages</a> # r3ply TS library code<br>
+  │   ├── <a href="{{ root }}/packages/lib/">lib</a> # the main r3ply logic<br>
+  │   └── <a href="{{ root }}/packages/schema/">schema</a> # JSON Schemas used by config<br>
+  ├── <a href="{{ root }}/site/">site</a> # Main site and docs<br>
+  │   ├── <a href="{{ root }}/site/content/">content</a> # Site content (markdown files)<br>
+  │   │   ├── <a href="{{ root }}/site/content/comments/">comments</a> # Site comments (stored as a git submodule at <a href="https://github.com/asimpletune/r3ply-site-comments">asimpletune/r3ply-site-comments</a>)<br>
+  │   │   ├── <a href="{{ root }}/site/content/docs/">docs</a> # docs<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/docs/_index.md">_index.md</a> # docs index<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/docs/api.md">api.md</a> # API docs<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/docs/cli.md">cli.md</a> # CLI docs<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/docs/config.md">config.md</a> # config docs<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/docs/getting-started.md">getting-started.md</a> # getting-started- docs<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/docs/overview.md">overview.md</a> # overview docs<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/docs/schemas.md">schemas.md</a> # schemas docs<br>
+  │   │   │   └── <a href="{{ root }}/site/content/docs/templating.md">templating.md</a> # templating docs<br>
+  │   │   ├── <a href="{{ root }}/site/content/project/">project</a> # info about project<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/project/_index.md">_index.md</a> # project index<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/project/about.md">about.md</a> # about project<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/project/contact.md">contact.md</a> # contact<br>
+  │   │   │   ├── <a href="{{ root }}/site/content/project/contributing.md">contributing.md</a> # contributing<br>
+  │   │   │   └── <a href="{{ root }}/site/content/project/roadmap.md">roadmap.md</a> # roadmap<br>
+  │   │   ├── <a href="{{ root }}/site/content/_index.md">_index.md</a> # landing page<br>
+  │   │   ├── <a href="{{ root }}/site/content/debug-comment-template.md">debug-comment-template.md</a> # used to debug the comment that's used to generate <code>&lt;template&gt;</code> tags.<br>
+  │   │   └── <a href="{{ root }}/site/content/demo.md">demo.md</a> # demo page<br>
+  │   ├── <a href="{{ root }}/site/css/">css</a> # CSS<br>
+  │   │   └── <a href="{{ root }}/site/css/input.css">input.css</a> # input to tailwind pipeline (see site/package.json)<br>
+  │   ├── <a href="{{ root }}/site/media/">media</a> # for storing media related to artwork, e.g. Pixelmator Pro files<br>
+  ├── <a href="{{ root }}/test-data/">test-data</a><br>
+  │   └── <a href="{{ root }}/test-data/eml/">eml</a> # email files used to test various r3ply code bases<br>
+  ├── <a href="{{ root }}/tools/">tools</a> # random tools that don't have a good place<br>
+  │   └── <a href="{{ root }}/tools/mail-parser-ts-bindings-0.9.1.tgz">mail-parser-ts-bindings-0.9.1.tgz</a> # provides types to the response from the mail parser r3ply uses<br>
+  ├── <a href="{{ root }}/Cargo.toml">Cargo.toml</a> # root level crate<br>
+  ├── <a href="{{ root }}/CHANGELOG.md">CHANGELOG.md</a> # changelog<br>
+  ├── <a href="{{ root }}/package.json">package.json</a> # root level package.json (mostly used for scripts)<br>
+  ├── <a href="{{ root }}/pnpm-workspace.yaml">pnpm-workspace.yaml</a> # describes the actual workspace (since r3ply uses pnpm instead of npm)<br>
+  ├── <a href="{{ root }}/README.md">README.md</a> # root README<br>
+  ├── <a href="{{ root }}/tsconfig.json">tsconfig.json</a> # root tsconfig (inherited by the others)<br>
+  └── <a href="{{ root }}/vitest.workspace.mts">vitest.workspace.mts</a> # workspace-level vitest config<br>
+  <br><br>
+  </p>
+  <p>
+  <br><br>
+  </p>
+  <hr>
+  <p class="VERSION">
+      tree v1.8.0 © 1996 - 2018 by Steve Baker and Thomas Moore <br>
+      HTML output hacked and copyleft © 1998 by Francesc Rocher <br>
+      JSON output hacked and copyleft © 2014 by Florian Sesser <br>
+      Charsets / OS/2 support © 2001 by Kyosuke Tokoro
+  </p>
+</div>

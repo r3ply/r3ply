@@ -1,6 +1,9 @@
 +++
-template = "base.html"
+template = "base-with-breadcrumbs.html"
 title = "r3ply Roadmap"
+
+[extra.comments]
+enabled = true
 +++
 
 # Roadmap
@@ -61,3 +64,7 @@ title = "r3ply Roadmap"
 
 - [ ] Add search
 - [ ] Tutorial section: for example, how to allow people to support aliases (will also be good for when attachments are supported)
+
+{{ fleuron_fish() }}
+
+{{ next_prev(prev_path="/project/about/", prev_text="About r3ply", next_path="/project/contributing/", next_text="Contributing") }}

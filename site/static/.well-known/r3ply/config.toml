@@ -27,7 +27,7 @@ label = "CLI"
 cache = true
 
 [comments.email]
-# "&comment_{}" = "comment.template.md"
+"&comment_{}" = "comment.template.md"
 email_signature_separator = "﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍﹍"
 
 [[moderation.local]]
