@@ -17,7 +17,6 @@ async function render_pending_comments(comments) {
 }
 
 function render_thread(head, comments, level, root) {
-
   const siblings = comments.filter(c => is_root(head) ? is_root(c) : in_reply_to(c) == in_reply_to(head))
   const head_index = siblings.findIndex(c => get_slug(c) == get_slug(head))
   const prev = siblings[head_index - 1] || false
@@ -25,6 +24,8 @@ function render_thread(head, comments, level, root) {
   const template_node = document.querySelector("#comment-template").content.cloneNode(true)
   const details = template_node.querySelector('details')
   details.id = get_slug(head)
+  details.classList.remove("group/1")
+  details.classList.add(`group/${level}`)
   render_summary(head, level, root, prev, next, template_node)
   render_article(head, template_node)
   const comment_article = details.querySelector('div')
@@ -35,11 +36,21 @@ function render_thread(head, comments, level, root) {
 
 // Renders the <summary>
 function render_summary(head, level, root, prev, next, template) {
+  render_preview_text(head, level, template)
   render_root_nav(root, level, template)
   render_parent_nav(head, level, template)
   render_current_nav(head, template)
   render_next_nav(next, template)
   render_prev_nav(prev, template)
+}
+// {{ comment.content | striptags | truncate(length=128) }}
+function render_preview_text(head, level, template_node) {
+  const span = template_node.querySelector("[data-comment-text-preview]")
+  span.innerText = stripHTML(head.comment.txt)
+  span.classList.remove(`group-open/1:hidden`)
+  span.classList.add(`group-open/${level}:hidden`)
+  // console.log("SPAN");
+  // console.log(span);
 }
 // Renders the summary's 'root' nav
 function render_root_nav(root, level, template_node) {
@@ -214,4 +225,9 @@ function get_date(ctx) {
     seconds,
     tz,
   }
+}
+function stripHTML(text) {
+  const template = document.createElement('template');
+  template.innerHTML = text;
+  return template.content.textContent || '';
 }

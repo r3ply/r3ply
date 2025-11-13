@@ -108,11 +108,12 @@
               <a href="#comments" class="text-pink-400 font-normal">#</a>
             </h2>
             {# controls #}
-            <div id="comment-controls" class="flex justify-center gap-2 md:gap-16 my-12 text-center">
+            <span id="comment-controls" class="flex justify-center gap-2 md:gap-16 my-12 text-center">
               {% set controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer pointer-events-auto md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
               <a
-              href="{{ util::mailto(to=config.extra.comments_email, subject=current_path, body=config.extra.mail_body_instructions) }}"
-              class="{{ controls }} bg-yellow-300 hover:bg-yellow-500">
+                  href="{{ util::mailto(to=config.extra.comments_email, subject=current_path, body=config.extra.mail_body_instructions) }}"
+                  class="{{ controls }} bg-yellow-300 hover:bg-yellow-500"
+              >
                 <span class="hidden md:inline">Write Comment</span>
                 <span class="inline md:hidden">Comment</span>
               </a>
@@ -124,28 +125,28 @@
                 <span class="hidden md:inline">Collapse All</span>
                 <span class="inline md:hidden">Collapse</span>
               </span>
-              <div class="inline group-open:hidden {{ controls }} bg-blue-300 hover:bg-blue-400">
+              <span class="inline group-open:hidden {{ controls }} bg-blue-300 hover:bg-blue-400">
                 <span class="font-mono">[+]</span>
                 <span class="hidden md:inline pointer-events-auto">Expand All</span>
                 <span class="inline md:hidden">Expand</span>
-              </div>
-              {# 'info' modal #}
-              <input type="checkbox" id="commenting-instructions" class="peer hidden">
-              <div class="fixed inset-0 hidden peer-checked:flex z-10 px-6 items-center justify-center bg-slate-950/50 dark:bg-gray-500/80">
-                <div class="pointer-events-auto relative max-h-[90vh] overflow-y-auto p-4 rounded-lg bg-blue-50 dark:bg-slate-900 shadow">
-                  <label for="commenting-instructions" class="pointer-events-auto absolute top-3 right-5 text-black dark:text-inherit cursor-pointer">Close</label>
-                  <div class="py-6 prose prose-pink dark:prose-invert prose-code:wrap-anywhere text-left">
-                    {{ load_data(path="commenting-instructions.md")
-                        | regex_replace(pattern="\{\{ mailto \}\}", rep=util::mailto(to=config.extra.comments_email, subject=current_path, body=config.extra.mail_body_instructions))
-                        | regex_replace(pattern="\{\{ current_path \}\}", rep=current_path)
-                        | regex_replace(pattern="\{\{ mailto_body \}\}", rep=config.extra.mail_body_instructions)
-                        | markdown
-                        | safe }}
-                  </div>
-                </div>
+              </span>
+            </span>
+          </summary>
+          {# 'info' modal #}
+          <input type="checkbox" id="commenting-instructions" class="peer hidden">
+          <div class="fixed inset-0 hidden peer-checked:flex z-10 px-6 items-center justify-center bg-slate-950/50 dark:bg-gray-500/80">
+            <div class="pointer-events-auto relative max-h-[90vh] overflow-y-auto p-4 rounded-lg bg-blue-50 dark:bg-slate-900 shadow">
+              <label for="commenting-instructions" class="pointer-events-auto absolute top-3 right-5 text-black dark:text-inherit cursor-pointer">Close</label>
+              <div class="py-6 prose prose-pink dark:prose-invert prose-code:wrap-anywhere text-left">
+                {{ load_data(path="commenting-instructions.md")
+                    | regex_replace(pattern="\{\{ mailto \}\}", rep=util::mailto(to=config.extra.comments_email, subject=current_path, body=config.extra.mail_body_instructions))
+                    | regex_replace(pattern="\{\{ current_path \}\}", rep=current_path)
+                    | regex_replace(pattern="\{\{ mailto_body \}\}", rep=config.extra.mail_body_instructions)
+                    | markdown
+                    | safe }}
               </div>
             </div>
-          </summary>
+          </div>
           {# Set-up pending comments cache if enabled in r3ply config #}
           {% set r3ply_config = load_data(path="/static/.well-known/r3ply/config.toml") %}
           {% if r3ply_config.comments.cache %}
@@ -182,9 +183,9 @@
             }
 
           </script>
-          <details id="pending-comments" class="mb-6 p-4 ml-2 md:ml-6 bg-gray-300/50 dark:bg-gray-700/50
+          <details id="pending-comments" class="mb-6 py-4 pr-4 ml-2 md:ml-6 bg-gray-300/50 dark:bg-gray-700/50
             border border-dashed dark:border-red-300 rounded-lg
-            group/pending-comments">
+            group/pending-comments overflow-x-scroll" open>
             <summary class="after:content-['[+]'] group-open/pending-comments:after:content-['[-]'] after:font-mono
               flex justify-end items-center gap-2 cursor-pointer">
               <h3 class="text-xl font-light text-gray-700 dark:text-green-300">
@@ -225,7 +226,7 @@
           {% set site_sections_styles = "decoration-teal-300" %}
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/_index.md') }}">Home</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }} cursor-not-allowed text-gray-600 no-underline!">Blog (Soon)</li>
-          <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="/todo" class="hover:text-white">Demo</a></li>
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/demo.md', lang=lang) }}" class="hover:text-white">Demo</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}" >Docs</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/project/_index.md', lang=lang) }}">Project</a></li>
         </ul>
@@ -250,7 +251,7 @@
         <ul class="{{ sub_menu_styles }}">
           {% set site_links_styles = "decoration-yellow-200" %}
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://github.com/asimpletune/r3ply/">GitHub Repo</a></li>
-          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://liberapay.com/spence/donate">Donate</li>
+          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://liberapay.com/spence/donate">Donate</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">Browse Comments</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">RSS Feeds</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="{{ get_url(path='/sitemap.xml') }}">Sitemap.xml</a></li>

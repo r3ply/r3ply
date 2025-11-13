@@ -23,9 +23,9 @@
 }}
 {% endmacro  %}
 
-{% macro mailto(to, subject, body) %}
-  mailto:{{ to }}?subject={{ subject | urlencode }}&body={{ body | urlencode }}
-{% endmacro %}
+{% macro mailto(to, subject, body) -%}
+  mailto:{{ to | urlencode }}?subject={{ subject | urlencode }}&body={{ body | urlencode }}
+{%- endmacro %}
 
 {% macro mailto_text_fragment(to, path, body, icon="💬", delay=600) %}
 <script>
