@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander'
-import { config, generate, init, simulate, cache } from './cmd.js'
+import { init, config, generate, simulate, cache } from './cmds'
 import chalk from 'chalk'
 
 const allowed_formats = ['toml', 'json'] as const
@@ -29,11 +29,11 @@ program
     'toml',
   )
 
-program.addCommand(init.init_cmd(process.cwd()))
-program.addCommand(config.config_cmd(process.cwd()))
-program.addCommand(generate.generate_cmd(process.cwd()))
-program.addCommand(simulate.simulate_cmd(process.cwd()))
-program.addCommand(cache.cache_cmd(process.cwd()))
+program.addCommand(init(process.cwd()))
+program.addCommand(config(process.cwd()))
+program.addCommand(generate(process.cwd()))
+program.addCommand(simulate(process.cwd()))
+program.addCommand(cache(process.cwd()))
 program.parseAsync(process.argv).catch((error: Error) => {
   program.error(chalk.redBright(error.message))
 })

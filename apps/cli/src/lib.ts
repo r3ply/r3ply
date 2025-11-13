@@ -22,7 +22,7 @@ import dayjs from 'dayjs'
 import { build_email } from '@r3ply/wasm'
 import crypto from 'crypto'
 import { mailbox } from 'typescript-mailbox-parser'
-import { init } from './cmd.js'
+import { InitCmdOptions } from './cmds/init'
 
 // project stuff ---------------------------------------------------------------
 export namespace project {
@@ -364,7 +364,7 @@ export namespace project {
 
   export async function init_r3ply_project_at(
     cwd: string,
-    { force, rotateKeys }: init.InitCmdOptions,
+    { force, rotateKeys }: InitCmdOptions,
     dir?: string,
   ): Promise<
     Result<

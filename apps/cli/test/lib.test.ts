@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { project } from '../src/lib'
 import { util } from '../src/util'
 import mockfs from 'mock-fs'
+import { InitCmdOptions } from '../src/cmds/init'
 
 describe('CLI library', () => {
   beforeEach(() => {
@@ -196,18 +197,23 @@ describe('CLI library', () => {
         e: {},
       },
     })
+    const init_cmd_opts: InitCmdOptions = {
+      date: '2025-08-15',
+      force: false,
+      rotateKeys: false
+    }
     expect(
-      (await project.init_r3ply_project_at('root/a')).unwrap().r3ply_dir,
+      (await project.init_r3ply_project_at('root/a', init_cmd_opts)).unwrap().r3ply_dir,
     ).toBe('root/a/.r3ply')
     expect(
-      (await project.init_r3ply_project_at('root/a', '../e')).unwrap()
+      (await project.init_r3ply_project_at('root/a', init_cmd_opts, '../e')).unwrap()
         .r3ply_dir,
     ).toBe('root/e/.r3ply')
     expect(
-      (await project.init_r3ply_project_at('root', 'b')).unwrapErr().message,
+      (await project.init_r3ply_project_at('root', init_cmd_opts, 'b')).unwrapErr().message,
     ).toMatch(/Project already initialized/)
     expect(
-      (await project.init_r3ply_project_at('root', 'b/c/d')).unwrapErr()
+      (await project.init_r3ply_project_at('root', init_cmd_opts, 'b/c/d')).unwrapErr()
         .message,
     ).toMatch(/Nested r3ply project/)
   })

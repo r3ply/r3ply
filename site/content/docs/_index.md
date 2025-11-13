@@ -13,6 +13,8 @@ The r3ply docs are arranged as a mixture of pure documentation, concepts, and tu
 - [Configuration](@/docs/config.md) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
 - [Templating](@/docs/templating.md) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
 - `re` - [The r3ply CLI](@/docs/cli.md) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
+- [Schemas](@/docs/schemas.md) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
+- [API](@/docs/api.md) <span class="font-extralight dark:text-yellow-200 ">(Documentation)</span>
 {% end %}
 
 {{ fleuron_fish() }}

@@ -221,8 +221,8 @@
         <span class="text-teal-300 {{ sub_menu_headers }}">Sections<span class="hidden md:inline">:</span></span>
         <ul class="{{ sub_menu_styles }}">
           {% set site_sections_styles = "decoration-teal-300" %}
-          <li class="{{ sub_menu_items }} {{ site_sections_styles }} cursor-not-allowed text-gray-600 no-underline!">Blog (Soon)</li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/_index.md') }}">Home</a></li>
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }} cursor-not-allowed text-gray-600 no-underline!">Blog (Soon)</li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="/todo" class="hover:text-white">Demo</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/docs/_index.md') }}" >Docs</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }}"><a href="{{ get_url(path='@/project/_index.md', lang=lang) }}">Project</a></li>

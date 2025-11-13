@@ -3,7 +3,6 @@ import {
   R3plySiteConfig,
   R3plySignetConfig,
 } from '@r3ply/schema/config'
-import { simulate as cmd_simulate, cache as cmd_cache } from './cmd'
 import { comments, moderation } from '@r3ply/lib'
 import { util } from './util'
 import { highlight } from 'cli-highlight'
@@ -16,13 +15,25 @@ import {
   PrescreenResult,
 } from 'packages/lib/src/comments/viaEmail'
 import { BaseCmdOptions } from '.'
+import { SimulateCmdEmailOpts } from './cmds/simulate'
+import { CacheStartOpts } from './cmds/cache'
+
+export function txt_info(...text: unknown[]) {
+  return chalk.whiteBright(text)
+}
+export function txt_help(...text: unknown[]) {
+  return chalk.yellowBright(text)
+}
+export function txt_warn(...text: unknown[]) {
+  return chalk.redBright(text)
+}
 
 export namespace tty {
   export namespace cmds {
     export namespace init {
       export function print_warn_force_is_set() {
         console.debug(
-          `--force=true ${chalk.redBright('overwrites any preexisting .r3ply dir!\n')}`,
+          `--force=true ${txt_warn('overwrites any preexisting .r3ply dir!\n')}`,
         )
       }
       export function print_initialized_new_project(
@@ -32,9 +43,9 @@ export namespace tty {
       ) {
         console.info(
           `Initialized empty r3ply project at ${chalk.greenBright(path.dirname(r3ply_dir))}`,
-          `\n\n${chalk.yellowBright('Add the following site entry to your config:')}`,
+          `\n\n${txt_help('Add the following site entry to your config:')}`,
           `\n\n${highlight(format == 'toml' ? TOML.stringify(signet_config as any) : JSON.stringify(signet_config, null, 2))}`,
-          `\n${chalk.yellowBright("Help:")} You can generate a config with ${chalk.yellowBright("`re generate config`")} if you have not already.`,
+          `\n${txt_help("Help:")} You can generate a config with ${txt_help("`re generate config`")} if you have not already.`,
         )
       }
     }
@@ -42,7 +53,7 @@ export namespace tty {
       export function print_mail_to_link(query: string) {
         if (query == '') {
           console.debug(
-            chalk.yellowBright(
+            txt_help(
               `# hint: use options, e.g. '--to', otherwise mailto link will be mostly empty.`,
             ),
           )
@@ -88,12 +99,12 @@ export namespace tty {
     export namespace simulate {
       export function print_comment_via_email_initial(
         email: string,
-        options: cmd_simulate.SimulateCmdEmailOpts,
+        options: SimulateCmdEmailOpts,
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'email')) {
           // TODO: for some reason highlight.js doesn't support `eml`???
           if (options.heading)
-            console.log(`${chalk.whiteBright('# === Input Email ===')}`)
+            console.log(`${txt_info('# === Input Email ===')}`)
           console.log(
             highlight(email.replace(/\r/g, ''), {
               language: 'yaml',
@@ -109,14 +120,14 @@ export namespace tty {
           site_config,
         }: { site_config_path: string; site_config: R3plySiteConfig },
         email_event_response: comments.email.CommentEmailEventResponse,
-        options: cmd_simulate.SimulateCmdEmailOpts,
+        options: SimulateCmdEmailOpts,
         format: BaseCmdOptions['format'],
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'config')) {
           if (util.print_w_quiet_and_filter_opts(options, 'config=system')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('# === Comment: System Config ===\n')}`,
+                `${txt_info('# === Comment: System Config ===\n')}`,
               )
             console.log(
               format == 'toml'
@@ -133,7 +144,7 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'config=site')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('# === Comment: Site Config ===\n')}`,
+                `${txt_info('# === Comment: Site Config ===\n')}`,
               )
             console.log(
               format == 'toml'
@@ -153,7 +164,7 @@ export namespace tty {
         if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
           if (options.heading)
             console.log(
-              chalk.whiteBright('# === Comment: Prescreening Results ===') +
+              txt_info('# === Comment: Prescreening Results ===') +
                 '\n',
             )
           if (email_event_response.prescreening.isOk()) {
@@ -174,11 +185,11 @@ export namespace tty {
                   }) + '\n',
             )
           } else {
-            console.log(chalk.redBright('# Prescreening failed checks:\n'))
+            console.log(txt_warn('# Prescreening failed checks:\n'))
             const prescreen_failures =
               email_event_response.prescreening.unwrapErr()
             if (prescreen_failures.r3ply_is_disabled.result == 'fail') {
-              // console.log(chalk.redBright("- check: r3ply is disabled"))
+              // console.log(txt_warn("- check: r3ply is disabled"))
               console.log(
                 format == 'toml'
                   ? highlight(
@@ -200,7 +211,7 @@ export namespace tty {
               )
             }
             if (prescreen_failures.comments_accepted.result == 'fail') {
-              // console.log(chalk.redBright("- check: comments accepted"))
+              // console.log(txt_warn("- check: comments accepted"))
               console.log(
                 format == 'toml'
                   ? highlight(
@@ -272,7 +283,7 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'receive')) {
             if (options.heading) {
               console.log(
-                chalk.whiteBright('# === Comment: Comment Received ===') + '\n',
+                txt_info('# === Comment: Comment Received ===') + '\n',
               )
               if (receive_details.isOk()) {
                 console.log(
@@ -293,7 +304,7 @@ export namespace tty {
                       ) + '\n',
                 )
               } else {
-                console.log(chalk.redBright(receive_details.unwrapErr() + '\n'))
+                console.log(txt_warn(receive_details.unwrapErr() + '\n'))
               }
             }
           }
@@ -305,7 +316,7 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'deliverable')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('# === Comment: Deliverability Details ===')}\n`,
+                `${txt_info('# === Comment: Deliverability Details ===')}\n`,
               )
             if (deliverable_details.isOk()) {
               // Elide email to not repeat information
@@ -319,7 +330,7 @@ export namespace tty {
               )
             } else {
               console.log(
-                `${chalk.redBright(deliverable_details.unwrapErr())}\n`,
+                `${txt_warn(deliverable_details.unwrapErr())}\n`,
               )
             }
           }
@@ -331,7 +342,7 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'prepare')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('# === Comment: Template Context ===\n')}`,
+                `${txt_info('# === Comment: Template Context ===\n')}`,
               )
             if (prepare_details.isOk()) {
               console.log(
@@ -340,7 +351,7 @@ export namespace tty {
                   : `${highlight('/* These are the values available to your templates */\n' + JSON.stringify(prepare_details.unwrap(), null, 2), { language: 'json', ignoreIllegals: true })}\n`,
               )
             } else {
-              console.log(chalk.redBright(prepare_details.unwrapErr() + '\n'))
+              console.log(txt_warn(prepare_details.unwrapErr() + '\n'))
             }
           }
         }
@@ -351,12 +362,12 @@ export namespace tty {
           if (util.print_w_quiet_and_filter_opts(options, 'comment')) {
             if (options.heading)
               console.log(
-                `${chalk.whiteBright('# === Comment: Processed ===')}\n`,
+                `${txt_info('# === Comment: Processed ===')}\n`,
               )
             if (process_details.isOk()) {
               console.log(highlight(process_details.unwrap()))
             } else {
-              console.log(chalk.redBright(process_details.unwrapErr() + '\n'))
+              console.log(txt_warn(process_details.unwrapErr() + '\n'))
             }
           }
         }
@@ -365,7 +376,7 @@ export namespace tty {
         request: Result<moderation.LocalModerationRequest, Error>,
         ticket: moderation.LocalModerationTicket | undefined,
         count: number,
-        options: cmd_simulate.SimulateCmdEmailOpts,
+        options: SimulateCmdEmailOpts,
         format: BaseCmdOptions['format'],
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
@@ -377,7 +388,7 @@ export namespace tty {
           ) {
             if (options.heading)
               console.log(
-                chalk.whiteBright(`# === Moderation: Local[${count}] ===\n`),
+                txt_info(`# === Moderation: Local[${count}] ===\n`),
               )
             if (request.isOk()) {
               const partial_request: Partial<
@@ -460,13 +471,13 @@ export namespace tty {
                   )
                 } else {
                   const error = ticket.details.unwrapErr()
-                  console.log(chalk.redBright(`Error: ${error.message}`))
+                  console.log(txt_warn(`Error: ${error.message}`))
                 }
               }
             } else {
               const error = request.unwrapErr()
               console.log(
-                chalk.redBright(`Moderation skipped: ${error.message}`),
+                txt_warn(`Moderation skipped: ${error.message}`),
               )
             }
             // Print blank line
@@ -478,7 +489,7 @@ export namespace tty {
         request: Result<moderation.GitHubModerationRequest, Error>,
         ticket: moderation.GitHubModerationTicket | undefined,
         count: number,
-        options: cmd_simulate.SimulateCmdEmailOpts,
+        options: SimulateCmdEmailOpts,
         format: BaseCmdOptions['format'],
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
@@ -490,7 +501,7 @@ export namespace tty {
           ) {
             if (options.heading)
               console.log(
-                chalk.whiteBright(
+                txt_info(
                   `# === Moderation: GitHub[${count}] (MOCKED) ===\n`,
                 ),
               )
@@ -580,13 +591,13 @@ export namespace tty {
                   )
                 } else {
                   const error = ticket.details.unwrapErr()
-                  console.log(chalk.redBright(`Error: ${error.message}`))
+                  console.log(txt_warn(`Error: ${error.message}`))
                 }
               }
             } else {
               const error = request.unwrapErr()
               console.log(
-                chalk.redBright(`Moderation skipped: ${error.message}`),
+                txt_warn(`Moderation skipped: ${error.message}`),
               )
             }
             // Print blank line
@@ -599,13 +610,13 @@ export namespace tty {
         not_implemented_moderation_results: NonNullable<
           comments.email.CommentEmailEventResponse['moderation']
         >,
-        options: cmd_simulate.SimulateCmdEmailOpts,
+        options: SimulateCmdEmailOpts,
         format: BaseCmdOptions['format'],
       ) {
         if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
           if (util.print_w_quiet_and_filter_opts(options, `moderation=other`)) {
             if (options.heading)
-              console.log(chalk.whiteBright(`# === Moderation: Other ===\n`))
+              console.log(txt_info(`# === Moderation: Other ===\n`))
             const ignored_moderation =
               format == 'toml'
                 ? TOML.stringify({
@@ -655,7 +666,7 @@ export namespace tty {
       }
     }
     export namespace cache {
-      export function print_serving_cache(cache_dir: string, options: cmd_cache.CacheStartOpts) {
+      export function print_serving_cache(cache_dir: string, options: CacheStartOpts) {
         if (options.reset) console.log(`Resetting cache at ${cache_dir}`)
         console.log(`Static server running at http://${options.interface}:${options.port}`);
         console.log(`Serving files from: ${cache_dir}`);
