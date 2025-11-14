@@ -49,8 +49,6 @@ function render_preview_text(head, level, template_node) {
   span.innerText = stripHTML(head.comment.txt)
   span.classList.remove(`group-open/1:hidden`)
   span.classList.add(`group-open/${level}:hidden`)
-  // console.log("SPAN");
-  // console.log(span);
 }
 // Renders the summary's 'root' nav
 function render_root_nav(root, level, template_node) {

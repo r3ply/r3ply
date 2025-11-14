@@ -170,12 +170,15 @@
               if (!response.ok) {
                 console.warn("HTTP error:", response.status)
               } else {
-                // filter out comments that are permanent now but still temporarily cached
+                // filter out pending comments that have already been merged into the permanent comments
                 const pending_comments = await response.json()
-                  .then(all => all.filter(c => document.getElementById(`${get_slug(c)}`) === null))
+                  .then(all => all
+                  .filter(c => document.getElementById(`${get_slug(c)}`) === null))
+                // produce an array of root-level comments, which may each further be nested
                 const rendered_comments = await render_pending_comments(pending_comments)
-                console.log(rendered_comments)
+                // set the text for number of comments that were filtered above
                 document.querySelector('#pending-comments h3 span').innerText = `(${pending_comments.length})`
+                // append each root-level comment to the space intended for them
                 rendered_comments.forEach(c => document.querySelector('#pending-comments-container').append(c))
               }
             } catch (error) {
@@ -185,7 +188,7 @@
           </script>
           <details id="pending-comments" class="mb-6 py-4 pr-4 ml-2 md:ml-6 bg-gray-300/50 dark:bg-gray-700/50
             border border-dashed dark:border-red-300 rounded-lg
-            group/pending-comments overflow-x-scroll" open>
+            group/pending-comments overflow-x-scroll">
             <summary class="after:content-['[+]'] group-open/pending-comments:after:content-['[-]'] after:font-mono
               flex justify-end items-center gap-2 cursor-pointer">
               <h3 class="text-xl font-light text-gray-700 dark:text-green-300">
