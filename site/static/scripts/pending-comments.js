@@ -252,9 +252,9 @@ function get_date(ctx) {
  * Hopefully this is a safe way to completely strip HTML that originated from the outside world
  */
 function stripHTML(text) {
-  const template = document.createElement('template');
-  template.innerHTML = text;
-  return template.content.textContent || '';
+  const template = document.createElement('template')
+  template.innerHTML = text
+  return template.content.textContent || ''
 }
 /**
  * Same functionality as template/macros/util.html::mailto
