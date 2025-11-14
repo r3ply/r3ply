@@ -4,33 +4,54 @@
  * A nested <template> of a comment is written there and then used here.
  *
  * (comments arrive as an array of CommentTemplateContext & EmailTemplateContext objects)
+ *
+ * mailto: {
+ *   // email address where site can receive comments
+ *   // e.g. r3ply.com@r3ply.com
+ *   to: string,
+ *   // subject of the comment (must be path or URL)
+ *   // e.g. /demo/
+ *   subject: string
+ *   // prefilled body that can be used as instructions
+ *   // see [comments.email.email_signature_separator] in /docs/config/#email-comments
+ *   body: string
+ * }
  */
-async function render_pending_comments(comments) {
+async function render_pending_comments(comments, mailto) {
   const filtered_and_sorted = comments
     // we start only with the root comments
     .filter(c => is_root(c))
     // in reverse chronological order
     .sort((a, b) => b.comment.ts_rcvd - a.comment.ts_rcvd)
-
   // then render each thread once
-  return filtered_and_sorted.map(head => render_thread(head, comments, 1, head))
+  return filtered_and_sorted.map(head => render_thread(head, comments, 1, head, mailto))
 }
 
-function render_thread(head, comments, level, root) {
+function render_thread(head, comments, level, root, mailto) {
+  // filter out siblings from all comments
   const siblings = comments.filter(c => is_root(head) ? is_root(c) : in_reply_to(c) == in_reply_to(head))
+  // establish where head is among siblings
   const head_index = siblings.findIndex(c => get_slug(c) == get_slug(head))
+  // establish previous sibling, if any
   const prev = siblings[head_index - 1] || false
+  // establish next sibling, if any
   const next = siblings[head_index + 1] || false
+  // get the comment template node, clone it, and save its contents
   const template_node = document.querySelector("#comment-template").content.cloneNode(true)
+  // set the current comment's ID at the top-level detail element and set a CSS class based on its level
   const details = template_node.querySelector('details')
   details.id = get_slug(head)
   details.classList.remove("group/1")
   details.classList.add(`group/${level}`)
+  // continue rendering the comment's summary element
   render_summary(head, level, root, prev, next, template_node)
-  render_article(head, template_node)
-  const comment_article = details.querySelector('div')
+  // continue rendering the comment's article element element
+  render_article(head, template_node, mailto)
+  // get the comment article's container and render its children as a tree by recursing on this function
+  const comment_article = details.querySelector('[data-comment-article-container]')
   const children = comments.filter(c => in_reply_to(c) == `#${get_slug(head)}`)
-  children.forEach(c => comment_article.appendChild(render_thread(c, comments, level + 1, root)))
+  children.forEach(c => comment_article.appendChild(render_thread(c, comments, level + 1, root, mailto)))
+  // return the comment template so it can eventually be attached to the actual document
   return template_node
 }
 
@@ -110,7 +131,7 @@ function render_prev_nav(prev, template_node) {
   }
 }
 // Renders the comment's <article>
-function render_article(head, template_node) {
+function render_article(head, template_node, mailto) {
   const article_template = template_node.querySelector("#comment-article-template")
   const article = article_template.content.cloneNode(true)
   // Comment-ID
@@ -169,6 +190,9 @@ function render_article(head, template_node) {
   temp_container.innerHTML = head.comment.html
   comment_content.replaceChildren(...temp_container.childNodes)
   article.querySelector('#comment-content-template').replaceWith(comment_content)
+  // r3ply! button
+  const r3ply_a = article.querySelector('[data-reply-mailto]')
+  r3ply_a.href=make_mailto_link(mailto.to, `${mailto.subject}#${get_slug(head)}`, mailto.body)
   article_template.replaceWith(article)
 }
 // JS version of comment.template.md's `[:8]`
@@ -224,8 +248,17 @@ function get_date(ctx) {
     tz,
   }
 }
+/**
+ * Hopefully this is a safe way to completely strip HTML that originated from the outside world
+ */
 function stripHTML(text) {
   const template = document.createElement('template');
   template.innerHTML = text;
   return template.content.textContent || '';
+}
+/**
+ * Same functionality as template/macros/util.html::mailto
+ */
+function make_mailto_link(to, subject, body) {
+  return `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }

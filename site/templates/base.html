@@ -165,6 +165,9 @@
             // e.g. https://api.r3ply.com/cache/comments/pending/example.com/blog/posts/123/
             const cache_server = new URL("{{ cache_server | safe }}")
             const url = new URL(`/cache/comments/pending/{{ site_domain | safe }}{{ current_path | safe }}`, cache_server)
+            const comments_email = "{{ config.extra.comments_email | safe }}"
+            const current_path = "{{ current_path | safe }}"
+            const email_body_instructions = `{{ config.extra.mail_body_instructions | safe }}`
             try {
               const response = await fetch(url)
               if (!response.ok) {
@@ -175,7 +178,11 @@
                   .then(all => all
                   .filter(c => document.getElementById(`${get_slug(c)}`) === null))
                 // produce an array of root-level comments, which may each further be nested
-                const rendered_comments = await render_pending_comments(pending_comments)
+                const rendered_comments = await render_pending_comments(pending_comments, {
+                  to: comments_email,
+                  subject: current_path,
+                  body: email_body_instructions
+                })
                 // set the text for number of comments that were filtered above
                 document.querySelector('#pending-comments h3 span').innerText = `(${pending_comments.length})`
                 // append each root-level comment to the space intended for them
