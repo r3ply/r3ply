@@ -1,0 +1,8 @@
+{#
+    col - width in characters
+#}
+<div class="prose-code:block! prose-code:w-[{{ col | default(value=120) }}ch]! prose-code:overflow-x-scroll!">
+
+{{ body | markdown | safe }}
+
+</div>

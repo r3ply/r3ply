@@ -199,6 +199,8 @@ The `$foo` syntax means this variable is some kind of meta variable reserved by 
 
 Below is an example of the full site config, using every default and with every value set. For convenience there are also separate sections with more discussion for [`site`](#site-config-entry), [`comments`](#comments-configuration), and [`moderation`](#moderation-configuration).
 
+{% scrolling_snippet() %}
+
 <!-- prettier-ignore-start -->
 ```toml, linenos, name=r3ply site config.toml, hl_lines=1-8
 # ALL SITE CONFIG VARIABLES SET + DEFAULTS
@@ -341,12 +343,15 @@ enabled = true
 ```
 <!-- prettier-ignore-end -->
 
+{% end %}
+
 ---
 
 ### Site { #site-config-entry }
 
 The `site` config key expects an array of objects. Each site entry object is as follows:
 
+{% scrolling_snippet() %}
 <!-- prettier-ignore-start -->
 ```toml
 {{ schema_comment(version="v0.0.1", schema="config/signet", skip=["examples"]) }}
@@ -363,9 +368,11 @@ issued = 2025-10-24
 label = "prod"
 ```
 <!-- prettier-ignore-end -->
+{% end %}
 
 One config file can be used by many sites. This is a fairly common scenario when you want to stage changes. You may have one site deployed at one domain, while having another site deployed to a staging domain for testing.
 
+{% scrolling_snippet() %}
 <!-- prettier-ignore-start -->
 ```toml
 [[site]]
@@ -379,6 +386,7 @@ issued = 2025-10-24
 label = "staging"
 ```
 <!-- prettier-ignore-end -->
+{% end %}
 
 Additional filtering can be done further downstream in the r3ply pipeline by using the site entry's `label`. See `filter*` for more details.
 
@@ -388,6 +396,7 @@ Additional filtering can be done further downstream in the r3ply pipeline by usi
 
 The `comments` key is where the behavior for comments is adjusted. Here are the top-level comment config variables.
 
+{% scrolling_snippet() %}
 <!-- prettier-ignore-start -->
 ```toml
 {{ schema_comment(version="v0.0.1", schema="config/comments") }}
@@ -409,6 +418,7 @@ allow_tags = [ "a", "br", "p", "span", "strong", "s", "del", "em", "u", "ul", "o
 "$comment_sources" = [ "email" ]
 ```
 <!-- prettier-ignore-end -->
+{% end %}
 
 {% info(type="warning") %}
 It is strongly advised **NOT** to disable `sanitize_html`.
@@ -418,6 +428,7 @@ There are also individual _comment sources_ that have their own config key, albe
 
 #### Email Comments
 
+{% scrolling_snippet() %}
 <!-- prettier-ignore-start -->
 ```toml
 {{ schema_comment(version="v0.0.1", schema="config/comments/email") }}
@@ -440,6 +451,7 @@ max_size_bytes = 1_048_576
 comment_mime = "text/plain"
 ```
 <!-- prettier-ignore-end -->
+{% end %}
 
 ---
 
@@ -447,6 +459,7 @@ comment_mime = "text/plain"
 
 Moderation is what happens to a comment after it has been received and processed according to a site's config. What follows are the top-level moderation config options.
 
+{% scrolling_snippet() %}
 <!-- prettier-ignore-start -->
 ```toml
 {{ schema_comment(version="v0.0.1", schema="config/moderation") }}
@@ -455,11 +468,13 @@ Moderation is what happens to a comment after it has been received and processed
 enabled = true
 ```
 <!-- prettier-ignore-end -->
+{% end %}
 
 Additionally, there are individual moderation channels that have their own sub-configs.
 
 #### Local Moderation
 
+{% scrolling_snippet() %}
 <!-- prettier-ignore-start -->
 ```toml
 {{ schema_comment(version="v0.0.1", schema="config/moderation/local") }}
@@ -472,9 +487,11 @@ enabled = true
 "allow*" = [ ]
 ```
 <!-- prettier-ignore-end -->
+{% end %}
 
 #### GitHub Moderation
 
+{% scrolling_snippet() %}
 <!-- prettier-ignore-start -->
 ```toml
 {{ schema_comment(version="v0.0.1", schema="config/moderation/github") }}
@@ -510,9 +527,11 @@ enabled = true
 "allow*" = [ ]
 ```
 <!-- prettier-ignore-end -->
+{% end %}
 
 #### Webhook Moderation
 
+{% scrolling_snippet() %}
 <!-- prettier-ignore-start -->
 ```toml
 {{ schema_comment(version="v0.0.1", schema="config/moderation/webhook") }}
@@ -527,11 +546,13 @@ enabled = true
 "allow*" = [ ]
 ```
 <!-- prettier-ignore-end -->
+{% end %}
 
 ## System Config { #r3ply-system-config }
 
 Below is an example of the full r3ply system config, using every default and with every value set.
 
+{% scrolling_snippet() %}
 <!-- prettier-ignore-start -->
 ```toml
 {{ schema_comment(version="v0.0.1", schema="config/r3ply") }}
@@ -561,6 +582,7 @@ attachments = false
 max_size_bytes = 5_242_880
 ```
 <!-- prettier-ignore-end -->
+{% end %}
 
 {{ fleuron_fish() }}
 
