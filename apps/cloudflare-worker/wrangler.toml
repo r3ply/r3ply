@@ -46,14 +46,10 @@ database_name = "r3ply staging db"
 database_id = "7ee88e89-bd64-41b8-bd03-a537ee600b4b"
 preview_database_id = "R3PLY_STAGING_DB"
 
-# [[services]]
-# binding = "R3PLY_GITHUB_APP"
-# service = "r3ply-github-app"
-
 # Docs: https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/
 [[send_email]]
 name = "MODERATOR_EMAIL"
-destination_address = "moderator@spenc.es"
+destination_address = "spence@admin.r3ply.com"
 
 [[rules]]
 type = "Text"

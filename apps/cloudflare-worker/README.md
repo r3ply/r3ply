@@ -1,65 +1,85 @@
-# r3ply Comments
+# r3ply Cloudflare Worker
 
-Accepts comments to your website via email.
+Implementation of r3ply using Cloudflare Workers that's accessible over the public internet via email, along with a small rest API.
 
-Here's an example of the basic flow that is currently being used at https://spenc.es/
-
-![commenting lifecycle using r3ply as swimlanes](<./documentation/my%20r3ply%20workflow%20(swimlanes)@0.5x.png>)
+See [https://r3ply.com/](https://r3ply.com/) for more info:
+- [docs](https://r3ply.com/docs/) - for the general r3ply docs
+- [demo](https://r3ply.com/demo/) - to see a demo
+- [project](https://r3ply.com/project/) - for project documentation like structure and contributing info.
 
 ## Environment Variables
 
-- `EMAIL_HASH_PEPPER` - a secret that's added to user emails before they're hashed to make it more difficulty to uncover their identity
 - `R3PLY_GIST_TOKEN` - a secret that's used by r3ply to anonymously store emails as gists in case there's a problem while processing a comment
 
 ## Basic Usage
 
 ```sh
 # install dependencies
-npm install
+pnpm install
 
-# deploys to cloudflare infrastructure
-npm run deploy
+# run cloudflare type generation
+pnpm cf:types
 
 # runs a local server for testing (inbound email won't work)
-npm run dev
+pnpm run dev
 
 # runs tests once
-npm test
+pnpm test
 
 # run tests continually
-npm test:watch
+pnpm test:watch
 
-# cleans the dist directory and builds an api
-npm run prepack
+# builds project
+pnpm build
 
-# packages the api so it can be distributed locally as a tar ball
-npm pack
+# deploys to cloudflare infrastructure
+pnpm cf:deploy
+
+# tail output of worker to the console
+pnpm tail
 ```
 
-## Infrastructure
+## Local Testing
 
-There are a few pieces of infrastructure to be aware of
+Make sure the server is running first.
 
-- Cloudflare
-  - Email Workers ([docs](https://developers.cloudflare.com/email-routing/email-workers/)) - provides inbound email and some limited reply/fwd/send capabilities
-    - Email Routing ([panel](https://dash.cloudflare.com/55945010d6d11381c59ab3263481b978/r3ply.com/email/routing/routes)) - Manage how routes trigger workers for this project
-    - Moderator email binding - you can register certain email with Cloudflare in advance and then bind them to your service, which is how moderator emails are currently handled (In the future this should be removed as Cloudflare limits how many email bindings you can have)
-    <!-- - Mail Channels ([link](https://support.mailchannels.com/hc/en-us/articles/4565898358413-Sending-Email-from-Cloudflare-Workers-using-MailChannels-Send-API)) - provides free email sending with Cloudflare Workers, but this functionality hasn't been implemented yet -->
-- GitHub
-  - r3ply is currently storing emails in private gists, just in case there's an issue when processing a comment, which should allow the message to be reprocessed in the future if needed
-
-## Statefulness
-
-### D1
-
-This project is using [D1](https://developers.cloudflare.com/d1/), a Cloudflare SQL db, to store the state of the comments.
-
-The schema is located in [schema.sql](./schema.sql). Here are some useful commands
-
-```zsh
-# run the schema script locally
-wrangler d1 execute r3ply --local --file=./schema.sql
-
-# run the schema script in production (☠️ DANGER ☠️)
-wrangler d1 execute r3ply --remote --file=./schema.sql
+```sh
+pnpm run dev
 ```
+
+### Comments via Email
+
+You can use `re` - the r3ply CLI tool - to test emails via this r3ply cloudflare worker:
+
+```bash
+re generate email --from bob@user.com --to <EMAIL> --subject "/example/" | \
+curl --request POST 'http://localhost:8787/cdn-cgi/handler/email' \
+  --url-query 'from=bob@user.com' \
+  --url-query 'to=<EMAIL>' \
+  --data-binary @-
+```
+
+### Cache
+
+This project uses the d1 database to cache.
+
+You can query the database locally
+
+```bash
+wrangler d1 execute R3PLY_STAGING_DB --local --command "<SQL>"
+```
+
+To query what tables are available you can use this sql query.
+
+```sql
+SELECT name
+FROM sqlite_master
+WHERE type = 'table'
+  AND name NOT LIKE 'sqlite_%';
+```
+
+
+## Rate Limits
+
+- 5 emails per 60 seconds (for comments)
+- 12 reqs per 60 seconds (for API)

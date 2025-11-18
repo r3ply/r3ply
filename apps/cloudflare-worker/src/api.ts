@@ -31,7 +31,7 @@ function api(r3ply: R3plySystemConfig) {
     })
     return result.then((result) => {
       const format = c.req.query('format')
-      if (format == 'json') {
+      if (format && format.toLowerCase() == 'json') {
         return c.json({ ...result, domain, r3ply: req_url.hostname })
       } else {
         return c.text(`[[site]]
@@ -46,9 +46,11 @@ issued = ${result.issued}\n`)
   api.get('/cache/comments/pending/:domain/:path{.+}', async (c) => {
     const { domain, path } = c.req.param()
     c.res.headers.set('Access-Control-Allow-Origin', '*')
+    c.res.headers.set('Content-Type', 'application/json')
     return CommentCache(c.env.R3PLY_STAGING_DB)
       .get(domain, path)
-      .then((comments) => c.json(comments))
+      .then((rows) => rows.map(row => JSON.parse(row.comment_json)))
+      .then(comments => c.json(comments))
   })
 
   return api
