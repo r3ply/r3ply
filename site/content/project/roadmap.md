@@ -40,9 +40,12 @@ enabled = true
 - [ ] Add synonyms for the stage names to be used by the `--filter`/`--quiet` options. For example, currently `comment` is used instead of `processed` but it should technically permit both.
 - [ ] Rewrite in rust
 
-## r3ply Apps & Infrastructure
+## Public r3ply.com instance
 
-- [ ] Email server
+### General
+
+- [ ] Dedicated email server
+- [ ] Better error messaging, possibly by responding directly to the commenter
 
 ## Moderation Channels
 
@@ -51,7 +54,7 @@ enabled = true
 
 ### GitHub Moderation
 
--  [ ] Add support for public repos via a fork + new PR flow in the GitHub bot.
+-  [ ] Add support for public repos via a fork + new PR flow in the GitHub bot. (note: that at the moment this is not quite so straightforward. You can create a public user for a bot and use the rest api to fork a repo and then create a PR. The problem is that forking is async and the current cloudflare worker can't live that long. One solution would be to pay for cloudflare and use their queue solution. Another would be to create a jobs table and use a cron job to poll it every x minutes for any pending work. For the time being people should just know they need to install the r3ply bot github app and if they want to help fix this then the situation and the pros and cons should just be documented somewhere.)
 
 ### Webhook
 
