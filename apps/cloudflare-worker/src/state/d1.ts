@@ -1,5 +1,5 @@
 import { comments } from '@r3ply/lib'
-import { OmitFirstParameter } from '../util'
+import { OmitFirstParameter, url_path_relative_to_base } from '../util'
 
 type CommentViaEmailStates =
   | 'accepted'
@@ -170,7 +170,6 @@ export interface CommentCache {
   get(
     domain: string,
     path: string,
-    comment_id?: string,
   ): Promise<CachedComment[]>
   set(
     domain: string,
@@ -178,6 +177,7 @@ export interface CommentCache {
     comment_id: string,
     comment: any,
   ): Promise<D1Result<void>>
+  all(domain: string): Promise<CachedComment[]>
   clear(): Promise<void>
 }
 
@@ -197,15 +197,13 @@ export function CommentCache(d1: D1Database): CommentCache {
       comment_id: string,
       comment: any,
     ): Promise<D1Result<void>> {
-      const url = new URL('https://example.com')
+      const url = url_path_relative_to_base(path, new URL('https://example.com'))
       url.host = domain
-      url.pathname = path
       return d1
         .prepare(
           `${create_table}
           INSERT INTO pending_comments (domain, path, comment_id, comment_json)
-          VALUES (?1, ?2, ?3, ?4);
-        `,
+          VALUES (?1, ?2, ?3, ?4);`,
         )
         .bind(url.host, url.pathname, comment_id, JSON.stringify(comment))
         .run<void>()
@@ -213,28 +211,27 @@ export function CommentCache(d1: D1Database): CommentCache {
     get: async function (
       domain: string,
       path: string,
-      comment_id?: string,
     ): Promise<CachedComment[]> {
+      const url = url_path_relative_to_base(path, new URL('https://example.com'))
+      url.host = domain
+        return d1
+          .prepare(
+            `${create_table}\nSELECT * FROM pending_comments WHERE domain = ? AND path = ?;`,
+          )
+          .bind(url.hostname, url.pathname)
+          .run<CachedComment>()
+          .then((db_rep) => db_rep.results)
+    },
+    all: async function(domain: string): Promise<CachedComment[]> {
       const url = new URL('https://example.com')
       url.host = domain
-      url.pathname = path
-      if (comment_id) {
-        return d1
-          .prepare(
-            `${create_table}\nSELECT * from pending_comments WHERE comment_id = ? AND domain = ? AND path = ?;`,
-          )
-          .bind(comment_id, url.host, url.pathname)
-          .run<CachedComment>()
-          .then((db_rep) => db_rep.results)
-      } else {
-        return d1
-          .prepare(
-            `${create_table}\nSELECT * from pending_comments WHERE domain = ? AND path = ?;`,
-          )
-          .bind(url.host, url.pathname)
-          .run<CachedComment>()
-          .then((db_rep) => db_rep.results)
-      }
+      return d1.prepare(`
+        ${create_table}
+        SELECT * FROM pending_comments WHERE domain = ?;`
+      )
+      .bind(url.hostname)
+      .run<CachedComment>()
+      .then((db_rep) => db_rep.results)
     },
     clear: async function (): Promise<void> {
       return d1

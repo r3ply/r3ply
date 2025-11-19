@@ -53,6 +53,16 @@ issued = ${result.issued}\n`)
       .then(comments => c.json(comments))
   })
 
+  api.get('/cache/comments/pending/:domain/', async (c) => {
+    const { domain } = c.req.param()
+    c.res.headers.set('Access-Control-Allow-Origin', '*')
+    c.res.headers.set('Content-Type', 'application/json')
+    return CommentCache(c.env.R3PLY_STAGING_DB)
+      .all(domain)
+      .then((rows) => rows.map(row => JSON.parse(row.comment_json)))
+      .then(comments => c.json(comments))
+  })
+
   return api
 }
 

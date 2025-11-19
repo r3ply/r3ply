@@ -75,32 +75,27 @@ describe('pending_comments', () => {
     await cache.clear()
   })
   const cache = CommentCache(env.TEST_DB)
-  test('set/get', async () => {
-    // domains and paths are normalized via the URL class, so domains become lowercase and paths remain case sensitive
-    await cache.set('A', '/B', '456', JSON.stringify({}))
-    await cache.set('C', '/d', '789', JSON.stringify({}))
-
-    const ab = await cache.get('a', '/b')
-    const aB = await cache.get('a', '/B')
-    const AB = await cache.get('A', '/B')
-    const Ab = await cache.get('A', '/b')
-
-    expect(ab).toStrictEqual([])
-    expect(aB[0].comment_id).toBe('456')
-    expect(AB[0].comment_id).toBe('456')
-    expect(Ab).toStrictEqual([])
-
-    const cd = await cache.get('c', '/d')
-    const cD = await cache.get('c', '/D')
-    const CD = await cache.get('C', '/D')
-    const Cd = await cache.get('C', '/d')
-    expect(cd[0].comment_id).toBe('789')
-    expect(cD).toStrictEqual([])
-    expect(CD).toStrictEqual([])
-    expect(Cd[0].comment_id).toBe('789')
-
-    const dne = await cache.get('D', '/')
-    expect(dne).toStrictEqual([])
+  test('domain is case insensitive', async () => {
+    const work = await Promise.all([cache.set('A', 'b', '12', JSON.stringify({})), cache.set('a', 'b', '34', JSON.stringify({}))])
+    const [A_domains, a_domains] = await Promise.all([cache.all('A'), cache.all('a')])
+    expect(A_domains).length(work.length).length(2)
+    expect(A_domains).toStrictEqual(a_domains)
+  })
+  test('path is always relative to root', async () => {
+    const work = await Promise.all([cache.set('a', 'b', '12', JSON.stringify({})),
+      cache.set('a', '../b', '34', JSON.stringify({})),
+      cache.set('a', './b', '56', JSON.stringify({})),
+      cache.set('a', './https://b.com', '78', JSON.stringify({}))])
+    const all = await cache.all('a')
+    expect(all.map(c => c.domain)).toStrictEqual(["a", "a", "a", "a"])
+    expect(all.filter(c => c.path == "/b").map(c => Number(c.comment_id)).sort((c1, c2) => c1 - c2)).toStrictEqual([12, 34, 56])
+    expect(all.filter(c => c.comment_id == "78")[0].path).toBe("/https://b.com")
+  })
+  test('path is case sensitive', async () => {
+    const work = await Promise.all([cache.set('a', 'b', '12', JSON.stringify({})), cache.set('a', 'B', '34', JSON.stringify({}))])
+    const [b_paths, B_paths] = await Promise.all([cache.get('a', 'b'), cache.get('a', 'B')])
+    expect(b_paths.map(c => [c.path, c.comment_id])).toStrictEqual([['/b', '12']])
+    expect(B_paths.map(c => [c.path, c.comment_id])).toStrictEqual([['/B', '34']])
   })
   test('clear', async () => {
     await cache.set('abc', 'def', '3.14', {})

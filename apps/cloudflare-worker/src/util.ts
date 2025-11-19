@@ -40,7 +40,7 @@ export const DereferenceFileAtURL: util.config.DerferenceFile = async (
   }
 }
 
-function url_path_relative_to_base(path: string, base: URL) {
+export function url_path_relative_to_base(path: string, base: URL) {
   if (path.startsWith('/')) return new URL(path, base)
   else return new URL('./' + path, base)
 }
