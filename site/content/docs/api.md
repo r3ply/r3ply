@@ -58,9 +58,15 @@ issued = 2023-07-16
 
 There is a rate limit of 12 requests/minute/ip. Pending comments are available for at least 24 hours.
 
-* Request: `GET <R3PLY_DOMAIN>/cache/comments/pending/<SITE_DOMAIN>/<PATH*>`
+#### Get All Pending Comments for a Domain
+
+* Request: `GET <R3PLY_DOMAIN>/cache/comments/pending/<SITE_DOMAIN>/`
 * Response: JSON Array of [Template Contexts](@/docs/templating.md#template-context)
 
+#### Get Pending Comments for a Domain + Path
+
+* Request: `GET <R3PLY_DOMAIN>/cache/comments/pending/<SITE_DOMAIN>/<PATH*>`
+* Response: JSON Array of [Template Contexts](@/docs/templating.md#template-context)
 
 Example:
 
@@ -161,5 +167,13 @@ $ curl "https://r3ply.com/cache/comments/pending/r3ply.com/demo/"
   }
 ]
 ```
+
+## Email
+
+There is also a simple email interface under development.
+
+### ping@r3ply.com
+
+Responds with the time between when the email was sent and when it was received in milliseconds.
 
 {{ next_prev(prev_path="/docs/schemas/", prev_text="r3ply Schemas", next_path="/project/", next_text="r3ply Project") }}

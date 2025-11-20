@@ -26,10 +26,15 @@ namespace_id = "1001"
 # Cloudflare location
 # Period: the duration of the period, in seconds. Must be either 10 or 60
 simple = { limit = 12, period = 60 }
-
+# Limits comments via email to 5 emails/60 s/email address
 [[ratelimits]]
 name = "COMMENT_VIA_EMAIL_RATE_LIMITER"
 namespace_id = "1002"
+simple = { limit = 5, period = 60 }
+# Limits access to the "email interface" to 5 emails/60 s/email address
+[[ratelimits]]
+name = "EMAIL_INTERFACE_RATE_LIMITER"
+namespace_id = "1003"
 simple = { limit = 5, period = 60 }
 
 # The following is needed for CF pages + D1 local development

@@ -52,10 +52,13 @@ pnpm run dev
 You can use `re` - the r3ply CLI tool - to test emails via this r3ply cloudflare worker:
 
 ```bash
-re generate email --from bob@user.com --to <EMAIL> --subject "/example/" | \
+EMAIL_FROM="bob@user.com"
+EMAIL_TO="ping@r3ply.com"
+EMAIL_SUBJECT="example"
+re generate email --from "$EMAIL_FROM" --to "$EMAIL_TO" --subject "$EMAIL_SUBJECT" | \
 curl --request POST 'http://localhost:8787/cdn-cgi/handler/email' \
-  --url-query 'from=bob@user.com' \
-  --url-query 'to=<EMAIL>' \
+  --url-query "from=$EMAIL_FROM" \
+  --url-query "to=$EMAIL_TO" \
   --data-binary @-
 ```
 

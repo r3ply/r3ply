@@ -8,7 +8,7 @@ import { CommentState } from './state/d1'
 import { R3plySystemConfig, R3plySiteConfig } from '@r3ply/schema/config'
 import { util, R3ply, moderation, comments } from '@r3ply/lib'
 import { mailbox } from 'typescript-mailbox-parser'
-import { DereferenceFileAtURL } from './util'
+import { create_reply_email, DereferenceFileAtURL } from './util'
 import {
   mk_cf_accept,
   mk_cf_deliverable,
@@ -36,7 +36,7 @@ export default {
   },
 
   async email(...params): Promise<void> {
-    const [msg] = params
+    const [msg, env] = params
     // parse mailbox of email's 'To' header
     const to_mb = mailbox(msg.to)
     if (Array.isArray(to_mb)) {
@@ -47,7 +47,17 @@ export default {
     }
 
     switch (to_mb.local) {
-      // Currently all emails are treated as comments (TODO: a sort of email interface could be built in the future)
+      case "ping": {
+        const { success } = await env.EMAIL_INTERFACE_RATE_LIMITER.limit({ key: msg.from })
+        if (!success) {
+          msg.setReject('Rate limit exceeded.')
+          return Promise.resolve()
+        }
+        const date_sent = new Date(Option(msg.headers.get('Date')).expect("Date header is required."))
+        const now = new Date()
+        await msg.reply(create_reply_email(msg, { subject: "Re: ping", body: `time=${now.valueOf() - date_sent.valueOf()}ms` }))
+        return Promise.resolve()
+      }
       default: {
         // Guard against emails that are too big
         if (msg.rawSize > r3ply_system_config.email.max_size_bytes) {
