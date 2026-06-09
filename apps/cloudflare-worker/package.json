@@ -28,12 +28,12 @@
     "mime": "^4.0.6",
     "mimetext": "^3.0.16",
     "octokit": "^4.1.2",
-    "oxide.ts": "^1.1.0"
+    "oxide.ts": "^1.1.0",
+    "typescript-mailbox-parser": "0.0.3"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.9.10",
     "typescript": "^5.5.4",
-    "typescript-mailbox-parser": "^0.0.1",
     "vitest": "^3.2.4",
     "wrangler": "^4.42.0"
   },

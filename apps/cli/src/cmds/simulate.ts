@@ -108,7 +108,7 @@ async function simulate(cwd: string, input: string | undefined, options: Simulat
     let site_domain: string = (() => {
       if (to) {
         const mb = mailbox(to)
-        if (Array.isArray(mb))
+        if (!mb.ok)
           throw new Error(
             `Unable to parse --to '${to}', reasons: ${JSON.stringify(mb)}`,
           )

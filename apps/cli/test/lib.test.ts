@@ -3,6 +3,14 @@ import { project } from '../src/lib'
 import { util } from '../src/util'
 import mockfs from 'mock-fs'
 import { InitCmdOptions } from '../src/cmds/init'
+import { mailbox } from 'typescript-mailbox-parser'
+
+describe('foo', () => {
+  test('foo', () => {
+    const result = mailbox('bob@example.com')
+    expect(result.ok).toBe(true)
+  })
+})
 
 describe('CLI library', () => {
   beforeEach(() => {

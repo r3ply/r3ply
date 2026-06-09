@@ -37,14 +37,17 @@ export default {
 
   async email(...params): Promise<void> {
     const [msg, env] = params
+
     // parse mailbox of email's 'To' header
     const to_mb = mailbox(msg.to)
-    if (Array.isArray(to_mb)) {
+    if (!to_mb.ok) {
       console.error(
         `Error parsing 'To' mailbox '${msg.to}'\n${JSON.stringify(to_mb, null, 2)}`,
       )
       return Promise.resolve()
     }
+    console.log(`mb local: ${to_mb.local}`);
+
 
     switch (to_mb.local) {
       case "ping": {
@@ -59,6 +62,8 @@ export default {
         return Promise.resolve()
       }
       default: {
+        console.log(`default: ${to_mb.local}`);
+
         // Guard against emails that are too big
         if (msg.rawSize > r3ply_system_config.email.max_size_bytes) {
           console.error(

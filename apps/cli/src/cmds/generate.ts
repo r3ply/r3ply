@@ -229,9 +229,9 @@ async function generate_mailto(body: string, { to, subject, cc, bcc }: GenerateM
 
   function parse_email_addr(str: string) {
     const mb = mailbox(str)
-    if (Array.isArray(mb))
+    if (!mb.ok)
       throw new Error(
-        `Invalid email '${str}', errors ${JSON.stringify(mb)}`,
+        `Invalid email '${str}', errors ${JSON.stringify(mb.errors)}`,
       )
     else {
       if (mb.name) {

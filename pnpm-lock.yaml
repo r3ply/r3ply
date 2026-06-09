@@ -66,8 +66,8 @@ importers:
         specifier: ^6.1.6
         version: 6.1.6
       typescript-mailbox-parser:
-        specifier: ^0.0.1
-        version: 0.0.1
+        specifier: 0.0.3
+        version: 0.0.3
     devDependencies:
       '@types/mock-fs':
         specifier: ^4.13.4
@@ -138,6 +138,9 @@ importers:
       oxide.ts:
         specifier: ^1.1.0
         version: 1.1.0
+      typescript-mailbox-parser:
+        specifier: 0.0.3
+        version: 0.0.3
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.9.10
@@ -145,9 +148,6 @@ importers:
       typescript:
         specifier: ^5.5.4
         version: 5.8.2
-      typescript-mailbox-parser:
-        specifier: ^0.0.1
-        version: 0.0.1
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)
@@ -2451,8 +2451,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  typescript-mailbox-parser@0.0.1:
-    resolution: {integrity: sha512-G88OtKELBEm2v/cv5O7SMXngtXNMiSUaodfJUBoGsDEH5p4Cqkj8feh3Ynuxv7dr2tuePewBO49Xa7C0RrBL8g==}
+  typescript-mailbox-parser@0.0.3:
+    resolution: {integrity: sha512-/hZLg/WzWZA9G/cc7BvG+fubZE1VZ5lGh4aUYyYf4s/z8Q8vMAnNJLia15BUFPlsJmMRiqYlLLBCEmppnnuPYA==}
 
   typescript@5.8.2:
     resolution: {integrity: sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==}
@@ -4501,7 +4501,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  typescript-mailbox-parser@0.0.1: {}
+  typescript-mailbox-parser@0.0.3: {}
 
   typescript@5.8.2: {}
 

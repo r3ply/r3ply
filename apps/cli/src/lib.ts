@@ -600,10 +600,11 @@ export namespace generate {
     domain: string
   } {
     const result = mailbox(email)
-    if (Array.isArray(result))
+    if (!result.ok)
       throw new Error(
         `Unable to parse email ${email}, errors: ${JSON.stringify(result)}`,
       )
+    result.local = result.local.replace(/^"(.*)"$/, '$1');
     return result
   }
 
