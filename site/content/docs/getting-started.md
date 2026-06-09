@@ -206,15 +206,15 @@ Now that we can simulate the receiving comments based on a real configuration, w
       "hostname": "site.local.test",
       "path": "/docs/getting-started/"
     },
-    "txt": "If you think about it... commenting systems have been a sort of a [great filter](https://en.wikipedia.org/wiki/Great_Filter) for websites, since at least the 1990s.\r\n",
-    "md": "<p>If you think about it... commenting systems have been a sort of a <a href=\"https://en.wikipedia.org/wiki/Great_Filter\">great filter</a> for websites, since at least the 1990s.</p>\n",
-    "html": "<p>If you think about it... commenting systems have been a sort of a <a href=\"https://en.wikipedia.org/wiki/Great_Filter\" rel=\"noopener noreferrer\">great filter</a> for websites, since at least the 1990s.</p>\n"
+    "txt": "If you think about it... commenting systems have been a sort of [great filter](https://en.wikipedia.org/wiki/Great_Filter) for websites, since at least the 1990s.\r\n",
+    "md": "<p>If you think about it... commenting systems have been a sort of <a href=\"https://en.wikipedia.org/wiki/Great_Filter\">great filter</a> for websites, since at least the 1990s.</p>\n",
+    "html": "<p>If you think about it... commenting systems have been a sort of <a href=\"https://en.wikipedia.org/wiki/Great_Filter\" rel=\"noopener noreferrer\">great filter</a> for websites, since at least the 1990s.</p>\n"
   },
   "email": {
     "to": "site.local.test@cli.r3ply.test",
     "subject": "/docs/getting-started/",
     "date": "2025-11-09T09:28:30+00:00",
-    "text": "If you think about it... commenting systems have been a sort of a [great filter](https://en.wikipedia.org/wiki/Great_Filter) for websites, since at least the 1990s.\r\n",
+    "text": "If you think about it... commenting systems have been a sort of [great filter](https://en.wikipedia.org/wiki/Great_Filter) for websites, since at least the 1990s.\r\n",
     "auth": {
       "dkim": false,
       "spf": false,
@@ -274,9 +274,9 @@ Here we see details about the comment's author. Their email address has been ano
       "hostname": "site.local.test",
       "path": "/docs/getting-started/"
     },
-    "txt": "If you think about it... commenting systems have been a sort of a [great filter](https://en.wikipedia.org/wiki/Great_Filter) for websites, since at least the 1990s.\r\n",
-    "md": "<p>If you think about it... commenting systems have been a sort of a <a href=\"https://en.wikipedia.org/wiki/Great_Filter\">great filter</a> for websites, since at least the 1990s.</p>\n",
-    "html": "<p>If you think about it... commenting systems have been a sort of a <a href=\"https://en.wikipedia.org/wiki/Great_Filter\" rel=\"noopener noreferrer\">great filter</a> for websites, since at least the 1990s.</p>\n"
+    "txt": "If you think about it... commenting systems have been a sort of [great filter](https://en.wikipedia.org/wiki/Great_Filter) for websites, since at least the 1990s.\r\n",
+    "md": "<p>If you think about it... commenting systems have been a sort of <a href=\"https://en.wikipedia.org/wiki/Great_Filter\">great filter</a> for websites, since at least the 1990s.</p>\n",
+    "html": "<p>If you think about it... commenting systems have been a sort of <a href=\"https://en.wikipedia.org/wiki/Great_Filter\" rel=\"noopener noreferrer\">great filter</a> for websites, since at least the 1990s.</p>\n"
   },
   ...
 ```
@@ -291,10 +291,10 @@ There's also the `subject` field of the `comment` object, which tells us the URL
 
 ## Integrating Comments { #integrating-comments }
 
-To build comments into your site you just treat them like you would do any other content. Since everyone's websites are built differently, specific advice can't be given, however r3ply allows you to customize how comments look using a templating language ([docs](@/docs/templating.md)). Therefore you have a few options at your disposal.
+To build comments into your site you just treat them like you would do any other content. Since everyone's websites are built differently, specific advice can't be given, however r3ply allows you to customize how comments are structured using a templating language ([docs](@/docs/templating.md)). Therefore you have a few options at your disposal.
 
 1. You can just save comments as plain json files and build your site from those
-2. or you can customize it in a way that works with how you would like them to be built into your site.
+2. Or you can customize it in a way that works with how you would like them to be built into your site.
 
 {% info(type="tip") %}
 It's recommended to store the original JSON somewhere in your comment, even if you do template it. This is in case you ever need to migrate old comments to a new look.
@@ -313,7 +313,7 @@ Let's look at a quick example though, using the comment [from above](#inside-a-c
   </header>
   <section>
     <blockquote>
-      <p>If you think about it... commenting systems have been a sort of a <a href="https://en.wikipedia.org/wiki/Great_Filter" rel="noopener noreferrer">great filter</a> for websites, since at least the 1990s.</p>
+      <p>If you think about it... commenting systems have been a sort of <a href="https://en.wikipedia.org/wiki/Great_Filter" rel="noopener noreferrer">great filter</a> for websites, since at least the 1990s.</p>
     </blockquote>
   </section>
   <hr>
@@ -333,7 +333,7 @@ And that same comment above would render like this (with a little added styling)
     </header>
     <section>
       <blockquote class="border-red-400 text-black!">
-        <p>If you think about it... commenting systems have been a sort of a <a class="text-gray-600! dark:text-slate-700!" href="https://en.wikipedia.org/wiki/Great_Filter" rel="noopener noreferrer">great filter</a> for websites, since at least the 1990s.</p>
+        <p>If you think about it... commenting systems have been a sort of <a class="text-gray-600! dark:text-slate-700!" href="https://en.wikipedia.org/wiki/Great_Filter" rel="noopener noreferrer">great filter</a> for websites, since at least the 1990s.</p>
       </blockquote>
     </section>
     <hr class="my-6! md:my-8! border-teal-600! dark:border-violet-500!">

@@ -14,9 +14,9 @@ pnpm initialize
 # use `BUILD_OPTS` to specify options
 pnpm build
 # continuously build and serve (in memory)
-# Listens at 127.0.0.1:1111 by default
+# Listens at 127.0.0.1:7759 by default
 # Use `SERVE_OPTS` to specify options
-pnpm serve to build in memory, and serve at `127.0.0.1:1111` by default. (use `SERVE_OPTS` for serve options)
+pnpm serve
 ```
 
 See the site's [package.json](./package.json) for more.

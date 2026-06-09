@@ -20,3 +20,7 @@ The r3ply docs are arranged as a mixture of pure documentation, concepts, and tu
 {{ fleuron_fish() }}
 
 {{ next_prev(next_path="/docs/getting-started/" next_text="Getting Started") }}
+
+---
+
+Also, see [footer](/docs/#footer) below for more links (besides documentation).

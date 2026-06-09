@@ -178,8 +178,8 @@ async function simulate(cwd: string, input: string | undefined, options: Simulat
   )
 
   // Update comment cache if enabled
-  if (site_config.comments?.cache) {
-    const ctx = email_event_response.prepared?.unwrap()!
+  if (site_config.comments?.cache && email_event_response.prepared?.unwrap()) {
+    const ctx = email_event_response.prepared?.unwrap()
     const domain = ctx.r3ply.site
     const path = ctx.comment.subject.path
 

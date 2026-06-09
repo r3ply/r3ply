@@ -69,6 +69,9 @@ enabled = true
 
 - [ ] Add search
 - [ ] Tutorial section: for example, how to allow people to support aliases (will also be good for when attachments are supported)
+- [ ] Add links in FAQ to relevant docs for each point
+- [ ] Make demo comments content a little more relevant
+- [ ] Add ability to pin comments, so people may comment on the demo section but the key ones that demonstrate important functionality stay at the top
 
 {{ fleuron_fish() }}
 

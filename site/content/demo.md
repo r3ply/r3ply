@@ -14,7 +14,7 @@ In r3ply, comments can be sent as emails. This allows visitors to use their own 
 
 The question then becomes can an email-based comment system be a good experience for users? This demo page is here to demonstrate the possibilities and to let you be the judge.
 
-Check out the [demo](./#comments) below or continue reading to see the details.
+Check out the [demo comment section](./#comments) below or continue reading to see the details.
 
 {% toc() %}
 
@@ -158,9 +158,9 @@ cache = true
 
 Last is what it's like to displaying the actual comments on your website. The short answer is that comments are rendered just like any other content. However r3ply gives you tools to make this as easy as possible.
 
-Each comment arrives by default as JSON. This object represents the 'comment context' ([docs](@/docs/templating.md#template-context)), however you can configure how you want the comments to look by using a templating language ([docs](@/docs/templating.md#templating-language-syntax)) that uses this context.
+Each comment arrives by default as JSON. This object represents the _template context_ ([docs](@/docs/templating.md#template-context)), however you can configure how you want the comments to look by using a templating language ([docs](@/docs/templating.md#templating-language-syntax)) that uses this context.
 
-In addition to this, you can use `re` – the r3ply CLI tool – tool ([docs](@/docs/cli.md)) to simulate receiving comments via the local file system to get your r3ply config and website pipeline just right.
+In addition to this, you can use `re`, the r3ply CLI tool ([docs](@/docs/cli.md)), to simulate receiving comments via the local file system to get your r3ply config and website pipeline just right, while you iterate on your development.
 
 ### Comment Fields { #comment-fields }
 
