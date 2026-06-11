@@ -1,10 +1,9 @@
 import { Hono } from 'hono'
 import api from './api'
 import { Option, Result, Some } from 'oxide.ts'
-// @ts-ignore
 import r3ply_system_config_toml from '../r3ply.config.toml'
 import { GistClient, GistFiles } from './state/gist'
-import { CommentState } from './state/d1'
+import { CommentCache, CommentState } from './state/d1'
 import { R3plySystemConfig, R3plySiteConfig } from '@r3ply/schema/config'
 import { util, R3ply, moderation, comments } from '@r3ply/lib'
 import { mailbox } from 'typescript-mailbox-parser'
@@ -34,7 +33,10 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     return app.fetch(request, env, ctx)
   },
-
+  async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext) {
+    const cache = CommentCache(env.R3PLY_STAGING_DB)
+    await cache.evict(259200) // 72h in seconds — will be driven by system config later
+  },
   async email(...params): Promise<void> {
     const [msg, env] = params
 
@@ -58,6 +60,8 @@ export default {
         }
         const date_sent = new Date(Option(msg.headers.get('Date')).expect("Date header is required."))
         const now = new Date()
+        const cache = CommentCache(env.R3PLY_STAGING_DB)
+        await cache.set("example.com", "/ping/", "ID: " + Date.now().toString(), JSON.stringify({}))
         await msg.reply(create_reply_email(msg, { subject: "Re: ping", body: `time=${now.valueOf() - date_sent.valueOf()}ms` }))
         return Promise.resolve()
       }

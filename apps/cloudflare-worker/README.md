@@ -62,6 +62,8 @@ curl --request POST 'http://localhost:8787/cdn-cgi/handler/email' \
   --data-binary @-
 ```
 
+(Note: this code needs to be run from within the project directory of the relevant site NOT necessarily within the directory of the cloudflare worker)
+
 ### Cache
 
 This project uses the d1 database to cache.
@@ -80,6 +82,8 @@ FROM sqlite_master
 WHERE type = 'table'
   AND name NOT LIKE 'sqlite_%';
 ```
+
+You can trigger the cache eviction locally by running `curl "http://localhost:8787/__scheduled?cron=0+0+*+*+*"`.
 
 
 ## Rate Limits

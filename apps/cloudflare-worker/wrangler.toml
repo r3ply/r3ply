@@ -51,6 +51,10 @@ database_name = "r3ply staging db"
 database_id = "7ee88e89-bd64-41b8-bd03-a537ee600b4b"
 preview_database_id = "R3PLY_STAGING_DB"
 
+# This cleans up the pending comments every day at midnight
+[triggers]
+crons = ["0 0 * * *"]
+
 # Docs: https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/
 [[send_email]]
 name = "MODERATOR_EMAIL"
