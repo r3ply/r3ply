@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, test } from 'vitest'
+import { beforeEach, beforeAll, describe, expect, test } from 'vitest'
 import { env } from 'cloudflare:test'
 import { CommentCache, CommentState } from '../src/state/d1'
 import { CommentMetadata } from 'packages/lib/src/comments'
@@ -20,7 +20,7 @@ describe('comments', () => {
 
 describe('comments_via_email', () => {
   let metadata: CommentMetadata
-  beforeAll(async () => {
+  beforeEach(async () => {
     await env.TEST_DB.prepare(`DROP TABLE IF EXISTS comments_via_email;`).run()
     metadata = await state
       .receive_comment('email')
@@ -70,7 +70,7 @@ describe('comments_via_email', () => {
 })
 
 describe('pending_comments', () => {
-  beforeAll(async () => {
+  beforeEach(async () => {
     // `clear` destroys/creates the table, so reusing it for test setup
     await cache.clear()
   })
@@ -109,5 +109,28 @@ describe('pending_comments', () => {
       'SELECT * from pending_comments',
     ).run()
     expect(actual.results).toStrictEqual([])
+  })
+  test('evict', async () => {
+    const seconds_ago = (seconds: number): string =>
+      new Date(Date.now() - seconds * 1000)
+        .toISOString()
+        .replace('T', ' ')
+        .slice(0, 19)
+    await cache.set('abc', 'def', '3.14', {})
+    await cache.set('uvw', 'xyz', '285', {}, seconds_ago(10))
+    const abc = await cache.get('abc', 'def')
+    const uvw = await cache.get('uvw', 'xyz')
+    expect(abc[0].comment_id).toBe('3.14')
+    expect(uvw[0].comment_id).toBe('285')
+    await cache.evict(15)
+    const too_old_to_evict = await env.TEST_DB.prepare(
+      'SELECT * from pending_comments',
+    ).run()
+    expect(too_old_to_evict.results).lengthOf(2)
+    await cache.evict(5)
+    const actual = await env.TEST_DB.prepare(
+      'SELECT * from pending_comments',
+    ).run()
+    expect(actual.results).lengthOf(1)
   })
 })

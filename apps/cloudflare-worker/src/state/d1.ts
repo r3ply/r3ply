@@ -176,9 +176,11 @@ export interface CommentCache {
     path: string,
     comment_id: string,
     comment: any,
+    created_utc?: string
   ): Promise<D1Result<void>>
   all(domain: string): Promise<CachedComment[]>
   clear(): Promise<void>
+  evict(max_age_seconds: number): Promise<void>
 }
 
 export function CommentCache(d1: D1Database): CommentCache {
@@ -196,17 +198,24 @@ export function CommentCache(d1: D1Database): CommentCache {
       path: string,
       comment_id: string,
       comment: any,
+      created_utc?: string
     ): Promise<D1Result<void>> {
       const url = url_path_relative_to_base(path, new URL('https://example.com'))
       url.host = domain
-      return d1
+      const prepared = d1
         .prepare(
-          `${create_table}
-          INSERT INTO pending_comments (domain, path, comment_id, comment_json)
-          VALUES (?1, ?2, ?3, ?4);`,
+          created_utc ?
+            `${create_table}
+            INSERT INTO pending_comments (domain, path, comment_id, comment_json, created_utc)
+            VALUES (?1, ?2, ?3, ?4, ?5);` :
+            `${create_table}
+            INSERT INTO pending_comments (domain, path, comment_id, comment_json)
+            VALUES (?1, ?2, ?3, ?4);`,
         )
-        .bind(url.host, url.pathname, comment_id, JSON.stringify(comment))
-        .run<void>()
+        return created_utc ?
+        prepared.bind(url.host, url.pathname, comment_id, JSON.stringify(comment), created_utc).run<void>() :
+        prepared.bind(url.host, url.pathname, comment_id, JSON.stringify(comment)).run<void>()
+
     },
     get: async function (
       domain: string,
@@ -238,6 +247,12 @@ export function CommentCache(d1: D1Database): CommentCache {
         .prepare(`${drop_table}\n${create_table}`)
         .run()
         .then((_) => Promise.resolve())
+    },
+    evict: async function (max_age_seconds): Promise<void> {
+      d1
+        .prepare(`DELETE FROM pending_comments WHERE created_utc < datetime('now', '-' || ? || ' seconds')`)
+        .bind(max_age_seconds)
+        .run() as Promise<D1Result<void>>
     },
   }
 }

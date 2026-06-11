@@ -1,26 +1,22 @@
-import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config'
+import { cloudflareTest } from '@cloudflare/vitest-pool-workers'
+import { defineConfig } from 'vitest/config'
+import { fileURLToPath } from 'url'
 
-export default defineWorkersConfig({
+export default defineConfig({
   resolve: {
-    preserveSymlinks: false,
+    alias: {
+      'mimetext': fileURLToPath(new URL('./node_modules/mimetext/dist/mimetext.browser.es.js', import.meta.url))
+    }
   },
+  plugins: [
+    cloudflareTest({
+      wrangler: { configPath: './wrangler.toml' },
+      miniflare: {
+        d1Databases: { TEST_DB: { id: 'TEST_DB' } },
+      },
+    }),
+  ],
   test: {
     includeSource: ['src/**/*.{js,ts}'],
-    deps: {
-      optimizer: {
-        ssr: {
-          enabled: true,
-          include: ['@r3ply/wasm'],
-        },
-      },
-    },
-    poolOptions: {
-      workers: {
-        wrangler: { configPath: './wrangler.toml' },
-        miniflare: {
-          d1Databases: { TEST_DB: { id: 'TEST_DB' } },
-        },
-      },
-    },
   },
 })
