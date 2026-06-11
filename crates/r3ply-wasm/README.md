@@ -1,6 +1,6 @@
 # r3ply-wasm
 
-This crate exports several useful rust functions with wasm bindings.
+This crate exports several useful rust functions with wasm bindings for use within the downstream [@r3ply/lib](../../packages/lib/README.md) package.
 
 ## Build/Install
 

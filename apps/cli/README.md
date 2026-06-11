@@ -22,7 +22,7 @@ You can build once or continuously.
 ```sh
 # build once
 pnpm build
-# build continuously
+# build continuously (use `pnpm link` to be able to test the changes)
 pnpm build:watch
 ```
 

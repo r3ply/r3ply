@@ -26,7 +26,7 @@ Or you can import them directly, e.g. `import { R3plySiteConfig } from '@r3ply/s
 
 How to do stuff:
 
-```
+```sh
 # run the tests once
 npm test
 
