@@ -23,6 +23,8 @@ import { build_email } from '@r3ply/wasm'
 import crypto from 'crypto'
 import { mailbox } from 'typescript-mailbox-parser'
 import { InitCmdOptions } from './cmds/init'
+import { CommentTemplateContext } from 'packages/lib/src/comments/process.js'
+import { CommentViaEmailContext } from 'packages/lib/src/comments/viaEmail/index.js'
 
 // project stuff ---------------------------------------------------------------
 export namespace project {
@@ -184,6 +186,54 @@ export namespace project {
         .then((bytes) => JSON.parse(bytes.toString()))
     } else {
       return []
+    }
+  }
+
+  export async function evict_comments_from_cache(
+    cwd: string,
+    at_path: string,
+    max_age_seconds: number,
+  ) {
+    const cache_dir = await get_cache_dir(cwd)
+    const comments_path = path.join(cache_dir, at_path)
+    return walk(comments_path)
+
+    // TODO: break this out into some kind of util function and add an argument to accept a function
+    async function walk(dir: string): Promise<void> {
+      const entries = await fs.promises.readdir(dir, { withFileTypes: true })
+      for (const entry of entries) {
+        const full_path = path.join(dir, entry.name)
+        if (entry.isDirectory()) {
+          return walk(full_path)
+        } else {
+          return fs.promises
+            .readFile(full_path)
+            .then(
+              (bytes) =>
+                JSON.parse(bytes.toString()) as (CommentTemplateContext &
+                  CommentViaEmailContext)[],
+            )
+            .then((comments) => {
+              const new_comments: (CommentTemplateContext &
+                CommentViaEmailContext)[] = []
+              const now_unix = dayjs().unix()
+              for (const comment of comments) {
+                const comment_sent_unix = dayjs(comment.email.date).unix()
+                const age = now_unix - comment_sent_unix
+                // keep comments that are <= max age
+                if (age <= max_age_seconds) new_comments.push(comment)
+                else
+                  console.debug(
+                    `Deleting comment with ID "${comment.comment.id}" as it is ${age} seconds old.`,
+                  )
+              }
+              return fs.promises.writeFile(
+                full_path,
+                JSON.stringify(new_comments, null, 2),
+              )
+            })
+        }
+      }
     }
   }
 

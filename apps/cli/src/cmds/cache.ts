@@ -38,6 +38,28 @@ function cache_cmd(cwd: string) {
     .action(async () => {
       return project.clean_cache(cwd)
     })
+
+  cache_cmd
+    .command('evict')
+    .description('evict stale pending comments')
+    .option<number>(
+      '--ttl <MAX_AGE_SECONDS>',
+      'Max age allowed for comments in seconds',
+      (str) => {
+        const num = Number.parseInt(str)
+        if (Number.isNaN(num))
+          throw new Error(`ttl must be a number, received ${str}`)
+        return num
+      },
+      259200,
+    )
+    .action(async (options: { ttl: number }) => {
+      return project.evict_comments_from_cache(
+        cwd,
+        'comments/pending/',
+        options.ttl,
+      )
+    })
   return cache_cmd
 }
 

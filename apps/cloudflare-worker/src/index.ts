@@ -35,7 +35,7 @@ export default {
   },
   async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext) {
     const cache = CommentCache(env.R3PLY_STAGING_DB)
-    await cache.evict(259200) // 72h in seconds — will be driven by system config later
+    await cache.evict(259200) // i.e. 72h in seconds. TODO: configurable by r3ply system config later
   },
   async email(...params): Promise<void> {
     const [msg, env] = params
