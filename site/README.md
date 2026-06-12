@@ -4,6 +4,8 @@
 
 ## Install/Build/Run
 
+The site depends on Zola v0.20.0.
+
 ```bash
 # install dependencies
 pnpm install
