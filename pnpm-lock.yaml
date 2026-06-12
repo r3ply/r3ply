@@ -93,9 +93,6 @@ importers:
 
   apps/cloudflare-worker:
     dependencies:
-      '@cloudflare/vitest-pool-workers':
-        specifier: ^0.16.14
-        version: 0.16.14(@vitest/runner@4.1.8)(@vitest/snapshot@4.1.8)(vitest@4.1.8(@types/node@24.2.1)(vite@7.1.9(@types/node@24.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)))
       '@iarna/toml':
         specifier: ^3.0.0
         version: 3.0.0
@@ -145,6 +142,9 @@ importers:
         specifier: 0.0.3
         version: 0.0.3
     devDependencies:
+      '@cloudflare/vitest-pool-workers':
+        specifier: ^0.16.14
+        version: 0.16.14(@vitest/runner@4.1.8)(@vitest/snapshot@4.1.8)(vitest@4.1.8(@types/node@24.2.1)(vite@7.1.9(@types/node@24.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)))
       typescript:
         specifier: ^5.5.4
         version: 5.8.2
