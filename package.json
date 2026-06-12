@@ -18,7 +18,11 @@
     "site": "pnpm initialize && pnpm -r --filter './site' run serve"
   },
   "pnpm": {
-    "overrides": {}
+    "overrides": {},
+    "supportedArchitectures": {
+      "os": ["current", "linux"],
+      "cpu": ["current", "x64"]
+    }
   },
   "devDependencies": {
     "prettier": "^3.5.3",
@@ -27,5 +31,6 @@
   },
   "volta": {
     "node": "22.9.0"
-  }
+  },
+  "packageManager": "pnpm@10.11.1"
 }
