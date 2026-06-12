@@ -1,0 +1,38 @@
+{
+  "name": "@r3ply/wasm",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build:node": "wasm-pack build --release --target nodejs --out-name r3ply-wasm-node --no-pack",
+    "build:bundler": "wasm-pack build --release --target bundler --out-name r3ply-wasm-bundler --no-pack",
+    "build:patch": "cp ./bundler-wasm-patch.js pkg/r3ply-wasm-bundler.js",
+    "build:package": "cp ./package.json pkg/",
+    "build:wasm": "npm run build:node && npm run build:bundler && npm run build:patch && npm run build:package",
+    "pack": "wasm-pack pack",
+    "test": "cargo test",
+    "test:watch": "cargo watch test"
+  },
+  "files": [
+    "r3ply-wasm-bundler_bg.js",
+    "r3ply-wasm-bundler_bg.wasm",
+    "r3ply-wasm-bundler_bg.wasm.d.ts",
+    "r3ply-wasm-bundler.d.ts",
+    "r3ply-wasm-bundler.js",
+    "r3ply-wasm-node_bg.wasm",
+    "r3ply-wasm-node_bg.wasm.d.ts",
+    "r3ply-wasm-node.d.ts",
+    "r3ply-wasm-node.js"
+  ],
+  "exports": {
+    "node": {
+      "import": "./r3ply-wasm-node.js",
+      "types": "./r3ply-wasm-node.d.ts",
+      "require": "./r3ply-wasm-node.js"
+    },
+    "default": {
+      "import": "./r3ply-wasm-bundler.js",
+      "types": "./r3ply-wasm-bundler.d.ts",
+      "require": "./r3ply-wasm-bundler.js"
+    }
+  }
+}
