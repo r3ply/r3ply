@@ -8,3 +8,4 @@ crates/r3ply-wasm/pkg/**
 **/pnpm-lock.yaml
 **/worker-configuration.d.ts
 **/schemas/**/*.json
+site/content/comments/**

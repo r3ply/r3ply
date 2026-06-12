@@ -49,8 +49,8 @@ issued = ${result.issued}\n`)
     c.res.headers.set('Content-Type', 'application/json')
     return CommentCache(c.env.R3PLY_STAGING_DB)
       .get(domain, path)
-      .then((rows) => rows.map(row => JSON.parse(row.comment_json)))
-      .then(comments => c.json(comments))
+      .then((rows) => rows.map((row) => JSON.parse(row.comment_json)))
+      .then((comments) => c.json(comments))
   })
 
   api.get('/cache/comments/pending/:domain/', async (c) => {
@@ -59,8 +59,8 @@ issued = ${result.issued}\n`)
     c.res.headers.set('Content-Type', 'application/json')
     return CommentCache(c.env.R3PLY_STAGING_DB)
       .all(domain)
-      .then((rows) => rows.map(row => JSON.parse(row.comment_json)))
-      .then(comments => c.json(comments))
+      .then((rows) => rows.map((row) => JSON.parse(row.comment_json)))
+      .then((comments) => c.json(comments))
   })
 
   return api

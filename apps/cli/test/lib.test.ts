@@ -208,21 +208,26 @@ describe('CLI library', () => {
     const init_cmd_opts: InitCmdOptions = {
       date: '2025-08-15',
       force: false,
-      rotateKeys: false
+      rotateKeys: false,
     }
     expect(
-      (await project.init_r3ply_project_at('root/a', init_cmd_opts)).unwrap().r3ply_dir,
+      (await project.init_r3ply_project_at('root/a', init_cmd_opts)).unwrap()
+        .r3ply_dir,
     ).toBe('root/a/.r3ply')
     expect(
-      (await project.init_r3ply_project_at('root/a', init_cmd_opts, '../e')).unwrap()
-        .r3ply_dir,
+      (
+        await project.init_r3ply_project_at('root/a', init_cmd_opts, '../e')
+      ).unwrap().r3ply_dir,
     ).toBe('root/e/.r3ply')
     expect(
-      (await project.init_r3ply_project_at('root', init_cmd_opts, 'b')).unwrapErr().message,
+      (
+        await project.init_r3ply_project_at('root', init_cmd_opts, 'b')
+      ).unwrapErr().message,
     ).toMatch(/Project already initialized/)
     expect(
-      (await project.init_r3ply_project_at('root', init_cmd_opts, 'b/c/d')).unwrapErr()
-        .message,
+      (
+        await project.init_r3ply_project_at('root', init_cmd_opts, 'b/c/d')
+      ).unwrapErr().message,
     ).toMatch(/Nested r3ply project/)
   })
 })

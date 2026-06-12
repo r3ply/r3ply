@@ -167,16 +167,13 @@ export interface CachedComment {
 }
 
 export interface CommentCache {
-  get(
-    domain: string,
-    path: string,
-  ): Promise<CachedComment[]>
+  get(domain: string, path: string): Promise<CachedComment[]>
   set(
     domain: string,
     path: string,
     comment_id: string,
     comment: any,
-    created_utc?: string
+    created_utc?: string,
   ): Promise<D1Result<void>>
   all(domain: string): Promise<CachedComment[]>
   clear(): Promise<void>
@@ -198,49 +195,65 @@ export function CommentCache(d1: D1Database): CommentCache {
       path: string,
       comment_id: string,
       comment: any,
-      created_utc?: string
+      created_utc?: string,
     ): Promise<D1Result<void>> {
-      const url = url_path_relative_to_base(path, new URL('https://example.com'))
+      const url = url_path_relative_to_base(
+        path,
+        new URL('https://example.com'),
+      )
       url.host = domain
-      const prepared = d1
-        .prepare(
-          created_utc ?
-            `${create_table}
+      const prepared = d1.prepare(
+        created_utc
+          ? `${create_table}
             INSERT INTO pending_comments (domain, path, comment_id, comment_json, created_utc)
-            VALUES (?1, ?2, ?3, ?4, ?5);` :
-            `${create_table}
+            VALUES (?1, ?2, ?3, ?4, ?5);`
+          : `${create_table}
             INSERT INTO pending_comments (domain, path, comment_id, comment_json)
             VALUES (?1, ?2, ?3, ?4);`,
-        )
-        return created_utc ?
-        prepared.bind(url.host, url.pathname, comment_id, JSON.stringify(comment), created_utc).run<void>() :
-        prepared.bind(url.host, url.pathname, comment_id, JSON.stringify(comment)).run<void>()
-
+      )
+      return created_utc
+        ? prepared
+            .bind(
+              url.host,
+              url.pathname,
+              comment_id,
+              JSON.stringify(comment),
+              created_utc,
+            )
+            .run<void>()
+        : prepared
+            .bind(url.host, url.pathname, comment_id, JSON.stringify(comment))
+            .run<void>()
     },
     get: async function (
       domain: string,
       path: string,
     ): Promise<CachedComment[]> {
-      const url = url_path_relative_to_base(path, new URL('https://example.com'))
+      const url = url_path_relative_to_base(
+        path,
+        new URL('https://example.com'),
+      )
       url.host = domain
-        return d1
-          .prepare(
-            `${create_table}\nSELECT * FROM pending_comments WHERE domain = ? AND path = ?;`,
-          )
-          .bind(url.hostname, url.pathname)
-          .run<CachedComment>()
-          .then((db_rep) => db_rep.results)
+      return d1
+        .prepare(
+          `${create_table}\nSELECT * FROM pending_comments WHERE domain = ? AND path = ?;`,
+        )
+        .bind(url.hostname, url.pathname)
+        .run<CachedComment>()
+        .then((db_rep) => db_rep.results)
     },
-    all: async function(domain: string): Promise<CachedComment[]> {
+    all: async function (domain: string): Promise<CachedComment[]> {
       const url = new URL('https://example.com')
       url.host = domain
-      return d1.prepare(`
+      return d1
+        .prepare(
+          `
         ${create_table}
-        SELECT * FROM pending_comments WHERE domain = ?;`
-      )
-      .bind(url.hostname)
-      .run<CachedComment>()
-      .then((db_rep) => db_rep.results)
+        SELECT * FROM pending_comments WHERE domain = ?;`,
+        )
+        .bind(url.hostname)
+        .run<CachedComment>()
+        .then((db_rep) => db_rep.results)
     },
     clear: async function (): Promise<void> {
       return d1
@@ -250,7 +263,9 @@ export function CommentCache(d1: D1Database): CommentCache {
     },
     evict: async function (max_age_seconds): Promise<void> {
       d1
-        .prepare(`DELETE FROM pending_comments WHERE created_utc < datetime('now', '-' || ? || ' seconds')`)
+        .prepare(
+          `DELETE FROM pending_comments WHERE created_utc < datetime('now', '-' || ? || ' seconds')`,
+        )
         .bind(max_age_seconds)
         .run() as Promise<D1Result<void>>
     },

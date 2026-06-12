@@ -18,12 +18,12 @@ export default {
   txt: {
     info: txt_info,
     help: txt_help,
-    warn: txt_warn
+    warn: txt_warn,
   },
   cmds: {
     init,
     generate,
     simulate,
-    cache
-  }
+    cache,
+  },
 }

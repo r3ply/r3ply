@@ -48,32 +48,36 @@ export function url_path_relative_to_base(path: string, base: URL) {
   else return new URL('./' + path, base)
 }
 
-export function create_reply_email(msg: ForwardableEmailMessage, {
-  sender_name,
-  rcpt_name,
-  subject,
-  body,
-}: {
-  sender_name?: string,
-  rcpt_name?: string,
-  subject?: string
-  body: string,
-}) {
+export function create_reply_email(
+  msg: ForwardableEmailMessage,
+  {
+    sender_name,
+    rcpt_name,
+    subject,
+    body,
+  }: {
+    sender_name?: string
+    rcpt_name?: string
+    subject?: string
+    body: string
+  },
+) {
   const msg_reply = createMimeMessage()
-  msg_reply.setHeader("In-Reply-To", Option(msg.headers.get("Message-ID")).expect("No Message-ID found. This should not happen."))
-  msg_reply.setSender({ "name": sender_name, "addr": msg.to, "type": "From" })
-  msg_reply.setRecipient({ "name": rcpt_name, "addr": msg.from, "type": "To" })
-  msg_reply.setSubject(subject ?? `Re: ${msg.headers.get("Subject")}`)
+  msg_reply.setHeader(
+    'In-Reply-To',
+    Option(msg.headers.get('Message-ID')).expect(
+      'No Message-ID found. This should not happen.',
+    ),
+  )
+  msg_reply.setSender({ name: sender_name, addr: msg.to, type: 'From' })
+  msg_reply.setRecipient({ name: rcpt_name, addr: msg.from, type: 'To' })
+  msg_reply.setSubject(subject ?? `Re: ${msg.headers.get('Subject')}`)
   msg_reply.addMessage({
     contentType: 'text/plain',
-    data: body
-  });
+    data: body,
+  })
 
-  return new EmailMessage(
-    msg.to,
-    msg.from,
-    msg_reply.asRaw()
-  )
+  return new EmailMessage(msg.to, msg.from, msg_reply.asRaw())
 }
 
 if (import.meta.vitest) {

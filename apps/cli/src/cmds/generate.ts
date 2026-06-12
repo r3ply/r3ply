@@ -1,14 +1,12 @@
-import { Command } from "commander"
-import { project, generate } from "../lib"
-import dayjs from "dayjs"
-import { util } from "../util"
-import {
-  R3plySiteConfig,
-} from '@r3ply/schema/config'
-import { BaseCmdOptions } from ".."
-import tty from "../tty"
-import { mailbox } from "typescript-mailbox-parser"
-import { Result } from "oxide.ts"
+import { Command } from 'commander'
+import { project, generate } from '../lib'
+import dayjs from 'dayjs'
+import { util } from '../util'
+import { R3plySiteConfig } from '@r3ply/schema/config'
+import { BaseCmdOptions } from '..'
+import tty from '../tty'
+import { mailbox } from 'typescript-mailbox-parser'
+import { Result } from 'oxide.ts'
 
 type GenerateSignetCmdOpts = {
   site: string
@@ -52,11 +50,7 @@ function generate_cmd(cwd: string) {
   const config_cmd = generate_cmd
     .command('config')
     .description('generate a config')
-    .option(
-      '--site <domain>',
-      `site domain`,
-      project.DEFAULT_SITE_DOMAIN,
-    )
+    .option('--site <domain>', `site domain`, project.DEFAULT_SITE_DOMAIN)
     .option(
       '--r3ply <r3ply domain>',
       `r3ply domain`,
@@ -72,22 +66,13 @@ function generate_cmd(cwd: string) {
       'e.g. "prod", "test"',
       project.DEFAULT_CLI_SIGNET_LABEL,
     )
-    .option(
-      '--comments <comment-source>',
-      'options are: email',
-      'email',
+    .option('--comments <comment-source>', 'options are: email', 'email')
+    .option('--moderation <channel>', 'See below', 'local')
+    .addHelpText(
+      'after',
+      `\nModeration <channel> options: <github | webhook | local>`,
     )
-    .option(
-      '--moderation <channel>',
-      'See below',
-      'local',
-    )
-    .addHelpText('after', `\nModeration <channel> options: <github | webhook | local>`)
-    .option(
-      '--verbose',
-      'include more defaults explicitly',
-      false,
-    )
+    .option('--verbose', 'include more defaults explicitly', false)
     .action(async (options: GenerateConfigCmdOpts) => {
       const parent_opts = generate_cmd.parent!.opts<BaseCmdOptions>()
       generate_config(cwd, { ...options, ...parent_opts })
@@ -100,33 +85,20 @@ function generate_cmd(cwd: string) {
     .option('--subject <string>', 'subject header of email')
     .option('--cc <email>', 'cc header of email', util.collect_opts, [])
     .option('--bcc <email>', 'bcc header of email', util.collect_opts, [])
-    .action(
-      async (
-        body: string,
-        options: GenerateMailtoOpts,
-      ) => {
-        generate_mailto(body, options)
-      },
-    )
+    .action(async (body: string, options: GenerateMailtoOpts) => {
+      generate_mailto(body, options)
+    })
 
   const signet_cmd = generate_cmd
     .command('signet')
     .description('get a signet issued')
-    .option(
-      '--site <domain>',
-      `site domain`,
-      project.DEFAULT_SITE_DOMAIN,
-    )
+    .option('--site <domain>', `site domain`, project.DEFAULT_SITE_DOMAIN)
     .option(
       '--r3ply <r3ply domain>',
       `r3ply domain`,
       project.DEFAULT_R3PLY_DOMAIN,
     )
-    .option(
-      '--date <YYYY-MM-DD>',
-      'date issued',
-      dayjs().format('YYYY-MM-DD'),
-    )
+    .option('--date <YYYY-MM-DD>', 'date issued', dayjs().format('YYYY-MM-DD'))
     .option(
       '--label <string>',
       'e.g. "prod", "test"',
@@ -143,20 +115,25 @@ function generate_cmd(cwd: string) {
     .argument('[input]', 'Input text (can also accept pipe)')
     // Add email header options
     .option('--message-id <id>', 'Message-ID header')
-    .option('--date <date>', 'Date header', "now (UTC)")
+    .option('--date <date>', 'Date header', 'now (UTC)')
     .option('--from <address>', 'From header')
     .option('--to <address>', 'To header')
     .option('--subject <url | path>', 'Email subject')
     .option('--body <text>', 'Email body')
-    .action(async (input: string | undefined, options: GenerateEmailCmdOpts) => {
-      const parent_opts = generate_cmd.parent!.opts<BaseCmdOptions>()
-      generate_email(cwd, input, { ...options, ...parent_opts })
-    })
+    .action(
+      async (input: string | undefined, options: GenerateEmailCmdOpts) => {
+        const parent_opts = generate_cmd.parent!.opts<BaseCmdOptions>()
+        generate_email(cwd, input, { ...options, ...parent_opts })
+      },
+    )
 
   return generate_cmd
 }
 
-async function generate_config(cwd: string, options: GenerateConfigCmdOpts & BaseCmdOptions) {
+async function generate_config(
+  cwd: string,
+  options: GenerateConfigCmdOpts & BaseCmdOptions,
+) {
   const site = await project.get_keys(cwd).then((keys) =>
     project.get_cli_system_config(cwd).then((system_config) => {
       return generate.signet(
@@ -197,9 +174,7 @@ async function generate_config(cwd: string, options: GenerateConfigCmdOpts & Bas
           } else if (options.moderation == 'local') {
             return minimal_local_config
           } else {
-            throw new Error(
-              `Unknown moderation type: ${options.moderation}`,
-            )
+            throw new Error(`Unknown moderation type: ${options.moderation}`)
           }
         })(),
       ],
@@ -215,7 +190,10 @@ async function generate_config(cwd: string, options: GenerateConfigCmdOpts & Bas
   return
 }
 
-async function generate_mailto(body: string, { to, subject, cc, bcc }: GenerateMailtoOpts) {
+async function generate_mailto(
+  body: string,
+  { to, subject, cc, bcc }: GenerateMailtoOpts,
+) {
   // If stdin is piped (not a TTY), read from it
   if (!process.stdin.isTTY) {
     body = await new Promise<string>((resolve, reject) => {
@@ -251,16 +229,17 @@ async function generate_mailto(body: string, { to, subject, cc, bcc }: GenerateM
   // create URL encoded query string
   const query = Object.entries(params)
     .filter(([_, v]) => v !== undefined && v !== '')
-    .map(
-      ([k, v]) => `?${encodeURIComponent(k)}=${encodeURIComponent(v!)}`,
-    )
+    .map(([k, v]) => `?${encodeURIComponent(k)}=${encodeURIComponent(v!)}`)
     .join('&')
 
   // output result
   tty.cmds.generate.print_mail_to_link(query)
 }
 
-async function generate_signet(cwd: string, options: GenerateSignetCmdOpts & BaseCmdOptions) {
+async function generate_signet(
+  cwd: string,
+  options: GenerateSignetCmdOpts & BaseCmdOptions,
+) {
   const keys = await project.get_keys(cwd)
   const cli_system_config = util.unsafeUnwrap(
     await project.get_cli_system_config(cwd),
@@ -275,11 +254,15 @@ async function generate_signet(cwd: string, options: GenerateSignetCmdOpts & Bas
   tty.cmds.generate.print_signet(signet, options.format)
 }
 
-async function generate_email(cwd: string, input: string | undefined, options: GenerateEmailCmdOpts & BaseCmdOptions) {
-  if (options.date == "now (UTC)") options.date = new Date().toUTCString()
+async function generate_email(
+  cwd: string,
+  input: string | undefined,
+  options: GenerateEmailCmdOpts & BaseCmdOptions,
+) {
+  if (options.date == 'now (UTC)') options.date = new Date().toUTCString()
   let site_config: R3plySiteConfig = await project.resolve_config(
     cwd,
-    options.config
+    options.config,
   )
 
   const site = site_config.site[util.random_int(site_config.site.length)]

@@ -5,8 +5,13 @@ import { fileURLToPath } from 'url'
 export default defineConfig({
   resolve: {
     alias: {
-      'mimetext': fileURLToPath(new URL('./node_modules/mimetext/dist/mimetext.browser.es.js', import.meta.url))
-    }
+      mimetext: fileURLToPath(
+        new URL(
+          './node_modules/mimetext/dist/mimetext.browser.es.js',
+          import.meta.url,
+        ),
+      ),
+    },
   },
   plugins: [
     cloudflareTest({

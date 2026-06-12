@@ -43,8 +43,8 @@ export namespace project {
   export const DEFAULT_EMAIL_KEY =
     'f+466zchScGV5oiKq4W5hxCct1iXBuwgRUnx8tBSuQQ='
   export const DEFAULT_CLI_SIGNET_LABEL = 'CLI'
-  const DEFAULT_STATIC_DIR = "static"
-  const CACHE_DIR = "cache"
+  const DEFAULT_STATIC_DIR = 'static'
+  const CACHE_DIR = 'cache'
 
   /**
    * Finds the `.r3ply` dir that should be located at the top-level of the user's repository
@@ -99,7 +99,7 @@ export namespace project {
    * Finds the static dir
    */
   export async function find_static_dir(cwd: string) {
-    const r3ply_dir = find_r3ply_dir(cwd).then(result => result.unwrap())
+    const r3ply_dir = find_r3ply_dir(cwd).then((result) => result.unwrap())
     const static_dir = path.join(await r3ply_dir, DEFAULT_STATIC_DIR)
     return static_dir
   }
@@ -112,9 +112,8 @@ export namespace project {
     const access = await Result.safe(fs.promises.access(static_dir))
     if (access.isOk()) {
       return static_dir
-    }
-    else {
-      return fs.promises.mkdir(static_dir).then(_ => static_dir)
+    } else {
+      return fs.promises.mkdir(static_dir).then((_) => static_dir)
     }
   }
 
@@ -136,12 +135,12 @@ export namespace project {
     if (access.isOk()) {
       if (reset) await clean_cache(cwd)
       return cache_dir
-    }
-    else {
-      return fs.promises.mkdir(cache_dir, { recursive: true }).then(_ => cache_dir)
+    } else {
+      return fs.promises
+        .mkdir(cache_dir, { recursive: true })
+        .then((_) => cache_dir)
     }
   }
-
 
   /**
    * rm's and re-mkdir's the cache dir
@@ -150,28 +149,39 @@ export namespace project {
     const cache_dir = await find_cache_dir(cwd)
     const access = await Result.safe(fs.promises.access(cache_dir))
     if (access.isOk()) {
-      await fs.promises.rm(cache_dir, { recursive: true, force: true }).then(_ => fs.promises.mkdir(cache_dir))
-    }
-    else {
+      await fs.promises
+        .rm(cache_dir, { recursive: true, force: true })
+        .then((_) => fs.promises.mkdir(cache_dir))
+    } else {
       throw new Error(`No cache found at ${cache_dir}`)
     }
   }
 
-  export async function add_comment_to_cache(cwd: string, comment: { path: string, content: any }) {
+  export async function add_comment_to_cache(
+    cwd: string,
+    comment: { path: string; content: any },
+  ) {
     const cache_dir = await get_cache_dir(cwd)
     const comment_path = path.join(cache_dir, comment.path)
     const parent = path.dirname(comment_path)
     await fs.promises.mkdir(parent, { recursive: true })
-    return fs.promises.writeFile(comment_path, JSON.stringify(comment.content, null, 2))
+    return fs.promises.writeFile(
+      comment_path,
+      JSON.stringify(comment.content, null, 2),
+    )
   }
 
-  export async function get_comment_from_cache(cwd: string, comment: { path: string }) {
+  export async function get_comment_from_cache(
+    cwd: string,
+    comment: { path: string },
+  ) {
     const cache_dir = await get_cache_dir(cwd)
     const comment_path = path.join(cache_dir, comment.path)
     const access = await Result.safe(fs.promises.access(comment_path))
     if (access.isOk()) {
-      return fs.promises.readFile(comment_path)
-        .then(bytes => JSON.parse(bytes.toString()))
+      return fs.promises
+        .readFile(comment_path)
+        .then((bytes) => JSON.parse(bytes.toString()))
     } else {
       return []
     }
@@ -432,7 +442,7 @@ export namespace project {
               })
               .then((_) => {
                 return fs.promises.writeFile(
-                  path.resolve(new_r3ply_dir, ".gitignore"),
+                  path.resolve(new_r3ply_dir, '.gitignore'),
                   'static/cache',
                 )
               })
@@ -604,7 +614,7 @@ export namespace generate {
       throw new Error(
         `Unable to parse email ${email}, errors: ${JSON.stringify(result)}`,
       )
-    result.local = result.local.replace(/^"(.*)"$/, '$1');
+    result.local = result.local.replace(/^"(.*)"$/, '$1')
     return result
   }
 

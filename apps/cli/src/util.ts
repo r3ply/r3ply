@@ -34,12 +34,14 @@ export namespace util {
   }
 
   export async function read_stdin(): Promise<string | undefined> {
-    if (process.stdin.isTTY) return ''; // nothing piped
-    const chunks = [];
+    if (process.stdin.isTTY) return '' // nothing piped
+    const chunks = []
     for await (const chunk of process.stdin) {
-      chunks.push(chunk);
+      chunks.push(chunk)
     }
-    return Buffer.concat(chunks.map(c => Buffer.isBuffer(c) ? c : Buffer.from(c))).toString('utf8');
+    return Buffer.concat(
+      chunks.map((c) => (Buffer.isBuffer(c) ? c : Buffer.from(c))),
+    ).toString('utf8')
   }
 
   /**

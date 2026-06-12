@@ -1,21 +1,16 @@
-import { Command } from "commander"
-import { util } from "../util"
-import { BaseCmdOptions } from ".."
-import { project, generate as lib_generate, moderation } from "../lib"
-import { Result } from "oxide.ts"
+import { Command } from 'commander'
+import { util } from '../util'
+import { BaseCmdOptions } from '..'
+import { project, generate as lib_generate, moderation } from '../lib'
+import { Result } from 'oxide.ts'
 import {
   R3plySiteConfig,
   R3plySystemConfig,
-  R3plySignetConfig
+  R3plySignetConfig,
 } from '@r3ply/schema/config'
-import {
-  R3ply,
-  moderation as mod_todo,
-  util as r3ply_util,
-} from '@r3ply/lib'
-import { mailbox } from "typescript-mailbox-parser"
-import tty from "../tty"
-
+import { R3ply, moderation as mod_todo, util as r3ply_util } from '@r3ply/lib'
+import { mailbox } from 'typescript-mailbox-parser'
+import tty from '../tty'
 
 type SimulateCmdEmailOpts = {
   moderate: boolean
@@ -59,24 +54,36 @@ function simulate_cmd(cwd: string) {
       `filter output at \`stages\` (or all output if stages is blank).`,
       util.split_list,
     )
-    .addHelpText('after', `\nFiltering/Silencing:
+    .addHelpText(
+      'after',
+      `\nFiltering/Silencing:
 <stage> = <email | config | prescreen | receive | deliverable | prepare | comment | moderation | notify>
 For substages add \`=\` after the stage name. Options are config=<site | system>, moderation=<github | webhook | local>
-If a substage is an array you can append an underscore + index to specify which element, e.g. moderation=local_0`)
-  .addHelpText('after', `\nExamples:
+If a substage is an array you can append an underscore + index to specify which element, e.g. moderation=local_0`,
+    )
+    .addHelpText(
+      'after',
+      `\nExamples:
 $ cat hello.txt | re simulate email --filter comment
 $ re simulate email --subject /demo/ --silence prescreen,receive,deliverable
-$ re simulate email --moderate --dry-run --body "testing" --filter comment,moderation=local_0`)
-    .action(async (input: string | undefined, options: SimulateCmdEmailOpts, cmd) => {
-      const parent_opts = simulate_cmd.parent!.opts<BaseCmdOptions>()
-      simulate(cwd, input, { ...options, ...parent_opts })
-    })
+$ re simulate email --moderate --dry-run --body "testing" --filter comment,moderation=local_0`,
+    )
+    .action(
+      async (input: string | undefined, options: SimulateCmdEmailOpts, cmd) => {
+        const parent_opts = simulate_cmd.parent!.opts<BaseCmdOptions>()
+        simulate(cwd, input, { ...options, ...parent_opts })
+      },
+    )
   return simulate_cmd
 }
 
-async function simulate(cwd: string, input: string | undefined, options: SimulateCmdEmailOpts & BaseCmdOptions) {
+async function simulate(
+  cwd: string,
+  input: string | undefined,
+  options: SimulateCmdEmailOpts & BaseCmdOptions,
+) {
   // Check if date is default
-  if (options.date == "now (UTC)") options.date = new Date().toUTCString()
+  if (options.date == 'now (UTC)') options.date = new Date().toUTCString()
 
   // Get site config
   let site_config_path: string = await project.resolve_config_path(
@@ -84,10 +91,7 @@ async function simulate(cwd: string, input: string | undefined, options: Simulat
     options.config,
   )
   let site_config_result = await Result.safe(
-    project.resolve_config(
-      cwd,
-      options.config,
-    ),
+    project.resolve_config(cwd, options.config),
   )
   let site_config: R3plySiteConfig = site_config_result.expect(
     'Error while opening config (hint: run `re config validate` to debug)',
@@ -184,18 +188,20 @@ async function simulate(cwd: string, input: string | undefined, options: Simulat
     const path = ctx.comment.subject.path
 
     const comment_path = `comments/pending/${domain}${path}/index.html`
-    const pending_comments: any[] = await project.get_comment_from_cache(cwd, { path: comment_path })
-    project.add_comment_to_cache(cwd, { path: comment_path, content: [...pending_comments, ctx] })
+    const pending_comments: any[] = await project.get_comment_from_cache(cwd, {
+      path: comment_path,
+    })
+    project.add_comment_to_cache(cwd, {
+      path: comment_path,
+      content: [...pending_comments, ctx],
+    })
   }
 
   // Print moderation
   if (options.moderate && email_event_response.moderation) {
     const supported_mod_channels = ['local', 'github']
     for (const moderation_channel_type of supported_mod_channels) {
-      for (const [
-        index,
-        { type, request },
-      ] of email_event_response.moderation
+      for (const [index, { type, request }] of email_event_response.moderation
         .filter((m) => m.type == moderation_channel_type)
         .entries()) {
         switch (type) {
@@ -257,13 +263,11 @@ async function simulate(cwd: string, input: string | undefined, options: Simulat
       const ignored_moderation_results = Object.keys(
         site_config.moderation,
       ).filter(
-        (moderation_key) =>
-          !supported_mod_channels.includes(moderation_key),
+        (moderation_key) => !supported_mod_channels.includes(moderation_key),
       )
-      const other_moderation_results =
-        email_event_response.moderation.filter(
-          (r) => !supported_mod_channels.includes(r.type),
-        )
+      const other_moderation_results = email_event_response.moderation.filter(
+        (r) => !supported_mod_channels.includes(r.type),
+      )
       tty.cmds.simulate.print_ignored_moderation_channels(
         ignored_moderation_results,
         other_moderation_results,

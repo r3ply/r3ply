@@ -1,10 +1,7 @@
-import chalk from "chalk"
-import tty from "../tty"
-import {
-  R3plySiteConfig,
-  R3plySignetConfig,
-} from '@r3ply/schema/config'
-import { BaseCmdOptions } from ".."
+import chalk from 'chalk'
+import tty from '../tty'
+import { R3plySiteConfig, R3plySignetConfig } from '@r3ply/schema/config'
+import { BaseCmdOptions } from '..'
 import { highlight } from 'cli-highlight'
 import TOML from '@iarna/toml'
 

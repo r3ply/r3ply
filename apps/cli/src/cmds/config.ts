@@ -1,9 +1,9 @@
-import { Command, HelpContext, program } from "commander"
-import { project } from "../lib"
-import { BaseCmdOptions } from ".."
-import { util } from "../util"
-import { generate } from "."
-import chalk from "chalk"
+import { Command, HelpContext, program } from 'commander'
+import { project } from '../lib'
+import { BaseCmdOptions } from '..'
+import { util } from '../util'
+import { generate } from '.'
+import chalk from 'chalk'
 
 function config_cmd(cwd: string) {
   const config_cmd = new Command('config').description('r3ply config commands')
@@ -24,15 +24,20 @@ function config_cmd(cwd: string) {
 
   const generate_alias = config_cmd
     .command('generate')
-    .addHelpText('before', chalk.yellowBright('(alias for generate config, see usage below)\n'))
+    .addHelpText(
+      'before',
+      chalk.yellowBright('(alias for generate config, see usage below)\n'),
+    )
     .description('Alias for generate config')
     .action(async () => {
-      program.parseAsync(['generate', 'config'], { from: 'user'})
+      program.parseAsync(['generate', 'config'], { from: 'user' })
     })
 
   generate_alias.helpInformation = (ctx: HelpContext) => {
-    const foo = generate(cwd).commands.find(c => c.name() == "config")?.helpInformation(ctx)
-    return foo || "See `re generate config` for more"
+    const foo = generate(cwd)
+      .commands.find((c) => c.name() == 'config')
+      ?.helpInformation(ctx)
+    return foo || 'See `re generate config` for more'
   }
 
   return config_cmd

@@ -48,25 +48,38 @@ export default {
       )
       return Promise.resolve()
     }
-    console.log(`mb local: ${to_mb.local}`);
-
+    console.log(`mb local: ${to_mb.local}`)
 
     switch (to_mb.local) {
-      case "ping": {
-        const { success } = await env.EMAIL_INTERFACE_RATE_LIMITER.limit({ key: msg.from })
+      case 'ping': {
+        const { success } = await env.EMAIL_INTERFACE_RATE_LIMITER.limit({
+          key: msg.from,
+        })
         if (!success) {
           msg.setReject('Rate limit exceeded.')
           return Promise.resolve()
         }
-        const date_sent = new Date(Option(msg.headers.get('Date')).expect("Date header is required."))
+        const date_sent = new Date(
+          Option(msg.headers.get('Date')).expect('Date header is required.'),
+        )
         const now = new Date()
         const cache = CommentCache(env.R3PLY_STAGING_DB)
-        await cache.set("example.com", "/ping/", "ID: " + Date.now().toString(), JSON.stringify({}))
-        await msg.reply(create_reply_email(msg, { subject: "Re: ping", body: `time=${now.valueOf() - date_sent.valueOf()}ms` }))
+        await cache.set(
+          'example.com',
+          '/ping/',
+          'ID: ' + Date.now().toString(),
+          JSON.stringify({}),
+        )
+        await msg.reply(
+          create_reply_email(msg, {
+            subject: 'Re: ping',
+            body: `time=${now.valueOf() - date_sent.valueOf()}ms`,
+          }),
+        )
         return Promise.resolve()
       }
       default: {
-        console.log(`default: ${to_mb.local}`);
+        console.log(`default: ${to_mb.local}`)
 
         // Guard against emails that are too big
         if (msg.rawSize > r3ply_system_config.email.max_size_bytes) {

@@ -1,15 +1,12 @@
 import { highlight } from 'cli-highlight'
-import { SimulateCmdEmailOpts } from "../cmds/simulate";
-import tty from "../tty";
-import { util } from "../util";
-import {
-  R3plySystemConfig,
-  R3plySiteConfig,
-} from '@r3ply/schema/config'
+import { SimulateCmdEmailOpts } from '../cmds/simulate'
+import tty from '../tty'
+import { util } from '../util'
+import { R3plySystemConfig, R3plySiteConfig } from '@r3ply/schema/config'
 import { comments, moderation } from '@r3ply/lib'
-import { BaseCmdOptions } from "..";
+import { BaseCmdOptions } from '..'
 import TOML from '@iarna/toml'
-import { Result } from "oxide.ts";
+import { Result } from 'oxide.ts'
 
 export function print_comment_via_email_initial(
   email: string,
@@ -17,8 +14,7 @@ export function print_comment_via_email_initial(
 ) {
   if (util.print_w_quiet_and_filter_opts(options, 'email')) {
     // TODO: for some reason highlight.js doesn't support `eml`???
-    if (options.heading)
-      console.log(`${tty.txt.info('# === Input Email ===')}`)
+    if (options.heading) console.log(`${tty.txt.info('# === Input Email ===')}`)
     console.log(
       highlight(email.replace(/\r/g, ''), {
         language: 'yaml',
@@ -40,9 +36,7 @@ export function print_comment_via_email_response(
   if (util.print_w_quiet_and_filter_opts(options, 'config')) {
     if (util.print_w_quiet_and_filter_opts(options, 'config=system')) {
       if (options.heading)
-        console.log(
-          `${tty.txt.info('# === Comment: System Config ===\n')}`,
-        )
+        console.log(`${tty.txt.info('# === Comment: System Config ===\n')}`)
       console.log(
         format == 'toml'
           ? highlight(
@@ -57,9 +51,7 @@ export function print_comment_via_email_response(
     }
     if (util.print_w_quiet_and_filter_opts(options, 'config=site')) {
       if (options.heading)
-        console.log(
-          `${tty.txt.info('# === Comment: Site Config ===\n')}`,
-        )
+        console.log(`${tty.txt.info('# === Comment: Site Config ===\n')}`)
       console.log(
         format == 'toml'
           ? `${highlight(
@@ -78,8 +70,7 @@ export function print_comment_via_email_response(
   if (util.print_w_quiet_and_filter_opts(options, 'prescreen')) {
     if (options.heading)
       console.log(
-        tty.txt.info('# === Comment: Prescreening Results ===') +
-          '\n',
+        tty.txt.info('# === Comment: Prescreening Results ===') + '\n',
       )
     if (email_event_response.prescreening.isOk()) {
       // Delete results in order to redact information that was shown in prior stages
@@ -100,8 +91,7 @@ export function print_comment_via_email_response(
       )
     } else {
       console.log(tty.txt.warn('# Prescreening failed checks:\n'))
-      const prescreen_failures =
-        email_event_response.prescreening.unwrapErr()
+      const prescreen_failures = email_event_response.prescreening.unwrapErr()
       if (prescreen_failures.r3ply_is_disabled.result == 'fail') {
         // console.log(tty.txt.warn("- check: r3ply is disabled"))
         console.log(
@@ -172,8 +162,7 @@ export function print_comment_via_email_response(
           format == 'toml'
             ? highlight(
                 TOML.stringify({
-                  email_size_bytes:
-                    prescreen_failures.email_size_bytes.errors,
+                  email_size_bytes: prescreen_failures.email_size_bytes.errors,
                 }),
               )
             : highlight(
@@ -196,26 +185,18 @@ export function print_comment_via_email_response(
   if (receive_details) {
     if (util.print_w_quiet_and_filter_opts(options, 'receive')) {
       if (options.heading) {
-        console.log(
-          tty.txt.info('# === Comment: Comment Received ===') + '\n',
-        )
+        console.log(tty.txt.info('# === Comment: Comment Received ===') + '\n')
         if (receive_details.isOk()) {
           console.log(
             format == 'toml'
-              ? highlight(
-                  TOML.stringify(receive_details.unwrap() as any),
-                  {
-                    language: 'toml',
-                    ignoreIllegals: true,
-                  },
-                )
-              : highlight(
-                  JSON.stringify(receive_details.unwrap() as any),
-                  {
-                    language: 'json',
-                    ignoreIllegals: true,
-                  },
-                ) + '\n',
+              ? highlight(TOML.stringify(receive_details.unwrap() as any), {
+                  language: 'toml',
+                  ignoreIllegals: true,
+                })
+              : highlight(JSON.stringify(receive_details.unwrap() as any), {
+                  language: 'json',
+                  ignoreIllegals: true,
+                }) + '\n',
           )
         } else {
           console.log(tty.txt.warn(receive_details.unwrapErr() + '\n'))
@@ -243,9 +224,7 @@ export function print_comment_via_email_response(
             : `${highlight('/* Note: `From` is redacted */\n' + JSON.stringify(result, null, 2), { language: 'json', ignoreIllegals: true })}\n`,
         )
       } else {
-        console.log(
-          `${tty.txt.warn(deliverable_details.unwrapErr())}\n`,
-        )
+        console.log(`${tty.txt.warn(deliverable_details.unwrapErr())}\n`)
       }
     }
   }
@@ -255,9 +234,7 @@ export function print_comment_via_email_response(
   if (prepare_details) {
     if (util.print_w_quiet_and_filter_opts(options, 'prepare')) {
       if (options.heading)
-        console.log(
-          `${tty.txt.info('# === Comment: Template Context ===\n')}`,
-        )
+        console.log(`${tty.txt.info('# === Comment: Template Context ===\n')}`)
       if (prepare_details.isOk()) {
         console.log(
           format == 'toml'
@@ -275,9 +252,7 @@ export function print_comment_via_email_response(
   if (process_details) {
     if (util.print_w_quiet_and_filter_opts(options, 'comment')) {
       if (options.heading)
-        console.log(
-          `${tty.txt.info('# === Comment: Processed ===')}\n`,
-        )
+        console.log(`${tty.txt.info('# === Comment: Processed ===')}\n`)
       if (process_details.isOk()) {
         console.log(highlight(process_details.unwrap()))
       } else {
@@ -295,19 +270,13 @@ export function print_local_moderation_event(
 ) {
   if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
     if (
-      util.print_w_quiet_and_filter_opts(
-        options,
-        `moderation=local_${count}`,
-      )
+      util.print_w_quiet_and_filter_opts(options, `moderation=local_${count}`)
     ) {
       if (options.heading)
-        console.log(
-          tty.txt.info(`# === Moderation: Local[${count}] ===\n`),
-        )
+        console.log(tty.txt.info(`# === Moderation: Local[${count}] ===\n`))
       if (request.isOk()) {
-        const partial_request: Partial<
-          ReturnType<typeof request.unwrap>
-        > = request.unwrap()
+        const partial_request: Partial<ReturnType<typeof request.unwrap>> =
+          request.unwrap()
         delete partial_request['send']
         partial_request.args = request.unwrap().args
         partial_request.args.comment =
@@ -390,9 +359,7 @@ export function print_local_moderation_event(
         }
       } else {
         const error = request.unwrapErr()
-        console.log(
-          tty.txt.warn(`Moderation skipped: ${error.message}`),
-        )
+        console.log(tty.txt.warn(`Moderation skipped: ${error.message}`))
       }
       // Print blank line
       console.log()
@@ -408,21 +375,15 @@ export function print_github_moderation_event(
 ) {
   if (util.print_w_quiet_and_filter_opts(options, 'moderation')) {
     if (
-      util.print_w_quiet_and_filter_opts(
-        options,
-        `moderation=github_${count}`,
-      )
+      util.print_w_quiet_and_filter_opts(options, `moderation=github_${count}`)
     ) {
       if (options.heading)
         console.log(
-          tty.txt.info(
-            `# === Moderation: GitHub[${count}] (MOCKED) ===\n`,
-          ),
+          tty.txt.info(`# === Moderation: GitHub[${count}] (MOCKED) ===\n`),
         )
       if (request.isOk()) {
-        const partial_request: Partial<
-          ReturnType<typeof request.unwrap>
-        > = request.unwrap()
+        const partial_request: Partial<ReturnType<typeof request.unwrap>> =
+          request.unwrap()
         delete partial_request['send']
         partial_request.args = request.unwrap().args
         partial_request.args.comment_data =
@@ -510,9 +471,7 @@ export function print_github_moderation_event(
         }
       } else {
         const error = request.unwrapErr()
-        console.log(
-          tty.txt.warn(`Moderation skipped: ${error.message}`),
-        )
+        console.log(tty.txt.warn(`Moderation skipped: ${error.message}`))
       }
       // Print blank line
       console.log()
@@ -558,8 +517,7 @@ export function print_ignored_moderation_channels(
             })
           : JSON.stringify(
               {
-                not_implemented:
-                  not_implemented_moderation_results as any,
+                not_implemented: not_implemented_moderation_results as any,
               },
               null,
               2,
