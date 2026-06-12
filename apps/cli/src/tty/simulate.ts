@@ -93,7 +93,6 @@ export function print_comment_via_email_response(
       console.log(tty.txt.warn('# Prescreening failed checks:\n'))
       const prescreen_failures = email_event_response.prescreening.unwrapErr()
       if (prescreen_failures.r3ply_is_disabled.result == 'fail') {
-        // console.log(tty.txt.warn("- check: r3ply is disabled"))
         console.log(
           format == 'toml'
             ? highlight(
@@ -115,7 +114,6 @@ export function print_comment_via_email_response(
         )
       }
       if (prescreen_failures.comments_accepted.result == 'fail') {
-        // console.log(tty.txt.warn("- check: comments accepted"))
         console.log(
           format == 'toml'
             ? highlight(
