@@ -1,7 +1,10 @@
 {
   "name": "@r3ply/wasm",
-  "version": "0.0.1",
+  "author": "Spencer Van Wessem Scorcelletti",
+  "license": "MIT",
   "private": true,
+  "version": "0.0.1",
+  "description": "Wasm bindings of useful dependencies for the r3ply commenting system",
   "scripts": {
     "build:node": "wasm-pack build --release --target nodejs --out-name r3ply-wasm-node --no-pack",
     "build:bundler": "wasm-pack build --release --target bundler --out-name r3ply-wasm-bundler --no-pack",

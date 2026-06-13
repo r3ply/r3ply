@@ -1,7 +1,10 @@
 {
   "name": "@r3ply/cloudflare-worker",
-  "version": "0.0.1",
+  "author": "Spencer Van Wessem Scorcelletti",
+  "license": "AGPL-3.0-only",
   "private": true,
+  "version": "0.0.1",
+  "description": "Cloudflare worker for the r3ply commenting system",
   "scripts": {
     "cf:types": "npx wrangler types",
     "build": "pnpm cf:types && wrangler deploy --dry-run --outdir=dist",

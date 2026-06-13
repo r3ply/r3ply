@@ -1,6 +1,10 @@
 {
   "name": "r3ply",
+  "author": "Spencer Van Wessem Scorcelletti",
+  "license": "AGPL-3.0-only",
   "private": true,
+  "version": "0.0.1",
+  "description": "Monorepo root of the r3ply commenting system",
   "workspaces": [
     "packages/*"
   ],

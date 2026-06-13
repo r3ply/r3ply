@@ -1,0 +1,1 @@
+By submitting a contribution to this project, you grant the maintainer the right to use your code under any license, including commercial ones, while retaining all your own rights to use it however you wish.

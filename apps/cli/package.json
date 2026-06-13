@@ -1,8 +1,11 @@
 {
-  "type": "module",
   "name": "@r3ply/cli",
+  "author": "Spencer Van Wessem Scorcelletti",
+  "license": "AGPL-3.0-only",
+  "private": true,
   "version": "0.0.1",
-  "description": "CLI for r3ply commenting system",
+  "description": "CLI for the r3ply commenting system",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -49,7 +52,5 @@
   },
   "volta": {
     "node": "22.9.0"
-  },
-  "author": "Spencer Scorcelletti",
-  "license": "MIT"
+  }
 }

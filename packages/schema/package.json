@@ -1,8 +1,11 @@
 {
-  "type": "module",
   "name": "@r3ply/schema",
+  "author": "Spencer Van Wessem Scorcelletti",
+  "license": "MIT",
+  "private": true,
   "version": "0.0.1",
   "description": "Schemas and parsers/validators for the r3ply commenting system",
+  "type": "module",
   "main": "dist/index.cjs",
   "module": "./dist/index.js",
   "types": "dist/index.d.ts",
@@ -46,7 +49,5 @@
   },
   "volta": {
     "node": "22.9.0"
-  },
-  "author": "Spencer Scorcelletti",
-  "license": "MIT"
+  }
 }

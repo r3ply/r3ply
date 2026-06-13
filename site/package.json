@@ -1,8 +1,10 @@
 {
   "name": "@r3ply/docs",
-  "version": "0.0.1",
-  "description": "r3ply site and documentation",
+  "author": "Spencer Van Wessem Scorcelletti",
+  "license": "CC-BY-SA-4.0",
   "private": true,
+  "version": "0.0.1",
+  "description": "The r3ply site and documentation",
   "scripts": {
     "initialize": "git submodule update --init --remote --recursive",
     "copy:schemas": "cp -r ../packages/schema/dist/schemas static/",
@@ -13,8 +15,6 @@
   "volta": {
     "node": "22.9.0"
   },
-  "author": "Spencer Scorcelletti",
-  "license": "MIT",
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.16",
     "@tailwindcss/forms": "^0.5.10",
