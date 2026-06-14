@@ -95,10 +95,13 @@
   {% endblock main %}
   {% block comments %}
     {% set doc = section | default(value=page | default(value=false)) %}
-    {% if doc.extra.comments.enabled %}
+    {% block allow_comments %}{% set allow_comments = doc.extra.comments.enabled | default(value=false) %}{% endblock allow_comments %}
+    {% if allow_comments %}
+      {% block choose_comments %}
       {% set comments = get_section(path="comments/_index.md")
         | get(key="pages")
         | filter(attribute="extra.comment.document", value=current_path) %}
+      {% endblock choose_comments %}
       <section id="comments" class="py-12 border-t-4 border-blue-300 dark:border-pink-300 border-dashed md:pr-6 pr-2 overflow-x-scroll bg-orange-50 bg-[url(/patterns/bank-note.svg)] dark:bg-inherit">
         <details class="group" open>
           <summary class="pl-4 pointer-events-none">
@@ -147,6 +150,7 @@
               </div>
             </div>
           </div>
+          {% block pending_comments %}
           {# Set-up pending comments cache if enabled in r3ply config #}
           {% set r3ply_config = load_data(path="/static/.well-known/r3ply/config.toml") %}
           {% if r3ply_config.comments.cache %}
@@ -205,6 +209,7 @@
             <div id="pending-comments-container" class="mt-6"></div>
           </details>
           {% endif %}
+          {% endblock pending_comments %}
           {{ comments::write_all(for_comments=comments, doc=doc, template=false) }}
           {% set template_comments = get_section(path="comments/_index.md")
             | get(key="pages")
@@ -214,7 +219,9 @@
           {% endif %}
         </details>
       </section>
+      {% block mailto_text_fragment %}
       {{ util::mailto_text_fragment(to=config.extra.comments_email, path=current_path, body=config.extra.mail_body_instructions) }}
+      {% endblock mailto_text_fragment %}
     {% endif %}
   {% endblock comments %}
   {% block footer %}

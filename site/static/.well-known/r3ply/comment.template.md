@@ -7,13 +7,8 @@ slug = {{ comment.id[:8] | json_encode }}
 
 [taxonomies]
 commenters = {{ [author.pseudonym[:7]] | str }}
-threads = {{
-  ["all"
-  , (comment.subject.path[1:]~comment.subject.fragment) if comment.subject.fragment else
-    comment.subject.path[1:-1]
-  , "comments/" ~ comment.id[:8] ~ "/"
-  ] | str
-}}
+threads = {{ ["all", comment.subject.path[1:-1], "comments/" ~ (comment.id[:8])] | str }}
+replies = {{ [("comments/" ~ comment.subject.fragment[1:9]) if (comment.subject.fragment and comment.subject.fragment[:8] != "#:~:text") else comment.subject.path[1:-1]] | str }}
 
 [extra.comment]
 document = {{ comment.subject.path | json_encode }}
