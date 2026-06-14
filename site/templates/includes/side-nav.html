@@ -263,17 +263,17 @@
     <li>
       <a href="{{ get_url(path='@/docs/api.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">API</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700">
-          <li>
-              <a href="{{ get_url(path='@/docs/api.md#rest', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">REST</a>
-              <ul class="px-4 list-disc list-inside font-light">
-                  <li>
-                      <a href="{{ get_url(path='@/docs/api.md#issue-signet', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Issue Signet</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/api.md#pending-comments-cache', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Comments Cache</a>
-                  </li>
-              </ul>
-          </li>
+        <li>
+          <a href="{{ get_url(path='@/docs/api.md#rest', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">REST</a>
+          <ul class="px-4 list-disc list-inside font-light">
+            <li>
+              <a href="{{ get_url(path='@/docs/api.md#issue-signet', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Issue Signet</a>
+            </li>
+            <li>
+              <a href="{{ get_url(path='@/docs/api.md#pending-comments-cache', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Comments Cache</a>
+            </li>
+          </ul>
+        </li>
       </ul>
     </li>
   </ul>
@@ -296,18 +296,18 @@
     <li>
       <a href="{{ get_url(path='@/project/_index.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Project</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700 dark:text-red-100">
-          <li>
-              <a href="{{ get_url(path='@/project/about.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">About</a>
-          </li>
-          <li>
-              <a href="{{ get_url(path='@/project/roadmap.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Roadmap</a>
-          </li>
-          <li>
-              <a href="{{ get_url(path='@/project/contributing.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Contributing</a>
-          </li>
-          <li>
-              <a href="{{ get_url(path='@/project/contact.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Contact & Support</a>
-          </li>
+        <li>
+          <a href="{{ get_url(path='@/project/about.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">About</a>
+        </li>
+        <li>
+          <a href="{{ get_url(path='@/project/roadmap.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Roadmap</a>
+        </li>
+        <li>
+          <a href="{{ get_url(path='@/project/contributing.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Contributing</a>
+        </li>
+        <li>
+          <a href="{{ get_url(path='@/project/contact.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Contact & Support</a>
+        </li>
       </ul>
     </li>
     {# Site Links #}
@@ -315,41 +315,47 @@
       <a href="{{ get_url(path='@/docs/getting-started.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Site Links</a>
       <ul class="px-4 list-disc list-inside font-light text-gray-700 dark:text-red-100">
           <li>
-              <a href="https://github.com/asimpletune/r3ply/" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">GitHub Repo</a>
+            <a href="https://github.com/asimpletune/r3ply/" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">GitHub Repo</a>
           </li>
           <li>
-              <a href="{{ get_url(path='@/project/contributing.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Browse Comments</a>
-              <ul class="px-4 list-disc list-inside font-light">
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#site-config-entry', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">All Comments</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Organized by Thread</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Organized by Author</a>
-                  </li>
-              </ul>
+            <a href="https://liberapay.com/spence/donate" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Donate</a>
           </li>
           <li>
-              <a href="{{ get_url(path='@/project/roadmap.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Sitemap.xml</a>
+            <a href="{{ get_url(path='@/project/contributing.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Browse Comments</a>
+            <ul class="px-4 list-disc list-inside font-light">
+              <li>
+                <a href="{{ get_url(path='@/docs/config.md#site-config-entry', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">All Comments</a>
+              </li>
+              <li>
+                <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Organized by Thread</a>
+              </li>
+              <li>
+                <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Organized by Author</a>
+              </li>
+            </ul>
           </li>
           <li>
-              <a href="{{ get_url(path='@/project/contributing.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">RSS Feeds</a>
-              <ul class="px-4 list-disc list-inside font-light">
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#site-config-entry', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">All Comments</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">By Page</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">By Thread</a>
-                  </li>
-                  <li>
-                      <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">By Author</a>
-                  </li>
-              </ul>
+            <a href="{{ get_url(path='@/project/contributing.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">RSS Feeds</a>
+            <ul class="px-4 list-disc list-inside font-light">
+              <li>
+                <a href="{{ get_url(path='@/docs/config.md#site-config-entry', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">All Comments</a>
+              </li>
+              <li>
+                <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">By Page</a>
+              </li>
+              <li>
+                <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">By Thread</a>
+              </li>
+              <li>
+                <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">By Author</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href="{{ get_url(path='@/project/roadmap.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Sitemap.xml</a>
+          </li>
+          <li>
+            <a href="{{ get_url(path='@/taxonomy.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Taxonomy</a>
           </li>
       </ul>
     </li>
