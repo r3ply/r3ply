@@ -6,6 +6,8 @@ template = "doc.html"
 enabled = true
 +++
 
+{{ breadcrumbs() }}
+
 # `re` - the r3ply CLI
 
 The r3ply CLI tool `re` is useful for developing your site to integrate comments, and to test/debug changes, such as edits to your r3ply config.

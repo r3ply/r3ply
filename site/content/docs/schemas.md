@@ -6,6 +6,8 @@ title = "r3ply schemas"
 enabled = true
 +++
 
+{{ breadcrumbs() }}
+
 # r3ply Schemas
 
 This page is a listing of all the schemas used by r3ply so they can be browsed or referenced by tooling.

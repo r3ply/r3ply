@@ -6,6 +6,8 @@ template = "doc.html"
 enabled = true
 +++
 
+{{ breadcrumbs() }}
+
 # Overview
 
 In this page we'll discuss concepts and terminology of r3ply. The goal is to give the reader a big picture understanding of r3ply (_Also, documentation that doesn't have a dedicated page should go here_).

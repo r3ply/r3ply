@@ -6,6 +6,8 @@ template = "doc.html"
 enabled = true
 +++
 
+{{ breadcrumbs() }}
+
 # Configuration
 
 Configuration is an important topic in r3ply, as it's the primary way most people would interact with the system. **This page will first cover fundamentals of r3ply configuration**, before specifying the configuration options for _site configs_ and _r3ply app configs_.

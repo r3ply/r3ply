@@ -6,6 +6,8 @@ template = "doc.html"
 enabled = true
 +++
 
+{{ breadcrumbs() }}
+
 # Getting Started
 
 In this tutorial we're going to walkthrough using r3ply from start to finish with an example. We will be installing the `re` CLI tool, generating a config, simulating a comment, and then discussing next steps. Follow the the steps below from within your project's top-level directory.

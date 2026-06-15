@@ -6,6 +6,8 @@ template = "doc.html"
 enabled = true
 +++
 
+{{ breadcrumbs() }}
+
 # API
 
 ## REST

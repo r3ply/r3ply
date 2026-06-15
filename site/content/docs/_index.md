@@ -3,6 +3,8 @@ title = "r3ply docs"
 template = "doc.html"
 +++
 
+{{ breadcrumbs() }}
+
 # r3ply Docs
 
 The r3ply docs are arranged as a mixture of pure documentation, concepts, and tutorials/walkthroughs.

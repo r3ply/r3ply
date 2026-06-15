@@ -6,6 +6,8 @@ title = "r3ply docs: Templating"
 enabled = true
 +++
 
+{{ breadcrumbs() }}
+
 # Templating
 
 Templating allows you to control how your comment files are structured using an easy text based language. This page discusses the syntax of this templating language, as well as documents the templating context that's available to your templates.
