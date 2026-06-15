@@ -1,7 +1,7 @@
 {% set doc = page | default(value=section) %}
-{% set justify = justify | default(value="justify-end") %}
+{% set tw = tw | default(value="ml-auto") %}
 <nav>
-  <ul class="flex gap-1 {{ justify }} prose-li:list-none mx-0 px-0">
+  <ul class="flex w-fit gap-1 {{ tw }} prose-li:list-none mx-0 px-0 border-b border-dashed border-emerald-300 text-lg prose-a:no-underline prose-li:my-1.5 prose-a:font-bold">
       <li><a class="no-underline text-inherit" href="#bread-crumbs-top">🍞:</a></li>
     {% set path = doc.ancestors | concat(with=doc.permalink) %}
     {% for a in path %}
@@ -13,7 +13,7 @@
       <li>/</li>
       <li><a href="{{ url }}" class="text-red-400 hover:underline">
         {% if loop.first %}
-        home
+        r3ply.com
         {% else %}
         {{ doc.components | nth(n=loop.index0-1) }}
         {% endif %}

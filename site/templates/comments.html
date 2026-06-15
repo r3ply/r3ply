@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% import "macros/util.html" as util %}
+
+{% block article_width %}
+min-w-full
+{% endblock article_width %}
+{% block article_margins_and_padding %}
+px-4
+{% endblock article_margins_and_padding %}
+{% block comments %}
+{% set comments = section.pages %}
+  <div class="px-4 prose min-w-full overflow-auto prose-table:table
+            prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert dark:prose-code:bg-transparent! dark:prose-code:text-violet-300!">
+    <table>
+      <thead>
+        <tr>
+          {# TODO: sort out having multilingual taxonomies for comments #}
+          <th>Comment Preview</th>
+          <th>Date</th>
+          <th>Page</th>
+          <th>Commenter</th>
+          <th class="text-center">ID</th>
+          <th class="text-center">Verified</th>
+          <th>Replying To</th>
+          <th class="text-center">
+            RSS
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="inline align-text-bottom text-red-300"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
+              />
+            </svg>
+          </th>
+        </tr>
+      </thead>
+      {% for c in comments %}
+        <tr>
+          {% set context_url = c.extra.comment.document ~ "#" ~ c.slug %}
+          <td><a class="text-red-300" href="{{ context_url }}">{{ c.content | striptags| truncate(length=32) }}</a></td>
+          <td class="font-mono"><span class="text-blue-300">{{ c.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
+          {% set url = get_url(path=c.extra.comment.document, trailing_slash=true) %}
+          <td><a class="text-yellow-200" href="{{ url }}">{{ c.extra.comment.document | truncate(length=32) }}</a></td>
+          {# {% set alias = comments::alias(commenter_id=c.extra.commenter_id) %} #}
+          {% set alias = aliases[c.extra.commenter_id][0].alias | default(value="") %}
+          <td>
+            {% if alias != "" %}
+              ✨<a class="text-teal-200" href="/commenters/{{ c.taxonomies.commenters[0] }}/">{{ alias }}</a>
+            {% else %}
+              <a class="text-teal-200" href="/commenters/{{ c.taxonomies.commenters[0] }}/">{{ c.taxonomies.commenters[0] }}</a>
+            {% endif %}
+          </td>
+          <td class="text-center font-mono">
+            #<a class="text-emerald-300" href="/comments/{{ c.slug }}">{{ c.slug }}</a>
+          </td>
+          <td class="text-center">
+            {% if c.extra.dkim_pass and c.extra.dmarc_pass and c.extra.spf_pass %}
+              <span class=" text-green-300">✓ </span>
+            {% else %}
+              <span class=" text-red-300">? </span>
+            {% endif %}
+          </td>
+          <td>
+            {# Comment is in response to just the document #}
+            {% if c.extra.comment.in_reply_to == false %}
+              <a class="text-yellow-200" href="/{{ c.extra.comment.document }}">{{ c.extra.comment.document }}</a>
+            {# Comment is in response to a text fragment #}
+            {% elif c.extra.comment.in_reply_to is starting_with("#:~:text=") %}
+            {% set text = c.extra.comment.in_reply_to | split(pat="") | slice(start=10) | join(sep="") %}
+            <a href="{{ c.extra.comment.document }}{{ c.extra.comment.in_reply_to }}" class="text-red-300">
+              <em>“{{ util::urldecode(encoded=text) | truncate(length=15) | trim }}”</em>
+            </a>
+            {# Comment is in response to another comment #}
+            {% else %}
+              <span>#</span><a class="text-emerald-300" href="/comment/{{ c.extra.comment.in_reply_to }}">{{ c.extra.comment.in_reply_to | split(pat="") | slice(start=1) | join(sep="") }}</a>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            <a class="text-pink-300" href="/replies/comments/{{ c.slug }}/atom.xml">Replies</a> | <a class="text-pink-300" href="/threads/comments/{{ c.slug }}/atom.xml">Thread</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+{% endblock comments %}
