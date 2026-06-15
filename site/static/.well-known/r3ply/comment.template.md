@@ -10,6 +10,11 @@ commenters = {{ [author.pseudonym[:7]] | str }}
 threads = {{ ["all", comment.subject.path[1:-1], "comments/" ~ (comment.id[:8])] | str }}
 replies = {{ [("comments/" ~ comment.subject.fragment[1:9]) if (comment.subject.fragment and comment.subject.fragment[:8] != "#:~:text") else comment.subject.path[1:-1]] | str }}
 
+[extra.email]
+dkim = {{ email.auth.dkim }}
+dmarc = {{ email.auth.dmarc }}
+spf = {{ email.auth.spf }}
+
 [extra.comment]
 document = {{ comment.subject.path | json_encode }}
 root = {{ comment.subject.fragment is undefined or comment.subject.fragment?[:8] == "#:~:text" }}

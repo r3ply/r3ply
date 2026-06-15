@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% import "macros/util.html" as util %}
+
+{% block title %}
+  {# {% set title = "/" ~ taxon.name ~ " replies" %}
+  <title>{{ title }}</title>
+  <meta property="og:title" content="{{ title }}" />
+  <meta name="twitter:title" content="{{ title }}" /> #}
+{% endblock title %}
+
+{% block article_width %}min-w-full{% endblock article_width %}
+{% block article_margins_and_padding %}px-4{% endblock article_margins_and_padding %}
+
+{% block content %}
+{{ util::other_breadcrumbs(links=["[r3ply.com](/)"]) }}
+<h1>Comments by Author <a class="no-underline text-pink-300 hover:text-pink-400 hover:underline" href="{{ get_url(path='#comments-by-author') }}">#</a></h1>
+{% endblock content %}
+
+{% block comments %}
+<div class="px-4 prose prose-light min-w-full overflow-auto prose-table:table
+prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert dark:prose-code:bg-transparent! dark:prose-code:text-violet-300!">
+  <table class="prose-td:whitespace-nowrap prose-tr:whitespace-nowrap table-fixed">
+    <thead>
+      <tr>
+        <th class="w-24">Author ID</th>
+        {# TODO #}
+        {# <th>Alias</th> #}
+        <th class=" w-56">Date</th>
+        <th class="w-auto">Most Recent Comment</th>
+        <th class="w-36 text-center"># of Comments</th>
+        <th class="w-24 text-center">All Verified</th>
+        <th class="w-24">
+          RSS
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="inline align-text-bottom text-red-300"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
+            />
+          </svg>
+        </th>
+      </tr>
+    </thead>
+    {# TODO #}
+    {# {% set aliases_page = get_page(path="comments/aliases.md", lang=lang, only_metadata=true) %} #}
+    {% for t in terms | sort(attribute="pages.0.date") | reverse %}
+      {%- set comments_for_author = get_taxonomy_term(kind="commenters", term=t.name) -%}
+      {% set comments_for_author = comments_for_author.pages | sort(attribute="date") | reverse %}
+      {% set most_recent_comment = comments_for_author | first %}
+      <tr>
+        {% set commenter = t.name | truncate(length=8) %}
+        {% set href = t.permalink %}
+        {% set num_comments = t.page_count %}
+        {# TODO #}
+        {# {% set alias = aliases[t.name][0].alias | default(value="") %} #}
+        <td><a class="font-mono text-emerald-300" href="{{ t.permalink }}">{{ commenter }}</a></td>
+        {# TODO #}
+        {# <td>
+          {% if alias %}
+            ✨<a class="text-teal-200" href="{{ aliases_page.permalink }}#:~:text={{ alias }}">{{ alias }}</a>
+          {% endif %}
+        </td> #}
+        <td class="font-mono"><span class="text-blue-300">{{ most_recent_comment.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
+        <td class="truncate">
+          {% set comment_url = get_url(path=most_recent_comment.extra.comment.document) %}
+          <a class="text-red-300" href="{{ comment_url }}#comment_{{ most_recent_comment.slug }}"
+            ><em>“{{ most_recent_comment.content | striptags | trim | truncate(length=512) }}”</em>
+          </a>
+        </td>
+        <td class="text-center">{{ num_comments }}</td>
+        <td class="text-center">
+          {% set dkim_fail = comments_for_author | filter(attribute="extra.email.dkim", value=false) | length > 0 %}
+          {% set dmarc_fail = comments_for_author | filter(attribute="extra.email.dmarc", value=false) | length > 0 %}
+          {% set spf_fail = comments_for_author | filter(attribute="extra.email.spf", value=false) | length > 0 %}
+          {% if dkim_fail and dmarc_fail and spf_fail %}
+            <span class="text-red-300">? </span>
+          {% else %}
+            <span class="text-green-300">✓ </span>
+          {% endif %}
+        </td>
+        <td>
+          {% set rss_url = t.permalink ~ "atom.xml" %}
+          <a class="text-pink-300" href="{{ rss_url }}">Subscribe</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock comments %}
