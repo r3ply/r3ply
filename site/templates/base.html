@@ -95,7 +95,9 @@
   {% endblock main %}
   {% block comments %}
     {% set doc = section | default(value=page | default(value=false)) %}
-    {% block allow_comments %}{% set allow_comments = doc.extra.comments.enabled | default(value=false) %}{% endblock allow_comments %}
+    {% block allow_comments %}
+      {% set allow_comments = doc.extra.comments.enabled | default(value=false) %}
+    {% endblock allow_comments %}
     {% if allow_comments %}
       {% block choose_comments %}
       {% set comments = get_section(path="comments/_index.md")
@@ -104,7 +106,7 @@
       {% endblock choose_comments %}
       <section id="comments" class="py-12 border-t-4 border-blue-300 dark:border-pink-300 border-dashed md:pr-6 pr-2 overflow-x-scroll bg-orange-50 bg-[url(/patterns/bank-note.svg)] dark:bg-inherit">
         <details class="group" open>
-          <summary class="pl-4 pointer-events-none">
+          <summary class="pl-4 pointer-events-none [&_a]:pointer-events-auto">
             {# title #}
             <h2 class="text-center text-4xl md:text-5xl font-thin">
               Comments ({{ comments | length }})
@@ -210,19 +212,21 @@
           </details>
           {% endif %}
           {% endblock pending_comments %}
-          {{ comments::write_all(for_comments=comments, doc=doc, template=false) }}
-          {% set template_comments = get_section(path="comments/_index.md")
-            | get(key="pages")
-            | filter(attribute="extra.comment.document", value="/debug-comment-template/") %}
-          {% if r3ply_config.comments.cache %}
-            {{ comments::write_all(for_comments=template_comments, doc=doc, template=true) }}
-          {% endif %}
+          {% block render_comments %}
+            {{ comments::write_all(for_comments=comments, doc=doc, template=false) }}
+            {% set template_comments = get_section(path="comments/_index.md")
+              | get(key="pages")
+              | filter(attribute="extra.comment.document", value="/debug-comment-template/") %}
+            {% if r3ply_config.comments.cache %}
+              {{ comments::write_all(for_comments=template_comments, doc=doc, template=true) }}
+            {% endif %}
+          {% endblock render_comments %}
         </details>
       </section>
       {% block mailto_text_fragment %}
-      {{ util::mailto_text_fragment(to=config.extra.comments_email, path=current_path, body=config.extra.mail_body_instructions) }}
+        {{ util::mailto_text_fragment(to=config.extra.comments_email, path=current_path, body=config.extra.mail_body_instructions) }}
       {% endblock mailto_text_fragment %}
-    {% endif %}
+    {% endif %}{# allow_comments #}
   {% endblock comments %}
   {% block footer %}
   {% block footer_open_tag %}

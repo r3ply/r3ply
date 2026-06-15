@@ -9,18 +9,30 @@
 {% endblock title %}
 
 {% block content %}
-<h1 class="text-center">Thread for /{{ term.name }}</h1>
+<h1 class="">Thread for Comment <a href="{{ get_url(path='/' ~ term.name) }}">#{{ term.pages[0].slug }}</a></h1>
 {% endblock content %}
 
-{% block comments %}
-<section id="comments" class="py-12 border-t-4 border-blue-300 dark:border-pink-300 border-dashed md:pr-6 pr-2 overflow-x-scroll bg-orange-50 bg-[url(/patterns/bank-note.svg)] dark:bg-inherit">
-{% if term.name | split(pat="") | slice(end=10) | join(sep="") == "comments/" %}
-  {% set replies_to = get_taxonomy_term(kind="threads", term="demo", required=false) %}
-  {% set pages = term.pages %}
-  {% if replies_to %}{% set pages = pages | concat(with=replies_to.pages) %}{% endif %}
-  {{ comments::write_thread(head=pages[0], comments=pages, level=1, root=pages[0], template=false) }}
+{% block allow_comments %}
+  {% set allow_comments = true %}
+{% endblock allow_comments %}
+
+{# An variable named `comments` that is an array of pages has to be set here for the template to work #}
+{% block choose_comments %}
+  {% set comments = term.pages %}
+  {% if term.name | split(pat="") | slice(end=10) | join(sep="") == "comments/" %}
+    {% set comment_is_root = true%}
+    {% set replies_to = get_taxonomy_term(kind="threads", term="demo", required=false) %}
+    {% if replies_to %}
+      {% set comments = comments | concat(with=replies_to.pages) %}
+    {% endif %}
+  {% endif %}
+{% endblock choose_comments %}
+{% block pending_comments %}{% endblock pending_comments %}
+
+{% block render_comments %}
+{% if comment_is_root %}
+  {{ comments::write_thread(head=comments[0], comments=comments, level=1, root=comments[0], template=false) }}
 {% else %}
-  {{ comments::write_all(for_comments=term.pages, doc=false, template=false) }}
+  {{ comments::write_all(for_comments=comments, doc=false, template=false) }}
 {% endif %}
-</section>
-{% endblock comments %}
+{% endblock render_comments %}
