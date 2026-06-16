@@ -20,6 +20,7 @@
   {% block preamble %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block extra_meta %}{% endblock extra_meta %}
   {% endblock preamble %}
   {% block title %}
     {% set title = section.title | default(value=page.title) %}
@@ -109,12 +110,14 @@
           <summary class="pl-4 pointer-events-none [&_a]:pointer-events-auto">
             {# title #}
             <h2 class="text-center text-4xl md:text-5xl font-thin">
-              Comments ({{ comments | length }})
-              <a href="#comments" class="text-pink-400 font-normal">#</a>
+              {% block comments_title %}Comments{% endblock comments_title %} {% block comments_count %}({{ comments | length }}){% endblock comments_count %}
+              <a href="#comments" class="text-pink-300 hover:text-pink-400 hover:underline font-normal">#</a>
             </h2>
             {# controls #}
+            {% block comment_controls %}
             <span id="comment-controls" class="flex justify-center gap-2 md:gap-16 my-12 text-center">
               {% set controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer pointer-events-auto md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
+              {% block write_comment_control %}
               <a
                   href="{{ util::mailto(to=config.extra.comments_email, subject=current_path, body=config.extra.mail_body_instructions) }}"
                   class="{{ controls }} bg-yellow-300 hover:bg-yellow-500"
@@ -122,9 +125,12 @@
                 <span class="hidden md:inline">Write Comment</span>
                 <span class="inline md:hidden">Comment</span>
               </a>
+              {% endblock write_comment_control %}
+              {% block info_comment_control %}
               <label for="commenting-instructions" class="{{ controls }} bg-green-300 hover:bg-green-400">
                 <span class="font-mono">[?]</span><span> Info</span>
               </label>
+              {% endblock info_comment_control %}
               <span class="hidden group-open:inline {{ controls }} bg-blue-300 hover:bg-blue-400">
                 <span class="font-mono">[-]</span>
                 <span class="hidden md:inline">Collapse All</span>
@@ -136,6 +142,7 @@
                 <span class="inline md:hidden">Expand</span>
               </span>
             </span>
+            {% endblock comment_controls %}
           </summary>
           {# 'info' modal #}
           <input type="checkbox" id="commenting-instructions" class="peer hidden">
