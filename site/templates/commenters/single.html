@@ -10,6 +10,10 @@
   <meta name="twitter:title" content="{{ title }}" />
 {% endblock title %}
 
+{% block article_margins_and_padding %}
+{{ super() }} pb-20
+{% endblock article_margins_and_padding %}
+
 {% block content %}
 {{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[commenters](/commenters/)", "[" ~ term.name ~ "](/commenters/" ~ term.name ~ "/)"]) }}
 {# The comments only have themself for a thread #}
@@ -80,7 +84,7 @@ _You can also browse comments by [thread](/threads/) (or [replies](/replies/)), 
 {% block render_comments %}
 {% for root in author_root_comments %}
 <section class="my-2">
-  <div class="prose prose-neutral dark:prose-invert prose-a:text-pink-300 prose-a:hover:text-pink-400">
+  <div class="prose prose-neutral dark:prose-invert dark:prose-a:text-pink-300 dark:prose-a:hover:text-pink-400 prose-a:text-pink-500 prose-a:hover:text-pink-600">
     <h3 class="ml-4"
       {% if root.extra.comment.in_reply_to %}
       id="{{ root.extra.comment.in_reply_to | split(pat='') | slice(start=2) | join(sep='') }}"

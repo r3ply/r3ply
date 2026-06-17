@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "macros/util.html" as util %}
 
-{% block article_width %}min-w-4xl{% endblock article_width %}
+{% block article_width %}min-w-4xl pb-16{% endblock article_width %}
 {% block article_margins_and_padding %}px-4 mx-auto{% endblock article_margins_and_padding %}
 {% block comments %}
 {% set comments = section.pages %}
@@ -40,50 +40,50 @@
           {% set context_url = c.extra.comment.document ~ "#" ~ c.slug %}
           <td>
             <em>
-              “<a class="text-red-300" href="{{ context_url }}">{{ c.content | striptags| truncate(length=32) }}</a>”
+              “<a class="dark:text-red-300 text-red-500" href="{{ context_url }}">{{ c.content | striptags| truncate(length=32) }}</a>”
             </em>
           </td>
-          <td class="font-mono"><span class="text-blue-300">{{ c.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
+          <td class="font-mono"><span class="dark:text-blue-300 text-blue-500">{{ c.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
           {% set url = get_url(path=c.extra.comment.document, trailing_slash=true) %}
-          <td><a class="text-yellow-200" href="{{ url }}">{{ c.extra.comment.document | truncate(length=32) }}</a></td>
+          <td><a class="dark:text-yellow-200 text-yellow-500" href="{{ url }}">{{ c.extra.comment.document | truncate(length=32) }}</a></td>
           {# {% set alias = comments::alias(commenter_id=c.extra.commenter_id) %} #}
           {% set alias = aliases[c.extra.commenter_id][0].alias | default(value="") %}
           <td>
             {# TODO: aliases #}
             {% if alias != "" %}
-              ✨<a class="text-teal-200" href="/commenters/{{ c.taxonomies.commenters[0] }}/">{{ alias }}</a>
+              ✨<a class="dark:text-teal-200 text-teal-500" href="/commenters/{{ c.taxonomies.commenters[0] }}/">{{ alias }}</a>
             {% else %}
-              @<a class="text-teal-200" href="/commenters/{{ c.taxonomies.commenters[0] }}/">{{ c.taxonomies.commenters[0] }}</a>
+              @<a class="dark:text-teal-200 text-teal-500" href="/commenters/{{ c.taxonomies.commenters[0] }}/">{{ c.taxonomies.commenters[0] }}</a>
             {% endif %}
           </td>
           <td class="text-center font-mono">
-            #<a class="text-emerald-300" href="/comments/{{ c.slug }}">{{ c.slug }}</a>
+            #<a class="dark:text-emerald-300 text-emerald-500" href="/comments/{{ c.slug }}">{{ c.slug }}</a>
           </td>
           <td class="text-center">
             {% if c.extra.dkim_pass and c.extra.dmarc_pass and c.extra.spf_pass %}
-              <span class=" text-green-300">✓ </span>
+              <span class="dark:text-green-300 text-green-500">✓ </span>
             {% else %}
-              <span class=" text-red-300">? </span>
+              <span class="dark:text-red-300 text-green-500">? </span>
             {% endif %}
           </td>
           <td>
             {# Comment is in response to just the document #}
             {% if c.extra.comment.in_reply_to == false %}
-              <a class="text-yellow-200" href="{{ c.extra.comment.document }}">{{ c.extra.comment.document }}</a>
+              <a class="dark:text-yellow-200 text-yellow-500" href="{{ c.extra.comment.document }}">{{ c.extra.comment.document }}</a>
             {# Comment is in response to a text fragment #}
             {% elif c.extra.comment.in_reply_to is starting_with("#:~:text=") %}
             {% set text = c.extra.comment.in_reply_to | split(pat="") | slice(start=10) | join(sep="") %}
-            <a href="{{ c.extra.comment.document }}{{ c.extra.comment.in_reply_to }}" class="text-red-300">
+            <a href="{{ c.extra.comment.document }}{{ c.extra.comment.in_reply_to }}" class="dark:text-red-300 text-red-500">
               <em>“{{ util::urldecode(encoded=text) | truncate(length=15) | trim }}”</em>
             </a>
             {# Comment is in response to another comment #}
             {% else %}
               {% set in_reply_to = c.extra.comment.in_reply_to | split(pat="") | slice(start=2) | join(sep="") %}
-              <span>#</span><a class="text-emerald-300" href="/comments/{{ in_reply_to }}">{{ in_reply_to }}</a>
+              <span>#</span><a class="dark:text-emerald-300" href="/comments/{{ in_reply_to }}">{{ in_reply_to }}</a>
             {% endif %}
           </td>
           <td class="text-center">
-            <a class="text-pink-300" href="/replies/comments/{{ c.slug }}/atom.xml">Replies</a> | <a class="text-pink-300" href="/threads/comments/{{ c.slug }}/atom.xml">Thread</a>
+            <a class="dark:text-pink-300 text-pink-500" href="/replies/comments/{{ c.slug }}/atom.xml">Replies</a> | <a class="dark:text-pink-300 text-pink-500" href="/threads/comments/{{ c.slug }}/atom.xml">Thread</a>
           </td>
         </tr>
       {% endfor %}

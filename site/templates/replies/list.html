@@ -57,13 +57,13 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
         {% set href = t.permalink %}
         {% set num_comments = t.page_count %}
         {# Author #}
-        <td>@<a class="font-mono text-emerald-300" href="{{ t.permalink }}">{{ commenter }}</a></td>
+        <td>@<a class="font-mono dark:text-emerald-300 text-emerald-500" href="{{ t.permalink }}">{{ commenter }}</a></td>
         {# Date #}
-        <td class="font-mono"><span class="text-blue-300">{{ root_comment.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
+        <td class="font-mono"><span class="dark:text-blue-300 text-blue-500">{{ root_comment.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
         {# Subject #}
         <td class="truncate">
           {% set comment_path = root_comment.extra.comment.document ~ "#" ~ root_comment.slug %}
-          <a class="text-red-300" href="{{ get_url(path=comment_path) }}">
+          <a class="dark:text-red-300 text-red-500" href="{{ get_url(path=comment_path) }}">
           {{comment_path}}
           </a>
         </td>
@@ -72,9 +72,9 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
         {# RSS #}
         <td>
           {% set rss_url = t.permalink ~ "atom.xml" %}
-          <a class="text-pink-300" href="{{ rss_url }}">Replies</a>
+          <a class="dark:text-pink-300 text-pink-500" href="{{ rss_url }}">Replies</a>
           <span>|</span>
-          <a class="text-pink-300" href="{{ rss_url | regex_replace(pattern='replies', rep='threads') }}">Thread</a>
+          <a class="dark:text-pink-300 text-pink-500" href="{{ rss_url | regex_replace(pattern='replies', rep='threads') }}">Thread</a>
         </td>
       </tr>
     {% endfor %}

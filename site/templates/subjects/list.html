@@ -12,7 +12,7 @@
 {% block article_margins_and_padding %}px-4 mx-auto{% endblock article_margins_and_padding %}
 {% block content %}
 {{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[subjects](/subjects/)"]) }}
-<div class="my-12">
+<div class="my-12 pb-6">
 <h1 id="comments-by-subject">Comments by Subject <a href="#comments-by-subject" class="text-pink-300 hover:text-pink-400 no-underline hover:underline">#</a></h1>
 
 The subjects below refer to a document on this website, i.e. pages.
@@ -63,20 +63,20 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
             {% set comment_path = comment_path ~ "#" ~ root_comment.replies[1] %}
           {% endif %}
 
-          <a class="text-red-300" href="{{ get_url(path=comment_path) }}">
+          <a class="dark:text-red-300 text-red-500" href="{{ get_url(path=comment_path, trailing_slash=true) }}#comments">
           {{comment_path}}
           </a>
         </td>
         {# Date #}
-        <td class="font-mono"><span class="text-blue-300">{{ root_comment.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
+        <td class="font-mono"><span class="dark:text-blue-300 text-blue-500">{{ root_comment.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
         {# Comment count #}
         <td class="text-center">{{ num_comments }}</td>
         {# RSS #}
         <td>
           {% set rss_url = t.permalink ~ "atom.xml" %}
-          <a class="text-pink-300" href="{{ rss_url }}">Replies</a>
+          <a class="dark:text-pink-300 text-pink-500" href="{{ rss_url }}">Replies</a>
           <span>|</span>
-          <a class="text-pink-300" href="{{ rss_url | regex_replace(pattern='replies', rep='threads') }}">Thread</a>
+          <a class="dark:text-pink-300 text-pink-500" href="{{ rss_url | regex_replace(pattern='replies', rep='threads') }}">Thread</a>
         </td>
       </tr>
     {% endfor %}

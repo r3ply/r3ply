@@ -1,0 +1,4 @@
+{% block extra_meta %}
+{# Redirect /subjects/:subject -> /:subject/ #}
+<meta http-equiv="refresh" content="0; url=/{{ term.name }}/#comments">
+{% endblock extra_meta %}
