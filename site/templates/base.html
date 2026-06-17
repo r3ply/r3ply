@@ -258,9 +258,11 @@
           {% endblock pending_comments %}
           {% block render_comments %}
             {{ comments::write_all(for_comments=comments, doc=doc, template=false) }}
-            {% set template_comments = get_section(path="comments/_index.md")
+            {# {% set template_comments = get_section(path="comments/_index.md")
               | get(key="pages")
-              | filter(attribute="extra.comment.document", value="/debug-comment-template/") %}
+              | filter(attribute="extra.comment.document", value="/debug-comment-template/") %} #}
+            {% set template_comments = [get_page(path="debug-comment-template/for-pending-comments.md")] %}
+            {# {{ get_page(path="comments/for-pending-comments.md") }} #}
             {% if r3ply_config.comments.cache %}
               {{ comments::write_all(for_comments=template_comments, doc=doc, template=true) }}
             {% endif %}

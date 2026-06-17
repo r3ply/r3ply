@@ -9,12 +9,17 @@
   <meta name="twitter:title" content="{{ title }}" /> #}
 {% endblock title %}
 
-{% block article_width %}min-w-full{% endblock article_width %}
-{% block article_margins_and_padding %}px-4{% endblock article_margins_and_padding %}
+{% block article_width %}min-w-4xl{% endblock article_width %}
+{% block article_margins_and_padding %}px-4 mx-auto{% endblock article_margins_and_padding %}
 
 {% block content %}
-{{ util::other_breadcrumbs(links=["[r3ply.com](/)"]) }}
-<h1>Comments by Author <a class="no-underline text-pink-300 hover:text-pink-400 hover:underline" href="{{ get_url(path='#comments-by-author') }}">#</a></h1>
+{{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[commenters](/commenters/)"]) }}
+<h1 class="comments-by-author">Comments by Author <a class="no-underline text-pink-300 hover:text-pink-400 hover:underline" href="#comments-by-author">#</a></h1>
+{{'
+Below are all comments organized by author. Author ID is a pseudonym that is cryptographically derived from their email address (see [docs](/docs/overview/#privacy)).
+
+_You can also browse comments by [thread](/threads/) (or [replies](/replies/)), [page](/subjects/), or just [all comments](/comments/)._
+' | markdown | safe }}
 {% endblock content %}
 
 {% block comments %}
@@ -50,6 +55,7 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
     {# TODO #}
     {# {% set aliases_page = get_page(path="comments/aliases.md", lang=lang, only_metadata=true) %} #}
     {% for t in terms | sort(attribute="pages.0.date") | reverse %}
+      {% if t.pages[0].extra.comment.ignore %}{% continue %}{% endif %}{# ignore the templating/debug comment #}
       {%- set comments_for_author = get_taxonomy_term(kind="commenters", term=t.name) -%}
       {% set comments_for_author = comments_for_author.pages | sort(attribute="date") | reverse %}
       {% set most_recent_comment = comments_for_author | first %}
@@ -57,19 +63,23 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
         {% set commenter = t.name | truncate(length=8) %}
         {% set href = t.permalink %}
         {% set num_comments = t.page_count %}
-        {# TODO #}
+
+        {# TODO: see spenc.es for example on how it should be done #}
         {# {% set alias = aliases[t.name][0].alias | default(value="") %} #}
-        <td><a class="font-mono text-emerald-300" href="{{ t.permalink }}">{{ commenter }}</a></td>
-        {# TODO #}
         {# <td>
           {% if alias %}
             ✨<a class="text-teal-200" href="{{ aliases_page.permalink }}#:~:text={{ alias }}">{{ alias }}</a>
           {% endif %}
         </td> #}
+
+        {# Author ID #}
+        <td><a class="font-mono text-emerald-300" href="{{ t.permalink }}">{{ commenter }}</a></td>
+        {# Date #}
         <td class="font-mono"><span class="text-blue-300">{{ most_recent_comment.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
+        {# Most Recent Comment #}
         <td class="truncate">
           {% set comment_url = get_url(path=most_recent_comment.extra.comment.document) %}
-          <a class="text-red-300" href="{{ comment_url }}#comment_{{ most_recent_comment.slug }}"
+          <a class="text-red-300" href="{{ comment_url }}#{{ most_recent_comment.slug }}"
             ><em>“{{ most_recent_comment.content | striptags | trim | truncate(length=512) }}”</em>
           </a>
         </td>

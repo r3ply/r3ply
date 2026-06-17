@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% import "macros/util.html" as util %}
 
-{% block article_width %}min-w-full{% endblock article_width %}
-{% block article_margins_and_padding %}px-4{% endblock article_margins_and_padding %}
+{% block article_width %}min-w-4xl{% endblock article_width %}
+{% block article_margins_and_padding %}px-4 mx-auto{% endblock article_margins_and_padding %}
 {% block comments %}
 {% set comments = section.pages %}
   <div class="px-4 prose min-w-full overflow-auto prose-table:table

@@ -1,7 +1,7 @@
 +++
 template = "base.html"
 title = "Debug Pending Comments (Set `draft = false` to use)"
-draft = true
+render = false
 
 [extra.comments]
 enabled = true
