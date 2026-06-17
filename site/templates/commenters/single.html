@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% import "macros/comments.html" as comments %}
+{% import "macros/util.html" as util %}
+
+
+{% block title %}
+  {% set title = "Comments by @" ~ term.name %}
+  <title>{{ title }}</title>
+  <meta property="og:title" content="{{ title }}" />
+  <meta name="twitter:title" content="{{ title }}" />
+{% endblock title %}
+
+{% block content %}
+{{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[commenters](/commenters/)", "[" ~ term.name ~ "](/commenters/" ~ term.name ~ "/)"]) }}
+{# The comments only have themself for a thread #}
+<h1 class="">Comments by <a href="{{ get_url(path='/commenters/' ~ term.name, trailing_slash=true) }}">@{{ term.name }}</a></h1>
+{{'
+Below are all comments by this author, organized by threads, in reverse chronological order. Author ID is a pseudonym that is cryptographically derived from their email address (see [docs](/docs/overview/#privacy)).
+
+_You can also browse comments by [thread](/threads/) (or [replies](/replies/)), [page](/subjects/), or just [all comments](/comments/)._
+' | markdown | safe }}
+{% endblock content %}
+
+{% block allow_comments %}
+  {% set allow_comments = true %}
+{% endblock allow_comments %}
+
+{% block mailto_text_fragment %}
+
+{% endblock mailto_text_fragment %}
+
+{# An variable named `comments` that is an array of pages has to be set here for the template to work #}
+{% block choose_comments %}
+{# Process author's comments starting with the most recent first #}
+{% set author_comments = term.pages | sort(attribute="date") | reverse %}
+{% set comments = author_comments %}
+{% set author_root_comments = [] %}
+{% for a in author_comments %}
+  {# case 0: ignore certain comments #}
+  {% if a.extra.comment.ignore %}{% continue %}{% endif %}
+  {# case 1: if comment is already root then add it and continue #}
+  {% if a.extra.comment.in_reply_to == false %}
+    {% set_global author_root_comments = author_root_comments | concat(with=a) %}
+    {% continue %}
+  {% endif %}
+  {% set leaf_to_root = comments::get_ancestors(node=a) | split(pat=",") %}
+  {% set index_a = loop.index0 %}
+  {% for b in author_comments | slice(start=index_a + 1) %}
+    {% if b.slug in leaf_to_root %}
+    {% set_global not_root = true %}
+    {% endif %}
+  {% endfor %}
+  {# case 2: if another comment by the same author is in the ancestors, then continue, and add it later #}
+  {% if not_root %}{% continue %}
+  {% else %}{% set_global author_root_comments = author_root_comments | concat(with=a) %}{% endif %}
+{% endfor %}
+{% endblock choose_comments %}
+{% block pending_comments %}{% endblock pending_comments %}
+{% block write_comment_control %}
+{% endblock write_comment_control %}
+{% block info_comment_control %}
+{% set subscribe_controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
+{# Subscribe to Thread #}
+<a href="{{ current_path }}atom.xml" class="{{ subscribe_controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      class="inline text-inherit h-4"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
+      />
+    </svg>
+  <span class="hidden md:inline">@{{ term.name }} Updates</span>
+  <span class="inline md:hidden">@{{ term.name }}</span>
+</a>
+{% endblock info_comment_control %}
+{% block subscribe_controls %}{% endblock subscribe_controls %}
+{% block render_comments %}
+{% for root in author_root_comments %}
+<section class="my-2">
+  <div class="prose prose-neutral dark:prose-invert prose-a:text-pink-300 prose-a:hover:text-pink-400">
+    <h3 class="ml-4"
+      {% if root.extra.comment.in_reply_to %}
+      id="{{ root.extra.comment.in_reply_to | split(pat='') | slice(start=2) | join(sep='') }}"
+      {% endif %}>
+      {% if root.extra.comment.in_reply_to %}
+      {% set subject_path = "/" ~ root.taxonomies.subjects[0] ~ "/" ~ root.extra.comment.in_reply_to  %}
+      {% else %}
+      {% set subject_path = "/" ~ root.taxonomies.subjects[0] ~ "/" %}
+      {% endif %}
+      <a href="{{ subject_path }}">
+        {{ subject_path }}
+      </a>
+    </h3>
+  </div>
+  {# Need to use the subject's comments to include other commenters in the same threads #}
+  {% set subject_comments = get_taxonomy_term(kind="subjects", term=root.taxonomies.subjects[0]) | get(key="pages") %}
+  {{ comments::write_thread(head=root, comments=subject_comments, level=1, root=root, template=false) }}
+</section>
+
+{% endfor %}
+{% endblock render_comments %}

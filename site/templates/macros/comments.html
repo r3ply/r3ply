@@ -193,7 +193,7 @@
         <span class="{{ cyan_text }}">: &lt;</span>
         <dd data-comment-id-field class="inline {{ amber_text }} truncate">
           <a class="hover:underline" href="{{ comment.path }}">
-            {{ ctx.comment.id | truncate(length=8) }}
+            <span class="dark:text-gray-300 text-gray-700">#</span>{{ ctx.comment.id | truncate(length=8) }}
           </a>
         </dd>
         <span class="{{ cyan_text }} before:content-['>']"></span>
@@ -209,7 +209,7 @@
         <span class="{{ cyan_text }}">: &lt;</span>
         <dd class="inline {{ amber_text }} hover:underline">
           <a data-from-field href="/commenters/{{ comment.authors[0] | truncate(length=7, end='') }}/">
-            {{ comment.authors[0] | truncate(length=7) }}
+            <span class="dark:text-gray-300 text-gray-700">@</span>{{ comment.authors[0] | truncate(length=7) }}
           </a>
         </dd>
         <span class="{{ cyan_text }} before:content-['>']"></span>
@@ -390,3 +390,18 @@
 </article>
   {% if template %}</template>{% endif %}
 {% endmacro %}
+
+{#
+  `stop_at` is an optional parameter, where you can specify the slug of a ancestor to stop at
+  This returns a string of slugs (comment ID's) separated by commas. It can be parsed into a list.
+  Note: how everything is printed matters so be careful with whitespace
+#}
+{%- macro get_ancestors(node, stop_at=false) -%}
+  {{ node.slug }}{# always print the current node #}
+  {%- set ancestor = node.extra.comment.in_reply_to -%}
+  {%- if ancestor == false or stop_at | as_str in ancestor -%}{# base case: ancestor of node is false or end—do nothing #}
+  {%- else -%}{# recursive case: print comma and call get_root, continuing upwards #}
+    {%- set ancestor=get_taxonomy_term(kind="threads", term=node.taxonomies.replies[1]) | get(key="pages") | nth(n=0) -%},{{ self::get_ancestors(node=ancestor, stop_at=stop_at) }}
+  {%- endif -%}
+{%- endmacro -%}
+

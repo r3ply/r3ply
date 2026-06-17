@@ -23,7 +23,7 @@ _You can also browse comments by [thread](/threads/) (or [replies](/replies/)), 
 {% endblock content %}
 
 {% block comments %}
-<div class="px-4 prose prose-light min-w-full overflow-auto prose-table:table
+<div class="mt-12 px-4 prose prose-light min-w-full overflow-auto prose-table:table
 prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert dark:prose-code:bg-transparent! dark:prose-code:text-violet-300!">
   <table class="prose-td:whitespace-nowrap prose-tr:whitespace-nowrap table-fixed">
     <thead>
@@ -73,7 +73,7 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
         </td> #}
 
         {# Author ID #}
-        <td><a class="font-mono text-emerald-300" href="{{ t.permalink }}">{{ commenter }}</a></td>
+        <td>@<a class="font-mono text-emerald-300" href="{{ t.permalink }}">{{ commenter }}</a></td>
         {# Date #}
         <td class="font-mono"><span class="text-blue-300">{{ most_recent_comment.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
         {# Most Recent Comment #}

@@ -131,6 +131,7 @@
                 <span class="font-mono">[?]</span><span> Info</span>
               </label>
               {% endblock info_comment_control %}
+              {% block collapse_controls %}
               <span class="hidden group-open:inline {{ controls }} bg-blue-300 hover:bg-blue-400">
                 <span class="font-mono">[-]</span>
                 <span class="hidden md:inline">Collapse All</span>
@@ -141,6 +142,7 @@
                 <span class="hidden md:inline pointer-events-auto">Expand All</span>
                 <span class="inline md:hidden">Expand</span>
               </span>
+              {% endblock collapse_controls %}
             </span>
             {% endblock comment_controls %}
             <br>

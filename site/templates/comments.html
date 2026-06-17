@@ -14,7 +14,7 @@
           <th>Comment Preview</th>
           <th>Date</th>
           <th>Page</th>
-          <th>Commenter</th>
+          <th>Author</th>
           <th class="text-center">ID</th>
           <th class="text-center">Verified</th>
           <th>Replying To</th>
@@ -35,7 +35,7 @@
           </th>
         </tr>
       </thead>
-      {% for c in comments %}
+      {% for c in comments | sort(attribute="date") | reverse %}
         <tr>
           {% set context_url = c.extra.comment.document ~ "#" ~ c.slug %}
           <td><a class="text-red-300" href="{{ context_url }}">{{ c.content | striptags| truncate(length=32) }}</a></td>
@@ -45,10 +45,11 @@
           {# {% set alias = comments::alias(commenter_id=c.extra.commenter_id) %} #}
           {% set alias = aliases[c.extra.commenter_id][0].alias | default(value="") %}
           <td>
+            {# TODO: aliases #}
             {% if alias != "" %}
               ✨<a class="text-teal-200" href="/commenters/{{ c.taxonomies.commenters[0] }}/">{{ alias }}</a>
             {% else %}
-              <a class="text-teal-200" href="/commenters/{{ c.taxonomies.commenters[0] }}/">{{ c.taxonomies.commenters[0] }}</a>
+              @<a class="text-teal-200" href="/commenters/{{ c.taxonomies.commenters[0] }}/">{{ c.taxonomies.commenters[0] }}</a>
             {% endif %}
           </td>
           <td class="text-center font-mono">
