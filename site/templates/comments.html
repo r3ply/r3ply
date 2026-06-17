@@ -38,7 +38,11 @@
       {% for c in comments | sort(attribute="date") | reverse %}
         <tr>
           {% set context_url = c.extra.comment.document ~ "#" ~ c.slug %}
-          <td><a class="text-red-300" href="{{ context_url }}">{{ c.content | striptags| truncate(length=32) }}</a></td>
+          <td>
+            <em>
+              “<a class="text-red-300" href="{{ context_url }}">{{ c.content | striptags| truncate(length=32) }}</a>”
+            </em>
+          </td>
           <td class="font-mono"><span class="text-blue-300">{{ c.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
           {% set url = get_url(path=c.extra.comment.document, trailing_slash=true) %}
           <td><a class="text-yellow-200" href="{{ url }}">{{ c.extra.comment.document | truncate(length=32) }}</a></td>
@@ -65,7 +69,7 @@
           <td>
             {# Comment is in response to just the document #}
             {% if c.extra.comment.in_reply_to == false %}
-              <a class="text-yellow-200" href="/{{ c.extra.comment.document }}">{{ c.extra.comment.document }}</a>
+              <a class="text-yellow-200" href="{{ c.extra.comment.document }}">{{ c.extra.comment.document }}</a>
             {# Comment is in response to a text fragment #}
             {% elif c.extra.comment.in_reply_to is starting_with("#:~:text=") %}
             {% set text = c.extra.comment.in_reply_to | split(pat="") | slice(start=10) | join(sep="") %}
@@ -74,7 +78,8 @@
             </a>
             {# Comment is in response to another comment #}
             {% else %}
-              <span>#</span><a class="text-emerald-300" href="/comment/{{ c.extra.comment.in_reply_to }}">{{ c.extra.comment.in_reply_to | split(pat="") | slice(start=1) | join(sep="") }}</a>
+              {% set in_reply_to = c.extra.comment.in_reply_to | split(pat="") | slice(start=2) | join(sep="") %}
+              <span>#</span><a class="text-emerald-300" href="/comments/{{ in_reply_to }}">{{ in_reply_to }}</a>
             {% endif %}
           </td>
           <td class="text-center">

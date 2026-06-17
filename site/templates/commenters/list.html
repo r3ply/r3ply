@@ -79,9 +79,9 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
         {# Most Recent Comment #}
         <td class="truncate">
           {% set comment_url = get_url(path=most_recent_comment.extra.comment.document) %}
-          <a class="text-red-300" href="{{ comment_url }}#{{ most_recent_comment.slug }}"
-            ><em>“{{ most_recent_comment.content | striptags | trim | truncate(length=512) }}”</em>
-          </a>
+          <em>
+            “<a class="text-red-300" href="{{ comment_url }}#{{ most_recent_comment.slug }}">{{ most_recent_comment.content | striptags | trim | truncate(length=512) }}</a>”
+          </em>
         </td>
         <td class="text-center">{{ num_comments }}</td>
         <td class="text-center">

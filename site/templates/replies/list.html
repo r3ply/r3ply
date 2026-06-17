@@ -57,7 +57,7 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
         {% set href = t.permalink %}
         {% set num_comments = t.page_count %}
         {# Author #}
-        <td><a class="font-mono text-emerald-300" href="{{ t.permalink }}">{{ commenter }}</a></td>
+        <td>@<a class="font-mono text-emerald-300" href="{{ t.permalink }}">{{ commenter }}</a></td>
         {# Date #}
         <td class="font-mono"><span class="text-blue-300">{{ root_comment.date | date(format="%Y-%m-%d %H:%M %Z") }}</span></td>
         {# Subject #}
