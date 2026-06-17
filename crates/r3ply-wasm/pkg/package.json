@@ -6,11 +6,13 @@
   "version": "0.0.1",
   "description": "Wasm bindings of useful dependencies for the r3ply commenting system",
   "scripts": {
+    "build:cargo": "cargo build",
     "build:node": "wasm-pack build --release --target nodejs --out-name r3ply-wasm-node --no-pack",
     "build:bundler": "wasm-pack build --release --target bundler --out-name r3ply-wasm-bundler --no-pack",
     "build:patch": "cp ./bundler-wasm-patch.js pkg/r3ply-wasm-bundler.js",
     "build:package": "cp ./package.json pkg/",
-    "build:wasm": "npm run build:node && npm run build:bundler && npm run build:patch && npm run build:package",
+    "build:wasm": "pnpm build:node && pnpm build:bundler && pnpm build:patch && pnpm build:package",
+    "build:all": "pnpm build:cargo && pnpm build:wasm",
     "pack": "wasm-pack pack",
     "test": "cargo test",
     "test:watch": "cargo watch test"

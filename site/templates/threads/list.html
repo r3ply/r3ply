@@ -11,11 +11,11 @@
 {% block content %}
 {{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[threads](/threads/)"]) }}
 <div class="my-12">
-<h1 class="">All Threads <a href="#all-threads" class="text-pink-300 hover:text-pink-400 no-underline hover:underline">#</a></h1>
+<h1 id="all-threads">All Threads <a href="#all-threads" class="text-pink-300 hover:text-pink-400 no-underline hover:underline">#</a></h1>
 {{'
-Below are all comment threads.
+Below are all comment threads. A thread is a comment and all its descendents.
 
-Also see comments [by author](/commenters/), [by page](/todo/), or just [all comments](/comments/).
+_(See also just [replies](/replies/) or browse comments [by author](/commenters/), [by page](/todo/), or just [all comments](/comments/))._
 ' | markdown | safe }}
 </div>
 {% endblock content %}
@@ -27,17 +27,10 @@ Also see comments [by author](/commenters/), [by page](/todo/), or just [all com
 {# An variable named `comments` that is an array of pages has to be set here for the template to work #}
 {% block choose_comments %}
   {% set all_threads = get_taxonomy_term(kind="threads", term="all", required=false) %}
-  {% set comments = all_threads.pages %}
+  {% set comments = all_threads.pages | default(value=[]) %}
 {% endblock choose_comments %}
 {% block pending_comments %}{% endblock pending_comments %}
 {# Hide the write comment button #}
 {% block write_comment_control %}{% endblock write_comment_control %}
 {% block info_comment_control %}{% endblock info_comment_control %}
-
-{# {% block render_comments %} #}
-{# {% if comment_is_root %}
-  {{ comments::write_thread(head=comments[0], comments=comments, level=1, root=comments[0], template=false) }}
-{% else %}
-  {{ comments::write_all(for_comments=comments, doc=false, template=false) }}
-{% endif %} #}
-{# {% endblock render_comments %} #}
+{% block subscribe_controls %}{% endblock subscribe_controls %}

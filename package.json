@@ -24,14 +24,20 @@
   "pnpm": {
     "overrides": {},
     "supportedArchitectures": {
-      "os": ["current", "linux"],
-      "cpu": ["current", "x64"]
+      "os": [
+        "current",
+        "linux"
+      ],
+      "cpu": [
+        "current",
+        "x64"
+      ]
     }
   },
   "devDependencies": {
-    "prettier": "^3.5.3",
-    "prettier-plugin-toml": "^2.0.2",
-    "vitest": "^3.2.4"
+    "prettier": "^3.8.4",
+    "prettier-plugin-toml": "^2.0.6",
+    "vitest": "^3.2.6"
   },
   "volta": {
     "node": "22.9.0"

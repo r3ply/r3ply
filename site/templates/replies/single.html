@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "macros/comments.html" as comments %}
+{% import "macros/util.html" as util %}
 
 {% block title %}
   {% set title = "/" ~ term.name ~ " replies" %}
@@ -9,7 +10,10 @@
 {% endblock title %}
 
 {% block content %}
-<h1 class="">Replies to Comment <a href="{{ get_url(path='/' ~ term.name) }}">#{{ term.pages[0].slug }}</a></h1>
+{{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[replies](/replies/)", "[" ~ term.name ~ "](/replies/" ~ term.name ~ ")"]) }}
+<div class="not-prose bg-gray-600/75 p-8 rounded-2xl">
+{{ comments::render(comment=term.pages[0], template=false) }}
+</div>
 {% endblock content %}
 
 {% block allow_comments %}
@@ -18,7 +22,7 @@
 
 {# An variable named `comments` that is an array of pages has to be set here for the template to work #}
 {% block choose_comments %}
-  {% set comments = term.pages | sort(attribute="date") | reverse %}
+  {% set comments = term.pages | slice(start=1) | sort(attribute="date") | reverse %}
 {% endblock choose_comments %}
 {% block pending_comments %}{% endblock pending_comments %}
 

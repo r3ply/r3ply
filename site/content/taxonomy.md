@@ -10,6 +10,8 @@ enabled = false
 
 # Site Taxonomy
 
+The following taxonomical categories are used to organize this site's comments:
+
+- [Subjects](/subjects/)
 - [Commenters](/commenters/)
-- [Threads](/threads/)
-- [Replies](/replies)
+- [Threads](/threads/) & [Replies](/replies)

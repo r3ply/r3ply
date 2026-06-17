@@ -93,13 +93,15 @@ pub fn tera(template: String, data: JsValue) -> Result<String, JsError> {
   tera.register_filter("json_encode", tera_contrib::json::json_encode);
   tera.register_filter("urlencode", tera_contrib::urlencode::urlencode);
   tera.register_filter("urlencode_strict", tera_contrib::urlencode::urlencode_strict);
-  tera.render_str(&template, &ctx).map_err(|error| JsError::from(error))
+  tera.render_str(&template, &ctx, false).map_err(|error| JsError::from(error))
 }
 
 // tests -----------------------------------------------------------------------
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
+    use wasm_bindgen_test::*;
 
     #[test]
     fn build_email_works() {
@@ -121,5 +123,16 @@ mod tests {
         .collect::<Vec<_>>()
         .join("\r\n");
       assert_eq!(actual, expected );
+    }
+
+    wasm_bindgen_test_configure!(run_in_node_experimental);
+
+    // Run with wasm-pack test--node
+    #[wasm_bindgen_test]
+    fn tera_works() {
+      let template = "Hello {{ name }}! {{ [1, ...[2, 3, 4], 5] }}".to_string();
+      let data = serde_wasm_bindgen::to_value(&json!({"name": "World"})).unwrap();
+      let result = tera(template, data).unwrap();
+      assert_eq!(result, "Hello World! [1, 2, 3, 4, 5]");
     }
 }

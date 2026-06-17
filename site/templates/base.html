@@ -115,7 +115,7 @@
             </h2>
             {# controls #}
             {% block comment_controls %}
-            <span id="comment-controls" class="flex justify-center gap-2 md:gap-16 my-12 text-center">
+            <span id="comment-controls" class="flex justify-center gap-2 md:gap-16 mt-12 text-center">
               {% set controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer pointer-events-auto md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
               {% block write_comment_control %}
               <a
@@ -143,6 +143,43 @@
               </span>
             </span>
             {% endblock comment_controls %}
+            <br>
+            {# subscribe #}
+            {% block subscribe_controls %}
+            <span id="subscribe-controls" class="flex justify-center gap-2 md:gap-16 mb-12 text-center">
+              {% set controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
+              {# Subscribe to Thread #}
+              <a href="/threads{{ current_path }}atom.xml" class="{{ controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    class="inline text-inherit h-4"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
+                    />
+                  </svg>
+                <span class="hidden md:inline">Whole Thread</span>
+                <span class="inline md:hidden">Thread</span>
+              </a>
+              {# Subscribe to Replies #}
+              <a href="/replies{{ current_path }}atom.xml" class="{{ controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    class="inline text-inherit h-4"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
+                    />
+                  </svg>
+                <span class="hidden md:inline">Direct Replies</span>
+                <span class="inline md:hidden">Replies</span>
+              </a>
+            </span>
+            {% endblock subscribe_controls %}
           </summary>
           {# 'info' modal #}
           <input type="checkbox" id="commenting-instructions" class="peer hidden">
@@ -280,7 +317,7 @@
           {% set site_links_styles = "decoration-yellow-200" %}
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://github.com/asimpletune/r3ply/">GitHub Repo</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://liberapay.com/spence/donate">Donate</a></li>
-          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">Browse Comments</a></li>
+          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/comments/">Browse Comments</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">RSS Feeds</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="{{ get_url(path='/sitemap.xml') }}">Sitemap.xml</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="{{ get_url(path='/taxonomy') }}">Taxonomy</a></li>
