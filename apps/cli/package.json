@@ -5,6 +5,14 @@
   "private": false,
   "version": "0.0.1",
   "description": "CLI for the r3ply commenting system",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asimpletune/r3ply"
+  },
+  "bugs": {
+    "url": "https://github.com/asimpletune/r3ply/issues"
+  },
+  "homepage": "https://r3ply.com",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
