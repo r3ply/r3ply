@@ -313,11 +313,11 @@
           {# Replies #}
           <span class="{{ yellow_text }}">,</span>
           <a title="View direct replies"
-            class="ml-2 {{ green_text }} hover:underline" href="/replies/comments/{{ ctx.comment.id | truncate(length=8, end='') }}/">replies</a>
+            class="ml-2 {{ green_text }} hover:underline" href="/replies/{{ ctx.comment.id | truncate(length=8, end='') }}/">replies</a>
           <span class="ml-1 {{ yellow_text }}">…</span>
           <a title="Subscribe to replies"
             class="ml-1"
-            href="/replies/comments/{{ ctx.comment.id | truncate(length=8, end='') }}/atom.xml">
+            href="/replies/{{ ctx.comment.id | truncate(length=8, end='') }}/atom.xml">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
@@ -332,10 +332,10 @@
           {# Thread #}
           <span class="{{ yellow_text }}">,</span>
           <a title="View whole thread"
-            class="ml-2 {{ green_text }} hover:underline" href="/threads/comments/{{ ctx.comment.id | truncate(length=8, end='') }}/">thread</a>
+            class="ml-2 {{ green_text }} hover:underline" href="/threads/{{ ctx.comment.id | truncate(length=8, end='') }}/">thread</a>
           <span class="ml-1 {{ yellow_text }}">…</span>
           <a title="Subscribe to thread"
-            href="/threads/comments/{{ ctx.comment.id | truncate(length=8, end='') }}/atom.xml" class="">
+            href="/threads/{{ ctx.comment.id | truncate(length=8, end='') }}/atom.xml" class="">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"

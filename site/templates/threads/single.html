@@ -5,12 +5,7 @@
 
 {% block extra_meta %}
 {# Redirect /threads/all -> /threads/ #}
-{% if term.name == "all" %}
-<meta http-equiv="refresh" content="0; url=/threads/">
-{# Redirect /threads/example/ -> /example/#comments #}
-{% elif term.name is not starting_with("comments/")%}
-<meta http-equiv="refresh" content="0; url=/{{ term.name }}/#comments">
-{% endif %}
+{% if term.name == "all" %}<meta http-equiv="refresh" content="0; url=/threads/">{% endif %}
 {% endblock extra_meta %}
 
 {% block title %}
@@ -52,8 +47,8 @@ _See also just [replies](/replies/) or browse comments [by author](/commenters/)
         d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
       />
     </svg>
-  <span class="hidden md:inline">Thread #{{ term.name }} Updates</span>
-  <span class="inline md:hidden">Thread #{{ term.name }}</span>
+  <span class="hidden md:inline">Thread <span class="text-red-100">#</span>{{ term.name }}</span>
+  <span class="inline md:hidden">#{{ term.name }}</span>
 </a>
 {% endblock info_comment_control %}
 {% block subscribe_controls %}
@@ -62,16 +57,10 @@ _See also just [replies](/replies/) or browse comments [by author](/commenters/)
 
 {# An variable named `comments` that is an array of pages has to be set here for the template to work #}
 {% block choose_comments %}
-  {% set comments = term.pages %}
-  {% if term.name is starting_with("comments/") %}
-    {% set subject_comments = get_taxonomy_term(kind="subjects", term=term.pages[0].taxonomies.subjects[0]) | get(key="pages") %}
-    {% set comments = comments | concat(with=subject_comments) %}
-  {% endif %}
+  {% set comments = term.pages | concat(with=get_taxonomy_term(kind="subjects", term=term.pages[0].taxonomies.subjects[0]) | get(key="pages")) %}
 {% endblock choose_comments %}
 {% block pending_comments %}{% endblock pending_comments %}
 
 {% block render_comments %}
-{% if term.name is starting_with("comments/") %}
-  {{ comments::write_thread(head=term.pages[0], comments=comments, level=1, root=term.pages[0], template=false) }}
-{% endif %}
+{{ comments::write_thread(head=term.pages[0], comments=comments, level=1, root=term.pages[0], template=false) }}
 {% endblock render_comments %}
