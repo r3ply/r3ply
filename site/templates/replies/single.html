@@ -11,14 +11,16 @@
 
 {% block content %}
 {{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[replies](/replies/)", "[" ~ term.name ~ "](/replies/" ~ term.name ~ ")"]) }}
-<div class="my-12 not-prose dark:bg-gray-600/75 bg-blue-300/25 border border-blue-400 p-8 rounded-2xl">
-  {{ comments::render(comment=term.pages | filter(attribute="slug", value=term.name) | first, template=false) }}
-  <span class="text-center">
-  {{
-    'See `context`, `replies`, and `thread` above for more options.'
-    | markdown | safe
-  }}
-  </span>
+<div class="my-12 pb-12">
+  <h1 id="replies-title">Replies to <a href="{{ current_path }}" class="text-pink-300 hover:text-pink-400 no-underline hover:underline"><span class="text-gray-400">#</span>{{ term.name }}</a></h1>
+  {{ "Below is the comment and its replies, which are only direct descendants." | markdown | safe }}
+  <div class="my-12 not-prose dark:bg-gray-600/75 bg-blue-300/25 border border-blue-400 p-8 rounded-2xl">
+    {{ comments::render(comment=term.pages | filter(attribute="slug", value=term.name) | first, template=false) }}
+    <span class="text-center">
+    {{ "See `context`, `replies`, and `thread` above for more options." | markdown | safe }}
+    </span>
+  </div>
+  {{"To browse comments by _all_ descendants, see [threads](/threads/). You can also browse comments [by author](/commenters/), [by page](/subjects/), or [all comments](/comments/)." | markdown | safe }}
 </div>
 {% endblock content %}
 

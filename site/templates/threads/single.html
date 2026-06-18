@@ -18,12 +18,15 @@
 {% block content %}
 {{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[threads](/threads/)", "#[" ~ term.pages[0].slug ~ "](/threads/" ~ term.name ~ "/)"]) }}
 <div class="my-12 pb-12">
-<h1 id="all-threads">All Threads <a href="#all-threads" class="text-pink-300 hover:text-pink-400 no-underline hover:underline">#</a></h1>
-{{'
-Below are all comment threads. A thread is a comment and all its descendents.
-
-_See also just [replies](/replies/) or browse comments [by author](/commenters/), [by page](/subjects/), or just [all comments](/comments/)._
-' | markdown | safe }}
+  <h1 id="threads-title">Thread <a href="{{ current_path }}" class="text-pink-300 hover:text-pink-400 no-underline hover:underline"><span class="text-gray-400">#</span>{{ term.name }}</a></h1>
+  {{"Below is the comment and thread, which includes all the comment's descendants." | markdown | safe }}
+  <div class="my-12 not-prose dark:bg-gray-600/75 bg-blue-300/25 border border-blue-400 p-8 rounded-2xl">
+    {% if term.name != "all" %}{{ comments::render(comment=term.pages | filter(attribute="slug", value=term.name) | first, template=false) }}{% endif %}
+    <span class="text-center">
+    {{ "See `context`, `replies`, and `thread` above for more options." | markdown | safe }}
+    </span>
+  </div>
+  {{"To browse comments by _direct_ descendants, see  [replies](/replies/). You can also browse comments [by author](/commenters/), [by page](/subjects/), or [all comments](/comments/)." | markdown | safe }}
 </div>
 {% endblock content %}
 
@@ -57,10 +60,18 @@ _See also just [replies](/replies/) or browse comments [by author](/commenters/)
 
 {# An variable named `comments` that is an array of pages has to be set here for the template to work #}
 {% block choose_comments %}
+  {% if term.name != "all" %}
   {% set comments = term.pages | concat(with=get_taxonomy_term(kind="subjects", term=term.pages[0].taxonomies.subjects[0]) | get(key="pages")) %}
+  {% set children = get_taxonomy_term(kind="replies", term=term.name) | get(key="pages") | sort(attribute="date") | slice(start=1) | reverse %}
+  {% set subject_comments = get_taxonomy_term(kind="subjects", term=term.pages[0].taxonomies.subjects[0]) | get(key="pages") %}
+  {% endif %}
 {% endblock choose_comments %}
 {% block pending_comments %}{% endblock pending_comments %}
 
 {% block render_comments %}
-{{ comments::write_thread(head=term.pages[0], comments=comments, level=1, root=term.pages[0], template=false) }}
+{% if term.name != "all" %}
+{% for c in children %}
+{{ comments::write_thread(head=c, comments=subject_comments, level=1, root=c, template=false) }}
+{% endfor %}
+{% endif %}
 {% endblock render_comments %}

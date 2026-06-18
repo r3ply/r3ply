@@ -4,13 +4,15 @@
 
 {% block content %}
 {{ util::breadcrumbs() }}
-<div class="my-12 not-prose dark:bg-gray-600/75 bg-blue-300/25 border border-blue-400 p-8 rounded-2xl">
-  {{ comments::render(comment=page, template=false) }}
-  <span class="text-center">
-  {{
-    'See `context`, `replies`, and `thread` above for more options.'
-    | markdown | safe
-  }}
-  </span>
+<div class="my-12 pb-12">
+  <h1 id="comment-title">Comment <a href="{{ current_path }}" class="text-pink-300 hover:text-pink-400 no-underline hover:underline"><span class="text-gray-400">#</span>{{ page.slug }}</a></h1>
+  {{"Below is a permanent link to just the comment." | markdown | safe }}
+  <div class="my-12 not-prose dark:bg-gray-600/75 bg-blue-300/25 border border-blue-400 p-8 rounded-2xl">
+    {{ comments::render(comment=page, template=false) }}
+    <span class="text-center">
+    {{ "See `context`, `replies`, and `thread` above for more options." | markdown | safe }}
+    </span>
+  </div>
+  {{ "You can explore the [taxonomy](/taxonomy/) for more ways to browse comments, such as by [page](/subjects/) or [author](/commenters/)." | markdown | safe }}
 </div>
 {% endblock content %}
