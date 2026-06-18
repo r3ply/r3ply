@@ -2,7 +2,7 @@
   "name": "@r3ply/cli",
   "author": "Spencer Van Wessem Scorcelletti",
   "license": "AGPL-3.0-only",
-  "private": true,
+  "private": false,
   "version": "0.0.1",
   "description": "CLI for the r3ply commenting system",
   "type": "module",

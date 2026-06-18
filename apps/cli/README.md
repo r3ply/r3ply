@@ -1,6 +1,10 @@
 # r3ply CLI
 
-CLI tool r3ply + local development. Run `re` for usage.
+CLI tool to help websites integrate with the r3ply commenting system.
+
+The r3ply commenting system allows websites to receive comments via email. It works well with static sites as well as dynamic sites. This package helps you do things like simulate emails so you can focus on templating them the way you want, without requiring you to manually send comments yourself over email. Essentially it allows for quick and accurate iteration, and makes the final deployment much more smooth.
+
+See [r3ply.com](https://r3ply.com) for more information, or read the [docs](https://r3ply.com/docs/cli/)
 
 ## Installation
 
@@ -14,6 +18,30 @@ pnpm install --dev @r3ply/cli
 # bun
 bun install --dev @r3ply/cli
 ```
+
+## Usage
+
+```text
+Usage: re [options] [command]
+
+CLI for r3ply
+
+Options:
+  -V, --version           output the version number
+  --config <path>         specify path to config
+  --format <toml | json>  format to use with file output (default: "toml")
+  -h, --help              display help for command
+
+Commands:
+  init [options]          initialize a new r3ply project (at current directory)
+  config                  r3ply config commands
+  generate                generate useful text
+  simulate                simulate receiving a comment using your r3ply config
+  cache                   manage comment cache
+  help [command]          display help for command
+```
+
+More detailed information is at [r3ply.com/docs/cli](https://r3ply.com/docs/cli/).
 
 ## Development
 
