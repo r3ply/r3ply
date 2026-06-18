@@ -312,27 +312,13 @@
     </li>
     {# Site Links #}
     <li>
-      <a href="{{ get_url(path='@/docs/getting-started.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ top_level_nav_styles }}">Site Links</a>
+      <span class="prose-p:inline {{ top_level_nav_styles }}">Site Links</span>
       <ul class="px-4 list-disc list-inside font-light text-gray-700 dark:text-red-100">
           <li>
             <a href="https://github.com/asimpletune/r3ply/" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">GitHub Repo</a>
           </li>
           <li>
             <a href="https://liberapay.com/spence/donate" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Donate</a>
-          </li>
-          <li>
-            <a href="{{ get_url(path='@/comments/_index.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Browse Comments</a>
-            <ul class="px-4 list-disc list-inside font-light">
-              <li>
-                <a href="{{ get_url(path='@/comments/_index.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">All Comments</a>
-              </li>
-              <li>
-                <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Organized by Thread</a>
-              </li>
-              <li>
-                <a href="{{ get_url(path='@/docs/config.md#comments-configuration', lang=lang) }}" class="{{ shared_nav_styles }} {{ ternary_level_nav_styles }}">Organized by Author</a>
-              </li>
-            </ul>
           </li>
           <li>
             <a href="{{ get_url(path='@/project/contributing.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">RSS Feeds</a>
@@ -356,6 +342,30 @@
           </li>
           <li>
             <a href="{{ get_url(path='@/taxonomy.md', lang=lang) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">Taxonomy</a>
+          </li>
+      </ul>
+    </li>
+    {# Comments #}
+    <li>
+      <span class="prose-p:inline {{ top_level_nav_styles }}">Comments</span>
+      <ul class="px-4 list-disc list-inside font-light text-gray-700 dark:text-red-100">
+          <li>
+            <a href="{{ get_url(path='/comments/', lang=lang, trailing_slash=true) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">All Comments</a>
+          </li>
+          <li>
+            <a href="{{ get_url(path='/subjects/', lang=lang, trailing_slash=true) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">By Page</a>
+          </li>
+          <li>
+            <a href="{{ get_url(path='/commenters/', lang=lang, trailing_slash=true) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">By Author</a>
+          </li>
+          <li>
+            <a href="{{ get_url(path='/threads/', lang=lang, trailing_slash=true) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">By Thread</a>
+          </li>
+          <li>
+            <a href="{{ get_url(path='/replies/', lang=lang, trailing_slash=true) }}" class="{{ shared_nav_styles }} {{ second_level_nav_styles }}">By Reply</a>
+          </li>
+          <li>
+            <span class="{{ shared_nav_styles }} {{ top_level_nav_styles }} text-gray-600! cursor-not-allowed">Aliases (Coming Soon)</span>
           </li>
       </ul>
     </li>

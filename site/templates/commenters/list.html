@@ -14,18 +14,18 @@
 
 {% block content %}
 {{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[commenters](/commenters/)"]) }}
-<h1 class="comments-by-author text-3xl">Comments by Author <a class="no-underline text-pink-300 hover:text-pink-400 hover:underline" href="#comments-by-author">#</a></h1>
-{{'
-Below are all comments organized by author. Author ID is a pseudonym that is cryptographically derived from their email address (see [docs](/docs/overview/#privacy)).
+<div class="my-8 md:my-12">
+  <h1 class="comments-by-author text-3xl">Comments by Author <a class="no-underline text-pink-300 hover:text-pink-400 hover:underline" href="#comments-by-author">#</a></h1>
+  {{ "Below are all comments organized by author. Author ID is a pseudonym that is cryptographically derived from their email address (see [docs](/docs/overview/#privacy))." | markdown | safe }}
 
-_You can also browse comments by [thread](/threads/) (or [replies](/replies/)), [page](/subjects/), or just [all comments](/comments/)._
-' | markdown | safe }}
+  {{ "You can also browse comments by [thread](/threads/) (or [replies](/replies/)), [page](/subjects/), or just [all comments](/comments/)." | markdown | safe }}
+</div>
 {% endblock content %}
 
 {% block comments %}
-<div class="mt-12 px-4 prose prose-light min-w-full overflow-auto prose-table:table prose-table:overflow-x-auto
+<div class="md:mt-12 w-full max-w-4xl mx-auto px-4 pb-12 prose prose-light overflow-auto prose-table:table prose-table:overflow-x-auto
 prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert dark:prose-code:bg-transparent! dark:prose-code:text-violet-300!">
-  <table class="prose-td:whitespace-nowrap prose-tr:whitespace-nowrap max-w-4xl mx-auto">
+  <table class="prose-td:whitespace-nowrap prose-tr:whitespace-nowrap">
     <thead>
       <tr>
         <th>Author ID</th>

@@ -12,14 +12,12 @@
 {% block article_margins_and_padding %}px-4 mx-auto{% endblock article_margins_and_padding %}
 {% block content %}
 {{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[subjects](/subjects/)"]) }}
-<div class="my-12 pb-6">
-<h1 id="comments-by-subject">Comments by Subject <a href="#comments-by-subject" class="text-pink-300 hover:text-pink-400 no-underline hover:underline">#</a></h1>
+<div class="my-8 md:my-12">
+<h1 id="comments-by-subject" class="text-3xl">Comments by Subject <a href="#comments-by-subject" class="text-pink-300 hover:text-pink-400 no-underline hover:underline">#</a></h1>
 
-The subjects below refer to a document on this website, i.e. pages.
+{{ "The subjects below refer to a document on this website, i.e. pages." | markdown | safe }}
 
-{{'
-_Browse also by [thread](/threads/) (or just [replies](/replies/)), [author](/commenters/), or just [all comments](/comments/)._
-' | markdown | safe }}
+{{"Browse also by [thread](/threads/) (or just [replies](/replies/)), [author](/commenters/), or [all comments](/comments/)." | markdown | safe }}
 </div>
 
 <div class="prose prose-light min-w-full overflow-auto prose-table:table

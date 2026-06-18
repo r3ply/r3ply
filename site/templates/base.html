@@ -324,7 +324,6 @@
           {% set site_links_styles = "decoration-yellow-200" %}
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://github.com/asimpletune/r3ply/">GitHub Repo</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="https://liberapay.com/spence/donate">Donate</a></li>
-          <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/comments/">Browse Comments</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="/todo">RSS Feeds</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="{{ get_url(path='/sitemap.xml') }}">Sitemap.xml</a></li>
           <li class="{{ sub_menu_items }} {{ site_links_styles }}"><a href="{{ get_url(path='/taxonomy') }}">Taxonomy</a></li>
@@ -332,14 +331,14 @@
       </li>
       {# RSS Feeds #}
       <li class="w-32 md:w-auto">
-        <span class="text-red-300 {{ sub_menu_headers }}">RSS Feeds<span class="hidden md:inline">:</span></span>
+        <span class="text-red-300 {{ sub_menu_headers }}">Comments<span class="hidden md:inline">:</span></span>
         <ul class="{{ sub_menu_styles }}">
-          {% set rss_feeds_styles = "decoration-red-300" %}
-          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }} cursor-not-allowed text-gray-600 no-underline!">Blog (Soon)</li>
-          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/threads/all/atom.xml">All Comments</a></li>
-          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Page</a></li>
-          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Thread</a></li>
-          <li class="{{ sub_menu_items }} {{ rss_feeds_styles }}"><a href="/todo">By Author</a></li>
+          {% set comments_styles = "decoration-red-300" %}
+          <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/comments/">All Comments</a></li>
+          <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/subjects/">By Page</a></li>
+          <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/commenters/">By Author</a></li>
+          <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/threads/">By Thread</a> | <a href="/replies/">Reply</a></li>
+          <li class="{{ sub_menu_items }} {{ site_sections_styles }} cursor-not-allowed text-gray-600 no-underline!">Aliases (Soon)</li>
         </ul>
       </li>
     </ul>
