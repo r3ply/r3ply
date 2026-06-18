@@ -10,4 +10,8 @@ export default defineConfig({
   target: 'es2022',
   format: ['esm', 'cjs'],
   outDir: 'dist',
+  bundle: true,
+  noExternal: [
+    "@mail-parser/ts-bindings"
+  ]
 })

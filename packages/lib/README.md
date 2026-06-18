@@ -2,11 +2,11 @@
 
 This library provides the underlying implementation of r3ply, as well as serves as a reference for the expected state changes and their transitions. It is not the r3ply application itself, and has no IO or way of directly interacting on its own, but it may be extended/composed in the real world to build an application (that would include things like statefulness, logging, etc...).
 
-In other words, if you're trying to understand how r3ply works you should probably start here, but if you're trying to make a version of r3ply that runs on AWS and stores messages on queues you should probably look at the [/apps](../../apps/) directory.
+In other words, if you're trying to understand how r3ply works you should probably start here, but if you're trying to make a version of r3ply that runs on AWS and stores messages on queues you should probably look at the [/apps](https://github.com/asimpletune/r3ply/tree/main/apps) directory in the [r3ply monorepo](https://github.com/asimpletune/r3ply/).
 
 This library handles the logic of what r3ply does and is embedded by r3ply apps, since it has no IO of its own. A r3ply app simply handle the edges (the IO part of things).
 
-For more details information view the [docs](../../site/content/docs/_index.md).
+For more details information view the [docs](https://r3ply.com/docs/) or visit [r3ply.com](https://r3ply.com).
 
 ## Installation
 
