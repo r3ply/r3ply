@@ -11,18 +11,25 @@
 
 {% block content %}
 {{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[replies](/replies/)", "[" ~ term.name ~ "](/replies/" ~ term.name ~ ")"]) }}
-<div class="not-prose bg-gray-600/75 p-8 rounded-2xl">
-{{ comments::render(comment=term.pages[0], template=false) }}
+<div class="my-12 not-prose dark:bg-gray-600/75 bg-blue-300/25 border border-blue-400 p-8 rounded-2xl">
+  {{ comments::render(comment=term.pages | filter(attribute="slug", value=term.name) | first, template=false) }}
+  <span class="text-center">
+  {{
+    'See `context`, `replies`, and `thread` above for more options.'
+    | markdown | safe
+  }}
+  </span>
 </div>
 {% endblock content %}
 
-{% block allow_comments %}
-  {% set allow_comments = true %}
-{% endblock allow_comments %}
+{% block allow_comments %}{% set allow_comments = true %}{% endblock allow_comments %}
+{% block subject_path %}{% set subject_path = term.pages[0].extra.comment.document ~ "#" ~ term.pages[0].slug %}{% endblock subject_path %}
+{% block thread_feed_path %}{% set thread_feed_path = "/threads/" ~ term.name ~ "/atom.xml" %}{% endblock thread_feed_path %}
+{% block replies_feed_path %}{% set replies_feed_path = "/replies/" ~ term.name ~ "/atom.xml" %}{% endblock thread_path %}
 
 {# An variable named `comments` that is an array of pages has to be set here for the template to work #}
 {% block choose_comments %}
-  {% set comments = term.pages | slice(start=1) | sort(attribute="date") | reverse %}
+  {% set comments = term.pages | sort(attribute="date") | slice(start=1) | reverse %}
 {% endblock choose_comments %}
 {% block pending_comments %}{% endblock pending_comments %}
 

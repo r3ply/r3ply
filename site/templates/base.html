@@ -115,11 +115,12 @@
             </h2>
             {# controls #}
             {% block comment_controls %}
+            {% block subject_path %}{% set subject_path = current_path %}{% endblock subject_path %}
             <span id="comment-controls" class="flex justify-center gap-2 md:gap-16 mt-12 text-center">
               {% set controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer pointer-events-auto md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
               {% block write_comment_control %}
               <a
-                  href="{{ util::mailto(to=config.extra.comments_email, subject=current_path, body=config.extra.mail_body_instructions) }}"
+                  href="{{ util::mailto(to=config.extra.comments_email, subject=subject_path, body=config.extra.mail_body_instructions) }}"
                   class="{{ controls }} bg-yellow-300 hover:bg-yellow-500"
               >
                 <span class="hidden md:inline">Write Comment</span>
@@ -151,7 +152,8 @@
             <span id="subscribe-controls" class="flex justify-center gap-2 md:gap-16 mb-12 text-center">
               {% set controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
               {# Subscribe to Thread #}
-              <a href="/threads{{ current_path }}atom.xml" class="{{ controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
+              {% block thread_feed_path %}{% set thread_feed_path = "/threads" ~ current_path ~ "atoml.xml" %}{% endblock thread_feed_path %}
+              <a href="{{ thread_feed_path }}" class="{{ controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="currentColor"
@@ -166,7 +168,8 @@
                 <span class="inline md:hidden">Thread</span>
               </a>
               {# Subscribe to Replies #}
-              <a href="/replies{{ current_path }}atom.xml" class="{{ controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
+              {% block replies_feed_path %}{% set replies_feed_path = "/replies" ~ current_path ~ "atoml.xml" %}{% endblock thread_path %}
+              <a href="{{ replies_feed_path }}" class="{{ controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="currentColor"
@@ -190,8 +193,8 @@
               <label for="commenting-instructions" class="pointer-events-auto absolute top-3 right-5 text-black dark:text-inherit cursor-pointer">Close</label>
               <div class="py-6 prose prose-pink dark:prose-invert prose-code:wrap-anywhere text-left">
                 {{ load_data(path="commenting-instructions.md")
-                    | regex_replace(pattern="\{\{ mailto \}\}", rep=util::mailto(to=config.extra.comments_email, subject=current_path, body=config.extra.mail_body_instructions))
-                    | regex_replace(pattern="\{\{ current_path \}\}", rep=current_path)
+                    | regex_replace(pattern="\{\{ mailto \}\}", rep=util::mailto(to=config.extra.comments_email, subject=subject_path, body=config.extra.mail_body_instructions))
+                    | regex_replace(pattern="\{\{ subject_path \}\}", rep=subject_path)
                     | regex_replace(pattern="\{\{ mailto_body \}\}", rep=config.extra.mail_body_instructions)
                     | markdown
                     | safe }}

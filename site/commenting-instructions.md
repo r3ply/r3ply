@@ -7,9 +7,9 @@ This is a demo of commenting using [r3ply](https://r3ply.com). You can leave com
 To try it out click the <a href="{{ mailto }}" class="px-3 py-2 border rounded-lg border-black dark:border-gray-500 bg-yellow-300 hover:bg-yellow-400 text-black no-underline">Write Comment</a> button, or draft an email manually [^1]. Your email client with a template already filled out that looks as follows:
 
 ```email, name=example-comment.eml
-From: "You" <your-name@account.com>
+From: "Your Name" <your-name@account.com>
 To: "r3ply.com" <r3ply.com@r3ply.com>
-Subject: {{ current_path }}
+Subject: {{ subject_path }}
 
 <YOUR COMMENT GOES HERE>
 {{ mailto_body }}

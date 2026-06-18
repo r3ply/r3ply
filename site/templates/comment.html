@@ -4,8 +4,13 @@
 
 {% block content %}
 {{ util::breadcrumbs() }}
-{% set comment = page %}
-<div class="not-prose bg-gray-600/75 p-8 rounded-2xl">
-{{ comments::render(comment=comment, template=false) }}
+<div class="my-12 not-prose dark:bg-gray-600/75 bg-blue-300/25 border border-blue-400 p-8 rounded-2xl">
+  {{ comments::render(comment=page, template=false) }}
+  <span class="text-center">
+  {{
+    'See `context`, `replies`, and `thread` above for more options.'
+    | markdown | safe
+  }}
+  </span>
 </div>
 {% endblock content %}
