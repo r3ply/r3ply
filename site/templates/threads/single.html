@@ -21,34 +21,57 @@
 {% endblock title %}
 
 {% block content %}
-{{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[threads](/threads/)", "[" ~ term.name ~ "](/threads/" ~ term.name ~ "/)"]) }}
-{# The comments only have themself for a thread #}
-<h1 class="">Thread for Comment <a href="{{ get_url(path='/' ~ term.name) }}">#{{ term.pages[0].slug }}</a></h1>
+{{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[threads](/threads/)", "#[" ~ term.pages[0].slug ~ "](/threads/" ~ term.name ~ "/)"]) }}
+<div class="my-12 pb-12">
+<h1 id="all-threads">All Threads <a href="#all-threads" class="text-pink-300 hover:text-pink-400 no-underline hover:underline">#</a></h1>
+{{'
+Below are all comment threads. A thread is a comment and all its descendents.
+
+_See also just [replies](/replies/) or browse comments [by author](/commenters/), [by page](/subjects/), or just [all comments](/comments/)._
+' | markdown | safe }}
+</div>
 {% endblock content %}
 
-{% block allow_comments %}
-  {% set allow_comments = true %}
-{% endblock allow_comments %}
+{% block allow_comments %}{% set allow_comments = true %}{% endblock allow_comments %}
+{% block comments_count %}
 
-{% block mailto_text_fragment %}
+{% endblock comments_count %}
+{% block write_comment_control %}
 
-{% endblock mailto_text_fragment %}
+{% endblock write_comment_control %}
+{% block info_comment_control %}
+{% set subscribe_controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
+<a href="{{ current_path }}atom.xml" class="{{ subscribe_controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      class="inline text-inherit h-4"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
+      />
+    </svg>
+  <span class="hidden md:inline">Thread #{{ term.name }} Updates</span>
+  <span class="inline md:hidden">Thread #{{ term.name }}</span>
+</a>
+{% endblock info_comment_control %}
+{% block subscribe_controls %}
+
+{% endblock subscribe_controls %}
 
 {# An variable named `comments` that is an array of pages has to be set here for the template to work #}
 {% block choose_comments %}
   {% set comments = term.pages %}
   {% if term.name is starting_with("comments/") %}
-    {% set comment_is_root = true%}
-    {% set replies_to = get_taxonomy_term(kind="replies", term=term.name, required=false) %}
-    {% if replies_to %}
-      {% set comments = comments | concat(with=replies_to.pages) %}
-    {% endif %}
+    {% set subject_comments = get_taxonomy_term(kind="subjects", term=term.pages[0].taxonomies.subjects[0]) | get(key="pages") %}
+    {% set comments = comments | concat(with=subject_comments) %}
   {% endif %}
 {% endblock choose_comments %}
 {% block pending_comments %}{% endblock pending_comments %}
 
 {% block render_comments %}
 {% if term.name is starting_with("comments/") %}
-  {{ comments::write_thread(head=comments[0], comments=comments, level=1, root=comments[0], template=false) }}
+  {{ comments::write_thread(head=term.pages[0], comments=comments, level=1, root=term.pages[0], template=false) }}
 {% endif %}
 {% endblock render_comments %}

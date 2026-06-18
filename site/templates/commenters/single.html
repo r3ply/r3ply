@@ -64,7 +64,6 @@ _You can also browse comments by [thread](/threads/) (or [replies](/replies/)), 
 {% endblock write_comment_control %}
 {% block info_comment_control %}
 {% set subscribe_controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
-{# Subscribe to Thread #}
 <a href="{{ current_path }}atom.xml" class="{{ subscribe_controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
     <svg
       xmlns="http://www.w3.org/2000/svg"
