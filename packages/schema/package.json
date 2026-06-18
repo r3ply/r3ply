@@ -2,7 +2,7 @@
   "name": "@r3ply/schema",
   "author": "Spencer Van Wessem Scorcelletti",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "version": "0.0.1",
   "description": "Schemas and parsers/validators for the r3ply commenting system",
   "repository": {
