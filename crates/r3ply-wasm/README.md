@@ -2,6 +2,8 @@
 
 This crate exports several useful rust functions with wasm bindings for use within the downstream [@r3ply/lib](../../packages/lib/README.md) package.
 
+See [r3ply.com](https://r3ply.com) to learn more about the r3ply commenting system.
+
 ## Build/Install
 
 ```sh

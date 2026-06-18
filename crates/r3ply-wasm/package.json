@@ -2,15 +2,23 @@
   "name": "@r3ply/wasm",
   "author": "Spencer Van Wessem Scorcelletti",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "version": "0.0.1",
   "description": "Wasm bindings of useful dependencies for the r3ply commenting system",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asimpletune/r3ply"
+  },
+  "bugs": {
+    "url": "https://github.com/asimpletune/r3ply/issues"
+  },
+  "homepage": "https://r3ply.com",
   "scripts": {
     "build:cargo": "cargo build",
     "build:node": "wasm-pack build --release --target nodejs --out-name r3ply-wasm-node --no-pack",
     "build:bundler": "wasm-pack build --release --target bundler --out-name r3ply-wasm-bundler --no-pack",
     "build:patch": "cp ./bundler-wasm-patch.js pkg/r3ply-wasm-bundler.js",
-    "build:package": "cp ./package.json pkg/",
+    "build:package": "cp ./package.json ./README.md ./LICENSE pkg/",
     "build:wasm": "pnpm build:node && pnpm build:bundler && pnpm build:patch && pnpm build:package",
     "build:all": "pnpm build:cargo && pnpm build:wasm",
     "pack": "wasm-pack pack",
@@ -18,6 +26,8 @@
     "test:watch": "cargo watch test"
   },
   "files": [
+    "README.md",
+    "LICENSE",
     "r3ply-wasm-bundler_bg.js",
     "r3ply-wasm-bundler_bg.wasm",
     "r3ply-wasm-bundler_bg.wasm.d.ts",
@@ -28,6 +38,7 @@
     "r3ply-wasm-node.d.ts",
     "r3ply-wasm-node.js"
   ],
+  "types": "./r3ply-wasm-node.d.ts",
   "exports": {
     "node": {
       "import": "./r3ply-wasm-node.js",
