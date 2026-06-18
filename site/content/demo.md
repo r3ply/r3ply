@@ -6,6 +6,8 @@ template="base.html"
 enabled = true
 +++
 
+{{ breadcrumbs() }}
+
 # r3ply Demo
 
 The purpose of this page is to demonstrate what a site that uses r3ply _could_ look like.

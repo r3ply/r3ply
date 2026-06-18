@@ -178,7 +178,7 @@
 {% set ctx = load_data(literal=comment.extra.comment.ctx, format="json") %}
   {% if template %}<template id="comment-article-template">{% endif %}
 <article id="comment:{{ comment.slug }}" class="pl-6 pb-4 min-w-[calc(100vw-0.875rem-1.5ch-1.5rem)]{# calc a min width of what 'auto' would be, but allowing the the content to grow and overflow #} md:min-w-auto">
-  <header class="font-mono font-lg">
+  <header class="font-mono font-lg mt-2">
     {% set purple_text = "text-purple-500 dark:text-purple-300" %}
     {% set cyan_text = "text-cyan-500 dark:text-cyan-300" %}
     {% set gray_text = "text-gray-800 dark:text-gray-100" %}
@@ -305,7 +305,7 @@
       {# Meta: #}
       <div class="flex">
         <dt class="inline {{ cyan_text }}">Meta</dt>
-        <dd class="flex {{ amber_text }} truncate">
+        <dd class="flex {{ amber_text }} text-nowrap">
           <span class="text-inherit {{ cyan_text }} after:content-['_['] {{ cyan_text }} after:text-yellow-400 dark:after:text-yellow-300">:</span>
           {# Context #}
           <a title="See comment in context"
