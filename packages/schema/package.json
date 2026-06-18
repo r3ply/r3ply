@@ -5,6 +5,14 @@
   "private": true,
   "version": "0.0.1",
   "description": "Schemas and parsers/validators for the r3ply commenting system",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asimpletune/r3ply"
+  },
+  "bugs": {
+    "url": "https://github.com/asimpletune/r3ply/issues"
+  },
+  "homepage": "https://r3ply.com",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "./dist/index.js",
@@ -49,5 +57,8 @@
   },
   "volta": {
     "node": "22.9.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

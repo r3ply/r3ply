@@ -1,6 +1,6 @@
 # @r3ply/schema
 
-JSON schemas and their parsers/validators to use with r3ply, e.g. with site configuration, etc...
+JSON schemas and their parsers/validators to use with the r3ply commenting system, e.g. with site configuration, etc...
 
 They can be referenced directly to help validate your config in real time:
 
@@ -21,6 +21,10 @@ They can be referenced directly to help validate your config in real time:
 ```
 
 Or you can import them directly, e.g. `import { R3plySiteConfig } from '@r3ply/schema'`
+
+---
+
+> The r3ply commenting system allows websites to receive comments via email. It works well with static sites as well as dynamic sites. For more information please visit [r3ply.com](https://r3ply.com).
 
 ## Build/Test/Run
 
