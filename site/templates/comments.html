@@ -1,12 +1,16 @@
 {% extends "base.html" %}
 {% import "macros/util.html" as util %}
 
-{% block article_width %}min-w-4xl pb-16{% endblock article_width %}
+{% block article_width %}max-w-4xl pb-16{% endblock article_width %}
 {% block article_margins_and_padding %}px-4 mx-auto{% endblock article_margins_and_padding %}
+{% block prose_overrides %}
+prose-h1:text-3xl
+{{ super() }}
+{% endblock prose_overrides %}
 {% block comments %}
 {% set comments = section.pages %}
   <div class="px-4 prose min-w-full overflow-auto prose-table:table
-            prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert dark:prose-code:bg-transparent! dark:prose-code:text-violet-300!">
+            prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert dark:prose-code:bg-transparent! dark:prose-code:text-violet-300! prose-td:whitespace-nowrap prose-tr:whitespace-nowrap">
     <table>
       <thead>
         <tr>

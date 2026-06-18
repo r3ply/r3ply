@@ -9,12 +9,12 @@
   <meta name="twitter:title" content="{{ title }}" /> #}
 {% endblock title %}
 
-{% block article_width %}min-w-4xl{% endblock article_width %}
+{% block article_width %}max-w-4xl{% endblock article_width %}
 {% block article_margins_and_padding %}px-4 mx-auto{% endblock article_margins_and_padding %}
 
 {% block content %}
 {{ util::other_breadcrumbs(links=["[r3ply.com](/)", "[commenters](/commenters/)"]) }}
-<h1 class="comments-by-author">Comments by Author <a class="no-underline text-pink-300 hover:text-pink-400 hover:underline" href="#comments-by-author">#</a></h1>
+<h1 class="comments-by-author text-3xl">Comments by Author <a class="no-underline text-pink-300 hover:text-pink-400 hover:underline" href="#comments-by-author">#</a></h1>
 {{'
 Below are all comments organized by author. Author ID is a pseudonym that is cryptographically derived from their email address (see [docs](/docs/overview/#privacy)).
 
@@ -23,19 +23,19 @@ _You can also browse comments by [thread](/threads/) (or [replies](/replies/)), 
 {% endblock content %}
 
 {% block comments %}
-<div class="mt-12 px-4 prose prose-light min-w-full overflow-auto prose-table:table
+<div class="mt-12 px-4 prose prose-light min-w-full overflow-auto prose-table:table prose-table:overflow-x-auto
 prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-neutral-300 prose-hr:border-black dark:prose-hr:border-gray-400 dark:prose-invert dark:prose-code:bg-transparent! dark:prose-code:text-violet-300!">
-  <table class="prose-td:whitespace-nowrap prose-tr:whitespace-nowrap table-fixed">
+  <table class="prose-td:whitespace-nowrap prose-tr:whitespace-nowrap max-w-4xl mx-auto">
     <thead>
       <tr>
-        <th class="w-24">Author ID</th>
+        <th>Author ID</th>
         {# TODO #}
         {# <th>Alias</th> #}
-        <th class="w-56">Date</th>
-        <th class="w-auto">Most Recent Comment</th>
-        <th class="w-36 text-center"># of Comments</th>
-        <th class="w-24 text-center">All Verified</th>
-        <th class="w-24">
+        <th>Date</th>
+        <th>Most Recent Comment</th>
+        <th class="text-center"># of Comments</th>
+        <th class="text-center">All Verified</th>
+        <th>
           RSS
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +80,7 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
         <td class="truncate">
           {% set comment_url = get_url(path=most_recent_comment.extra.comment.document) %}
           <em>
-            “<a class="dark:text-red-300 text-red-500" href="{{ comment_url }}#{{ most_recent_comment.slug }}">{{ most_recent_comment.content | striptags | trim | truncate(length=512) }}</a>”
+            “<a class="dark:text-red-300 text-red-500" href="{{ comment_url }}#{{ most_recent_comment.slug }}">{{ most_recent_comment.content | striptags | trim | truncate(length=32) }}</a>”
           </em>
         </td>
         <td class="text-center">{{ num_comments }}</td>
