@@ -14,7 +14,7 @@
   },
   "homepage": "https://r3ply.com",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "bin": {
     "re": "./dist/index.mjs"
@@ -23,6 +23,12 @@
     "dist",
     "README.md"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    }
+  },
   "scripts": {
     "build": "tsup",
     "build:watch": "tsup --watch",
@@ -60,5 +66,8 @@
   },
   "volta": {
     "node": "22.9.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
