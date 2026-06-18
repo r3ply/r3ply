@@ -22,4 +22,4 @@ Thoughts, comments, and feedback are more than welcome. If you have any ideas or
 {{ fleuron_fish() }}
 
 {{  next_prev(prev_path="/project/contributing/", prev_text="Contributing",
-    next_path="/todo/", next_text="Browse Comments") }}
+    next_path="/comments/", next_text="Browse Comments") }}

@@ -23,7 +23,7 @@ issued = 2025-10-16
 label = "CLI"
 
 [comments]
-"paths*" = ["/demo/", "/docs/**/", "/project/**/"]
+"paths*" = ["/demo/", "/feeds/", "/docs/**/", "/project/**/"]
 cache = true
 
 [comments.email]

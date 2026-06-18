@@ -31,6 +31,7 @@ Check out the [demo comment section](./#comments) below or continue reading to s
 - [Displaying Comments](#displaying-comments)
   - [Comment Fields](#comment-fields)
   - [Comment Navigation](#comment-navigation)
+- [Enabling Notifcations with RSS](#notifications-via-rss)
 
 {% end %}
 
@@ -191,5 +192,15 @@ On mobile it uses a shorthand version of the same navigation, but `/` for root, 
 {% fig(dark="/screenshots/comment-navigation_mobile_dark.webp", add_class="p-4 rounded-lg bg-blue-100 dark:bg-slate-900", caption="*nix style symbols for 'root', 'parent', and 'self'.") %}
 ![Screenshot showing "hackernews" style but on mobile](/screenshots/comment-navigation_mobile_light.webp)
 {% end %}
+
+## Enabling Notifications with RSS { #notifications-via-rss }
+
+Allowing users to get notifications is typically more trouble than its worth for most static sites. Also users don't like to be bothered with account creation. Unbelievably both of these issues are not an issue and notifications work very well with comments in r3ply. This is because many static site generators offer the ability to generate automatic RSS feeds. Since comments in r3ply can be treated just like the rest of your site's content, this allows separate RSS feeds to be created at virtually any level of granularity you can imagine.
+
+To demonstrate this concept this site generates RSS feeds for replies to a page, replies to a comment, replies from an author, and any reply within a thread.
+
+Furthermore it's very privacy respecting since RSS is fundamentally a pull-based system. If the user doesn't want to be notified they can just remove that RSS feed from their reader. Best of all is that it doesn't require any account creation or running any major infrastructure, beyond what is already required for a static site.
+
+You can learn more about this in the [feeds](/feeds/) page, or try it out for yourself in the [comment section](./#comments) below.
 
 {{ fleuron_fish(add_class="mb-2") }}
