@@ -29,6 +29,7 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
         <th>Author ID</th>
         <th>Date</th>
         <th>Subject</th>
+        <th>Comment Preview</th>
         <th class="text-center"># of Replies</th>
         <th class="w-12">
           RSS
@@ -66,6 +67,14 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
           <a class="dark:text-red-300 text-red-500" href="{{ get_url(path=comment_path) }}">
           {{comment_path}}
           </a>
+        </td>
+        {# Comment Preview #}
+        <td>
+          <em>
+            “<a class="dark:text-red-300 text-red-500" href="/replies/{{ t.name }}">{{
+              t.pages | filter(attribute="slug", value=t.name) | first | get(key="content") | striptags | trim | truncate(length=32)
+            }}</a>”
+          </em>
         </td>
         {# Reply count #}
         <td class="text-center">
