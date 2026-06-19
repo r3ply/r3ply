@@ -12,7 +12,7 @@ enabled = false
 
 # r3ply – Comments simple as email.
 
-r3ply is an [open-source project](https://github.com/asimpletune/r3ply) that allows websites to receive comments via email. It receives emailed comments on your behalf and packages them for your site to use.
+r3ply is an [open-source project](https://github.com/r3ply/r3ply) that allows websites to receive comments via email. It receives emailed comments on your behalf and packages them for your site to use.
 
 It can be hosted on your own domain, and there is also a (free) community hosted version on the r3ply.com domain.
 
@@ -212,11 +212,11 @@ _Signet's_ cannot be used by other websites, nor can they be used with other r3p
 
 ### What Comment Sources Are Supported?
 
-Currently there's just email. However, r3ply was designed from the beginning to allow for additional commenting sources. If you're interested in adding more, then please check out r3ply's [GitHub repo](https://github.com/asimpletune/r3ply) and the [contributing](@/project/contributing.md) docs.
+Currently there's just email. However, r3ply was designed from the beginning to allow for additional commenting sources. If you're interested in adding more, then please check out r3ply's [GitHub repo](https://github.com/r3ply/r3ply) and the [contributing](@/project/contributing.md) docs.
 
 ### What Moderation Channels Are Supported?
 
-Currently there's just `GitHub`, `webhook`, and `local` (which is used by the CLI). If you're interested in adding more, then please checkout r3ply's [GitHub repo](https://github.com/asimpletune/r3ply) and the [contributing](@/project/contributing.md) docs.
+Currently there's just `GitHub`, `webhook`, and `local` (which is used by the CLI). If you're interested in adding more, then please checkout r3ply's [GitHub repo](https://github.com/r3ply/r3ply) and the [contributing](@/project/contributing.md) docs.
 
 ### Can Commenters Receive an Email Notification?
 

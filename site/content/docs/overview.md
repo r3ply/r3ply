@@ -42,12 +42,12 @@ Here's a discussion of some of terminology and concepts of r3ply.
 
 ### r3ply
 
-r3ply **in essence** is just a [library (src ↗)](https://github.com/asimpletune/r3ply/tree/main/v0.0.1/packages/lib). To make a r3ply _app_ you just handle IO, delegating the main logic to the r3ply library. In that sense **every r3ply app is just a wrapper** around the r3ply library.
+r3ply **in essence** is just a [library (src ↗)](https://github.com/r3ply/r3ply/tree/main/v0.0.1/packages/lib). To make a r3ply _app_ you just handle IO, delegating the main logic to the r3ply library. In that sense **every r3ply app is just a wrapper** around the r3ply library.
 
 Two examples of _r3ply apps_ are:
 
-- The [r3ply Cloudflare Worker](https://github.com/asimpletune/r3ply/tree/main/v0.0.1/apps/cloudflare-worker): accessed publicly, via the internet
-- The [r3ply CLI (src ↗)](https://github.com/asimpletune/r3ply/tree/main/v0.0.1/packages/cli) - `re`: accessed privately, via the local file system
+- The [r3ply Cloudflare Worker](https://github.com/r3ply/r3ply/tree/main/v0.0.1/apps/cloudflare-worker): accessed publicly, via the internet
+- The [r3ply CLI (src ↗)](https://github.com/r3ply/r3ply/tree/main/v0.0.1/packages/cli) - `re`: accessed privately, via the local file system
 
 As you can see, the main difference between the two is how they're accessed. Therefore their main responsibilities are handling the particulars of IO specific to their domains.
 

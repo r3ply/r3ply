@@ -45,7 +45,7 @@ The experience of actually drafting a comment takes place in the user's email cl
 
 ### Privacy Respecting
 
-r3ply automatically anonymizes all the email addresses of the commenters, before they arrive for mode ration. This works by applying an HMAC-256 function on their email address, using the site's signet as a key envelope. You can read more about [the details](/docs/overview#anonymization) in the docs (or [view the source](https://github.com/asimpletune/r3ply/blob/main/packages/lib/src/comments/viaEmail/signet.ts) on GitHUb).
+r3ply automatically anonymizes all the email addresses of the commenters, before they arrive for mode ration. This works by applying an HMAC-256 function on their email address, using the site's signet as a key envelope. You can read more about [the details](/docs/overview#anonymization) in the docs (or [view the source](https://github.com/r3ply/r3ply/blob/main/packages/lib/src/comments/viaEmail/signet.ts) on GitHUb).
 
 ### Easy as Pushing a Button { #easy-button }
 

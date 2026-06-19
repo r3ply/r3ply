@@ -16,8 +16,8 @@ Thoughts, comments, and feedback are more than welcome. If you have any ideas or
   - To say hello: [hello@r3ply.com](mailto:hello@r3ply.com)
   - For support, contact the r3ply.com admin: [spence@admin.r3ply.com](mailto:spence@admin.r3ply.com)
 - GitHub
-  - Project, Docs, Site: [https://github.com/asimpletune/r3ply/](https://github.com/asimpletune/r3ply/)
-  - Comment Repo: [https://github.com/asimpletune/r3ply-site-comments/](https://github.com/asimpletune/r3ply-site-comments/)
+  - Project, Docs, Site: [https://github.com/r3ply/r3ply/](https://github.com/r3ply/r3ply/)
+  - Comment Repo: [https://github.com/r3ply/r3ply-site-comments/](https://github.com/r3ply/r3ply-site-comments/)
 
 {{ fleuron_fish() }}
 
