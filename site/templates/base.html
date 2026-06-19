@@ -152,7 +152,8 @@
             <span id="subscribe-controls" class="flex justify-center gap-2 md:gap-16 mb-12 text-center">
               {% set controls = "text-gray-900 font-light text-md tracking-tighter cursor-pointer md:text-xl rounded-lg px-2 py-1 md:px-3 md:py-2 border border-gray-500" %}
               {# Subscribe to Thread #}
-              {% block thread_feed_path %}{% set thread_feed_path = "/threads" ~ current_path ~ "atoml.xml" %}{% endblock thread_feed_path %}
+              {% block subscribe_to_thread %}
+              {% block thread_feed_path %}{% set thread_feed_path = "/subjects" ~ current_path ~ "atom.xml" %}{% endblock thread_feed_path %}
               <a href="{{ thread_feed_path }}" class="{{ controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -167,22 +168,12 @@
                 <span class="hidden md:inline">Whole Thread</span>
                 <span class="inline md:hidden">Thread</span>
               </a>
-              {# Subscribe to Replies #}
-              {% block replies_feed_path %}{% set replies_feed_path = "/replies" ~ current_path ~ "atoml.xml" %}{% endblock thread_path %}
-              <a href="{{ replies_feed_path }}" class="{{ controls }} bg-red-300 hover:bg-red-400 flex items-center gap-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    class="inline text-inherit h-4"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
-                    />
-                  </svg>
-                <span class="hidden md:inline">Direct Replies</span>
-                <span class="inline md:hidden">Replies</span>
-              </a>
+              {% endblock subscribe_to_thread %}
+
+              {# TODO Subscribe to Replies #}
+              {% block replies_feed_path %}{% endblock replies_feed_path %}
+              {% block subscribe_to_replies %}
+              {% endblock subscribe_to_replies %}
             </span>
             {% endblock subscribe_controls %}
           </summary>
@@ -337,7 +328,8 @@
           <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/comments/">All Comments</a></li>
           <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/subjects/">By Page</a></li>
           <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/commenters/">By Author</a></li>
-          <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/threads/">By Thread</a> | <a href="/replies/">Reply</a></li>
+          <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/threads/">By Thread</a></li>
+          <li class="{{ sub_menu_items }} {{ comments_styles }}"><a href="/replies/">Replies</a></li>
           <li class="{{ sub_menu_items }} {{ site_sections_styles }} cursor-not-allowed text-gray-600 no-underline!">Aliases (Soon)</li>
         </ul>
       </li>

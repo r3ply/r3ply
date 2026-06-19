@@ -33,7 +33,7 @@ ignored_content = ["**/content/comments/README.md"]
 taxonomies = [
   { name = "commenters", render = true, feed = true },
   { name = "subjects", render = true, feed = true },
-  { name = "threads", render = true, feed = true },
+  { name = "threads", render = true, feed = false },
   { name = "replies", render = true, feed = true },
 ]
 

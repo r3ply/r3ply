@@ -310,6 +310,10 @@
           {# Context #}
           <a title="See comment in context"
             class="{{ green_text }} hover:underline" href="{{ ctx.comment.subject.path }}#{{ ctx.comment.id | truncate(length=8, end='') }}">context</a>
+          {# Thread #}
+          <span class="{{ yellow_text }}">,</span>
+          <a title="View whole thread"
+            class="ml-2 {{ green_text }} hover:underline" href="/threads/{{ ctx.comment.id | truncate(length=8, end='') }}/">thread</a>
           {# Replies #}
           <span class="{{ yellow_text }}">,</span>
           <a title="View direct replies"
@@ -322,24 +326,6 @@
               xmlns="http://www.w3.org/2000/svg"
               fill="currentColor"
               class="inline align-text-bottom text-red-300 h-3.5 mb-0.5 hover:text-red-400"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm1.5 2.5c5.523 0 10 4.477 10 10a1 1 0 1 1-2 0 8 8 0 0 0-8-8 1 1 0 0 1 0-2m0 4a6 6 0 0 1 6 6 1 1 0 1 1-2 0 4 4 0 0 0-4-4 1 1 0 0 1 0-2m.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
-              />
-            </svg>
-          </a>
-          {# Thread #}
-          <span class="{{ yellow_text }}">,</span>
-          <a title="View whole thread"
-            class="ml-2 {{ green_text }} hover:underline" href="/threads/{{ ctx.comment.id | truncate(length=8, end='') }}/">thread</a>
-          <span class="ml-1 {{ yellow_text }}">…</span>
-          <a title="Subscribe to thread"
-            href="/threads/{{ ctx.comment.id | truncate(length=8, end='') }}/atom.xml" class="">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              class="inline align-text-bottom text-red-300 h-3.5 ml-1 mb-0.5 hover:text-red-400"
               viewBox="0 0 16 16"
             >
               <path

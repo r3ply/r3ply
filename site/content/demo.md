@@ -197,7 +197,7 @@ On mobile it uses a shorthand version of the same navigation, but `/` for root, 
 
 Allowing users to get notifications is typically more trouble than its worth for most static sites. Also users don't like to be bothered with account creation. Unbelievably both of these issues are not an issue and notifications work very well with comments in r3ply. This is because many static site generators offer the ability to generate automatic RSS feeds. Since comments in r3ply can be treated just like the rest of your site's content, this allows separate RSS feeds to be created at virtually any level of granularity you can imagine.
 
-To demonstrate this concept this site generates RSS feeds for replies to a page, replies to a comment, replies from an author, and any reply within a thread.
+To demonstrate this concept this site generates separate RSS feeds for any reply to a page, direct replies to a comment, and comments from a specific author. All of these can be subscribed to by site visitors' RSS readers and they'll receive notifications that way when changes are published.
 
 Furthermore it's very privacy respecting since RSS is fundamentally a pull-based system. If the user doesn't want to be notified they can just remove that RSS feed from their reader. Best of all is that it doesn't require any account creation or running any major infrastructure, beyond what is already required for a static site.
 

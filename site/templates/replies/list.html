@@ -68,7 +68,9 @@ prose-neutral prose-li:marker:text-black prose-pink dark:prose-li:marker:text-ne
           </a>
         </td>
         {# Reply count #}
-        <td class="text-center">{{ num_comments - 1 }}</td>
+        <td class="text-center">
+          <a href="/replies/{{ t.name }}">{{ num_comments - 1 }}</a>
+        </td>
         {# RSS #}
         <td>
           {% set rss_url = t.permalink ~ "atom.xml" %}
