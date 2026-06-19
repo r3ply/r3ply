@@ -75,7 +75,7 @@ function generate_cmd(cwd: string) {
     .option('--verbose', 'include more defaults explicitly', false)
     .action(async (options: GenerateConfigCmdOpts) => {
       const parent_opts = generate_cmd.parent!.opts<BaseCmdOptions>()
-      generate_config(cwd, { ...options, ...parent_opts })
+      return generate_config(cwd, { ...options, ...parent_opts })
     })
 
   const mailto_cmd = generate_cmd
@@ -86,7 +86,7 @@ function generate_cmd(cwd: string) {
     .option('--cc <email>', 'cc header of email', util.collect_opts, [])
     .option('--bcc <email>', 'bcc header of email', util.collect_opts, [])
     .action(async (body: string, options: GenerateMailtoOpts) => {
-      generate_mailto(body, options)
+      return generate_mailto(body, options)
     })
 
   const signet_cmd = generate_cmd
@@ -106,7 +106,7 @@ function generate_cmd(cwd: string) {
     )
     .action(async (options: GenerateSignetCmdOpts) => {
       const parent_opts = generate_cmd.parent!.opts<BaseCmdOptions>()
-      generate_signet(cwd, { ...options, ...parent_opts })
+      return generate_signet(cwd, { ...options, ...parent_opts })
     })
 
   const email_cmd = generate_cmd
@@ -123,7 +123,7 @@ function generate_cmd(cwd: string) {
     .action(
       async (input: string | undefined, options: GenerateEmailCmdOpts) => {
         const parent_opts = generate_cmd.parent!.opts<BaseCmdOptions>()
-        generate_email(cwd, input, { ...options, ...parent_opts })
+        return generate_email(cwd, input, { ...options, ...parent_opts })
       },
     )
 

@@ -12,14 +12,14 @@ function config_cmd(cwd: string) {
     .description('validate your r3ply configuration')
     .action(async () => {
       const parent_opts = config_cmd.parent!.opts<BaseCmdOptions>()
-      config_validate(cwd, { ...parent_opts })
+      return config_validate(cwd, { ...parent_opts })
     })
 
   config_cmd
     .command('set-default <path>')
     .description('the default config path r3ply will use')
     .action(async (path) => {
-      await project.set_default_cli_config_path(cwd, path)
+      return util.unsafeUnwrap(await project.set_default_cli_config_path(cwd, path))
     })
 
   const generate_alias = config_cmd

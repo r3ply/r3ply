@@ -71,7 +71,7 @@ $ re simulate email --moderate --dry-run --body "testing" --filter comment,moder
     .action(
       async (input: string | undefined, options: SimulateCmdEmailOpts, cmd) => {
         const parent_opts = simulate_cmd.parent!.opts<BaseCmdOptions>()
-        simulate(cwd, input, { ...options, ...parent_opts })
+        return simulate(cwd, input, { ...options, ...parent_opts })
       },
     )
   return simulate_cmd

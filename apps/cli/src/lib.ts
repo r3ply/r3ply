@@ -339,7 +339,7 @@ export namespace project {
         await project.get_site_config_path(cwd, config_option),
       )
     } else {
-      const project_dir = (await project.find_project_dir(cwd)).unwrap()
+      const project_dir = util.unsafeUnwrap(await project.find_project_dir(cwd))
       const cli_settings: any = util.unsafeUnwrap(
         await project.get_cli_settings(cwd),
       )
