@@ -5,6 +5,17 @@ import { Result } from 'oxide.ts'
 export namespace util {
   export type OkType<R> = R extends Result<infer O, any> ? O : never
   export type ErrType<R> = R extends Result<any, infer E> ? E : never
+
+  /**
+   * Used to distinguish expected errors from unexpected
+   */
+  export class CLIError extends Error {
+    constructor(message: string) {
+      super(message)
+      this.name = 'CLIError'
+    }
+  }
+
   export async function find_up(
     filename: string,
     cwd: string = process.cwd(),
@@ -29,7 +40,7 @@ export namespace util {
    */
   export function unsafeUnwrap<T, E = Error>(result: Result<T, E>): T {
     return result.unwrapOrElse(() => {
-      throw result.unwrapErr()
+      throw new CLIError((result.unwrapErr() as any)?.message ?? String(result.unwrapErr()))
     })
   }
 

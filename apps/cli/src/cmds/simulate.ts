@@ -113,7 +113,7 @@ async function simulate(
       if (to) {
         const mb = mailbox(to)
         if (!mb.ok)
-          throw new Error(
+          throw new util.CLIError(
             `Unable to parse --to '${to}', reasons: ${JSON.stringify(mb)}`,
           )
         else {

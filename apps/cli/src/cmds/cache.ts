@@ -3,6 +3,7 @@ import { project } from '../lib'
 import http from 'http'
 import handler from 'serve-handler'
 import tty from '../tty'
+import { util } from '../util'
 
 type CacheStartOpts = {
   port: number
@@ -22,7 +23,7 @@ function cache_cmd(cwd: string) {
       (str) => {
         const num = Number.parseInt(str)
         if (Number.isNaN(num))
-          throw new Error(`Port must be a number, received ${str}`)
+          throw new util.CLIError(`Port must be a number, received ${str}`)
         return num
       },
       2274,
@@ -48,7 +49,7 @@ function cache_cmd(cwd: string) {
       (str) => {
         const num = Number.parseInt(str)
         if (Number.isNaN(num))
-          throw new Error(`ttl must be a number, received ${str}`)
+          throw new util.CLIError(`ttl must be a number, received ${str}`)
         return num
       },
       259200,

@@ -174,7 +174,7 @@ async function generate_config(
           } else if (options.moderation == 'local') {
             return minimal_local_config
           } else {
-            throw new Error(`Unknown moderation type: ${options.moderation}`)
+            throw new util.CLIError(`Unknown moderation type: ${options.moderation}`)
           }
         })(),
       ],
@@ -208,7 +208,7 @@ async function generate_mailto(
   function parse_email_addr(str: string) {
     const mb = mailbox(str)
     if (!mb.ok)
-      throw new Error(
+      throw new util.CLIError(
         `Invalid email '${str}', errors ${JSON.stringify(mb.errors)}`,
       )
     else {

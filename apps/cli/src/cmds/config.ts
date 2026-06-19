@@ -52,7 +52,7 @@ async function config_validate(cwd: string, options: BaseCmdOptions) {
     await project.parse_site_config(cwd, site_config_path),
   )
   if (!site_config.valid)
-    throw new Error(
+    throw new util.CLIError(
       `config failed validation:\n\n${JSON.stringify(site_config.errors, null, 2)}`,
     )
 }

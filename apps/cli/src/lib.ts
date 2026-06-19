@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import { Result, Option } from 'oxide.ts'
-import { util } from './util.js'
+import { util } from './util'
 import fg from 'fast-glob'
 import TOML from '@iarna/toml'
 import {
@@ -59,8 +59,8 @@ export namespace project {
     const find_result = util.find_up('.r3ply', cwd).then((path) => {
       if (path) return path
       else
-        throw new Error(
-          `No ${R3PLY_DIR} directory found. ${chalk.yellow(`You can run \`re init\` to initialize one.`)}`,
+        throw new util.CLIError(
+          `No ${R3PLY_DIR} directory found. ${chalk.yellow(`You can run ${chalk.white('\`re init\`')} to initialize one.`)}`,
         )
     })
     return Result.safe(find_result)
@@ -155,7 +155,7 @@ export namespace project {
         .rm(cache_dir, { recursive: true, force: true })
         .then((_) => fs.promises.mkdir(cache_dir))
     } else {
-      throw new Error(`No cache found at ${cache_dir}`)
+      throw new util.CLIError(`No cache found at ${cache_dir}`)
     }
   }
 
@@ -254,11 +254,11 @@ export namespace project {
           await find_site_config_files(cwd, config_path),
         )
         if (relative_files.length == 0)
-          throw new Error(
+          throw new util.CLIError(
             `No config found at ${path.resolve(cwd, config_path)}`,
           )
         else if (relative_files.length > 1)
-          throw new Error(
+          throw new util.CLIError(
             `Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`,
           )
         else return path.resolve(cwd, relative_files[0])
@@ -267,9 +267,9 @@ export namespace project {
           await find_site_config_files(project_dir),
         )
         if (relative_files.length == 0)
-          throw new Error(`No r3ply config found within ${project_dir}`)
+          throw new util.CLIError(`No r3ply config found within ${chalk.white(project_dir)}. ${chalk.yellow(`You can run ${chalk.white('\`re generate config\`')} to generate one. (Make sure to save it to the expected file path, e.g. ${chalk.white('"r3ply.config.toml"')}.)`)}`)
         else if (relative_files.length > 1)
-          throw new Error(
+          throw new util.CLIError(
             `Multiple matches found: ${JSON.stringify(relative_files, null, 2)}`,
           )
         else return path.resolve(project_dir, relative_files[0])
@@ -462,7 +462,7 @@ export namespace project {
             parent_project_exists = await find_r3ply_dir(new_r3ply_dir)
           }
           if (parent_project_exists.isOk()) {
-            throw new Error(
+            throw new util.CLIError(
               `Nested r3ply project. There is already a parent directory initialized at ${chalk.blue('`' + parent_project_exists.unwrap() + '`')}.${chalk.yellow('(Nested projects can lead to strange effects)')}`,
             )
           }
@@ -505,8 +505,8 @@ export namespace project {
               })
           })
         } else {
-          throw new Error(
-            `Project already initialized at \`${chalk.reset(path.dirname(new_r3ply_dir))}\``,
+          throw new util.CLIError(
+            `Project already initialized at \`${chalk.white(path.dirname(new_r3ply_dir))}\`.`,
           )
         }
       })
@@ -547,7 +547,7 @@ export namespace project {
     const proposed_path = path.resolve(project_dir, config_path)
     const relative = path.relative(project_dir, proposed_path)
     if (relative.startsWith('..'))
-      throw new Error(
+      throw new util.CLIError(
         `Config path can not be outside of project directory "${project_dir}"`,
       )
     const settings = util.unsafeUnwrap(await get_cli_settings(cwd))
@@ -661,8 +661,8 @@ export namespace generate {
   } {
     const result = mailbox(email)
     if (!result.ok)
-      throw new Error(
-        `Unable to parse email ${email}, errors: ${JSON.stringify(result)}`,
+      throw new util.CLIError(
+        `Unable to parse email ${email}, errors: ${JSON.stringify(result)}.`,
       )
     result.local = result.local.replace(/^"(.*)"$/, '$1')
     return result
@@ -706,7 +706,7 @@ export namespace generate {
           })
         else
           return response.text().then((text) => {
-            throw new Error(text)
+            throw new util.CLIError(text)
           })
       })
     }
@@ -921,7 +921,7 @@ export namespace moderation {
     const proposed_path = path.join(project_dir, args.relative_path)
     const path_rel_to_proj = path.relative(project_dir, proposed_path)
     if (path_rel_to_proj.startsWith('..'))
-      throw new Error(
+      throw new util.CLIError(
         `Can't write comment to '${proposed_path}' because path is outside r3ply project directory!`,
       )
     else {

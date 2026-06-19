@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { program } from 'commander'
 import { init, config, generate, simulate, cache } from './cmds'
+import { util } from './util'
 import tty from './tty'
 
 const allowed_formats = ['toml', 'json'] as const
@@ -12,7 +13,7 @@ export type BaseCmdOptions = {
 
 function validate_format(value: string) {
   if (!allowed_formats.includes(value.toLowerCase() as any)) {
-    throw new Error(`Format must be one of: ${allowed_formats.join(' | ')}.`)
+    throw new util.CLIError(`Format must be one of: ${allowed_formats.join(' | ')}.`)
   }
   return value.toLowerCase() as AllowedFormats
 }
@@ -35,5 +36,9 @@ program.addCommand(generate(process.cwd()))
 program.addCommand(simulate(process.cwd()))
 program.addCommand(cache(process.cwd()))
 program.parseAsync(process.argv).catch((error: Error) => {
-  program.error(tty.txt.warn(error.message))
+  if (error instanceof util.CLIError) {
+    program.error(tty.txt.warn(error.message))
+  } else {
+    program.error(error?.stack ?? String(error))
+  }
 })
