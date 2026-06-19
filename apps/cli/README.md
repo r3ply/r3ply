@@ -4,7 +4,7 @@ CLI tool to help websites integrate with the r3ply commenting system.
 
 The r3ply commenting system allows websites to receive comments via email. It works well with static sites as well as dynamic sites. This package helps you do things like simulate emails so you can focus on templating them the way you want, without requiring you to manually send comments yourself over email. Essentially it allows for quick and accurate iteration, and makes the final deployment much more smooth.
 
-See [r3ply.com](https://r3ply.com) for more information, or read the [docs](https://r3ply.com/docs/cli/)
+> See [r3ply.com](https://r3ply.com) for more information, or read the [docs](https://r3ply.com/docs/cli/)
 
 ## Installation
 

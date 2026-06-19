@@ -3,7 +3,7 @@
   "author": "Spencer Van Wessem Scorcelletti",
   "license": "AGPL-3.0-only",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The r3ply commenting system library",
   "repository": {
     "type": "git",
@@ -19,7 +19,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -31,11 +32,11 @@
     "@types/micromatch": "^4.0.9",
     "tsup": "^8.4.0",
     "typescript": "^5.5.4",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@mail-parser/ts-bindings": "file:../../tools/mail-parser-ts-bindings-0.9.1.tgz"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
-    "@mail-parser/ts-bindings": "file:../../tools/mail-parser-ts-bindings-0.9.1.tgz",
     "@r3ply/schema": "workspace:*",
     "@r3ply/wasm": "workspace:^",
     "dayjs": "^1.11.13",

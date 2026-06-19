@@ -9,9 +9,5 @@ export default defineConfig({
   loader: { '.eml': 'text' },
   target: 'es2022',
   format: ['esm', 'cjs'],
-  outDir: 'dist',
-  bundle: true,
-  noExternal: [
-    "@mail-parser/ts-bindings"
-  ]
+  outDir: 'dist'
 })
