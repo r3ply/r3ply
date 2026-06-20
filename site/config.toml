@@ -71,10 +71,14 @@ paths = "safe"
 taxonomies = "off"
 
 [search]
-index_format = "fuse_json" # or "fuse_javascript"
+include_title = true
+include_description = true
+include_content = true
+index_format = "fuse_json"
 
 # Put all your custom variables here
 [extra]
+exclude_from_search = "EXCLUDE_FROM_SEARCH"
 r3ply_version = "0.0.1"
 r3ply_api_domain = "r3ply.com"
 comments_email = 'r3ply site & docs <r3ply.com@r3ply.com>'

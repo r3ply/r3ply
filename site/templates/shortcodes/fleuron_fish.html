@@ -4,4 +4,6 @@
 #}
 {% set dark_colors = ["dark:text-red-400", "dark:text-orange-300", "dark:text-amber-200", "dark:text-yellow-400", "dark:text-lime-300", "dark:text-emerald-300", "dark:text-teal-600", "dark:text-cyan-400", "dark:text-sky-500", "dark:text-blue-300", "dark:text-indigo-400", "dark:text-purple-300", "dark:text-violet-500", "dark:text-violet-500", "dark:text-fuchsia-400", "dark:text-pink-300", "dark:text-rose-400"]%}
 {% set color = color | default(value=dark_colors | nth(n=get_random(end=dark_colors | length))) %}
+{% include "includes/begin_search_exclude.html" %}
 <div class="mt-8 -mb-4 p-0 text-lg flex justify-center gap-3 {{ color }} {{ add_class | default(value='') }}"><span class="font-extralight">──</span><span>𓆝</span><span>𓆟</span><span>𓆞</span><span>𓆝</span><span>𓆟</span> <span>𓆝</span><span>𓆟</span><span>𓆞</span><span class="font-extralight">──</span></div>
+{% include "includes/end_search_exclude.html" %}

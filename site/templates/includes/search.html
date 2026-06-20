@@ -1,0 +1,539 @@
+<style>
+#doc-search-trigger, #nav-search-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--color-slate-600);
+  border-radius: 6px;
+  background: var(--color-blue-100);
+  color: var(--color-slate-600);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  @media (prefers-color-scheme: dark) {
+    color: #64748b;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+  }
+}
+#doc-search-trigger:hover, #nav-search-trigger:hover {
+  border-color: var(--color-slate-700);
+  background: var(--color-blue-200);
+  color: var(--color-black);
+  color: var(--color-slate-700);
+  @media (prefers-color-scheme: dark) {
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.07);
+    color: #94a3b8;
+  }
+}
+#doc-search-trigger svg, #nav-search-trigger svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.3rem;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.05);
+  color: #475569;
+  font-family: monospace;
+}
+
+/* Overlay */
+#search-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10vh;
+}
+#search-overlay.open { display: flex; }
+
+/* Modal */
+#search-modal {
+  width: 100%;
+  max-width: 640px;
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+}
+
+/* Input row */
+#search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+#search-input-row svg { width: 18px; height: 18px; stroke: #475569; fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+#search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e2e8f0;
+  font-size: 1rem;
+  caret-color: #6366f1;
+}
+#search-input::placeholder { color: #475569; }
+#search-esc {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--color-gray-500);
+  border-radius: 3px;
+  background: rgba(255,255,255,0.04);
+  color: var(--color-gray-300);
+  cursor: pointer;
+  font-family: monospace;
+  flex-shrink: 0;
+}
+:hover#search-esc {
+  background: var(--color-gray-700);
+}
+
+/* Results */
+#search-results {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.search-empty, .search-hint {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--color-gray-400);
+  font-size: 0.875rem;
+}
+
+.result-group { padding: 0.5rem 0; }
+.result-group + .result-group { border-top: 1px solid rgba(255,255,255,0.05); }
+
+.group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #475569;
+}
+.group-label .segment {
+  color: #64748b;
+}
+.group-label .segment + .segment::before {
+  content: ' / ';
+  color: var(--color-cyan-300);
+}
+.group-label .segment.active { color: #818cf8; }
+
+.result-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-radius: 0;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.1s;
+  outline: none;
+}
+.result-item:hover, .result-item:focus, .result-item.active {
+  background: rgba(99,102,241,0.08);
+}
+.result-item:focus { box-shadow: inset 2px 0 0 #6366f1; }
+
+.result-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.result-icon svg { width: 14px; height: 14px; stroke: #475569; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+.result-content { flex: 1; min-width: 0; }
+.result-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.2rem;
+}
+.result-excerpt {
+  font-size: 0.75rem;
+  color: #64748b;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.5;
+}
+.result-excerpt mark {
+  background: transparent;
+  color: #a5b4fc;
+  font-weight: 500;
+}
+
+.result-arrow {
+  color: var(--color-gray-500);
+  font-size: 1rem;
+  flex-shrink: 0;
+  align-self: center;
+  transition: color 0.1s;
+}
+.result-item:hover .result-arrow,
+.result-item:focus .result-arrow,
+.result-item.active .result-arrow { color: #6366f1; }
+
+/* Footer */
+#search-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.7rem;
+  color: var(--color-gray-100);
+}
+.footer-hint { display: flex; align-items: center; gap: 0.3rem; }
+.footer-hint .kbd { color: var(--color-cyan-200); border-color: rgba(255,255,255,0.06); }
+
+/* Page content mockup */
+.page-content {
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+  color: #475569;
+}
+.page-content h1 { font-size: 2.5rem; font-weight: 300; color: #e2e8f0; margin-bottom: 1rem; letter-spacing: -0.04em; }
+.page-content p { font-size: 0.95rem; line-height: 1.7; margin-bottom: 0.5rem; }
+.trigger-hint { margin-top: 2rem; font-size: 0.8rem; }
+</style>
+
+<div id="search-overlay" role="dialog" aria-modal="true" aria-label="Search">
+  <div id="search-modal" class="mx-2 md:mx-0">
+    <div id="search-input-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input
+        id="search-input"
+        type="text"
+        placeholder="Search docs…"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        aria-autocomplete="list"
+        aria-controls="search-results"
+      />
+      <span id="search-esc" role="button" tabindex="0">esc</span>
+    </div>
+
+    <div id="search-results" role="listbox" aria-label="Search results">
+      <div class="search-hint">Type to search across docs, guides, and comments.</div>
+    </div>
+
+    <div id="search-footer" aria-hidden="true">
+      <span class="footer-hint"><span class="kbd">↑</span><span class="kbd">↓</span> navigate</span>
+      <span class="footer-hint"><span class="kbd">↵</span> open</span>
+      <span class="footer-hint"><span class="kbd">esc</span> close</span>
+    </div>
+  </div>
+</div>
+<script src="/fuse.min.js"></script>
+<script type="module">
+const SEARCH_INDEX_URL = '/search_index.en.json';
+
+const overlay = document.getElementById('search-overlay');
+const modal = document.getElementById('search-modal');
+const input = document.getElementById('search-input');
+const results = document.getElementById('search-results');
+const escBtn = document.getElementById('search-esc');
+const nav_trigger = document.getElementById('nav-search-trigger');
+const doc_trigger = document.getElementById('doc-search-trigger');
+
+let fuse = null;
+let indexLoaded = false;
+let loading = false;
+let activeIdx = -1;
+let flatItems = [];
+
+// icons per section
+const icons = {
+  docs: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+  project: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  comments: `<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  home: `<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+  default: `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+};
+
+function getSection(url) {
+  if (!url) return 'home';
+  const parts = url.replace(/^\//, '').split('/').filter(Boolean);
+  if (parts.length === 0) return 'home';
+  return parts[0];
+}
+
+function getSubSection(url) {
+  if (!url) return null;
+  const parts = url.replace(/^\//, '').split('/').filter(Boolean);
+  return parts.length > 1 ? parts[1] : null;
+}
+
+function isComment(url) {
+  return url && (url.startsWith('/comments/') || url.includes('#comment'));
+}
+
+function groupKey(item) {
+  const url = item.url || '';
+  if (isComment(url)) return 'comments';
+  return getSection(url);
+}
+
+function groupLabel(key, items) {
+  if (key === 'home') return [{ text: 'home' }];
+  if (key === 'comments') return [{ text: 'comments' }];
+  const sub = items[0] ? getSubSection(items[0].url) : null;
+  const segs = [{ text: key }];
+  if (sub) segs.push({ text: sub, active: true });
+  return segs;
+}
+
+function highlightExcerpt(text, query) {
+  if (!text || !query) return '';
+  const words = query.trim().split(/\s+/).filter(Boolean);
+  const word = words[0];
+  const idx = text.toLowerCase().indexOf(word.toLowerCase());
+  const start = Math.max(0, idx === -1 ? 0 : idx - 60);
+  let out = (start > 0 ? '…' : '') + text.slice(start, start + 200);
+  words.forEach(w => {
+    const re = new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    out = out.replace(re, '<mark>$1</mark>');
+  });
+  return out;
+}
+
+function makeTextFragment(body, query) {
+  if (!body || !query) return '';
+  const word = query.trim().split(/\s+/).filter(Boolean)[0];
+  if (!word) return '';
+  const bodyTokens = body.split(/\n/).map(t => t.trim()).filter(Boolean);
+  const queryTokens = query.split(/\n/).map(t => t.trim()).filter(Boolean);
+  const queryToken = queryTokens.find(t => t.toLowerCase().includes(word.toLowerCase()));
+  if (!queryToken) return '';
+  const matches = bodyTokens.filter(t => t.toLowerCase().includes(queryToken.toLowerCase()));
+  if (!matches.length) return '';
+  return '#:~:text=' + encodeURIComponent(matches[0]);
+}
+
+function renderResults(hits, query) {
+  if (!hits.length) {
+    results.innerHTML = '<div class="search-empty">No results for <strong>' + query + '</strong></div>';
+    flatItems = [];
+    activeIdx = -1;
+    return;
+  }
+
+  // group by section
+  const groups = {};
+  const order = [];
+  hits.forEach(h => {
+    const k = groupKey(h);
+    if (!groups[k]) { groups[k] = []; order.push(k); }
+    groups[k].push(h);
+  });
+
+  let html = '';
+  flatItems = [];
+
+  order.forEach(key => {
+    const grpItems = groups[key];
+    const segs = groupLabel(key, grpItems);
+    html += '<div class="result-group">';
+    html += '<div class="group-label">';
+    segs.forEach(s => {
+      html += `<span class="segment${s.active ? ' active' : ''}">${s.text}</span>`;
+    });
+    html += '</div>';
+
+    grpItems.forEach(item => {
+      const frag = makeTextFragment(item.body, query);
+      const href = (item.url || '/') + frag;
+      const excerpt = highlightExcerpt(item.body, query);
+      const icon = icons[key] || icons.default;
+      const idx = flatItems.length;
+      flatItems.push({ href, el: null });
+
+      html += `<a class="result-item" href="${href}" role="option" data-idx="${idx}" tabindex="-1">
+        <div class="result-icon">${icon}</div>
+        <div class="result-content">
+          <div class="result-title">${item.title || item.url}</div>
+          <div class="result-excerpt">${excerpt}</div>
+        </div>
+        <span class="result-arrow">›</span>
+      </a>`;
+    });
+
+    html += '</div>';
+  });
+
+  results.innerHTML = html;
+  activeIdx = -1;
+
+  // store refs
+  results.querySelectorAll('.result-item').forEach((el, i) => {
+    flatItems[i].el = el;
+  });
+}
+
+function setActive(idx) {
+  flatItems.forEach((item, i) => {
+    if (item.el) item.el.classList.toggle('active', i === idx);
+  });
+  activeIdx = idx;
+  if (flatItems[idx] && flatItems[idx].el) {
+    flatItems[idx].el.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+const cleanBody = (text) => {
+  if (!text) return '';
+  return text.replace(/BEGIN {{ config.extra.exclude_from_search }}[\s\S]*?END {{ config.extra.exclude_from_search }}/g, '').trim();
+};
+
+async function loadIndex() {
+  if (indexLoaded || loading) return;
+  loading = true;
+  results.innerHTML = '<div class="search-hint">Loading index…</div>';
+  try {
+    const res = await fetch(SEARCH_INDEX_URL);
+    const data = await res.json();
+    const docs = (Array.isArray(data) ? data : (data.docs || data.results || []))
+      .map(d => ({ ...d, body: cleanBody(d.body) }));
+    fuse = new Fuse(docs, {
+      keys: [
+        { name: 'title', weight: 0.6 },
+        { name: 'body', weight: 0.3 },
+        { name: 'description', weight: 0.1 },
+      ],
+      includeScore: true,
+      threshold: 0.2,
+      ignoreLocation: true,
+      minMatchCharLength: 3,
+      useExtendedSearch: true
+    });
+    indexLoaded = true;
+    results.innerHTML = '<div class="search-hint">Type to search across docs, guides, and comments.</div>';
+    if (input.value.trim()) doSearch(input.value.trim());
+  } catch(error) {
+    console.log(error)
+    results.innerHTML = '<div class="search-empty">Could not load search index.</div>';
+  }
+  loading = false;
+}
+
+function doSearch(q) {
+  if (!fuse) return;
+  if (!q) {
+    results.innerHTML = '<div class="search-hint">Type to search across docs, guides, and comments.</div>';
+    flatItems = [];
+    return;
+  }
+  const hits = fuse.search(q, { limit: 24 }).map(r => r.item);
+  renderResults(hits, q);
+}
+
+function openSearch() {
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  input.focus();
+  loadIndex();
+}
+
+function closeSearch() {
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  input.value = '';
+  results.innerHTML = '<div class="search-hint">Type to search across docs, guides, and comments.</div>';
+  flatItems = [];
+  activeIdx = -1;
+}
+
+nav_trigger.addEventListener('click', openSearch);
+if (doc_trigger) doc_trigger.addEventListener('click', openSearch);
+escBtn.addEventListener('click', closeSearch);
+escBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') closeSearch(); });
+
+overlay.addEventListener('click', e => {
+  if (e.target === overlay) closeSearch();
+});
+
+input.addEventListener('input', () => doSearch(input.value.trim()));
+
+document.addEventListener('keydown', e => {
+  const meta = e.metaKey || e.ctrlKey;
+  if (meta && e.key === 'k') {
+    e.preventDefault();
+    overlay.classList.contains('open') ? closeSearch() : openSearch();
+    return;
+  }
+  if (!overlay.classList.contains('open')) return;
+  if (e.key === 'Escape') { closeSearch(); return; }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    setActive(Math.min(activeIdx + 1, flatItems.length - 1));
+    return;
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (activeIdx <= 0) { input.focus(); activeIdx = -1; flatItems.forEach(i => i.el && i.el.classList.remove('active')); return; }
+    setActive(Math.max(activeIdx - 1, 0));
+    return;
+  }
+  if (e.key === 'Enter' && activeIdx >= 0 && flatItems[activeIdx]) {
+    e.preventDefault();
+    window.location.href = flatItems[activeIdx].href;
+    closeSearch();
+  }
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    if (e.shiftKey) {
+      setActive(Math.max(activeIdx - 1, 0));
+    } else {
+      setActive(Math.min(activeIdx + 1, flatItems.length - 1));
+    }
+  }
+});
+
+results.addEventListener('click', e => {
+  const item = e.target.closest('.result-item');
+  if (item) closeSearch();
+});
+</script>

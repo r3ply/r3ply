@@ -24,6 +24,13 @@
       <li><a class="hidden md:inline text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/_index.md', lang=lang) }}">Home</a></li>
       <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/docs/_index.md', lang=lang) }}">Docs</a></li>
       <li><a class="text md:text-xl font-medium hover:underline decoration-black dark:decoration-inherit" href="{{ get_url(path='@/demo.md', lang=lang) }}">Demo</a></li>
+      <li class="mx-2 hidden md:block">
+        <button id="nav-search-trigger" aria-label="Search" aria-keyshortcuts="Meta+K Control+K">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search
+          <span class="kbd">⌘K</span>
+        </button>
+      </li>
       <li>|</li>
       <li>
         <a class="md:text-xl font-light after:content-['_↗']" href="https://github.com/asimpletune/r3ply">GitHub</a>

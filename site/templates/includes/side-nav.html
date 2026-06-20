@@ -9,6 +9,13 @@
   dark:bg-slate-900 dark:bg-[url(/patterns/wiggle_dark.svg)]
   w-64 overflow-y-scroll h-full
   hidden md:block peer-checked:block">
+  <div class="sticky top-2 m-2 dark:bg-slate-950">
+    <button class="w-full justify-center" id="doc-search-trigger" aria-label="Search" aria-keyshortcuts="Meta+K Control+K">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search
+      <span class="kbd">⌘K</span>
+    </button>
+  </div>
   {# r3ply Docs #}
   <ul id="docs-toc" class="py-4 px-4 list-disc list-inside font-medium dark:marker:text-neutral-50">
     <li class="list-none text-center mb-4"><a href="{{ get_url(path='@/docs/_index.md', lang=lang) }}" class="text-slate-900 dark:text-pink-300 text-2xl font-black underline hover:decoration-2">r3ply Docs</a></li>

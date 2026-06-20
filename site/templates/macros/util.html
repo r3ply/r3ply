@@ -304,6 +304,7 @@
 {% macro breadcrumbs() %}
 {% set doc = page | default(value=section) %}
 {% set tw = tw | default(value="ml-auto") %}
+{% include "includes/begin_search_exclude.html" %}
 <nav class="prose-ul:text-xs md:prose-ul:text-lg">
   <ul class="flex w-fit gap-1 {{ tw }} prose-li:list-none mx-0 px-0 border-b border-dashed dark:border-emerald-300 border-black text-lg prose-a:no-underline prose-li:my-1.5 prose-a:font-bold">
       <li><a class="no-underline text-inherit" href="#bread-crumbs-top">🍞:</a></li>
@@ -326,11 +327,13 @@
     <li>/</li>
   </ul>
 </nav>
+{% include "includes/end_search_exclude.html" %}
 {% endmacro  %}
 
 {# Use this for when there's no page or section variable. Just pass in an array of markdown links, e.g. [[foo](/)] #}
 {% macro other_breadcrumbs(links) %}
 {% set tw = tw | default(value="ml-auto") %}
+{% include "includes/begin_search_exclude.html" %}
 <nav class="prose-ul:text-xs md:prose-ul:text-lg">
   <ul class="flex w-fit gap-1 {{ tw }} prose-li:list-none mx-0 px-0 border-b border-dashed dark:border-emerald-300 border-black text-lg prose-a:no-underline prose-li:my-1.5 prose-a:font-bold">
       <li><a class="no-underline text-inherit" href="#bread-crumbs-top">🍞:</a></li>
@@ -343,4 +346,5 @@
     <li>/</li>
   </ul>
 </nav>
+{% include "includes/end_search_exclude.html" %}
 {% endmacro  %}

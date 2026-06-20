@@ -3,6 +3,7 @@
   `caption` - caption
   `add_class` - any extra classes to add to the containig figure tag
 #}
+{% include "includes/begin_search_exclude.html" %}
 <figure {% if add_class %}class="{{ add_class }}"{% endif %} >
   <picture>
     {% if dark %}
@@ -16,3 +17,4 @@
   <figcaption class="mt-2 text-sm text-center prose-p:m-0">{{ caption | markdown | safe }}</figcaption>
   {% endif %}
 </figure>
+{% include "includes/end_search_exclude.html" %}

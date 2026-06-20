@@ -1,3 +1,4 @@
+{% include "includes/begin_search_exclude.html" %}
 <!-- Built using `tree --dirsfirst -L 4 -I 'node_modules|package-lock.json|target|pnpm-lock.yaml|*.json|*.eml|dist|*.html|*.ts|*.js|public|*.svg|*.png|*.webp|*.jpg|*.lock' -H https://github.com/asimpletune/r3ply/tree/main --noreport` and then manually pruning unnecessary files/directories from there -->
 <div class="font-mono leading-5 whitespace-nowrap overflow-x-scroll bg-gray-800 p-4 rounded-lg">
   {% set root = "https://github.com/asimpletune/r3ply/tree/main" %}
@@ -58,3 +59,4 @@
       Charsets / OS/2 support © 2001 by Kyosuke Tokoro
   </p>
 </div>
+{% include "includes/end_search_exclude.html" %}

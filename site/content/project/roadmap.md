@@ -68,7 +68,7 @@ enabled = true
 
 ## Site/Docs
 
-- [ ] Add search
+- [X] Add search
 - [ ] Tutorial section: for example, how to allow people to support aliases (will also be good for when attachments are supported)
 - [ ] Add links in FAQ to relevant docs for each point
 - [ ] Make demo comments content a little more relevant
