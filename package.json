@@ -14,7 +14,7 @@
     "build:wasm": "pnpm --filter @r3ply/wasm run build:wasm && pnpm --filter @r3ply/wasm run pack",
     "build:pkgs": "pnpm -r --filter './packages/*' run build",
     "build:apps": "pnpm -r --filter './apps/*' run build",
-    "build:site": "pnpm initialize && pnpm -r --filter '@r3ply/schema' run build && pnpm -r --filter './site' run copy:schemas && pnpm -r --filter './site' run build",
+    "build:site": "pnpm initialize && pnpm -r --filter '@r3ply/schema' run build && pnpm -r --filter './site' run copy:schemas && BUILD_OPTS=\"--base-url=$CF_PAGES_URL\" pnpm -r --filter './site' run build",
     "build:all": "pnpm build:wasm && pnpm build:pkgs && pnpm build:apps && pnpm build:site",
     "test:ts": "vitest run",
     "test:ts:watch": "vitest",
