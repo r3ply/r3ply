@@ -3,6 +3,7 @@ import { program } from 'commander'
 import { init, config, generate, simulate, cache } from './cmds'
 import { util } from './util'
 import tty from './tty'
+import package_info from "../package.json"
 
 const allowed_formats = ['toml', 'json'] as const
 type AllowedFormats = (typeof allowed_formats)[number]
@@ -20,7 +21,7 @@ function validate_format(value: string) {
 
 program
   .name('re')
-  .version('0.0.1')
+  .version(package_info.version)
   .description('CLI for r3ply')
   .option('--config <path>', 'specify path to config')
   .option(

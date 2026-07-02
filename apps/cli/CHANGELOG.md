@@ -2,6 +2,8 @@
 
 ## Next
 
+- Take version number from package.json
+
 ## 0.0.2 (2026-07-02)
 
 - Fix #28 `--r3ply` option broken in `re generate signet` command
