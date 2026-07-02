@@ -32,7 +32,7 @@ issued = 2026-07-01
 label = "e2e local testing"
 
 [comments]
-"paths*" = ["/demo/", "/feeds/", "/docs/**/", "/project/**/"]
+"paths*" = ["/demo?(/)", "/docs/**/", "/project/**/"]
 cache = true
 
 [comments.email]
