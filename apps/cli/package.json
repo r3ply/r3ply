@@ -3,7 +3,7 @@
   "author": "Spencer Van Wessem Scorcelletti",
   "license": "AGPL-3.0-only",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "CLI for the r3ply commenting system",
   "repository": {
     "type": "git",

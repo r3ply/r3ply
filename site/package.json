@@ -3,7 +3,7 @@
   "author": "Spencer Van Wessem Scorcelletti",
   "license": "CC-BY-SA-4.0",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The r3ply site and documentation",
   "scripts": {
     "initialize": "git submodule update --init --remote --recursive",
