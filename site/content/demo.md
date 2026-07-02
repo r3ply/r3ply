@@ -12,7 +12,7 @@ enabled = true
 
 The purpose of this page is to demonstrate what a site that uses r3ply _could_ look like.
 
-In r3ply, comments can be sent as emails. This allows visitors to use their own email clients, giving them a native app experience when writing. More importantly, however, is the pseudonym derived from their email address allows for content moderation while protecting their privacy. **All without needing any type of login system!**
+In r3ply, comments can be sent as emails. This allows visitors to use their own email clients, giving them a native app experience when writing. More importantly, however, the pseudonym derived from their email address allows for content moderation while protecting their privacy. **All without needing any type of login system!**
 
 The question then becomes can an email-based comment system be a good experience for users? This demo page is here to show the possibilities and to let you be the judge.
 
@@ -45,7 +45,7 @@ The experience of actually drafting a comment takes place in the user's email cl
 
 ### Privacy Respecting
 
-r3ply automatically anonymizes all the email addresses of the commenters, before they arrive for mode ration. This works by applying an HMAC-256 function on their email address, using the site's signet as a key envelope. You can read more about [the details](/docs/overview#anonymization) in the docs (or [view the source](https://github.com/r3ply/r3ply/blob/main/packages/lib/src/comments/viaEmail/signet.ts) on GitHUb).
+r3ply automatically anonymizes all the email addresses of the commenters, before they arrive for moderation. This works by applying an HMAC-SHA256 function on their email address, using the site's signet as a key envelope. You can read more about [the details](/docs/overview#anonymization) in the docs (or [view the source](https://github.com/r3ply/r3ply/blob/main/packages/lib/src/comments/viaEmail/signet.ts) on GitHub).
 
 ### Easy as Pushing a Button { #easy-button }
 
@@ -96,7 +96,7 @@ Date: Sun, 2 Nov 2025 23:00:00 +0000
 Hi Bob! (...)
 ```
 
-This makes for a very old-web style, comment addressable system that's perfectly suited for static websites.
+This makes for a very old-web style, content addressable system that's perfectly suited for static websites.
 
 #### Commenting on Text Fragments { #text-fragments }
 
