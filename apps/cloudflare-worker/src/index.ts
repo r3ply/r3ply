@@ -178,7 +178,6 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
   const comment_statefulness = CommentState(env.R3PLY_STAGING_DB)
   const moderation_channel_implementations: comments.email.CommentViaEmailSupportedModerationChannels[] =
     env.ENVIRONMENT && env.ENVIRONMENT == "dev" ? [] : [moderation.GitHubModeration(github_api_fetcher(env.GITHUB_APP_PW))]
-  console.log(moderation_channel_implementations.length);
 
   const email_handler = r3ply.comments.viaEmail(
     env.SIGNET_KEY,
@@ -233,7 +232,10 @@ const comment_via_email: EmailExportedHandler<Env> = async (...params) => {
   } else {
     throw comment_via_email_result.unwrapErr()
   }
-  return msg.reply(create_reply_email(msg, { body: 'Your comment was successfully submitted for moderation.' } )).then(() => Promise.resolve())
+  return msg.reply(create_reply_email(msg, {
+    sender_name: `r3ply (p.p. ${site_domain})`,
+    body: 'Your comment was successfully submitted for moderation.'
+  })).then(() => Promise.resolve())
 }
 /**
  * Partially applies password to GitHub bot dependency to perform API call

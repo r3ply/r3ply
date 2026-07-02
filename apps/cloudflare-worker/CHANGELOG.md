@@ -2,6 +2,7 @@
 
 ## Next
 
+- Fix email confirmation not sending + set a nicer name in the confirmation
 - Fix #33 pending_comment cache not being cleared
 - Add a Caddyfile for proxying r3ply requests locally
 
