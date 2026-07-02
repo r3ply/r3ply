@@ -46,7 +46,7 @@ cache = true
 
 {% end %}
 
-Enter your domain above, press **"Issue Signet!"**, and then host the resulting config file on your site. Then you can start receive emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](@/docs/overview.md#moderation-channels).
+Enter your domain above, press **"Issue Signet!"**, and then host the resulting config file on your site. Then you can start receiving emails as comments addressed to `<YOUR_SITE>@r3ply.com` at your configured [moderation channel](@/docs/overview.md#moderation-channels).
 
 **Next Steps:**
 
@@ -160,7 +160,7 @@ The appeal is simple. Not only is email the most popular and ubiquitous platform
 
 **In fact, emailed comments mean there isn't even vendor lock-in!** Just swap out `<your-site>@r3ply.com` with whatever you want and you're back in business.
 
-To this point, [the idea](https://spenc.es/writing/email-as-a-commenting-system/#email-as-a-commenting-system-is-not-new) of email comments has been done manually [for a while now](https://web.archive.org/web/20240430052558/https://www.dam.brown.edu/people/mumford/blog/2019/conscious.html#:~:text=SOME%20EMAIL%20RESPONSES). r3ply is just software (the first?) for automating this process, and therefore we hope improves upon that design.
+To this point, [the idea](https://spenc.es/writing/email-as-a-commenting-system/#email-as-a-commenting-system-is-not-new) of email comments has been done manually [for a while now](https://web.archive.org/web/20240430052558/https://www.dam.brown.edu/people/mumford/blog/2019/conscious.html#:~:text=SOME%20EMAIL%20RESPONSES). r3ply is just software (the first?) for automating this process, and therefore we hope it improves upon that design.
 
 **Overall the user experience is actually very nice!**
 
@@ -206,7 +206,7 @@ For this purpose there's also a r3ply CLI tool called `re`, which is designed to
 
 r3ply uses the concept of a _signet_ to pseudo-anonymize the email addresses of commenters. This has the benefit of privacy, but is also deterministic, which allows site owners to moderate comments.
 
-Specifically, a _signet_ is an encrypted envelope issued by a r3ply service., to a website's domain. The envelop carries key material that's decrypted by the r3ply service, and then mixed with the senders email address, before performing an [HMAC ↗](https://en.wikipedia.org/wiki/HMAC).
+Specifically, a _signet_ is an encrypted envelope issued by a r3ply service., to a website's domain. The envelope carries key material that's decrypted by the r3ply service, and then mixed with the senders email address, before performing an [HMAC ↗](https://en.wikipedia.org/wiki/HMAC).
 
 _Signet's_ cannot be used by other websites, nor can they be used with other r3ply services. The signet represents a strict 1:1 relationship between the site domain and the r3ply service that issued the signet.
 
@@ -224,7 +224,7 @@ Commenters do receive a simple email notification letting them know their commen
 
 ### Can Site Moderators Receive an Email Notification?
 
-As of right now, there are some limitations around this. If you're a moderator who wants to receive email notifications, then the best way to do that is to make sure that your preferred moderation channel does this, e.g. GitHub pull request can be configured to email repository owners.
+There are currently some limitations around this. If you're a moderator who wants to receive email notifications, then the best way to do that is to make sure that your preferred moderation channel does this, e.g. GitHub pull request can be configured to email repository owners.
 
 The reason for this limitation is that r3ply's email provider only allows responding to emails. At the moment sending _new_ emails (or forwarding emails) — which would be required for notifying a site moderator by email - is restricted to only a pre-approved list of emails.
 
@@ -232,7 +232,7 @@ In the future a different, outbound service could be used or r3ply could host it
 
 ### What is the Difference between [r3ply.com](https://r3ply.com) and **_r3ply_**?
 
-r3ply is open-source software, and [r3ply.com](https://r3ply.com) is just a free and cannonical, community hosted deployment of that software. For people who just want to start receiving comments right away, [r3ply.com](https://r3ply.com) should be all they need. However, since r3ply is open-source anyone can host their own instance and serve themselves and others with it.
+r3ply is open-source software, and [r3ply.com](https://r3ply.com) is just a free and canonical, community hosted deployment of that software. For people who just want to start receiving comments right away, [r3ply.com](https://r3ply.com) should be all they need. However, since r3ply is open-source anyone can host their own instance and serve themselves and others with it.
 
 For example, if someone deployed r3ply at `https://r4ply.com`, websites could add that to their config and receive comments at `<site>@r4ply.com`.
 
