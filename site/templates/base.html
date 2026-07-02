@@ -266,8 +266,7 @@
         </details>
       </section>
       {% block mailto_text_fragment %}
-        {# TODO: I don't know if this does anything right now, so I'm going to comment it out and see. #}
-        {# {{ util::mailto_text_fragment(to=config.extra.comments_email, path=current_path, body=config.extra.mail_body_instructions) }} #}
+        {{ util::mailto_text_fragment(to=config.extra.comments_email, path=current_path, body=config.extra.mail_body_instructions) }}
       {% endblock mailto_text_fragment %}
     {% endif %}{# allow_comments #}
   {% endblock comments %}
