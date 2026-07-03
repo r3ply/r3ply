@@ -39,6 +39,7 @@ prose-h1:text-3xl
           </th>
         </tr>
       </thead>
+      <tbody>
       {% for c in comments | sort(attribute="date") | reverse %}
         {% set context_url = c.extra.comment.document ~ "#" ~ c.slug %}
         <tr>
@@ -101,6 +102,7 @@ prose-h1:text-3xl
           </td>
         </tr>
       {% endfor %}
+      </tbody>
     </table>
   </div>
 {% endblock comments %}
