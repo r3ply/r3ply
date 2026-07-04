@@ -20,6 +20,10 @@ Then you can use everything like you would a normal JS/TS module, in both node a
 import { sanitize_html } from '@r3ply/wasm'
 ```
 
+## Deploying
+
+This project generates a package.json file within [`pkg`](./pkg/package.json) and _that's_ what needs to be deployed.
+
 ## Tera 2 Templating Language
 
-See the [templating language docs](https://r3ply.com/docs/templating) for more.
+See the [templating language docs](https://keats.github.io/tera) for more.

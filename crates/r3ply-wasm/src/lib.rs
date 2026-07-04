@@ -127,12 +127,18 @@ mod tests {
 
     wasm_bindgen_test_configure!(run_in_node_experimental);
 
-    // Run with wasm-pack test--node
+    // Run with wasm-pack test --node
     #[wasm_bindgen_test]
     fn tera_works() {
       let template = "Hello {{ name }}! {{ [1, ...[2, 3, 4], 5] }}".to_string();
       let data = serde_wasm_bindgen::to_value(&json!({"name": "World"})).unwrap();
       let result = tera(template, data).unwrap();
       assert_eq!(result, "Hello World! [1, 2, 3, 4, 5]");
+      let template2 = r###"
+      {%- set foo = "\\" -%}
+      {{ foo }}"###.to_string();
+      let data2 = serde_wasm_bindgen::to_value(&json!({})).unwrap();
+      let result2 = tera(template2, data2).unwrap();
+      assert_eq!(result2, "\\");
     }
 }

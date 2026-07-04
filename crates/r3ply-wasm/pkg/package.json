@@ -3,14 +3,14 @@
   "author": "Spencer Van Wessem Scorcelletti",
   "license": "MIT",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Wasm bindings of useful dependencies for the r3ply commenting system",
   "repository": {
     "type": "git",
-    "url": "https://github.com/asimpletune/r3ply"
+    "url": "https://github.com/r3ply/r3ply"
   },
   "bugs": {
-    "url": "https://github.com/asimpletune/r3ply/issues"
+    "url": "https://github.com/r3ply/r3ply/issues"
   },
   "homepage": "https://r3ply.com",
   "scripts": {
@@ -23,7 +23,8 @@
     "build:all": "pnpm build:cargo && pnpm build:wasm",
     "pack": "wasm-pack pack",
     "test": "cargo test",
-    "test:watch": "cargo watch test"
+    "test:watch": "cargo watch test",
+    "test:wasm": "wasm-pack test --node"
   },
   "files": [
     "README.md",
