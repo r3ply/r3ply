@@ -50,7 +50,7 @@ Enter your domain above, press **"Issue Signet!"**, and then host the resulting 
 
 **Next Steps:**
 
-1. View the [demo](/docs/getting-started/#comments) to try it out
+1. View the [demo](/demo/#comments) to try it out
 2. Follow the [getting started](/docs#getting-started) tutorial
 3. Read the [docs](/docs) to learn more in-depth
 
@@ -61,7 +61,6 @@ Or just continue reading to get a high-level overview. Thanks for looking!
 - [Features](#features)
 - [Why Email?](#why-email)
 - [FAQ](#faq)
-- [Demo](/docs/getting-started/#comments)
 {% end %}
 
 {{ fleuron_fish() }}
